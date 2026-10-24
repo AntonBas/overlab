@@ -3,6 +3,8 @@ spring:
     name: overlab-backend
   profiles:
     default: local
+  config:
+    import: classpath:collector.yaml
   lifecycle:
     timeout-per-shutdown-phase: 30s
   datasource:
