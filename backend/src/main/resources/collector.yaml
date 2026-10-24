@@ -1,0 +1,21 @@
+collector:
+  base-url: https://overwatch.blizzard.com
+  user-agent: "Mozilla/5.0 (compatible; OverlabCollector/1.0)"
+  pause: 3s
+  game-format: FIVE_VS_FIVE
+  startup-job: ${COLLECTOR_STARTUP_JOB:}
+  jobs:
+    - name: daily-overview
+      cron: "0 0 4 * * *"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, MASTER, GRANDMASTER]
+      maps: [all-maps]
+    - name: weekly-maps
+      cron: "0 30 4 * * MON"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [ALL]
+      maps: [EACH]
