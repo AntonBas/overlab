@@ -1,5 +1,6 @@
 package gg.overlab.backend.collector;
 
+import gg.overlab.backend.collector.run.CollectorTrigger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -16,7 +17,7 @@ public class CollectorStartupRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (StringUtils.hasText(properties.startupJob())) {
-            collectorService.collectByName(properties.startupJob());
+            collectorService.runBlocking(properties.startupJob(), CollectorTrigger.STARTUP);
         }
     }
 }

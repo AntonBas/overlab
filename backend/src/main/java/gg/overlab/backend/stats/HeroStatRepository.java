@@ -1,7 +1,9 @@
 package gg.overlab.backend.stats;
 
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -51,4 +53,18 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
                                      @Param("platform") Platform platform,
                                      @Param("region") Region region,
                                      @Param("tier") RankTier tier);
+
+    @Modifying
+    @Query(value = """
+            delete from hero_stats
+            where captured_at < cast(:threshold as timestamptz)
+              and id not in (
+                select distinct on (hero_id, map_id, queue, game_format, platform, region, tier,
+                                    date_trunc('week', captured_at)) id
+                from hero_stats
+                where captured_at < cast(:threshold as timestamptz)
+                order by hero_id, map_id, queue, game_format, platform, region, tier,
+                         date_trunc('week', captured_at), captured_at desc)
+            """, nativeQuery = true)
+    int deleteOlderKeepingWeeklyLatest(@Param("threshold") Instant threshold);
 }
