@@ -1,0 +1,157 @@
+package gg.overlab.backend.user.auth;
+
+import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.notification.EmailService;
+import gg.overlab.backend.user.AuthProvider;
+import gg.overlab.backend.user.User;
+import gg.overlab.backend.user.UserMapper;
+import gg.overlab.backend.user.UserRepository;
+import gg.overlab.backend.user.UserRole;
+import gg.overlab.backend.user.auth.dto.LoginRequest;
+import gg.overlab.backend.user.auth.dto.RegisterRequest;
+import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
+import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
+import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
+import gg.overlab.backend.user.auth.exception.InvalidTokenException;
+import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.token.UserTokenService;
+import gg.overlab.backend.user.token.UserTokenType;
+import java.time.Instant;
+import java.util.Locale;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserTokenService tokenService;
+    private final EmailService emailService;
+    private final AuthProperties properties;
+
+    private volatile String dummyPasswordHash;
+
+    @Transactional
+    public UserDto register(RegisterRequest request) {
+        String email = normalize(request.email());
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new EmailAlreadyUsedException();
+        }
+        User user = new User();
+        user.setEmail(email);
+        user.setDisplayName(request.displayName().trim());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setRole(UserRole.USER);
+        user.setProvider(AuthProvider.LOCAL);
+        user = userRepository.save(user);
+        sendVerification(user);
+        return userMapper.toDto(user);
+    }
+
+    @Transactional
+    public AuthTokens login(LoginRequest request) {
+        User user = userRepository.findByEmailIgnoreCase(normalize(request.email())).orElse(null);
+        boolean passwordMatches = passwordEncoder.matches(request.password(), hashFor(user));
+        if (user == null || user.getPasswordHash() == null || !passwordMatches) {
+            throw new InvalidCredentialsException();
+        }
+        if (!user.isEnabled()) {
+            throw new InvalidCredentialsException();
+        }
+        if (!user.isEmailVerified()) {
+            throw new EmailNotVerifiedException();
+        }
+        return issueTokens(user);
+    }
+
+    @Transactional
+    public AuthTokens refresh(String rawRefreshToken) {
+        User user = tokenService.consume(rawRefreshToken, UserTokenType.REFRESH);
+        if (!user.isEnabled()) {
+            throw new InvalidTokenException();
+        }
+        return issueTokens(user);
+    }
+
+    @Transactional
+    public AuthTokens issueTokens(User user) {
+        user.setLastLoginAt(Instant.now());
+        userRepository.save(user);
+        String refreshToken = tokenService.issue(user, UserTokenType.REFRESH, properties.refreshTokenTtl());
+        return new AuthTokens(jwtTokenProvider.createAccessToken(user), refreshToken, userMapper.toDto(user));
+    }
+
+    @Transactional
+    public void logout(String rawRefreshToken) {
+        if (rawRefreshToken != null) {
+            tokenService.revoke(rawRefreshToken, UserTokenType.REFRESH);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public UserDto me(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User", userId));
+        return userMapper.toDto(user);
+    }
+
+    @Transactional
+    public void verifyEmail(String rawToken) {
+        User user = tokenService.consume(rawToken, UserTokenType.EMAIL_VERIFICATION);
+        user.setEmailVerified(true);
+    }
+
+    @Transactional
+    public void resendVerification(String email) {
+        userRepository.findByEmailIgnoreCase(normalize(email))
+                .filter(user -> !user.isEmailVerified() && user.getProvider() == AuthProvider.LOCAL)
+                .ifPresent(this::sendVerification);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        userRepository.findByEmailIgnoreCase(normalize(email))
+                .filter(user -> user.getProvider() == AuthProvider.LOCAL && user.isEnabled())
+                .ifPresent(user -> {
+                    tokenService.revokeAll(user, UserTokenType.PASSWORD_RESET);
+                    String token = tokenService.issue(user, UserTokenType.PASSWORD_RESET, properties.resetTokenTtl());
+                    emailService.sendPasswordReset(user, token);
+                });
+    }
+
+    @Transactional
+    public void resetPassword(String rawToken, String newPassword) {
+        User user = tokenService.consume(rawToken, UserTokenType.PASSWORD_RESET);
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setEmailVerified(true);
+        tokenService.revokeAll(user, UserTokenType.REFRESH);
+    }
+
+    private void sendVerification(User user) {
+        tokenService.revokeAll(user, UserTokenType.EMAIL_VERIFICATION);
+        String token = tokenService.issue(user, UserTokenType.EMAIL_VERIFICATION, properties.verificationTokenTtl());
+        emailService.sendVerification(user, token);
+    }
+
+    private String hashFor(User user) {
+        if (user != null && user.getPasswordHash() != null) {
+            return user.getPasswordHash();
+        }
+        if (dummyPasswordHash == null) {
+            dummyPasswordHash = passwordEncoder.encode("overlab-dummy-password");
+        }
+        return dummyPasswordHash;
+    }
+
+    private String normalize(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+}

@@ -1,6 +1,10 @@
 package gg.overlab.backend.exception.api;
 
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
+import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
+import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
+import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -10,6 +14,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,6 +58,44 @@ public class ApiErrorHandler {
                 .map(violation -> new ApiError.SubError(violation.getPropertyPath().toString(), violation.getMessage()))
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "Validation failed", request, subErrors);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleInvalidBody(MethodArgumentNotValidException exception,
+                                                      HttpServletRequest request) {
+        List<ApiError.SubError> subErrors = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> new ApiError.SubError(error.getField(), error.getDefaultMessage()))
+                .toList();
+        return build(HttpStatus.BAD_REQUEST, "Validation failed", request, subErrors);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException exception,
+                                                         HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Malformed request body", request, List.of());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException exception,
+                                                             HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiError> handleEmailNotVerified(EmailNotVerifiedException exception,
+                                                           HttpServletRequest request) {
+        return build(HttpStatus.FORBIDDEN, exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(EmailAlreadyUsedException.class)
+    public ResponseEntity<ApiError> handleEmailAlreadyUsed(EmailAlreadyUsedException exception,
+                                                           HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidToken(InvalidTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(Exception.class)

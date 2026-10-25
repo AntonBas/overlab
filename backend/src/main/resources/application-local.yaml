@@ -15,6 +15,9 @@ spring:
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  auth:
+    cookie-secure: false
+    rate-limit-per-minute: 60
 
 management:
   endpoints:
