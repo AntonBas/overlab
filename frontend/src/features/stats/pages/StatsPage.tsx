@@ -1,7 +1,7 @@
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
+import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime } from "../../../utils/format";
@@ -16,7 +16,9 @@ export function StatsPage() {
   usePageTitle("Hero statistics");
   const { filters, update, changeSort, key } = useFilterState();
   const maps = useFetch(fetchMaps, []);
-  const stats = useFetch(() => fetchStats(filters), [key]);
+  const stats = useFetch(() => fetchStats(filters), [key], {
+    keepPrevious: true,
+  });
 
   const showDelta = filters.map !== ALL_MAPS;
   const snapshot = stats.data;
@@ -36,7 +38,7 @@ export function StatsPage() {
         maps={maps.data ?? []}
         onChange={update}
       />
-      {stats.loading && <Spinner label="Loading statistics" />}
+      {stats.loading && <TableSkeleton label="Loading statistics" />}
       {stats.error &&
         (stats.error.status === 404 ? (
           <EmptyState>
@@ -46,8 +48,16 @@ export function StatsPage() {
         ) : (
           <ErrorMessage failure={stats.error} onRetry={stats.reload} />
         ))}
-      {!stats.loading && snapshot && (
-        <>
+      {snapshot && (
+        <div
+          className={stats.stale ? "is-stale" : undefined}
+          aria-busy={stats.stale}
+        >
+          <p className="visually-hidden" role="status">
+            {stats.stale
+              ? "Updating results"
+              : `${snapshot.heroes.length} heroes shown`}
+          </p>
           {snapshot.heroes.length === 0 ? (
             <EmptyState>No heroes match these filters.</EmptyState>
           ) : (
@@ -68,7 +78,7 @@ export function StatsPage() {
               Small numbers show the difference from the all-maps value.
             </p>
           )}
-        </>
+        </div>
       )}
     </>
   );

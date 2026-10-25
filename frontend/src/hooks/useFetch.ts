@@ -5,6 +5,7 @@ export interface FetchState<T> {
   data: T | null;
   error: RequestFailure | null;
   loading: boolean;
+  stale: boolean;
   reload: () => void;
 }
 
@@ -14,9 +15,14 @@ interface Settled<T> {
   error: RequestFailure | null;
 }
 
+interface FetchOptions {
+  keepPrevious?: boolean;
+}
+
 export function useFetch<T>(
   fetcher: () => Promise<T>,
   dependencies: readonly unknown[],
+  options: FetchOptions = {},
 ): FetchState<T> {
   const [version, setVersion] = useState(0);
   const [settled, setSettled] = useState<Settled<T> | null>(null);
@@ -48,11 +54,13 @@ export function useFetch<T>(
 
   const reload = useCallback(() => setVersion((current) => current + 1), []);
   const current = settled?.key === key ? settled : null;
+  const shown = current ?? (options.keepPrevious ? settled : null);
 
   return {
-    data: current?.data ?? null,
-    error: current?.error ?? null,
-    loading: current === null,
+    data: shown?.data ?? null,
+    error: shown?.error ?? null,
+    loading: shown === null,
+    stale: shown !== null && current === null,
     reload,
   };
 }
