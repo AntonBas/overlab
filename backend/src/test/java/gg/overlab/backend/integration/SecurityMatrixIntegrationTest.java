@@ -41,6 +41,7 @@ class SecurityMatrixIntegrationTest {
                 Arguments.of(HttpMethod.GET, "/api/guides", 200, 200, 200),
                 Arguments.of(HttpMethod.GET, "/actuator/health", 200, 200, 200),
                 Arguments.of(HttpMethod.GET, "/api/auth/me", 401, 404, 404),
+                Arguments.of(HttpMethod.GET, "/v3/api-docs", 401, 403, 200),
                 Arguments.of(HttpMethod.GET, "/api/admin/audit", 401, 403, 200),
                 Arguments.of(HttpMethod.GET, "/api/admin/guides", 401, 403, 200),
                 Arguments.of(HttpMethod.GET, "/api/admin/heroes", 401, 403, 200),
