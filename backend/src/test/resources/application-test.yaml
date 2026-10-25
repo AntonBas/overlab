@@ -13,6 +13,9 @@ app:
   auth:
     cookie-secure: false
     rate-limit-per-minute: 1000
+  rate-limit:
+    api-per-minute: 100000
+    stats-per-minute: 100000
 
 logging:
   level:
