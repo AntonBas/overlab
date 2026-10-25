@@ -7,6 +7,7 @@ import { HeroesPage } from "../features/heroes/pages/HeroesPage";
 import { HeroCountersPage } from "../features/heroes/pages/HeroCountersPage";
 import { HeroOnMapPage } from "../features/heroes/pages/HeroOnMapPage";
 import { HeroPerksPage } from "../features/heroes/pages/HeroPerksPage";
+import { ChangesPage } from "../features/history/pages/ChangesPage";
 import { PatchPage } from "../features/patches/pages/PatchPage";
 import { PatchesPage } from "../features/patches/pages/PatchesPage";
 import { MapPage } from "../features/maps/pages/MapPage";
@@ -106,6 +107,7 @@ export function AppRoutes() {
         <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
         <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />
         <Route path="maps/:map/:hero" element={<HeroOnMapPage />} />
+        <Route path="changes" element={<ChangesPage />} />
         <Route path="patches" element={<PatchesPage />} />
         <Route path="patches/:slug" element={<PatchPage />} />
         <Route path="maps" element={<MapsPage />} />

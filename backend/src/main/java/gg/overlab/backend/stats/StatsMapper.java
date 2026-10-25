@@ -1,6 +1,8 @@
 package gg.overlab.backend.stats;
 
 import gg.overlab.backend.hero.Hero;
+import gg.overlab.backend.stats.dto.HeroChangeDto;
+import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
 import gg.overlab.backend.stats.dto.HeroMapStatDto;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import java.math.BigDecimal;
@@ -36,6 +38,28 @@ public class StatsMapper {
                 delta(stat.getWinRate(), baseline == null ? null : baseline.getWinRate()),
                 delta(stat.getPickRate(), baseline == null ? null : baseline.getPickRate()),
                 stat.getCapturedAt());
+    }
+
+    public HeroHistoryPointDto toHistoryPoint(HeroStat stat) {
+        return new HeroHistoryPointDto(stat.getCapturedAt(), stat.getWinRate(), stat.getPickRate(),
+                stat.getBanRate());
+    }
+
+    public HeroChangeDto toChangeDto(HeroStat before, HeroStat after) {
+        Hero hero = after.getHero();
+        return new HeroChangeDto(
+                hero.getSlug(),
+                hero.getName(),
+                hero.getRole(),
+                before.getWinRate(),
+                after.getWinRate(),
+                delta(after.getWinRate(), before.getWinRate()),
+                before.getPickRate(),
+                after.getPickRate(),
+                delta(after.getPickRate(), before.getPickRate()),
+                before.getBanRate(),
+                after.getBanRate(),
+                delta(after.getBanRate(), before.getBanRate()));
     }
 
     private BigDecimal delta(BigDecimal value, BigDecimal baseline) {

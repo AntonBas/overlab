@@ -77,6 +77,51 @@ export interface HeroMapStats {
   maps: HeroMapStat[];
 }
 
+export interface HeroHistoryPoint {
+  capturedAt: string;
+  winRate: number;
+  pickRate: number;
+  banRate: number | null;
+}
+
+export interface HeroHistory {
+  hero: Hero;
+  queue: GameQueue;
+  tier: RankTier;
+  map: string;
+  platform: Platform;
+  region: Region;
+  from: string;
+  to: string;
+  points: HeroHistoryPoint[];
+}
+
+export interface HeroChange {
+  heroSlug: string;
+  heroName: string;
+  role: HeroRole;
+  winRateBefore: number;
+  winRateAfter: number;
+  winRateChange: number;
+  pickRateBefore: number;
+  pickRateAfter: number;
+  pickRateChange: number;
+  banRateBefore: number | null;
+  banRateAfter: number | null;
+  banRateChange: number | null;
+}
+
+export interface StatsComparison {
+  beforeCapturedAt: string;
+  afterCapturedAt: string;
+  queue: GameQueue;
+  tier: RankTier;
+  map: string;
+  platform: Platform;
+  region: Region;
+  heroes: HeroChange[];
+}
+
 export type PerkSlot = "MINOR" | "MAJOR";
 export type PerkRecommendation = "RECOMMENDED" | "OPTIONAL" | "AVOID";
 

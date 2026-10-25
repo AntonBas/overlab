@@ -12,8 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gg.overlab.backend.exception.api.ApiErrorHandler;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +25,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class StatsControllerTest {
 
     private final StatsService statsService = mock(StatsService.class);
+    private final StatsHistoryService historyService = mock(StatsHistoryService.class);
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService))
+        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService, historyService))
                 .setControllerAdvice(new ApiErrorHandler())
                 .build();
     }
@@ -78,5 +81,37 @@ class StatsControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("Statistics not found: x"));
+    }
+
+    @Test
+    void historyPassesTheDateRangeAndFilter() throws Exception {
+        StatsFilter expected = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE);
+        Instant from = Instant.parse("2026-10-01T00:00:00Z");
+        Instant to = Instant.parse("2026-10-08T00:00:00Z");
+
+        mockMvc.perform(get("/api/stats/hero/ana/history")
+                        .param("from", "2026-10-01T00:00:00Z").param("to", "2026-10-08T00:00:00Z"))
+                .andExpect(status().isOk());
+
+        verify(historyService).getHeroHistory("ana", expected, from, to);
+    }
+
+    @Test
+    void compareWithoutRangeOrPatchIsABadRequest() throws Exception {
+        mockMvc.perform(get("/api/stats/compare"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Provide either 'patch' or both 'from' and 'to'"));
+    }
+
+    @Test
+    void compareByPatchUsesThePatchSlug() throws Exception {
+        StatsFilter expected = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE);
+        StatsComparisonDto comparison = new StatsComparisonDto(StatsFixtures.CAPTURED_AT, StatsFixtures.CAPTURED_AT,
+                GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE, List.of());
+        when(historyService.compareAroundPatch(expected, "season-1")).thenReturn(comparison);
+
+        mockMvc.perform(get("/api/stats/compare").param("patch", "season-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.queue").value("COMPETITIVE"));
     }
 }

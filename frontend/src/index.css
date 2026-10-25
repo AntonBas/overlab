@@ -981,3 +981,59 @@ select:disabled {
     background-position: -200% 0;
   }
 }
+
+.chart {
+  margin: 16px 0;
+}
+
+.chart__caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.chart__svg {
+  width: 100%;
+  height: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.chart__svg--win {
+  --series: var(--bar-win);
+}
+
+.chart__svg--pick {
+  --series: var(--bar-pick);
+}
+
+.chart__svg--ban {
+  --series: var(--bar-ban);
+}
+
+.chart__line {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2;
+}
+
+.chart__dot {
+  fill: var(--series);
+}
+
+.chart__axis {
+  stroke: var(--border);
+}
+
+.chart__marker {
+  stroke: var(--muted);
+  stroke-dasharray: 4 4;
+}
+
+.chart__label {
+  fill: var(--muted);
+  font-size: 11px;
+}

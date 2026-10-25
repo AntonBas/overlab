@@ -20,6 +20,8 @@ import { Header } from "../components/layout/Header";
 import { RoleBadge } from "../components/ui/RoleBadge";
 import { PerkList } from "../features/heroes/components/PerkList";
 import { RelatedHeroes } from "../features/heroes/components/RelatedHeroes";
+import { ChangesTable } from "../features/history/components/ChangesTable";
+import { LineChart } from "../features/history/components/LineChart";
 import { StatsTable } from "../features/stats/components/StatsTable";
 
 function inRouter(ui: React.ReactElement) {
@@ -74,6 +76,41 @@ describe("accessibility", () => {
               role: "DAMAGE",
               strength: 2,
               note: null,
+            },
+          ]}
+        />
+      </>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("history chart and changes table have no violations", async () => {
+    const { container } = inRouter(
+      <>
+        <LineChart
+          title="Win rate"
+          tone="win"
+          points={[
+            { time: 0, value: 47 },
+            { time: 1000, value: 49 },
+          ]}
+        />
+        <ChangesTable
+          showBan={false}
+          changes={[
+            {
+              heroSlug: "ana",
+              heroName: "Ana",
+              role: "SUPPORT",
+              winRateBefore: 47,
+              winRateAfter: 49,
+              winRateChange: 2,
+              pickRateBefore: 10,
+              pickRateAfter: 11,
+              pickRateChange: 1,
+              banRateBefore: null,
+              banRateAfter: null,
+              banRateChange: null,
             },
           ]}
         />

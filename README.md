@@ -19,7 +19,8 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/heroes/:slug/counters`, `/heroes/:slug/perks` | Full counters and synergies, full perks |
 | `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
-| `/patches`, `/patches/:slug` | Patch list and notes |
+| `/patches`, `/patches/:slug` | Patch list, notes and the change in statistics around the release |
+| `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
 | `/guides/:id-:slug` | Video guide (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
 
@@ -113,6 +114,8 @@ The statistics endpoints are public `GET` requests.
 | `/api/maps`, `/api/maps/{slug}` | Maps |
 | `/api/stats` | Statistics table. Parameters: `queue`, `tier`, `map`, `platform`, `region`, `role`, `sort`, `direction`. For a map it also returns deltas against the all-maps numbers |
 | `/api/stats/hero/{slug}` | Statistics of one hero across all maps |
+| `/api/stats/hero/{slug}/history` | Snapshots of one hero over time. Parameters: `queue`, `tier`, `map`, `platform`, `region`, `from`, `to` (ISO date-time; default is the last 90 days, at most 366 days) |
+| `/api/stats/compare` | Changes between two snapshots, biggest win rate gain first. Use `from` and `to` (the last snapshot at or before each moment) or `patch={slug}` (last snapshot before the release against one a week later) |
 
 Quick Play has no ranks (`tier` is ignored) and no ban rate. Errors use one JSON shape (`ApiError`).
 
