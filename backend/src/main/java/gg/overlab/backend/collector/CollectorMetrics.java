@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,11 @@ public class CollectorMetrics {
 
     @PostConstruct
     void registerLastSuccessGauges() {
+        for (String counter : List.of("collector.new.heroes", "collector.new.maps", "collector.outliers",
+                "collector.rejected.snapshots")) {
+            registry.counter(counter);
+        }
+        registry.counter("collector.suspicious.snapshots", "reason", "pick_rate_sum");
         for (CollectorJob job : properties.jobs()) {
             Gauge.builder("collector.last.success.timestamp.seconds", runRepository,
                             repository -> lastSuccessSeconds(repository, job.name()))
@@ -33,6 +39,10 @@ public class CollectorMetrics {
     public void recordRequest(String jobName, boolean success) {
         registry.counter("collector.requests", JOB_TAG, jobName, "result", success ? "success" : "failure")
                 .increment();
+    }
+
+    public void recordRejectedSnapshot() {
+        registry.counter("collector.rejected.snapshots").increment();
     }
 
     public void recordNewHero(String slug) {

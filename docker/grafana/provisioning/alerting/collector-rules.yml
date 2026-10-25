@@ -68,3 +68,34 @@ groups:
           severity: critical
         annotations:
           summary: "The weekly-maps job has not finished successfully for longer than expected. Check Collector runs in the admin API and the backend logs."
+      - uid: collector-rejected-snapshots
+        title: "Collector: Blizzard responses were rejected in the last day"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(collector_rejected_snapshots_total[1d]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Responses from Blizzard failed validation, which usually means the endpoint format changed. Check the collector warnings in the backend logs."
