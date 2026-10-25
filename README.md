@@ -8,6 +8,20 @@ Unofficial fan site with Overwatch 2 hero statistics: win rate, pick rate and ba
 - Frontend: React + TypeScript (Vite)
 - Monitoring: Prometheus + Grafana
 
+## Frontend
+
+React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme follows the system setting), `react-router-dom`, `axios`. Code lives in `src/features/<domain>/` (`stats`, `heroes`, `maps`, `guides`, `auth`).
+
+| Address | Page |
+|---|---|
+| `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |
+| `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
+| `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
+| `/guides/:id-:slug` | Video guide (YouTube embed) |
+| `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
+
+Hero and map images are not shown (see `.tasks/current/0008-images-and-storage.md`).
+
 ## Architecture
 
 ```mermaid
@@ -53,7 +67,7 @@ docker compose up -d
 cd backend && ./gradlew bootRun
 ```
 
-3. Frontend:
+3. Frontend (Vite proxies `/api` and `/oauth2` to the backend on port 8080):
 
 ```bash
 cd frontend && npm ci && npm run dev
@@ -153,7 +167,7 @@ The whole stack (HTTPS proxy with the React build, backend, PostgreSQL, Redis, P
 
 ```bash
 cd backend && ./gradlew build
-cd frontend && npm run lint && npm run build
+cd frontend && npm run lint && npm run format:check && npm test && npm run build
 ```
 
 `./gradlew build` runs Checkstyle (no tabs, wildcard imports or code comments) and all tests. Integration tests start their own PostgreSQL and Redis with Testcontainers, so Docker must be running, but `docker compose up` is not needed. They cover the migrations, the statistics queries, the role matrix of every protected endpoint, the sign-in flow and the audit log.
