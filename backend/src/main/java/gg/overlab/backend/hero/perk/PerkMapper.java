@@ -1,0 +1,28 @@
+package gg.overlab.backend.hero.perk;
+
+import gg.overlab.backend.hero.perk.dto.PerkDto;
+import gg.overlab.backend.hero.perk.dto.PerkRequest;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PerkMapper {
+
+    public PerkDto toDto(Perk perk) {
+        return new PerkDto(
+                perk.getId(),
+                perk.getHero().getSlug(),
+                perk.getName(),
+                perk.getDescription(),
+                perk.getSlot(),
+                perk.getRecommendation(),
+                perk.getRecommendationNote());
+    }
+
+    public void apply(PerkRequest request, Perk perk) {
+        perk.setName(request.name().trim());
+        perk.setDescription(request.description());
+        perk.setSlot(request.slot());
+        perk.setRecommendation(request.recommendation());
+        perk.setRecommendationNote(request.recommendationNote());
+    }
+}
