@@ -47,7 +47,7 @@ Restore into an empty database:
 gunzip -c backups/overlab-<timestamp>.sql.gz | docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T postgres psql -U overlab -d overlab
 ```
 
-Test a restore before you rely on the backups.
+Test a restore before you rely on the backups: `docker/backup/verify-restore.sh backups` restores the newest dump into a throwaway PostgreSQL container and checks that the migrations and heroes are there. Run it from cron, for example weekly.
 
 ## Before going public
 
