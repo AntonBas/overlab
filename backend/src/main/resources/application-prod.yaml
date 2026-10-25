@@ -17,6 +17,9 @@ server:
     include-binding-errors: never
 
 logging:
+  structured:
+    format:
+      console: logstash
   level:
     root: INFO
     gg.overlab: INFO

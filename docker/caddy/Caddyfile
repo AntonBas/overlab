@@ -11,6 +11,9 @@
 
 	@backend path /api/* /oauth2/* /login/oauth2/*
 	handle @backend {
+		request_body {
+			max_size 1MB
+		}
 		reverse_proxy backend:8080
 	}
 
