@@ -4,9 +4,14 @@ import { formatDelta } from "../../utils/format";
 interface DeltaValueProps {
   value: number | null;
   inverted?: boolean;
+  title?: string;
 }
 
-export function DeltaValue({ value, inverted = false }: DeltaValueProps) {
+export function DeltaValue({
+  value,
+  inverted = false,
+  title = "Difference from the all-maps value",
+}: DeltaValueProps) {
   if (value === null) {
     return null;
   }
@@ -19,7 +24,7 @@ export function DeltaValue({ value, inverted = false }: DeltaValueProps) {
         "delta--up": positive,
         "delta--down": negative,
       })}
-      title="Difference from the all-maps value"
+      title={title}
     >
       {formatDelta(value)}
     </span>

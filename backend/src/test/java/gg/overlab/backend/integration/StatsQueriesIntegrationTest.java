@@ -1,7 +1,10 @@
 package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import gg.overlab.backend.exception.core.BadRequestException;
+import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.hero.Hero;
@@ -14,12 +17,18 @@ import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.patch.Patch;
+import gg.overlab.backend.patch.PatchRepository;
+import gg.overlab.backend.stats.StatsHistoryService;
 import gg.overlab.backend.stats.StatsService;
 import gg.overlab.backend.stats.StatsSort;
+import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroMapStatsDto;
+import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +55,12 @@ class StatsQueriesIntegrationTest {
 
     @Autowired
     private StatsService statsService;
+
+    @Autowired
+    private StatsHistoryService historyService;
+
+    @Autowired
+    private PatchRepository patchRepository;
 
     @Autowired
     private CacheManager cacheManager;
@@ -139,6 +154,79 @@ class StatsQueriesIntegrationTest {
         assertThat(result.maps()).hasSize(1);
         assertThat(result.maps().get(0).mapSlug()).isEqualTo("rialto");
         assertThat(result.maps().get(0).winRateDelta()).isEqualByComparingTo("1.00");
+    }
+
+    @Test
+    void historyReturnsOverallPointsInChronologicalOrder() {
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
+                NEW.plus(Duration.ofDays(1)));
+
+        assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, NEW);
+        assertThat(history.points().get(0).winRate()).isEqualByComparingTo("40.00");
+        assertThat(history.points().get(1).winRate()).isEqualByComparingTo("47.00");
+    }
+
+    @Test
+    void historyForAMapReturnsOnlyThatMap() {
+        StatsFilter rialtoFilter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "rialto", Platform.PC,
+                Region.EUROPE);
+
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", rialtoFilter, OLD, NEW);
+
+        assertThat(history.points()).hasSize(2);
+        assertThat(history.points().get(1).winRate()).isEqualByComparingTo("48.00");
+    }
+
+    @Test
+    void historyRespectsTheRequestedRange() {
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), NEW, NEW.plus(Duration.ofDays(1)));
+
+        assertThat(history.points()).hasSize(1);
+    }
+
+    @Test
+    void historyRejectsReversedAndTooWideRanges() {
+        assertThatThrownBy(() -> historyService.getHeroHistory("ana-test", allMaps(), NEW, OLD))
+                .isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> historyService.getHeroHistory("ana-test", allMaps(), NEW.minus(Duration.ofDays(400)),
+                NEW)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void comparisonListsChangesBiggestGainFirst() {
+        StatsComparisonDto comparison = historyService.compare(allMaps(), OLD, NEW);
+
+        assertThat(comparison.beforeCapturedAt()).isEqualTo(OLD);
+        assertThat(comparison.afterCapturedAt()).isEqualTo(NEW);
+        assertThat(comparison.heroes()).extracting(change -> change.heroSlug())
+                .containsExactly("genji-test", "ana-test");
+        assertThat(comparison.heroes().get(0).winRateChange()).isEqualByComparingTo("14.00");
+        assertThat(comparison.heroes().get(1).pickRateChange()).isEqualByComparingTo("13.00");
+    }
+
+    @Test
+    void comparisonBeforeTheFirstSnapshotIsNotFound() {
+        assertThatThrownBy(() -> historyService.compare(allMaps(), OLD.minus(Duration.ofDays(30)), NEW))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void patchComparisonUsesTheLastSnapshotBeforeReleaseAndOneAfterAWeek() {
+        Patch patch = new Patch();
+        patch.setVersion("test-patch");
+        patch.setSlug("test-patch");
+        patch.setReleasedAt(OLD.plus(Duration.ofDays(1)));
+        patchRepository.save(patch);
+
+        StatsComparisonDto comparison = historyService.compareAroundPatch(allMaps(), "test-patch");
+
+        assertThat(comparison.beforeCapturedAt()).isEqualTo(OLD);
+        assertThat(comparison.afterCapturedAt()).isEqualTo(NEW);
+        assertThat(comparison.heroes()).hasSize(2);
+    }
+
+    private StatsFilter allMaps() {
+        return StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, StatsFilter.ALL_MAPS, Platform.PC, Region.EUROPE);
     }
 
     private Hero hero(String slug, String name, HeroRole role) {

@@ -10,6 +10,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
 import { formatDateTime } from "../../../utils/format";
+import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { GuideList } from "../../guides/components/GuideList";
 import { fetchHeroMapStats } from "../../stats/api/statsApi";
@@ -120,6 +121,8 @@ export function HeroPage() {
           </p>
         )}
       </section>
+
+      <HeroHistorySection slug={slug} queue={queue} />
 
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">

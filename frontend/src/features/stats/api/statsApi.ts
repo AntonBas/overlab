@@ -1,10 +1,12 @@
 import { api } from "../../../services/api";
 import type {
   GameQueue,
+  HeroHistory,
   HeroMapStats,
   Platform,
   RankTier,
   Region,
+  StatsComparison,
   StatsSnapshot,
 } from "../../../types/api";
 import type { StatsFilters } from "../filters";
@@ -39,6 +41,36 @@ export async function fetchHeroMapStats(
   params: HeroStatsParams,
 ): Promise<HeroMapStats> {
   const { data } = await api.get<HeroMapStats>(`/stats/hero/${slug}`, {
+    params,
+  });
+  return data;
+}
+
+export interface HistoryParams extends HeroStatsParams {
+  from: string;
+  to: string;
+}
+
+export async function fetchHeroHistory(
+  slug: string,
+  params: HistoryParams,
+): Promise<HeroHistory> {
+  const { data } = await api.get<HeroHistory>(`/stats/hero/${slug}/history`, {
+    params,
+  });
+  return data;
+}
+
+export interface ComparisonParams extends HeroStatsParams {
+  patch?: string;
+  from?: string;
+  to?: string;
+}
+
+export async function fetchComparison(
+  params: ComparisonParams,
+): Promise<StatsComparison> {
+  const { data } = await api.get<StatsComparison>("/stats/compare", {
     params,
   });
   return data;

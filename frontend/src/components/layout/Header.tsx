@@ -9,6 +9,7 @@ const LINKS = [
   { to: "/stats", label: "Statistics" },
   { to: "/heroes", label: "Heroes" },
   { to: "/maps", label: "Maps" },
+  { to: "/changes", label: "Changes" },
   { to: "/patches", label: "Patches" },
 ];
 

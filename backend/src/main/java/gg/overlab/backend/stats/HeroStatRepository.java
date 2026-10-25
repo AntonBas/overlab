@@ -2,6 +2,7 @@ package gg.overlab.backend.stats;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -53,6 +54,87 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
                                      @Param("platform") Platform platform,
                                      @Param("region") Region region,
                                      @Param("tier") RankTier tier);
+
+    @Query("""
+            select s from HeroStat s
+            where s.hero.slug = :heroSlug and s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt between :from and :to
+            order by s.capturedAt
+            """)
+    List<HeroStat> findHistoryForAllMaps(@Param("heroSlug") String heroSlug,
+                                         @Param("queue") GameQueue queue,
+                                         @Param("platform") Platform platform,
+                                         @Param("region") Region region,
+                                         @Param("tier") RankTier tier,
+                                         @Param("from") Instant from,
+                                         @Param("to") Instant to);
+
+    @Query("""
+            select s from HeroStat s join s.map m
+            where s.hero.slug = :heroSlug and m.slug = :mapSlug
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt between :from and :to
+            order by s.capturedAt
+            """)
+    List<HeroStat> findHistoryForMap(@Param("heroSlug") String heroSlug,
+                                     @Param("mapSlug") String mapSlug,
+                                     @Param("queue") GameQueue queue,
+                                     @Param("platform") Platform platform,
+                                     @Param("region") Region region,
+                                     @Param("tier") RankTier tier,
+                                     @Param("from") Instant from,
+                                     @Param("to") Instant to);
+
+    @Query("""
+            select max(s.capturedAt) from HeroStat s
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt <= :at
+            """)
+    Optional<Instant> findCaptureAtOrBeforeForAllMaps(@Param("queue") GameQueue queue,
+                                                      @Param("platform") Platform platform,
+                                                      @Param("region") Region region,
+                                                      @Param("tier") RankTier tier,
+                                                      @Param("at") Instant at);
+
+    @Query("""
+            select max(s.capturedAt) from HeroStat s join s.map m
+            where m.slug = :mapSlug
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt <= :at
+            """)
+    Optional<Instant> findCaptureAtOrBeforeForMap(@Param("mapSlug") String mapSlug,
+                                                  @Param("queue") GameQueue queue,
+                                                  @Param("platform") Platform platform,
+                                                  @Param("region") Region region,
+                                                  @Param("tier") RankTier tier,
+                                                  @Param("at") Instant at);
+
+    @Query("""
+            select s from HeroStat s join fetch s.hero
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt = :capturedAt
+            """)
+    List<HeroStat> findSnapshotForAllMaps(@Param("queue") GameQueue queue,
+                                          @Param("platform") Platform platform,
+                                          @Param("region") Region region,
+                                          @Param("tier") RankTier tier,
+                                          @Param("capturedAt") Instant capturedAt);
+
+    @Query("""
+            select s from HeroStat s join fetch s.hero join s.map m
+            where m.slug = :mapSlug
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt = :capturedAt
+            """)
+    List<HeroStat> findSnapshotForMap(@Param("mapSlug") String mapSlug,
+                                      @Param("queue") GameQueue queue,
+                                      @Param("platform") Platform platform,
+                                      @Param("region") Region region,
+                                      @Param("tier") RankTier tier,
+                                      @Param("capturedAt") Instant capturedAt);
 
     @Modifying
     @Query(value = """
