@@ -20,6 +20,22 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/guides/:id-:slug` | Video guide (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
 
+### Admin
+
+`/admin/**` is available to the `ADMIN` role only (the link appears in the header for admins). Anonymous visitors are sent to `/login` and returned afterwards, regular users see an access denied page. The server checks every request; the frontend only hides what is not allowed. Admin pages are marked `noindex` and disallowed in `robots.txt`.
+
+| Address | Purpose |
+|---|---|
+| `/admin/heroes` | Edit hero description, hide or show a hero |
+| `/admin/perks` | Perks per hero: slot, recommendation, note |
+| `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
+| `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
+| `/admin/patches`, `/admin/maps` | Patch notes; map mode and image URL |
+| `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
+| `/admin/audit` | Audit log with filters and "was → became" changes |
+
+Forms warn about unsaved changes when you leave the page.
+
 Hero and map images are not shown (see `.tasks/current/0008-images-and-storage.md`).
 
 ## Architecture

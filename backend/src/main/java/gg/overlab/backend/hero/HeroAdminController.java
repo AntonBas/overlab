@@ -1,6 +1,6 @@
 package gg.overlab.backend.hero;
 
-import gg.overlab.backend.hero.dto.HeroDto;
+import gg.overlab.backend.hero.dto.HeroAdminDto;
 import gg.overlab.backend.hero.dto.HeroUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -20,12 +20,12 @@ public class HeroAdminController {
     private final HeroService heroService;
 
     @GetMapping
-    public List<HeroDto> findAll() {
+    public List<HeroAdminDto> findAll() {
         return heroService.findAllForAdmin();
     }
 
     @PutMapping("/{slug}")
-    public HeroDto update(@PathVariable String slug, @Valid @RequestBody HeroUpdateRequest request) {
+    public HeroAdminDto update(@PathVariable String slug, @Valid @RequestBody HeroUpdateRequest request) {
         return heroService.update(slug, request);
     }
 }

@@ -3,6 +3,7 @@ package gg.overlab.backend.hero;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.hero.dto.HeroAdminDto;
 import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.hero.dto.HeroUpdateRequest;
 import java.util.List;
@@ -39,19 +40,19 @@ public class HeroService {
     }
 
     @Transactional(readOnly = true)
-    public List<HeroDto> findAllForAdmin() {
-        return heroRepository.findAll(Sort.by("name")).stream().map(heroMapper::toDto).toList();
+    public List<HeroAdminDto> findAllForAdmin() {
+        return heroRepository.findAll(Sort.by("name")).stream().map(heroMapper::toAdminDto).toList();
     }
 
     @EvictContentCaches
     @Transactional
-    public HeroDto update(String slug, HeroUpdateRequest request) {
+    public HeroAdminDto update(String slug, HeroUpdateRequest request) {
         Hero hero = heroRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
-        HeroDto before = heroMapper.toDto(hero);
+        HeroAdminDto before = heroMapper.toAdminDto(hero);
         hero.setDescription(request.description());
         hero.setActive(request.active());
-        HeroDto after = heroMapper.toDto(hero);
+        HeroAdminDto after = heroMapper.toAdminDto(hero);
         auditService.logUpdate("Hero", slug, before, after);
         return after;
     }

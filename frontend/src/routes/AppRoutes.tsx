@@ -1,5 +1,16 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
+import { AdminLayout } from "../features/admin/components/AdminLayout";
+import { RequireAdmin } from "../features/admin/components/RequireAdmin";
+import { AdminHomePage } from "../features/admin/pages/AdminHomePage";
+import { AuditAdminPage } from "../features/admin/pages/AuditAdminPage";
+import { CollectorAdminPage } from "../features/admin/pages/CollectorAdminPage";
+import { GuidesAdminPage } from "../features/admin/pages/GuidesAdminPage";
+import { HeroesAdminPage } from "../features/admin/pages/HeroesAdminPage";
+import { MapsAdminPage } from "../features/admin/pages/MapsAdminPage";
+import { PatchesAdminPage } from "../features/admin/pages/PatchesAdminPage";
+import { PerksAdminPage } from "../features/admin/pages/PerksAdminPage";
+import { RelationsAdminPage } from "../features/admin/pages/RelationsAdminPage";
 import { ForgotPasswordPage } from "../features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "../features/auth/pages/LoginPage";
 import { RegisterPage } from "../features/auth/pages/RegisterPage";
@@ -29,6 +40,24 @@ export function AppRoutes() {
         <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
+        <Route
+          path="admin"
+          element={
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
+          }
+        >
+          <Route index element={<AdminHomePage />} />
+          <Route path="heroes" element={<HeroesAdminPage />} />
+          <Route path="perks" element={<PerksAdminPage />} />
+          <Route path="relations" element={<RelationsAdminPage />} />
+          <Route path="guides" element={<GuidesAdminPage />} />
+          <Route path="patches" element={<PatchesAdminPage />} />
+          <Route path="maps" element={<MapsAdminPage />} />
+          <Route path="collector" element={<CollectorAdminPage />} />
+          <Route path="audit" element={<AuditAdminPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

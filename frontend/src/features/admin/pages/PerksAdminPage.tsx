@@ -1,0 +1,259 @@
+import { useState, type FormEvent } from "react";
+import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../components/ui/PageHeader";
+import { Spinner } from "../../../components/ui/Spinner";
+import { useFetch } from "../../../hooks/useFetch";
+import { usePageTitle } from "../../../hooks/usePageTitle";
+import type { Perk, PerkRecommendation, PerkSlot } from "../../../types/api";
+import {
+  createPerk,
+  deletePerk,
+  fetchPerks,
+  updatePerk,
+} from "../api/adminApi";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { DataTable } from "../components/DataTable";
+import { SelectField, TextAreaField } from "../components/Fields";
+import { StatusMessage } from "../components/StatusMessage";
+import { useHeroOptions } from "../components/useHeroOptions";
+import { useSave } from "../components/useSave";
+import { useUnsavedChanges } from "../components/unsavedChanges";
+import { FormField } from "../../../components/ui/FormField";
+
+const RECOMMENDATIONS: PerkRecommendation[] = [
+  "RECOMMENDED",
+  "OPTIONAL",
+  "AVOID",
+];
+
+interface PerkFormProps {
+  heroSlug: string;
+  perk: Perk | null;
+  onSaved: () => void;
+  onClose: () => void;
+}
+
+function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
+  const [name, setName] = useState(perk?.name ?? "");
+  const [description, setDescription] = useState(perk?.description ?? "");
+  const [slot, setSlot] = useState<PerkSlot>(perk?.slot ?? "MINOR");
+  const [recommendation, setRecommendation] = useState<PerkRecommendation>(
+    perk?.recommendation ?? "OPTIONAL",
+  );
+  const [note, setNote] = useState(perk?.recommendationNote ?? "");
+  const save = useSave();
+  const dirty =
+    name !== (perk?.name ?? "") ||
+    description !== (perk?.description ?? "") ||
+    slot !== (perk?.slot ?? "MINOR") ||
+    recommendation !== (perk?.recommendation ?? "OPTIONAL") ||
+    note !== (perk?.recommendationNote ?? "");
+  useUnsavedChanges(dirty && !save.success);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const payload = {
+      heroSlug,
+      name: name.trim(),
+      description: description.trim() === "" ? null : description,
+      slot,
+      recommendation,
+      recommendationNote: note.trim() === "" ? null : note,
+    };
+    const saved = await save.run(
+      () => (perk ? updatePerk(perk.id, payload) : createPerk(payload)),
+      "Perk saved.",
+    );
+    if (saved) {
+      onSaved();
+      onClose();
+    }
+  }
+
+  return (
+    <form className="form admin__form" onSubmit={submit}>
+      <h2>{perk ? `Edit ${perk.name}` : "New perk"}</h2>
+      <FormField
+        label="Name"
+        name="name"
+        required
+        value={name}
+        error={save.fieldErrors.name}
+        onChange={(event) => setName(event.target.value)}
+      />
+      <TextAreaField
+        label="Description"
+        name="description"
+        value={description}
+        error={save.fieldErrors.description}
+        onChange={(event) => setDescription(event.target.value)}
+      />
+      <SelectField
+        label="Slot"
+        name="slot"
+        value={slot}
+        onChange={(event) => setSlot(event.target.value as PerkSlot)}
+      >
+        <option value="MINOR">Minor</option>
+        <option value="MAJOR">Major</option>
+      </SelectField>
+      <SelectField
+        label="Recommendation"
+        name="recommendation"
+        value={recommendation}
+        onChange={(event) =>
+          setRecommendation(event.target.value as PerkRecommendation)
+        }
+      >
+        {RECOMMENDATIONS.map((value) => (
+          <option key={value} value={value}>
+            {value}
+          </option>
+        ))}
+      </SelectField>
+      <TextAreaField
+        label="Recommendation note"
+        name="recommendationNote"
+        rows={2}
+        value={note}
+        error={save.fieldErrors.recommendationNote}
+        onChange={(event) => setNote(event.target.value)}
+      />
+      <StatusMessage error={save.error} />
+      <div className="form__actions">
+        <button type="submit" className="button" disabled={save.saving}>
+          Save
+        </button>
+        <button
+          type="button"
+          className="button button--ghost"
+          onClick={onClose}
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export function PerksAdminPage() {
+  usePageTitle("Admin: perks");
+  const heroes = useHeroOptions();
+  const [heroSlug, setHeroSlug] = useState("");
+  const perks = useFetch(
+    () => (heroSlug ? fetchPerks(heroSlug) : Promise.resolve([] as Perk[])),
+    [heroSlug],
+  );
+  const [editing, setEditing] = useState<Perk | "new" | null>(null);
+  const [deleting, setDeleting] = useState<Perk | null>(null);
+  const removal = useSave();
+
+  async function confirmDelete() {
+    if (!deleting) {
+      return;
+    }
+    const removed = await removal.run(
+      () => deletePerk(deleting.id),
+      `Perk ${deleting.name} deleted.`,
+    );
+    if (removed) {
+      perks.reload();
+    }
+    setDeleting(null);
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Perks"
+        actions={
+          heroSlug && (
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              New perk
+            </button>
+          )
+        }
+      />
+      {heroes.error && (
+        <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
+      )}
+      <SelectField
+        label="Hero"
+        name="hero"
+        value={heroSlug}
+        onChange={(event) => {
+          setHeroSlug(event.target.value);
+          setEditing(null);
+          removal.reset();
+        }}
+      >
+        <option value="">Choose a hero</option>
+        {heroes.data?.map((hero) => (
+          <option key={hero.slug} value={hero.slug}>
+            {hero.name}
+          </option>
+        ))}
+      </SelectField>
+      <StatusMessage error={removal.error} success={removal.success} />
+      {heroSlug && perks.loading && <Spinner />}
+      {perks.error && (
+        <ErrorMessage failure={perks.error} onRetry={perks.reload} />
+      )}
+      {heroSlug && perks.data && (
+        <DataTable
+          rows={perks.data}
+          rowKey={(perk) => perk.id}
+          emptyMessage="This hero has no perks yet."
+          columns={[
+            { header: "Name", render: (perk) => perk.name },
+            { header: "Slot", render: (perk) => perk.slot },
+            { header: "Recommendation", render: (perk) => perk.recommendation },
+            {
+              header: "",
+              render: (perk) => (
+                <div className="form__actions">
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => setEditing(perk)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => setDeleting(perk)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+        />
+      )}
+      {heroSlug && editing && (
+        <PerkForm
+          key={editing === "new" ? "new" : editing.id}
+          heroSlug={heroSlug}
+          perk={editing === "new" ? null : editing}
+          onSaved={perks.reload}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="Delete perk"
+          message={`Delete the perk "${deleting.name}"? This cannot be undone.`}
+          busy={removal.saving}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
+    </>
+  );
+}
