@@ -37,7 +37,7 @@ services:
       - overlab-net
 
   prometheus:
-    image: prom/prometheus:v3.1.0
+    image: prom/prometheus:v3.15.1
     container_name: overlab-prometheus
     restart: unless-stopped
     ports:
