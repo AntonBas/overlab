@@ -25,8 +25,10 @@ import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,13 +48,16 @@ class RatesCollectorServiceTest {
     private final CollectorJob job = CollectorFixtures.job("daily", List.of(GameQueue.QUICK_PLAY, GameQueue.COMPETITIVE),
             List.of(RankTier.ALL, RankTier.GOLD), List.of("all-maps"));
 
+    private CollectorMetrics metrics;
     private RatesCollectorService service;
 
     @BeforeEach
     void setUp() {
         CollectorProperties properties = CollectorFixtures.properties(1, job);
+        metrics = new CollectorMetrics(meterRegistry, runRepository, properties);
+        metrics.registerLastSuccessGauges();
         service = new RatesCollectorService(properties, client, validator, writer, mock(GameMapRepository.class),
-                mock(CacheManager.class), runRepository, new CollectorMetrics(meterRegistry), deferredExecutor);
+                mock(CacheManager.class), runRepository, metrics, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {
@@ -77,7 +82,22 @@ class RatesCollectorServiceTest {
         assertThat(run.getErrorSummary()).isNull();
         assertThat(meterRegistry.get("collector.requests").tag("result", "success").counter().count()).isEqualTo(3.0);
         assertThat(meterRegistry.get("collector.rows.saved").counter().count()).isEqualTo(15.0);
-        assertThat(meterRegistry.get("collector.last.success.timestamp.seconds").gauge().value()).isPositive();
+    }
+
+    @Test
+    void lastSuccessGaugeIsReadFromTheRunHistory() {
+        CollectorRun success = new CollectorRun();
+        success.setFinishedAt(Instant.parse("2026-10-25T04:01:00Z"));
+        when(runRepository.findFirstByJobNameAndStatusOrderByFinishedAtDesc("daily", CollectorRunStatus.SUCCESS))
+                .thenReturn(Optional.of(success));
+
+        assertThat(meterRegistry.get("collector.last.success.timestamp.seconds").tag("collector_job", "daily").gauge()
+                .value()).isEqualTo((double) success.getFinishedAt().getEpochSecond());
+    }
+
+    @Test
+    void lastSuccessGaugeIsNotANumberBeforeAnySuccessfulRun() {
+        assertThat(meterRegistry.get("collector.last.success.timestamp.seconds").gauge().value()).isNaN();
     }
 
     @Test
@@ -115,7 +135,6 @@ class RatesCollectorServiceTest {
         assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.FAILED);
         assertThat(run.getRowsSaved()).isZero();
         assertThat(run.getErrorSummary()).contains("blizzard down");
-        assertThat(meterRegistry.find("collector.last.success.timestamp.seconds").gauge()).isNull();
     }
 
     @Test
