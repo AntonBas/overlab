@@ -80,8 +80,10 @@ cp .env.example .env
 Fill in `DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` in `.env`, then:
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
+
+This starts the whole stack in one go: site on http://localhost:5173 (React build served by Caddy, `/api` proxied to the backend), backend, PostgreSQL, Redis, Mailpit (http://localhost:8025), Prometheus (http://localhost:9090) and Grafana (http://localhost:3000). The collector runs `daily-overview` on every backend start (`COLLECTOR_STARTUP_JOB`, set it empty to disable). For hot-reload development start only the infrastructure with `docker compose up -d postgres redis mailpit prometheus grafana` and continue with the steps below.
 
 2. Backend (the `local` profile is the default):
 
