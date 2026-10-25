@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
@@ -11,6 +11,8 @@ export function LoginPage() {
   usePageTitle("Sign in");
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = (location.state as { from?: string } | null)?.from ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function LoginPage() {
     setUnverified(false);
     try {
       await signIn(email, password);
-      navigate("/");
+      navigate(returnTo, { replace: true });
     } catch (failure) {
       const result = toFailure(failure);
       if (result.status === 403) {

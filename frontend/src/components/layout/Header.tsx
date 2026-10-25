@@ -33,6 +33,18 @@ export function Header() {
                 </NavLink>
               </li>
             ))}
+            {user?.role === "ADMIN" && (
+              <li>
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    clsx("nav__link", { "nav__link--active": isActive })
+                  }
+                >
+                  Admin
+                </NavLink>
+              </li>
+            )}
           </ul>
         </nav>
         <div className="site-header__account">

@@ -689,3 +689,146 @@ select:disabled {
     padding: 8px 10px;
   }
 }
+
+.admin {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.admin__menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin__link {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin__link:hover,
+.admin__link--active {
+  background: var(--surface-2);
+}
+
+.admin__content {
+  min-width: 0;
+}
+
+.admin__form {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  max-width: 640px;
+}
+
+.admin__cards {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.breadcrumbs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.form__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.form-field textarea {
+  width: 100%;
+  font: inherit;
+}
+
+.form-field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice--success {
+  border-color: var(--good, var(--accent));
+}
+
+.button--danger {
+  background: var(--bad);
+  color: #fff;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.dialog__backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.5);
+  z-index: 50;
+}
+
+.dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 420px;
+  width: calc(100% - 32px);
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.changes del {
+  color: var(--bad);
+}
+
+.changes ins {
+  text-decoration: none;
+  color: var(--good, inherit);
+}
+
+@media (max-width: 800px) {
+  .admin {
+    grid-template-columns: 1fr;
+  }
+
+  .admin__menu ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
