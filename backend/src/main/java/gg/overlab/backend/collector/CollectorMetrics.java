@@ -35,6 +35,22 @@ public class CollectorMetrics {
                 .increment();
     }
 
+    public void recordNewHero(String slug) {
+        registry.counter("collector.new.heroes").increment();
+    }
+
+    public void recordNewMap(String slug) {
+        registry.counter("collector.new.maps").increment();
+    }
+
+    public void recordOutliers(int count) {
+        registry.counter("collector.outliers").increment(count);
+    }
+
+    public void recordSuspiciousSnapshot(String reason) {
+        registry.counter("collector.suspicious.snapshots", "reason", reason).increment();
+    }
+
     public void recordRun(String jobName, CollectorRunStatus status, int rowsSaved, Duration duration) {
         registry.counter("collector.rows.saved", JOB_TAG, jobName).increment(rowsSaved);
         Timer.builder("collector.job.duration")
