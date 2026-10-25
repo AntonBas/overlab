@@ -491,23 +491,21 @@ select:disabled {
   font-size: 0.85rem;
 }
 
-.role-badge__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--muted);
+.role-badge__icon {
+  fill: var(--muted);
+  flex: none;
 }
 
-.role-badge--tank .role-badge__dot {
-  background: var(--tank);
+.role-badge--tank .role-badge__icon {
+  fill: var(--tank);
 }
 
-.role-badge--damage .role-badge__dot {
-  background: var(--damage);
+.role-badge--damage .role-badge__icon {
+  fill: var(--damage);
 }
 
-.role-badge--support .role-badge__dot {
-  background: var(--support);
+.role-badge--support .role-badge__icon {
+  fill: var(--support);
 }
 
 .chip-list {
@@ -830,5 +828,156 @@ select:disabled {
   .admin__menu ul {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+}
+
+.main:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.site-header__toggle {
+  display: none;
+}
+
+.site-header__menu {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.hero-search input {
+  border: 0;
+  background: transparent;
+  width: 140px;
+}
+
+.hero-search input:focus-visible {
+  outline: none;
+}
+
+.hero-search:focus-within {
+  outline: 2px solid var(--accent);
+}
+
+.hero-search__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.hero-search__list[hidden] {
+  display: none;
+}
+
+.hero-search__option {
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.hero-search__option--active,
+.hero-search__option:hover {
+  background: var(--surface-2);
+}
+
+.is-stale {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .site-header__toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .site-header__menu {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 12px;
+  }
+
+  .site-header__menu--open {
+    display: flex;
+  }
+
+  .nav {
+    flex-direction: column;
+  }
+
+  .site-header__account {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .hero-search input {
+    width: 100%;
+  }
+}
+
+.patch-notes {
+  white-space: pre-wrap;
+}
+
+.skeleton__row {
+  height: 45px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-2) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
   }
 }

@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
@@ -22,7 +22,6 @@ import {
 import { HeroMapTable } from "../components/HeroMapTable";
 import { PerkList } from "../components/PerkList";
 import { RelatedHeroes } from "../components/RelatedHeroes";
-import { useParams } from "react-router-dom";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
@@ -125,7 +124,7 @@ export function HeroPage() {
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">
           <h2>By map</h2>
-          <HeroMapTable maps={stats.data.maps} />
+          <HeroMapTable maps={stats.data.maps} heroSlug={slug} />
         </section>
       )}
 
@@ -133,6 +132,9 @@ export function HeroPage() {
         <section className="section">
           <h2>Perks</h2>
           <PerkList perks={perks.data} />
+          <p>
+            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
+          </p>
         </section>
       )}
 
@@ -153,6 +155,16 @@ export function HeroPage() {
           <h2>Works well with</h2>
           <RelatedHeroes heroes={synergies.data} />
         </section>
+      )}
+      {(counters.data?.counters.length ?? 0) +
+        (counters.data?.counteredBy.length ?? 0) +
+        (synergies.data?.length ?? 0) >
+        0 && (
+        <p>
+          <Link to={`/heroes/${slug}/counters`}>
+            All counters and synergies
+          </Link>
+        </p>
       )}
       {(counters.data?.counters.length ?? 0) +
         (counters.data?.counteredBy.length ?? 0) +

@@ -66,4 +66,29 @@ describe("useFetch", () => {
     await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(result.current.loading).toBe(false));
   });
+
+  it("keeps the previous result while the next one loads when asked to", async () => {
+    let release: (value: string) => void = () => undefined;
+    const fetcher = (id: string) =>
+      id === "first"
+        ? Promise.resolve("first result")
+        : new Promise<string>((resolve) => {
+            release = resolve;
+          });
+
+    const { result, rerender } = renderHook(
+      ({ id }) => useFetch(() => fetcher(id), [id], { keepPrevious: true }),
+      { initialProps: { id: "first" } },
+    );
+    await waitFor(() => expect(result.current.data).toBe("first result"));
+
+    rerender({ id: "second" });
+    expect(result.current.data).toBe("first result");
+    expect(result.current.loading).toBe(false);
+    expect(result.current.stale).toBe(true);
+
+    await act(async () => release("second result"));
+    await waitFor(() => expect(result.current.data).toBe("second result"));
+    expect(result.current.stale).toBe(false);
+  });
 });

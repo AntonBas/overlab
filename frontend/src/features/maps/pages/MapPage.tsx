@@ -5,6 +5,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
+import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -24,7 +25,9 @@ export function MapPage() {
   const { slug = "" } = useParams();
   const { filters, update, changeSort, key } = useFilterState(slug);
   const map = useFetch(() => fetchMap(slug), [slug]);
-  const stats = useFetch(() => fetchStats(filters), [key, slug]);
+  const stats = useFetch(() => fetchStats(filters), [key, slug], {
+    keepPrevious: true,
+  });
   const guides = useFetch(() => fetchGuides({ map: slug }), [slug]);
   usePageTitle(map.data?.name);
 
@@ -78,7 +81,7 @@ export function MapPage() {
           </button>
         ))}
       </div>
-      {stats.loading && <Spinner label="Loading statistics" />}
+      {stats.loading && <TableSkeleton label="Loading statistics" />}
       {stats.error &&
         (stats.error.status === 404 ? (
           <EmptyState>
@@ -87,8 +90,16 @@ export function MapPage() {
         ) : (
           <ErrorMessage failure={stats.error} onRetry={stats.reload} />
         ))}
-      {!stats.loading && stats.data && (
-        <>
+      {stats.data && (
+        <div
+          className={stats.stale ? "is-stale" : undefined}
+          aria-busy={stats.stale}
+        >
+          <p className="visually-hidden" role="status">
+            {stats.stale
+              ? "Updating results"
+              : `${stats.data.heroes.length} heroes shown`}
+          </p>
           <p className="muted footnote">
             Snapshot from {formatDateTime(stats.data.capturedAt)}, all ranks.
           </p>
@@ -100,13 +111,18 @@ export function MapPage() {
             direction={filters.direction}
             onSort={changeSort}
             heroLinkSuffix={isQuickPlay(filters) ? "?queue=quick_play" : ""}
+            mapSlug={slug}
           />
-        </>
+        </div>
       )}
-      {guides.data && guides.data.length > 0 && (
+      {guides.data && (
         <section className="section">
           <h2>Video guides on this map</h2>
-          <GuideList guides={guides.data} />
+          {guides.data.length > 0 ? (
+            <GuideList guides={guides.data} />
+          ) : (
+            <EmptyState>No guides for this map yet.</EmptyState>
+          )}
         </section>
       )}
     </>

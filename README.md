@@ -17,8 +17,13 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |
 | `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
+| `/heroes/:slug/counters`, `/heroes/:slug/perks` | Full counters and synergies, full perks |
+| `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
+| `/patches`, `/patches/:slug` | Patch list and notes |
 | `/guides/:id-:slug` | Video guide (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
+
+The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
 
 ### Admin
 

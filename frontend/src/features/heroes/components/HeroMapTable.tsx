@@ -27,7 +27,13 @@ function compare(sort: MapSort, first: HeroMapStat, second: HeroMapStat) {
   }
 }
 
-export function HeroMapTable({ maps }: { maps: HeroMapStat[] }) {
+export function HeroMapTable({
+  maps,
+  heroSlug,
+}: {
+  maps: HeroMapStat[];
+  heroSlug: string;
+}) {
   const [sort, setSort] = useState<MapSort>("WIN_DELTA");
   const sorted = useMemo(
     () => [...maps].sort((first, second) => compare(sort, first, second)),
@@ -63,7 +69,9 @@ export function HeroMapTable({ maps }: { maps: HeroMapStat[] }) {
               <tr key={map.mapSlug}>
                 <th scope="row">
                   <span className="table__hero">
-                    <Link to={`/maps/${map.mapSlug}`}>{map.mapName}</Link>
+                    <Link to={`/maps/${map.mapSlug}/${heroSlug}`}>
+                      {map.mapName}
+                    </Link>
                     {map.mode && (
                       <span className="muted">{MAP_MODE_LABELS[map.mode]}</span>
                     )}
