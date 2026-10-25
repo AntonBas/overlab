@@ -67,9 +67,18 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build backend image
+        run: docker build --tag overlab-backend:ci backend
+      - name: Build edge image
+        run: docker build --tag overlab-edge:ci --file docker/caddy/Dockerfile .
+
   dependabot-auto-merge:
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, docker]
     if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
     permissions:
       contents: write

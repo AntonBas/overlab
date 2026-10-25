@@ -128,6 +128,10 @@ Metrics (`collector_requests_total`, `collector_rows_saved_total`, `collector_jo
 - `local` (default): defaults for localhost, SQL logging, health details, Prometheus endpoint
 - `prod` (`SPRING_PROFILES_ACTIVE=prod`): no defaults for database and Redis, no error or health details
 
+## Deployment
+
+The whole stack (HTTPS proxy with the React build, backend, PostgreSQL, Redis, Prometheus, Grafana, daily database backups) runs from `docker-compose.prod.yml` on a single server. See [docs/DEPLOY.md](docs/DEPLOY.md). In `prod` the metrics endpoint is served on an internal port (9091) and is not published.
+
 ## Checks
 
 ```bash
