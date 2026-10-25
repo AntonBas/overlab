@@ -2,7 +2,16 @@ collector:
   base-url: https://overwatch.blizzard.com
   user-agent: "Mozilla/5.0 (compatible; OverlabCollector/1.0)"
   pause: 3s
-  game-format: FIVE_VS_FIVE
+  game-format: ${COLLECTOR_GAME_FORMAT:FIVE_VS_FIVE}
+  min-heroes: 30
+  retry:
+    max-attempts: 3
+    backoff: 5s
+  timeouts:
+    connect: 5s
+    read: 20s
+  retention:
+    detailed-days: 180
   startup-job: ${COLLECTOR_STARTUP_JOB:}
   jobs:
     - name: daily-overview
@@ -19,3 +28,19 @@ collector:
       regions: [EUROPE]
       tiers: [ALL]
       maps: [EACH]
+    - name: weekly-console
+      cron: "0 15 5 * * MON"
+      enabled: false
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [CONSOLE]
+      regions: [EUROPE]
+      tiers: [ALL]
+      maps: [all-maps]
+    - name: weekly-other-regions
+      cron: "0 45 5 * * MON"
+      enabled: false
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [AMERICAS, ASIA]
+      tiers: [ALL]
+      maps: [all-maps]

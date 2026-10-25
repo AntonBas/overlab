@@ -101,14 +101,27 @@ The backend collects statistics from Blizzard's public hero statistics page on a
 
 - `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
 - `weekly-maps`: every map, rank `ALL`
+- `weekly-console`, `weekly-other-regions`: disabled examples (`enabled: false`) for Console and other regions
 
-To run one job on startup:
+The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
+
+Admin endpoints (`ADMIN` role):
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/admin/collector/jobs` | Configured jobs |
+| `POST /api/admin/collector/jobs/{name}/run` | Start a job now (202, 409 if it is already running) |
+| `GET /api/admin/collector/runs` | Latest 50 runs |
+
+To run one job when the backend starts:
 
 ```bash
 COLLECTOR_STARTUP_JOB=daily-overview ./gradlew bootRun
 ```
 
-Responses are cached in Redis and the caches are cleared after every collector run.
+The game format stored with every snapshot (`FIVE_VS_FIVE` or `SIX_VS_SIX`) is set with `COLLECTOR_GAME_FORMAT` and must be changed by hand when the game switches format. Snapshots older than 180 days are thinned out weekly, keeping the latest snapshot of each week. Responses are cached in Redis and the caches are cleared after every collector run.
+
+Metrics (`collector_requests_total`, `collector_rows_saved_total`, `collector_job_duration_seconds`, `collector_last_success_timestamp_seconds`) are exposed to Prometheus, and the Grafana dashboard "Overlab: collector and API" is provisioned from `docker/grafana/dashboards/`.
 
 ## Profiles
 

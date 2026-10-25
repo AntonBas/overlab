@@ -8,11 +8,13 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.scheduling.support.CronExpression;
 
 public record CollectorJob(
         @NotBlank String name,
         @NotBlank String cron,
+        @DefaultValue("true") boolean enabled,
         @NotEmpty List<GameQueue> queues,
         @NotEmpty List<Platform> platforms,
         @NotEmpty List<Region> regions,
