@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RatesSnapshotWriter {
@@ -31,6 +33,8 @@ public class RatesSnapshotWriter {
     private final HeroRepository heroRepository;
     private final GameMapRepository gameMapRepository;
     private final HeroStatRepository heroStatRepository;
+    private final SnapshotQualityChecker qualityChecker;
+    private final CollectorMetrics metrics;
 
     @Transactional
     public int save(Instant capturedAt, GameQueue queue, GameFormat gameFormat, Platform platform, Region region,
@@ -38,10 +42,11 @@ public class RatesSnapshotWriter {
         Map<String, Hero> heroesBySlug = new HashMap<>();
         heroRepository.findAll().forEach(hero -> heroesBySlug.put(hero.getSlug(), hero));
         GameMap map = resolveMap(mapSlug);
+        qualityChecker.inspect(capturedAt, queue, gameFormat, platform, region, tier, mapSlug, rates);
 
         List<HeroStat> stats = new ArrayList<>();
         for (BlizzardRatesResponse.HeroRate rate : rates) {
-            Hero hero = heroesBySlug.computeIfAbsent(rate.id(), slug -> new Hero());
+            Hero hero = heroesBySlug.computeIfAbsent(rate.id(), this::newHero);
             applyHeroDetails(hero, rate);
             hero = heroRepository.save(hero);
             heroesBySlug.put(rate.id(), hero);
@@ -49,6 +54,12 @@ public class RatesSnapshotWriter {
         }
         heroStatRepository.saveAll(stats);
         return stats.size();
+    }
+
+    private Hero newHero(String slug) {
+        log.warn("New hero discovered: {}", slug);
+        metrics.recordNewHero(slug);
+        return new Hero();
     }
 
     private void applyHeroDetails(Hero hero, BlizzardRatesResponse.HeroRate rate) {
@@ -80,6 +91,8 @@ public class RatesSnapshotWriter {
             return null;
         }
         return gameMapRepository.findBySlug(mapSlug).orElseGet(() -> {
+            log.warn("New map discovered: {}, set its mode and image in the admin panel", mapSlug);
+            metrics.recordNewMap(mapSlug);
             GameMap map = new GameMap();
             map.setSlug(mapSlug);
             map.setName(humanReadable(mapSlug));

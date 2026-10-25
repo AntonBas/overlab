@@ -69,4 +69,8 @@ public class HeroStat {
 
     @Column(name = "captured_at", nullable = false)
     private Instant capturedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private SnapshotSource source = SnapshotSource.COLLECTOR;
 }

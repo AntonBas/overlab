@@ -18,7 +18,16 @@ class DatabaseSchemaIntegrationTest {
         List<String> versions = jdbcTemplate.queryForList(
                 "select version from flyway_schema_history where success order by installed_rank", String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "5");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "5", "6");
+    }
+
+    @Test
+    void snapshotsRememberTheirSource() {
+        String defaultValue = jdbcTemplate.queryForObject(
+                "select column_default from information_schema.columns "
+                        + "where table_name = 'hero_stats' and column_name = 'source'", String.class);
+
+        assertThat(defaultValue).contains("COLLECTOR");
     }
 
     @Test
