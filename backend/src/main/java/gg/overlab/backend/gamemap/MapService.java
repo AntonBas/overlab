@@ -1,5 +1,6 @@
 package gg.overlab.backend.gamemap;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.dto.MapDto;
@@ -18,6 +19,7 @@ public class MapService {
 
     private final GameMapRepository gameMapRepository;
     private final MapMapper mapMapper;
+    private final AuditService auditService;
 
     @Cacheable(value = CACHE_NAME, key = "'all'")
     @Transactional(readOnly = true)
@@ -40,8 +42,11 @@ public class MapService {
     public MapDto update(String slug, MapUpdateRequest request) {
         GameMap map = gameMapRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Map", slug));
+        MapDto before = mapMapper.toDto(map);
         map.setMode(request.mode());
         map.setImageUrl(request.imageUrl());
-        return mapMapper.toDto(map);
+        MapDto after = mapMapper.toDto(map);
+        auditService.logUpdate("Map", slug, before, after);
+        return after;
     }
 }

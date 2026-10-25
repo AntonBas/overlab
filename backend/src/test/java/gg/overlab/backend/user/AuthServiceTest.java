@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.audit.AuditAction;
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.auth.AuthService;
@@ -34,11 +36,12 @@ class AuthServiceTest {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final UserTokenService tokenService = mock(UserTokenService.class);
     private final EmailService emailService = mock(EmailService.class);
+    private final AuditService auditService = mock(AuditService.class);
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
     private final JwtTokenProvider jwtTokenProvider =
             new JwtTokenProvider(AuthFixtures.properties(), new MockEnvironment());
     private final AuthService service = new AuthService(userRepository, new UserMapper(), passwordEncoder,
-            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties());
+            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties(), auditService);
 
     private User existingUser;
 
@@ -65,6 +68,7 @@ class AuthServiceTest {
         assertThat(saved.getValue().getRole()).isEqualTo(UserRole.USER);
         assertThat(result.emailVerified()).isFalse();
         verify(emailService).sendVerification(any(User.class), eq("raw-token"));
+        verify(auditService).logUserEvent(eq(AuditAction.CREATE), any(), eq("USER"));
     }
 
     @Test
@@ -86,6 +90,7 @@ class AuthServiceTest {
         assertThat(tokens.refreshToken()).isEqualTo("raw-token");
         assertThat(tokens.user().email()).isEqualTo("ana@overlab.gg");
         assertThat(existingUser.getLastLoginAt()).isNotNull();
+        verify(auditService).logUserEvent(AuditAction.LOGIN, 5L, "USER");
     }
 
     @Test
@@ -170,6 +175,7 @@ class AuthServiceTest {
         assertThat(existingUser.getPasswordHash()).isNotEqualTo(oldHash);
         assertThat(passwordEncoder.matches("brand-new-password", existingUser.getPasswordHash())).isTrue();
         verify(tokenService).revokeAll(existingUser, UserTokenType.REFRESH);
+        verify(auditService).logUserEvent(AuditAction.PASSWORD_CHANGE, 5L, "USER");
     }
 
     @Test

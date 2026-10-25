@@ -1,5 +1,6 @@
 package gg.overlab.backend.patch;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -19,9 +20,12 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class PatchService {
 
+    private static final String AUDIT_TYPE = "Patch";
+
     private final PatchRepository patchRepository;
     private final PatchMapper patchMapper;
     private final SlugService slugService;
+    private final AuditService auditService;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'patches:all'")
     @Transactional(readOnly = true)
@@ -54,7 +58,9 @@ public class PatchService {
         patch.setSlug(StringUtils.hasText(request.slug())
                 ? requireFreeSlug(request.slug(), null)
                 : slugService.generateUnique(request.version(), patchRepository::existsBySlug));
-        return patchMapper.toDto(patchRepository.save(patch));
+        PatchDto created = patchMapper.toDto(patchRepository.save(patch));
+        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        return created;
     }
 
     @EvictContentCaches
@@ -64,17 +70,21 @@ public class PatchService {
         if (patchRepository.existsByVersionIgnoreCaseAndIdNot(request.version().trim(), id)) {
             throw new ConflictException("Patch already exists: " + request.version());
         }
+        PatchDto before = patchMapper.toDto(patch);
         patchMapper.apply(request, patch);
         if (StringUtils.hasText(request.slug()) && !request.slug().equals(patch.getSlug())) {
             patch.setSlug(requireFreeSlug(request.slug(), id));
         }
-        return patchMapper.toDto(patch);
+        PatchDto after = patchMapper.toDto(patch);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
     }
 
     @EvictContentCaches
     @Transactional
     public void delete(Long id) {
         Patch patch = patchRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patch", id));
+        auditService.logDelete(AUDIT_TYPE, id, patchMapper.toDto(patch));
         patchRepository.delete(patch);
     }
 

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -30,7 +31,8 @@ class HeroRelationServiceTest {
 
     private final HeroRelationRepository relationRepository = mock(HeroRelationRepository.class);
     private final HeroRepository heroRepository = mock(HeroRepository.class);
-    private final HeroRelationService service = new HeroRelationService(relationRepository, heroRepository);
+    private final HeroRelationService service = new HeroRelationService(relationRepository, heroRepository,
+            mock(AuditService.class));
 
     private final Hero ana = hero(1, "ana", "Ana", HeroRole.SUPPORT);
     private final Hero genji = hero(2, "genji", "Genji", HeroRole.DAMAGE);

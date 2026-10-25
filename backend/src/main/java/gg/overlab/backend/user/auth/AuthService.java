@@ -1,5 +1,7 @@
 package gg.overlab.backend.user.auth;
 
+import gg.overlab.backend.audit.AuditAction;
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -36,6 +38,7 @@ public class AuthService {
     private final UserTokenService tokenService;
     private final EmailService emailService;
     private final AuthProperties properties;
+    private final AuditService auditService;
 
     private volatile String dummyPasswordHash;
 
@@ -53,6 +56,7 @@ public class AuthService {
         user.setProvider(AuthProvider.LOCAL);
         user = userRepository.save(user);
         sendVerification(user);
+        auditService.logUserEvent(AuditAction.CREATE, user.getId(), user.getRole().name());
         return userMapper.toDto(user);
     }
 
@@ -69,7 +73,14 @@ public class AuthService {
         if (!user.isEmailVerified()) {
             throw new EmailNotVerifiedException();
         }
-        return issueTokens(user);
+        return loginAs(user);
+    }
+
+    @Transactional
+    public AuthTokens loginAs(User user) {
+        AuthTokens tokens = issueTokens(user);
+        auditService.logUserEvent(AuditAction.LOGIN, user.getId(), user.getRole().name());
+        return tokens;
     }
 
     @Transactional
@@ -133,6 +144,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setEmailVerified(true);
         tokenService.revokeAll(user, UserTokenType.REFRESH);
+        auditService.logUserEvent(AuditAction.PASSWORD_CHANGE, user.getId(), user.getRole().name());
     }
 
     private void sendVerification(User user) {

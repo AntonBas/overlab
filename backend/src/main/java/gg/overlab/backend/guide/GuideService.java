@@ -1,5 +1,6 @@
 package gg.overlab.backend.guide;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -24,6 +25,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class GuideService {
 
+    private static final String AUDIT_TYPE = "Guide";
     private static final Pattern PATH_PATTERN = Pattern.compile("^(\\d+)(?:-.*)?$");
 
     private final GuideRepository guideRepository;
@@ -31,6 +33,7 @@ public class GuideService {
     private final GameMapRepository gameMapRepository;
     private final GuideMapper guideMapper;
     private final SlugService slugService;
+    private final AuditService auditService;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'guides:' + #heroSlug + ':' + #mapSlug")
     @Transactional(readOnly = true)
@@ -75,7 +78,9 @@ public class GuideService {
                 ? requireFreeSlug(request.slug(), null)
                 : slugService.generateUnique(request.title(), guideRepository::existsBySlug));
         apply(guide, request);
-        return toDto(guideRepository.save(guide));
+        GuideDto created = toDto(guideRepository.save(guide));
+        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        return created;
     }
 
     @EvictContentCaches
@@ -83,17 +88,21 @@ public class GuideService {
     public GuideDto update(Long id, GuideRequest request) {
         Guide guide = guideRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Guide", id));
+        GuideDto before = toDto(guide);
         if (StringUtils.hasText(request.slug()) && !request.slug().equals(guide.getSlug())) {
             guide.setSlug(requireFreeSlug(request.slug(), id));
         }
         apply(guide, request);
-        return toDto(guide);
+        GuideDto after = toDto(guide);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
     }
 
     @EvictContentCaches
     @Transactional
     public void delete(Long id) {
         Guide guide = guideRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Guide", id));
+        auditService.logDelete(AUDIT_TYPE, id, guideMapper.toDto(guide));
         guideRepository.delete(guide);
     }
 

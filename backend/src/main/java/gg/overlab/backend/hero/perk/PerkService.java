@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.perk;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.ConflictException;
@@ -18,9 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PerkService {
 
+    private static final String AUDIT_TYPE = "Perk";
+
     private final PerkRepository perkRepository;
     private final HeroRepository heroRepository;
     private final PerkMapper perkMapper;
+    private final AuditService auditService;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'perks:' + #heroSlug")
     @Transactional(readOnly = true)
@@ -41,7 +45,9 @@ public class PerkService {
         Perk perk = new Perk();
         perk.setHero(hero);
         perkMapper.apply(request, perk);
-        return perkMapper.toDto(perkRepository.save(perk));
+        PerkDto created = perkMapper.toDto(perkRepository.save(perk));
+        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        return created;
     }
 
     @EvictContentCaches
@@ -52,15 +58,19 @@ public class PerkService {
         if (perkRepository.existsByHeroIdAndNameIgnoreCaseAndIdNot(hero.getId(), request.name().trim(), id)) {
             throw new ConflictException("Perk already exists for this hero: " + request.name());
         }
+        PerkDto before = perkMapper.toDto(perk);
         perk.setHero(hero);
         perkMapper.apply(request, perk);
-        return perkMapper.toDto(perk);
+        PerkDto after = perkMapper.toDto(perk);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
     }
 
     @EvictContentCaches
     @Transactional
     public void delete(Long id) {
         Perk perk = perkRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Perk", id));
+        auditService.logDelete(AUDIT_TYPE, id, perkMapper.toDto(perk));
         perkRepository.delete(perk);
     }
 
