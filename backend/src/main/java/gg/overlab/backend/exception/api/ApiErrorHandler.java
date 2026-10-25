@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -128,6 +129,6 @@ public class ApiErrorHandler {
                                            List<ApiError.SubError> subErrors) {
         ApiError body = new ApiError(status.getReasonPhrase(), status.value(), Instant.now(), message,
                 request.getRequestURI(), subErrors);
-        return ResponseEntity.status(status).body(body);
+        return ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, "no-store").body(body);
     }
 }

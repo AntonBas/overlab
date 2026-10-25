@@ -31,10 +31,11 @@ public class WebSecurityConfig {
                                                    AuthCookieService cookieService,
                                                    StringRedisTemplate redisTemplate,
                                                    AuthProperties authProperties,
+                                                   RateLimitProperties rateLimitProperties,
                                                    ObjectProvider<ClientRegistrationRepository> clientRegistrations,
                                                    ObjectProvider<OAuth2LoginHandlers> oauthHandlers) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, cookieService);
-        RateLimitFilter rateLimitFilter = new RateLimitFilter(redisTemplate, authProperties);
+        RateLimitFilter rateLimitFilter = new RateLimitFilter(redisTemplate, authProperties, rateLimitProperties);
 
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -51,7 +52,8 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(new PublicCacheFilter(), JwtAuthenticationFilter.class);
 
         if (clientRegistrations.getIfAvailable() != null && oauthHandlers.getIfAvailable() != null) {
             OAuth2LoginHandlers handlers = oauthHandlers.getObject();
