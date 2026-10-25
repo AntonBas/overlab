@@ -64,6 +64,18 @@ The statistics endpoints are public `GET` requests.
 
 Quick Play has no ranks (`tier` is ignored) and no ban rate. Errors use one JSON shape (`ApiError`).
 
+Curated content, also public `GET` requests:
+
+| Endpoint | Description |
+|---|---|
+| `/api/heroes/{slug}/perks` | Perks with a recommendation (`RECOMMENDED`, `OPTIONAL`, `AVOID`) |
+| `/api/heroes/{slug}/counters` | Heroes this hero counters and heroes that counter it |
+| `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
+| `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published video guides (YouTube embeds) |
+| `/api/patches`, `/api/patches/{slug}`, `/api/patches/at?date=` | Patches and the patch active at a date |
+
+Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}`. Any admin change clears the content caches.
+
 ### Authentication
 
 Email and password registration plus Google sign-in. Tokens are stored in `httpOnly` cookies (access token 15 minutes, refresh token 14 days, rotated on every refresh).

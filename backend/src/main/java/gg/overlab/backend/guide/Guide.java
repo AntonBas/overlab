@@ -35,6 +35,9 @@ public class Guide extends TimestampedEntity {
     @JoinColumn(name = "map_id")
     private GameMap map;
 
+    @Column(nullable = false, unique = true, length = 200)
+    private String slug;
+
     @Column(nullable = false, length = 256)
     private String title;
 

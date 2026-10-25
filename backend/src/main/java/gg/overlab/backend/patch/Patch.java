@@ -26,6 +26,9 @@ public class Patch extends TimestampedEntity {
     @Column(nullable = false, unique = true, length = 64)
     private String version;
 
+    @Column(nullable = false, unique = true, length = 64)
+    private String slug;
+
     @Column(length = 128)
     private String title;
 
