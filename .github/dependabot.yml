@@ -57,7 +57,7 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /
     target-branch: develop
     schedule:
