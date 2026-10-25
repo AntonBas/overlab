@@ -3,6 +3,7 @@ package gg.overlab.backend.collector;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import gg.overlab.backend.hero.Hero;
+import gg.overlab.backend.integration.IntegrationTest;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.stats.GameFormat;
@@ -21,10 +22,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
+@IntegrationTest
 @Transactional
 class SnapshotRetentionJobIntegrationTest {
 

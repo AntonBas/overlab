@@ -8,6 +8,23 @@ Unofficial fan site with Overwatch 2 hero statistics: win rate, pick rate and ba
 - Frontend: React + TypeScript (Vite)
 - Monitoring: Prometheus + Grafana
 
+## Architecture
+
+```mermaid
+flowchart LR
+    Browser[React SPA] -->|HTTPS| Edge[Caddy]
+    Edge -->|/api, /oauth2| Backend[Spring Boot]
+    Edge -->|static files| Browser
+    Backend --> Postgres[(PostgreSQL)]
+    Backend --> Redis[(Redis cache and rate limits)]
+    Backend -->|scheduled, throttled| Blizzard[Blizzard statistics page]
+    Backend -->|SMTP| Mail[Mail server]
+    Prometheus --> Backend
+    Grafana --> Prometheus
+```
+
+The collector is the only component that talks to Blizzard. User requests are served from the database and the Redis cache.
+
 ## Structure
 
 ```
@@ -138,6 +155,8 @@ The whole stack (HTTPS proxy with the React build, backend, PostgreSQL, Redis, P
 cd backend && ./gradlew build
 cd frontend && npm run lint && npm run build
 ```
+
+`./gradlew build` runs Checkstyle (no tabs, wildcard imports or code comments) and all tests. Integration tests start their own PostgreSQL and Redis with Testcontainers, so Docker must be running, but `docker compose up` is not needed. They cover the migrations, the statistics queries, the role matrix of every protected endpoint, the sign-in flow and the audit log.
 
 ## Branches and CI
 
