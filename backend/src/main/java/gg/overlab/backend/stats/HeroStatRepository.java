@@ -1,6 +1,54 @@
 package gg.overlab.backend.stats;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
+
+    @Query("""
+            select s from HeroStat s join fetch s.hero
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt = (
+                select max(x.capturedAt) from HeroStat x
+                where x.map is null
+                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier)
+            """)
+    List<HeroStat> findLatestForAllMaps(@Param("queue") GameQueue queue,
+                                        @Param("platform") Platform platform,
+                                        @Param("region") Region region,
+                                        @Param("tier") RankTier tier);
+
+    @Query("""
+            select s from HeroStat s join fetch s.hero join s.map m
+            where m.slug = :mapSlug
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt = (
+                select max(x.capturedAt) from HeroStat x join x.map xm
+                where xm.slug = :mapSlug
+                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier)
+            """)
+    List<HeroStat> findLatestForMap(@Param("mapSlug") String mapSlug,
+                                    @Param("queue") GameQueue queue,
+                                    @Param("platform") Platform platform,
+                                    @Param("region") Region region,
+                                    @Param("tier") RankTier tier);
+
+    @Query("""
+            select s from HeroStat s join fetch s.hero h left join fetch s.map
+            where h.slug = :heroSlug
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt = (
+                select max(x.capturedAt) from HeroStat x
+                where x.hero = s.hero and x.queue = s.queue and x.platform = s.platform
+                  and x.region = s.region and x.tier = s.tier
+                  and (x.map = s.map or (x.map is null and s.map is null)))
+            """)
+    List<HeroStat> findLatestForHero(@Param("heroSlug") String heroSlug,
+                                     @Param("queue") GameQueue queue,
+                                     @Param("platform") Platform platform,
+                                     @Param("region") Region region,
+                                     @Param("tier") RankTier tier);
 }

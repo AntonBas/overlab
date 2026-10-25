@@ -1,6 +1,9 @@
 package gg.overlab.backend.collector;
 
 import gg.overlab.backend.gamemap.GameMapRepository;
+import gg.overlab.backend.gamemap.MapService;
+import gg.overlab.backend.hero.HeroService;
+import gg.overlab.backend.stats.StatsSnapshotProvider;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
@@ -10,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,6 +28,7 @@ public class RatesCollectorService {
     private final BlizzardRatesClient client;
     private final RatesSnapshotWriter writer;
     private final GameMapRepository gameMapRepository;
+    private final CacheManager cacheManager;
 
     public int collect(CollectorJob job) {
         Instant capturedAt = Instant.now();
@@ -50,8 +56,18 @@ public class RatesCollectorService {
                 }
             }
         }
+        evictCaches();
         log.info("Collector job '{}' finished: {} rows saved, {} failed requests", job.name(), savedRows, failedRequests);
         return savedRows;
+    }
+
+    private void evictCaches() {
+        for (String cacheName : List.of(StatsSnapshotProvider.CACHE_NAME, HeroService.CACHE_NAME, MapService.CACHE_NAME)) {
+            Cache cache = cacheManager.getCache(cacheName);
+            if (cache != null) {
+                cache.clear();
+            }
+        }
     }
 
     public void collectByName(String jobName) {
