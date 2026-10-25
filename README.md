@@ -47,12 +47,13 @@ cd frontend && npm ci && npm run dev
 - Frontend: http://localhost:5173
 - API: http://localhost:8080/api
 - Health: http://localhost:8080/actuator/health
+- Mailpit (local mail inbox): http://localhost:8025
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
 
 ## API
 
-All endpoints are public `GET` requests.
+The statistics endpoints are public `GET` requests.
 
 | Endpoint | Description |
 |---|---|
@@ -62,6 +63,21 @@ All endpoints are public `GET` requests.
 | `/api/stats/hero/{slug}` | Statistics of one hero across all maps |
 
 Quick Play has no ranks (`tier` is ignored) and no ban rate. Errors use one JSON shape (`ApiError`).
+
+### Authentication
+
+Email and password registration plus Google sign-in. Tokens are stored in `httpOnly` cookies (access token 15 minutes, refresh token 14 days, rotated on every refresh).
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/auth/register` | Create an account and send a verification email |
+| `POST /api/auth/verify-email`, `/resend-verification` | Confirm the email address |
+| `POST /api/auth/login`, `/refresh`, `/logout` | Sign in, rotate tokens, sign out |
+| `GET /api/auth/me` | Current user |
+| `POST /api/auth/forgot-password`, `/reset-password` | Password reset by email |
+| `GET /oauth2/authorization/google` | Start Google sign-in (needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`) |
+
+Authentication endpoints are rate limited per IP (Redis). `/api/admin/**` requires the `ADMIN` role. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables.
 
 ## Statistics collector
 
