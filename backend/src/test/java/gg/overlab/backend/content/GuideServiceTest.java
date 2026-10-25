@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -29,7 +30,7 @@ class GuideServiceTest {
     private final HeroRepository heroRepository = mock(HeroRepository.class);
     private final GameMapRepository mapRepository = mock(GameMapRepository.class);
     private final GuideService service = new GuideService(guideRepository, heroRepository, mapRepository,
-            new GuideMapper(), new SlugService());
+            new GuideMapper(), new SlugService(), mock(AuditService.class));
 
     private Hero illari;
     private GameMap rialto;

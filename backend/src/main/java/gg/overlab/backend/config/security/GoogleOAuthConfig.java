@@ -46,7 +46,7 @@ public class GoogleOAuthConfig {
                     try {
                         User user = oauthUserService.findOrCreate(AuthProvider.GOOGLE, googleUser.getSubject(),
                                 googleUser.getEmail(), googleUser.getFullName());
-                        AuthTokens tokens = authService.issueTokens(user);
+                        AuthTokens tokens = authService.loginAs(user);
                         cookieService.writeTokens(response, tokens.accessToken(), tokens.refreshToken());
                         if (request.getSession(false) != null) {
                             request.getSession(false).invalidate();

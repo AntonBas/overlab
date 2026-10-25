@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.dto.HeroDto;
@@ -19,6 +20,7 @@ public class HeroService {
 
     private final HeroRepository heroRepository;
     private final HeroMapper heroMapper;
+    private final AuditService auditService;
 
     @Cacheable(value = CACHE_NAME, key = "'all'")
     @Transactional(readOnly = true)
@@ -46,8 +48,11 @@ public class HeroService {
     public HeroDto update(String slug, HeroUpdateRequest request) {
         Hero hero = heroRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
+        HeroDto before = heroMapper.toDto(hero);
         hero.setDescription(request.description());
         hero.setActive(request.active());
-        return heroMapper.toDto(hero);
+        HeroDto after = heroMapper.toDto(hero);
+        auditService.logUpdate("Hero", slug, before, after);
+        return after;
     }
 }

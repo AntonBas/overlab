@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.relation;
 
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.BadRequestException;
@@ -24,11 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class HeroRelationService {
 
+    private static final String AUDIT_TYPE = "HeroRelation";
+
     private static final Comparator<RelatedHeroDto> BY_STRENGTH_THEN_NAME =
             Comparator.comparingInt(RelatedHeroDto::strength).reversed().thenComparing(RelatedHeroDto::name);
 
     private final HeroRelationRepository relationRepository;
     private final HeroRepository heroRepository;
+    private final AuditService auditService;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'counters:' + #heroSlug")
     @Transactional(readOnly = true)
@@ -67,7 +71,9 @@ public class HeroRelationService {
     public RelationDto create(RelationRequest request) {
         HeroRelation relation = new HeroRelation();
         apply(relation, request, null);
-        return toDto(relationRepository.save(relation));
+        RelationDto created = toDto(relationRepository.save(relation));
+        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        return created;
     }
 
     @EvictContentCaches
@@ -75,8 +81,11 @@ public class HeroRelationService {
     public RelationDto update(Long id, RelationRequest request) {
         HeroRelation relation = relationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Hero relation", id));
+        RelationDto before = toDto(relation);
         apply(relation, request, id);
-        return toDto(relation);
+        RelationDto after = toDto(relation);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
     }
 
     @EvictContentCaches
@@ -84,6 +93,7 @@ public class HeroRelationService {
     public void delete(Long id) {
         HeroRelation relation = relationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Hero relation", id));
+        auditService.logDelete(AUDIT_TYPE, id, toDto(relation));
         relationRepository.delete(relation);
     }
 
