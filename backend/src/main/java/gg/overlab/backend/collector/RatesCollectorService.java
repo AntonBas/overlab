@@ -147,6 +147,9 @@ public class RatesCollectorService {
                             } catch (RuntimeException exception) {
                                 run.setRequestsFailed(run.getRequestsFailed() + 1);
                                 metrics.recordRequest(job.name(), false);
+                                if (exception instanceof InvalidSnapshotException) {
+                                    metrics.recordRejectedSnapshot();
+                                }
                                 if (errors.size() < MAX_DISTINCT_ERRORS) {
                                     errors.add(describe(queue, platform, region, tier, mapSlug, exception));
                                 }
