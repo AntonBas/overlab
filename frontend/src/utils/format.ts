@@ -52,6 +52,7 @@ export const TIER_LABELS: Record<RankTier, string> = {
   SILVER: "Silver",
   GOLD: "Gold",
   PLATINUM: "Platinum",
+  EMERALD: "Emerald",
   DIAMOND: "Diamond",
   MASTER: "Master",
   GRANDMASTER: "Grandmaster",

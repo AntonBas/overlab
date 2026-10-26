@@ -39,6 +39,7 @@ export const TIERS: readonly RankTier[] = [
   "SILVER",
   "GOLD",
   "PLATINUM",
+  "EMERALD",
   "DIAMOND",
   "MASTER",
   "GRANDMASTER",
