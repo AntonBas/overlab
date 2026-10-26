@@ -90,6 +90,11 @@ const AdminLayout = lazy(() =>
     default: module.AdminLayout,
   })),
 );
+const MyLibraryPage = lazy(() =>
+  import("../features/personal/pages/MyLibraryPage").then((module) => ({
+    default: module.MyLibraryPage,
+  })),
+);
 const SettingsPage = lazy(() =>
   import("../features/account/pages/SettingsPage").then((module) => ({
     default: module.SettingsPage,
@@ -123,6 +128,7 @@ export function AppRoutes() {
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
+        <Route path="me" element={<MyLibraryPage />} />
         <Route path="me/settings" element={<SettingsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />

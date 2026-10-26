@@ -20,6 +20,7 @@ import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
 import gg.overlab.backend.user.account.dto.UpdateProfileRequest;
 import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.personal.PersonalService;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.util.Locale;
@@ -42,6 +43,7 @@ public class AccountService {
     private final AuthProperties properties;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
+    private final PersonalService personalService;
 
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
@@ -93,7 +95,9 @@ public class AccountService {
     public AccountExportDto export(Long userId) {
         User user = load(userId);
         return new AccountExportDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(),
-                user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt());
+                user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt(),
+                personalService.favorites(userId), personalService.notes(userId),
+                personalService.preferences(userId));
     }
 
     private User load(Long userId) {

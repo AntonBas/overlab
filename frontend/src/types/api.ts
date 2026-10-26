@@ -25,6 +25,25 @@ export interface Hero {
   portraitUrl: string | null;
 }
 
+export interface Favorites {
+  heroes: Hero[];
+  maps: GameMap[];
+}
+
+export interface Note {
+  heroSlug: string;
+  heroName: string;
+  content: string;
+  updatedAt: string | null;
+}
+
+export interface Preferences {
+  queue: GameQueue | null;
+  platform: Platform | null;
+  region: Region | null;
+  tier: RankTier | null;
+}
+
 export interface GameMap {
   slug: string;
   name: string;

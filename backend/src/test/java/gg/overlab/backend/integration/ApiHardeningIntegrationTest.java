@@ -80,6 +80,17 @@ class ApiHardeningIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void sameOriginWritesAreNotRejectedByCors() throws Exception {
+        for (String method : new String[] {"PUT", "DELETE", "POST"}) {
+            mockMvc.perform(options("/api/me/profile")
+                            .header(HttpHeaders.ORIGIN, "http://localhost:5173")
+                            .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, method)
+                            .with(uniqueClient()))
+                    .andExpect(status().isOk());
+        }
+    }
+
     private RequestPostProcessor uniqueClient() {
         String address = "198.51." + Math.abs(UUID.randomUUID().hashCode() % 250) + "."
                 + Math.abs(UUID.randomUUID().hashCode() % 250);
