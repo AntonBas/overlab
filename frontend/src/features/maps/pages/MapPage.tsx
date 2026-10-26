@@ -14,6 +14,7 @@ import {
   formatDateTime,
 } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
+import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { GuideList } from "../../guides/components/GuideList";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
@@ -50,10 +51,13 @@ export function MapPage() {
             : "Small numbers show the difference from the all-maps value."
         }
         actions={
-          <QueueToggle
-            value={filters.queue}
-            onChange={(queue) => update({ queue })}
-          />
+          <>
+            <FavoriteButton kind="map" slug={slug} name={map.data.name} />
+            <QueueToggle
+              value={filters.queue}
+              onChange={(queue) => update({ queue })}
+            />
+          </>
         }
       />
       <div className="segmented" role="group" aria-label="Role">

@@ -1065,3 +1065,30 @@ select:disabled {
 .settings-section h2 {
   margin: 0;
 }
+
+.favorite-button {
+  white-space: nowrap;
+}
+
+.link-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note-preview {
+  flex-basis: 100%;
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--muted);
+}

@@ -76,7 +76,7 @@ export function Header() {
           <div className="site-header__account">
             {!loading && user && (
               <>
-                <Link className="nav__link" to="/me/settings">
+                <Link className="nav__link" to="/me">
                   {user.displayName}
                 </Link>
                 <button

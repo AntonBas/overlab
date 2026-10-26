@@ -13,6 +13,8 @@ import { formatDateTime } from "../../../utils/format";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { GuideList } from "../../guides/components/GuideList";
+import { FavoriteButton } from "../../personal/components/FavoriteButton";
+import { HeroNote } from "../../personal/components/HeroNote";
 import { fetchHeroMapStats } from "../../stats/api/statsApi";
 import {
   fetchCounters,
@@ -73,14 +75,17 @@ export function HeroPage() {
           </>
         }
         actions={
-          <QueueToggle
-            value={queue}
-            onChange={(next) =>
-              setSearchParams(
-                next === "COMPETITIVE" ? {} : { queue: "quick_play" },
-              )
-            }
-          />
+          <>
+            <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
+            <QueueToggle
+              value={queue}
+              onChange={(next) =>
+                setSearchParams(
+                  next === "COMPETITIVE" ? {} : { queue: "quick_play" },
+                )
+              }
+            />
+          </>
         }
       />
       {hero.data.description && (
@@ -184,6 +189,8 @@ export function HeroPage() {
           <GuideList guides={guides.data} />
         </section>
       )}
+
+      <HeroNote key={slug} heroSlug={slug} />
     </>
   );
 }

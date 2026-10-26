@@ -23,6 +23,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
 | `/guides/:id-:slug` | Video guide (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
+| `/me` | Favorites, notes and default filters |
 | `/me/settings` | Change name, password and email, download or delete your data |
 
 The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
@@ -158,8 +159,11 @@ Email and password registration plus Google sign-in. Tokens are stored in `httpO
 | `PUT /api/me/profile` | Change the display name |
 | `POST /api/me/password` | Change the password (local accounts; needs the current password) |
 | `POST /api/me/email` | Request an email change; the address changes after the confirmation link sent to the new one is opened (`/verify-email`) |
-| `GET /api/me/export` | Download the account data as JSON |
+| `GET /api/me/export` | Download the account data (profile, favorites, notes, default filters) as JSON |
 | `DELETE /api/me` | Delete the account (local accounts confirm with the password); audit entries about the user are anonymized, the last administrator cannot be deleted |
+| `GET /api/me/favorites`, `PUT`/`DELETE /api/me/favorites/heroes/{slug}`, `/maps/{slug}` | Favorite heroes and maps (200 of each at most) |
+| `GET /api/me/notes`, `PUT`/`DELETE /api/me/notes/{heroSlug}` | Private notes per hero (2000 characters, 50 notes; saving an empty note deletes it) |
+| `GET`/`PUT /api/me/preferences` | Default mode, rank, platform and region for the statistics filters |
 | `GET /api/admin/users`, `PUT /api/admin/users/{id}/enabled` | Admin: search users, block or unblock (blocked users are signed out and cannot sign in; an admin cannot block themselves) |
 
 Password reset for a Google account sends an email that explains it signs in with Google instead of staying silent.
