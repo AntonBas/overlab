@@ -19,7 +19,7 @@ collector:
       queues: [QUICK_PLAY, COMPETITIVE]
       platforms: [PC]
       regions: [EUROPE]
-      tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, MASTER, GRANDMASTER]
+      tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
       maps: [all-maps]
     - name: weekly-maps
       cron: "0 30 4 * * MON"
