@@ -2,6 +2,7 @@ import { api } from "../../../services/api";
 import type { GameMap, Guide, Patch, Perk } from "../../../types/api";
 import type {
   AdminHero,
+  AdminUser,
   AuditEntry,
   AuditFilters,
   CollectorJob,
@@ -166,6 +167,26 @@ export async function fetchAuditLog(
       page: filters.page,
       size: 25,
     },
+  });
+  return data;
+}
+
+export async function fetchAdminUsers(
+  query: string,
+  page: number,
+): Promise<PageResponse<AdminUser>> {
+  const { data } = await api.get<PageResponse<AdminUser>>("/admin/users", {
+    params: { q: query || undefined, page, size: 25 },
+  });
+  return data;
+}
+
+export async function setUserEnabled(
+  id: number,
+  enabled: boolean,
+): Promise<AdminUser> {
+  const { data } = await api.put<AdminUser>(`/admin/users/${id}/enabled`, {
+    enabled,
   });
   return data;
 }

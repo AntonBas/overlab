@@ -90,6 +90,16 @@ const AdminLayout = lazy(() =>
     default: module.AdminLayout,
   })),
 );
+const SettingsPage = lazy(() =>
+  import("../features/account/pages/SettingsPage").then((module) => ({
+    default: module.SettingsPage,
+  })),
+);
+const UsersAdminPage = lazy(() =>
+  import("../features/admin/pages/UsersAdminPage").then((module) => ({
+    default: module.UsersAdminPage,
+  })),
+);
 const RequireAdmin = lazy(() =>
   import("../features/admin/components/RequireAdmin").then((module) => ({
     default: module.RequireAdmin,
@@ -113,6 +123,7 @@ export function AppRoutes() {
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
+        <Route path="me/settings" element={<SettingsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
@@ -134,6 +145,7 @@ export function AppRoutes() {
           <Route path="patches" element={<PatchesAdminPage />} />
           <Route path="maps" element={<MapsAdminPage />} />
           <Route path="collector" element={<CollectorAdminPage />} />
+          <Route path="users" element={<UsersAdminPage />} />
           <Route path="audit" element={<AuditAdminPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />

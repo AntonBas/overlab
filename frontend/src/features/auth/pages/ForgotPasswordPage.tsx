@@ -26,8 +26,9 @@ export function ForgotPasswordPage() {
     return (
       <AuthLayout title="Check your email">
         <p>
-          If an account exists for <strong>{email}</strong>, a link to set a new
-          password is on its way.
+          If an account exists for <strong>{email}</strong>, an email with
+          instructions is on its way: a link to set a new password, or a
+          reminder to use Google sign-in.
         </p>
         <Link to="/login">Back to sign in</Link>
       </AuthLayout>

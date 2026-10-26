@@ -107,6 +107,18 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
+export interface AdminUser {
+  id: number;
+  email: string;
+  displayName: string;
+  role: "USER" | "ADMIN";
+  provider: "LOCAL" | "GOOGLE";
+  emailVerified: boolean;
+  enabled: boolean;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
 export interface AuditFilters {
   entityType?: string;
   actorId?: string;

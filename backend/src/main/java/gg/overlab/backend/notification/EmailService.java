@@ -34,10 +34,28 @@ public class EmailService {
                         + "\n\nIf you did not request this, ignore this message.");
     }
 
+    public void sendEmailChange(User user, String newEmail, String rawToken) {
+        send(user, newEmail, "Confirm your new Overlab email",
+                "Hi " + user.getDisplayName() + ",\n\nConfirm this address as your new Overlab email:\n"
+                        + frontendUrl + "/verify-email?token=" + rawToken
+                        + "\n\nIf you did not request this, ignore this message.");
+    }
+
+    public void sendGoogleSignInNotice(User user) {
+        send(user, "Your Overlab account uses Google sign-in",
+                "Hi " + user.getDisplayName() + ",\n\nSomeone asked to reset the password for this address, but your "
+                        + "account signs in with Google and has no password. Use \"Sign in with Google\" at "
+                        + frontendUrl + "/login.\n\nIf this was not you, ignore this message.");
+    }
+
     private void send(User user, String subject, String text) {
+        send(user, user.getEmail(), subject, text);
+    }
+
+    private void send(User user, String recipient, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(authProperties.mailFrom());
-        message.setTo(user.getEmail());
+        message.setTo(recipient);
         message.setSubject(subject);
         message.setText(text);
         try {

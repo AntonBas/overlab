@@ -14,10 +14,7 @@ public class PublicEtagConfig {
         ShallowEtagHeaderFilter filter = new ShallowEtagHeaderFilter() {
             @Override
             protected boolean shouldNotFilter(HttpServletRequest request) {
-                String path = request.getRequestURI();
-                return !"GET".equals(request.getMethod())
-                        || path.startsWith("/api/admin/")
-                        || path.startsWith("/api/auth/");
+                return !PublicApiPaths.isPublicRead(request.getMethod(), request.getRequestURI());
             }
         };
         FilterRegistrationBean<ShallowEtagHeaderFilter> registration = new FilterRegistrationBean<>(filter);

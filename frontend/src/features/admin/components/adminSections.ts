@@ -5,6 +5,7 @@ export const ADMIN_SECTIONS = [
   { to: "/admin/guides", label: "Guides" },
   { to: "/admin/patches", label: "Patches" },
   { to: "/admin/maps", label: "Maps" },
+  { to: "/admin/users", label: "Users" },
   { to: "/admin/collector", label: "Collector" },
   { to: "/admin/audit", label: "Audit log" },
 ];
