@@ -39,7 +39,7 @@ Grafana listens on `127.0.0.1:3000` only. Reach it through an SSH tunnel: `ssh -
 
 ## Backups
 
-The `backup` service writes a compressed `pg_dump` to `BACKUP_PATH` every `BACKUP_INTERVAL_SECONDS` (default daily) and removes files older than `BACKUP_KEEP_DAYS` (default 14). These files live on the same server, so copy them off the machine as well, for example with `rclone` or `rsync` from a cron job.
+The `backup` service writes a compressed `pg_dump` to `BACKUP_PATH` every `BACKUP_INTERVAL_SECONDS` (default daily) and removes files older than `BACKUP_KEEP_DAYS` (default 14). These files live on the same server, so the service can also copy every new backup off the machine with `rclone`: put an `rclone.conf` with your remote (S3, Backblaze B2, SFTP and others, see `rclone config`) into `docker/backup/rclone/` (git-ignored, or point `RCLONE_CONFIG_DIR` elsewhere) and set `BACKUP_REMOTE` to `remote:bucket/path`. Remote copies older than `BACKUP_REMOTE_KEEP_DAYS` (default 30) are deleted. A failed copy is logged and does not stop the local backups.
 
 Restore into an empty database:
 
