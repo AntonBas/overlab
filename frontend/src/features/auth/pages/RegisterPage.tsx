@@ -11,6 +11,7 @@ export function RegisterPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -18,8 +19,12 @@ export function RegisterPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    setSubmitting(true);
     setError(null);
+    if (password !== confirmPassword) {
+      setFieldErrors({ confirmPassword: "Passwords do not match" });
+      return;
+    }
+    setSubmitting(true);
     setFieldErrors({});
     try {
       await register({ displayName, email, password });
@@ -82,6 +87,17 @@ export function RegisterPage() {
           value={password}
           error={fieldErrors.password}
           onChange={(event) => setPassword(event.target.value)}
+        />
+        <FormField
+          label="Confirm password"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+          maxLength={72}
+          value={confirmPassword}
+          error={fieldErrors.confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
         />
         {error && (
           <p className="form__error" role="alert">
