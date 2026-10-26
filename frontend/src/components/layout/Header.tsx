@@ -76,7 +76,9 @@ export function Header() {
           <div className="site-header__account">
             {!loading && user && (
               <>
-                <span className="muted">{user.displayName}</span>
+                <Link className="nav__link" to="/me/settings">
+                  {user.displayName}
+                </Link>
                 <button
                   type="button"
                   className="button button--ghost"

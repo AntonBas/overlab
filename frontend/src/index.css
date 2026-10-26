@@ -1046,3 +1046,22 @@ select:disabled {
   fill: var(--muted);
   font-size: 11px;
 }
+
+.settings {
+  display: grid;
+  gap: 24px;
+  max-width: 640px;
+}
+
+.settings-section {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.settings-section h2 {
+  margin: 0;
+}

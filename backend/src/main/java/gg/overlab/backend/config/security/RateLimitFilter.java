@@ -22,7 +22,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
             "/api/auth/resend-verification");
-    private static final String API_PREFIX = "/api/";
     private static final String STATS_PREFIX = "/api/stats";
     private static final Duration WINDOW = Duration.ofMinutes(1);
 
@@ -61,8 +60,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if ("POST".equals(request.getMethod()) && LIMITED_PATHS.contains(path)) {
             return new Rule(path, authProperties.rateLimitPerMinute());
         }
-        if ("GET".equals(request.getMethod()) && path.startsWith(API_PREFIX)
-                && !path.startsWith("/api/admin/") && !path.startsWith("/api/auth/")) {
+        if (PublicApiPaths.isPublicRead(request.getMethod(), path)) {
             if (path.startsWith(STATS_PREFIX)) {
                 return new Rule("stats", rateLimitProperties.statsPerMinute());
             }

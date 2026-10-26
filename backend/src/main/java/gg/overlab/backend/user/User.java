@@ -46,6 +46,9 @@ public class User extends TimestampedEntity {
     @Column(name = "provider_id", length = 255)
     private String providerId;
 
+    @Column(name = "pending_email", length = 255)
+    private String pendingEmail;
+
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 

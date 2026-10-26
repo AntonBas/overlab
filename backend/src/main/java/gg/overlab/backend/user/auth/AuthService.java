@@ -78,6 +78,9 @@ public class AuthService {
 
     @Transactional
     public AuthTokens loginAs(User user) {
+        if (!user.isEnabled()) {
+            throw new InvalidCredentialsException();
+        }
         AuthTokens tokens = issueTokens(user);
         auditService.logUserEvent(AuditAction.LOGIN, user.getId(), user.getRole().name());
         return tokens;
@@ -116,8 +119,25 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String rawToken) {
-        User user = tokenService.consume(rawToken, UserTokenType.EMAIL_VERIFICATION);
+        User user;
+        try {
+            user = tokenService.consume(rawToken, UserTokenType.EMAIL_VERIFICATION);
+        } catch (InvalidTokenException exception) {
+            applyEmailChange(tokenService.consume(rawToken, UserTokenType.EMAIL_CHANGE));
+            return;
+        }
         user.setEmailVerified(true);
+    }
+
+    private void applyEmailChange(User user) {
+        String newEmail = user.getPendingEmail();
+        if (newEmail == null || userRepository.existsByEmailIgnoreCase(newEmail)) {
+            throw new InvalidTokenException();
+        }
+        user.setEmail(newEmail);
+        user.setPendingEmail(null);
+        user.setEmailVerified(true);
+        auditService.logUserEvent(AuditAction.UPDATE, user.getId(), user.getRole().name());
     }
 
     @Transactional
@@ -130,8 +150,12 @@ public class AuthService {
     @Transactional
     public void forgotPassword(String email) {
         userRepository.findByEmailIgnoreCase(normalize(email))
-                .filter(user -> user.getProvider() == AuthProvider.LOCAL && user.isEnabled())
+                .filter(User::isEnabled)
                 .ifPresent(user -> {
+                    if (user.getProvider() != AuthProvider.LOCAL) {
+                        emailService.sendGoogleSignInNotice(user);
+                        return;
+                    }
                     tokenService.revokeAll(user, UserTokenType.PASSWORD_RESET);
                     String token = tokenService.issue(user, UserTokenType.PASSWORD_RESET, properties.resetTokenTtl());
                     emailService.sendPasswordReset(user, token);

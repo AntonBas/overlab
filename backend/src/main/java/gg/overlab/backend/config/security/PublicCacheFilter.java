@@ -10,16 +10,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class PublicCacheFilter extends OncePerRequestFilter {
 
-    private static final String API_PREFIX = "/api/";
     private static final String PUBLIC_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return !"GET".equals(request.getMethod())
-                || !path.startsWith(API_PREFIX)
-                || path.startsWith("/api/admin/")
-                || path.startsWith("/api/auth/");
+        return !PublicApiPaths.isPublicRead(request.getMethod(), request.getRequestURI());
     }
 
     @Override
