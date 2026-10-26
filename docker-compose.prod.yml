@@ -93,9 +93,9 @@ services:
       - overlab-net
 
   backup:
-    image: postgres:16-alpine
+    build:
+      context: ./docker/backup
     restart: unless-stopped
-    entrypoint: ["/backup.sh"]
     environment:
       DB_HOST: postgres
       DB_NAME: ${DB_NAME:-overlab}
@@ -103,9 +103,12 @@ services:
       PGPASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+      BACKUP_REMOTE: ${BACKUP_REMOTE:-}
+      BACKUP_REMOTE_KEEP_DAYS: ${BACKUP_REMOTE_KEEP_DAYS:-30}
+      RCLONE_CONFIG: /config/rclone/rclone.conf
     volumes:
-      - ./docker/backup/backup.sh:/backup.sh:ro
       - ${BACKUP_PATH:-./backups}:/backups
+      - ${RCLONE_CONFIG_DIR:-./docker/backup/rclone}:/config/rclone:ro
     depends_on:
       postgres:
         condition: service_healthy

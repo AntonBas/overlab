@@ -5,3 +5,6 @@
 .idea/
 .vscode/
 .DS_Store
+
+docker/backup/rclone/
+backups/
