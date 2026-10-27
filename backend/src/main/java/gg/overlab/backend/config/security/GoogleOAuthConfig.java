@@ -23,10 +23,12 @@ public class GoogleOAuthConfig {
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository(
             @Value("${GOOGLE_CLIENT_ID}") String clientId,
-            @Value("${GOOGLE_CLIENT_SECRET}") String clientSecret) {
+            @Value("${GOOGLE_CLIENT_SECRET}") String clientSecret,
+            @Value("${app.frontend-url}") String frontendUrl) {
         return new InMemoryClientRegistrationRepository(CommonOAuth2Provider.GOOGLE.getBuilder("google")
                 .clientId(clientId)
                 .clientSecret(clientSecret)
+                .redirectUri(frontendUrl + "/login/oauth2/code/google")
                 .scope("openid", "profile", "email")
                 .build());
     }
