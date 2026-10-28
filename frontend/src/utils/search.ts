@@ -25,3 +25,7 @@ export function matchHeroes(heroes: Hero[], query: string, limit = 8): Hero[] {
   }
   return [...starts, ...contains].slice(0, limit);
 }
+
+export function matchesName(name: string, query: string): boolean {
+  return normalize(name).includes(normalize(query));
+}

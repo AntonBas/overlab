@@ -13,7 +13,15 @@ const maps: GameMap[] = [
 
 function renderFilters(filters: Filters = DEFAULT_FILTERS) {
   const onChange = vi.fn();
-  render(<StatsFilters filters={filters} maps={maps} onChange={onChange} />);
+  render(
+    <StatsFilters
+      filters={filters}
+      maps={maps}
+      onChange={onChange}
+      search=""
+      onSearchChange={vi.fn()}
+    />,
+  );
   return onChange;
 }
 

@@ -63,6 +63,18 @@ describe("StatsPage", () => {
     expect(screen.getByText(/Snapshot from/)).toBeInTheDocument();
   });
 
+  it("filters the table by hero name without refetching", async () => {
+    fetchStatsMock.mockResolvedValue(snapshot());
+
+    renderPage();
+    await screen.findByRole("link", { name: "Ana" });
+    await userEvent.type(screen.getByRole("searchbox"), "gen");
+
+    expect(screen.getByRole("link", { name: "Genji" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Ana" })).not.toBeInTheDocument();
+    expect(fetchStatsMock).toHaveBeenCalledTimes(1);
+  });
+
   it("takes the filters from the address", async () => {
     fetchStatsMock.mockResolvedValue(snapshot());
 
