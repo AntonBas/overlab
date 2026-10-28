@@ -45,7 +45,6 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       COLLECTOR_GAME_FORMAT: ${COLLECTOR_GAME_FORMAT:-FIVE_VS_FIVE}
-      COLLECTOR_STARTUP_JOB: ${COLLECTOR_STARTUP_JOB:-daily-overview}
       TZ: ${TZ:-Europe/Kyiv}
     depends_on:
       postgres:
