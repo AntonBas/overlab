@@ -23,6 +23,8 @@ import org.springframework.web.client.RestClient;
 public class BlizzardRatesClient {
 
     private static final String RATES_PATH = "/en-us/rates/data/";
+    private static final int COMPETITIVE_QUEUE = 2;
+    private static final int QUICK_PLAY_QUEUE = 0;
 
     private final RestClient restClient;
     private final CollectorProperties.Retry retry;
@@ -66,7 +68,7 @@ public class BlizzardRatesClient {
                         .queryParam("map", mapSlug)
                         .queryParam("region", capitalized(region))
                         .queryParam("role", "All")
-                        .queryParam("rq", queue == GameQueue.COMPETITIVE ? 1 : 0)
+                        .queryParam("rq", queue == GameQueue.COMPETITIVE ? COMPETITIVE_QUEUE : QUICK_PLAY_QUEUE)
                         .queryParam("tier", capitalized(tier))
                         .build())
                 .retrieve()
