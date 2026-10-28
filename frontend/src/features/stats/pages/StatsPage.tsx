@@ -54,7 +54,7 @@ export function StatsPage() {
         (stats.error.status === 404 ? (
           <EmptyState>
             No statistics have been collected for this combination yet. Map
-            statistics are currently collected for all ranks together.
+            statistics are collected once a week.
           </EmptyState>
         ) : (
           <ErrorMessage failure={stats.error} onRetry={stats.reload} />

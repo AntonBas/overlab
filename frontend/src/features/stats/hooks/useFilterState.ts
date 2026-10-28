@@ -12,9 +12,7 @@ export function useFilterState(fixedMap?: string) {
   const preferencesApplied = useRef(false);
   const filters = useMemo(() => {
     const parsed = parseFilters(searchParams);
-    return fixedMap
-      ? { ...parsed, map: fixedMap, tier: "ALL" as const }
-      : parsed;
+    return fixedMap ? { ...parsed, map: fixedMap } : parsed;
   }, [searchParams, fixedMap]);
 
   useEffect(() => {
@@ -39,7 +37,6 @@ export function useFilterState(fixedMap?: string) {
     const params = toSearchParams(next);
     if (fixedMap) {
       params.delete("map");
-      params.delete("tier");
     }
     if (params.toString() !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
@@ -55,7 +52,6 @@ export function useFilterState(fixedMap?: string) {
       const params = toSearchParams(next);
       if (fixedMap) {
         params.delete("map");
-        params.delete("tier");
       }
       setSearchParams(params);
     },
