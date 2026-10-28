@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { formatDateTime } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { fetchStats } from "../api/statsApi";
@@ -33,9 +33,13 @@ export function StatsPage() {
       <PageHeader
         title="Hero statistics"
         subtitle={
-          snapshot
-            ? `Snapshot from ${formatDateTime(snapshot.capturedAt)}`
-            : "Win, pick and ban rates collected from Blizzard's public statistics"
+          snapshot ? (
+            <>
+              Data collected <CollectedAt value={snapshot.capturedAt} />
+            </>
+          ) : (
+            "Win, pick and ban rates collected from Blizzard's public statistics"
+          )
         }
       />
       <StatsFilters

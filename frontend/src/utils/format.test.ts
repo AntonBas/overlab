@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatDelta, formatPercent, formatSeconds } from "./format";
+import {
+  formatDelta,
+  formatPercent,
+  formatRelativeTime,
+  formatSeconds,
+} from "./format";
 
 describe("formatPercent", () => {
   it("shows one decimal and a percent sign", () => {
@@ -34,5 +39,21 @@ describe("formatSeconds", () => {
     expect(formatSeconds(83)).toBe("1:23");
     expect(formatSeconds(5)).toBe("0:05");
     expect(formatSeconds(600)).toBe("10:00");
+  });
+});
+
+describe("formatRelativeTime", () => {
+  const now = Date.parse("2026-10-28T12:00:00Z");
+
+  it("says just now for a few seconds", () => {
+    expect(formatRelativeTime("2026-10-28T11:59:40Z", now)).toBe("just now");
+  });
+
+  it("uses minutes, hours and days", () => {
+    expect(formatRelativeTime("2026-10-28T11:30:00Z", now)).toBe(
+      "30 minutes ago",
+    );
+    expect(formatRelativeTime("2026-10-28T10:00:00Z", now)).toBe("2 hours ago");
+    expect(formatRelativeTime("2026-10-26T12:00:00Z", now)).toBe("2 days ago");
   });
 });

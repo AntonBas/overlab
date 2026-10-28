@@ -7,12 +7,9 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
+import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import {
-  MAP_MODE_LABELS,
-  ROLE_LABELS,
-  formatDateTime,
-} from "../../../utils/format";
+import { MAP_MODE_LABELS, ROLE_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { GuideList } from "../../guides/components/GuideList";
@@ -105,7 +102,8 @@ export function MapPage() {
               : `${stats.data.heroes.length} heroes shown`}
           </p>
           <p className="muted footnote">
-            Snapshot from {formatDateTime(stats.data.capturedAt)}, all ranks.
+            Data collected <CollectedAt value={stats.data.capturedAt} />, all
+            ranks.
           </p>
           <StatsTable
             heroes={stats.data.heroes}

@@ -22,11 +22,35 @@ export function formatDelta(value: number | null | undefined): string {
   return `${rounded > 0 ? "+" : "−"}${Math.abs(rounded).toFixed(1)}`;
 }
 
-export function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+export function formatDateTime(value: string, withZone = false): string {
+  const options: Intl.DateTimeFormatOptions = withZone
+    ? {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }
+    : { dateStyle: "medium", timeStyle: "short" };
+  return new Intl.DateTimeFormat("en-GB", options).format(new Date(value));
+}
+
+const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ["day", 86_400],
+  ["hour", 3_600],
+  ["minute", 60],
+];
+
+export function formatRelativeTime(value: string, now = Date.now()): string {
+  const elapsedSeconds = Math.round((new Date(value).getTime() - now) / 1000);
+  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  for (const [unit, secondsInUnit] of RELATIVE_UNITS) {
+    if (Math.abs(elapsedSeconds) >= secondsInUnit) {
+      return formatter.format(Math.round(elapsedSeconds / secondsInUnit), unit);
+    }
+  }
+  return "just now";
 }
 
 export function formatSeconds(totalSeconds: number): string {

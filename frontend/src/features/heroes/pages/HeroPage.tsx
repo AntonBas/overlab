@@ -7,9 +7,9 @@ import { RateBar } from "../../../components/ui/RateBar";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
-import { formatDateTime } from "../../../utils/format";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { GuideList } from "../../guides/components/GuideList";
@@ -121,8 +121,8 @@ export function HeroPage() {
         )}
         {overall && (
           <p className="muted footnote">
-            All ranks, PC, Europe. Snapshot from{" "}
-            {formatDateTime(overall.capturedAt)}.
+            All ranks, PC, Europe. Data collected{" "}
+            <CollectedAt value={overall.capturedAt} />.
           </p>
         )}
       </section>
