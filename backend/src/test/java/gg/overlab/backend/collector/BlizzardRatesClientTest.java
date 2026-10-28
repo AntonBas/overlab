@@ -40,7 +40,7 @@ class BlizzardRatesClientTest {
                 .andExpect(queryParam("input", "PC"))
                 .andExpect(queryParam("map", "rialto"))
                 .andExpect(queryParam("region", "Europe"))
-                .andExpect(queryParam("rq", "1"))
+                .andExpect(queryParam("rq", "2"))
                 .andExpect(queryParam("tier", "Gold"))
                 .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON));
 
