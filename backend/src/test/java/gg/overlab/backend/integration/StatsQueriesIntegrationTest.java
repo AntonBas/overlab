@@ -167,6 +167,18 @@ class StatsQueriesIntegrationTest {
     }
 
     @Test
+    void historyKeepsOnlyTheLatestSnapshotOfEachDay() {
+        Instant laterSameDay = NEW.plus(Duration.ofHours(6));
+        heroStatRepository.saveAndFlush(stat(ana, null, RankTier.ALL, laterSameDay, "49.00", "24.00"));
+
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
+                NEW.plus(Duration.ofDays(1)));
+
+        assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, laterSameDay);
+        assertThat(history.points().get(1).winRate()).isEqualByComparingTo("49.00");
+    }
+
+    @Test
     void historyForAMapReturnsOnlyThatMap() {
         StatsFilter rialtoFilter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "rialto", Platform.PC,
                 Region.EUROPE);

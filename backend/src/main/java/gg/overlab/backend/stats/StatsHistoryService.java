@@ -13,8 +13,11 @@ import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +57,7 @@ public class StatsHistoryService {
                 filter.region(), filter.tier(), start, end)
                 : heroStatRepository.findHistoryForMap(heroSlug, filter.mapSlug(), filter.queue(), filter.platform(),
                 filter.region(), filter.tier(), start, end);
-        List<HeroHistoryPointDto> points = stats.stream().map(statsMapper::toHistoryPoint).toList();
+        List<HeroHistoryPointDto> points = latestPerDay(stats.stream().map(statsMapper::toHistoryPoint).toList());
         return new HeroHistoryDto(hero, filter.queue(), filter.tier(), filter.mapSlug(), filter.platform(),
                 filter.region(), start, end, points);
     }
@@ -107,5 +110,13 @@ public class StatsHistoryService {
                 filter.tier(), capturedAt)
                 : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), filter.platform(),
                 filter.region(), filter.tier(), capturedAt);
+    }
+
+    private static List<HeroHistoryPointDto> latestPerDay(List<HeroHistoryPointDto> points) {
+        Map<LocalDate, HeroHistoryPointDto> latestByDay = new LinkedHashMap<>();
+        for (HeroHistoryPointDto point : points) {
+            latestByDay.put(LocalDate.ofInstant(point.capturedAt(), ZoneOffset.UTC), point);
+        }
+        return List.copyOf(latestByDay.values());
     }
 }
