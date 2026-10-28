@@ -9,13 +9,22 @@ import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { MAP_MODE_LABELS, ROLE_LABELS } from "../../../utils/format";
+import {
+  MAP_MODE_LABELS,
+  ROLE_LABELS,
+  TIER_LABELS,
+} from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { GuideList } from "../../guides/components/GuideList";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
-import { ROLES, isQuickPlay } from "../../stats/filters";
+import {
+  ROLES,
+  TIERS,
+  isQuickPlay,
+  type StatsFilters,
+} from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { fetchMap } from "../api/mapsApi";
 
@@ -57,30 +66,49 @@ export function MapPage() {
           </>
         }
       />
-      <div className="segmented" role="group" aria-label="Role">
-        <button
-          type="button"
-          className={clsx("segmented__item", {
-            "segmented__item--active": filters.role === null,
-          })}
-          aria-pressed={filters.role === null}
-          onClick={() => update({ role: null })}
-        >
-          All roles
-        </button>
-        {ROLES.map((role) => (
+      <div className="filters">
+        <label className="field">
+          <span className="field__label">Rank</span>
+          <select
+            value={filters.tier}
+            disabled={isQuickPlay(filters)}
+            title={isQuickPlay(filters) ? "Quick Play has no ranks" : undefined}
+            onChange={(event) =>
+              update({ tier: event.target.value as StatsFilters["tier"] })
+            }
+          >
+            {TIERS.map((tier) => (
+              <option key={tier} value={tier}>
+                {TIER_LABELS[tier]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="segmented" role="group" aria-label="Role">
           <button
-            key={role}
             type="button"
             className={clsx("segmented__item", {
-              "segmented__item--active": filters.role === role,
+              "segmented__item--active": filters.role === null,
             })}
-            aria-pressed={filters.role === role}
-            onClick={() => update({ role })}
+            aria-pressed={filters.role === null}
+            onClick={() => update({ role: null })}
           >
-            {ROLE_LABELS[role]}
+            All roles
           </button>
-        ))}
+          {ROLES.map((role) => (
+            <button
+              key={role}
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": filters.role === role,
+              })}
+              aria-pressed={filters.role === role}
+              onClick={() => update({ role })}
+            >
+              {ROLE_LABELS[role]}
+            </button>
+          ))}
+        </div>
       </div>
       {stats.loading && <TableSkeleton label="Loading statistics" />}
       {stats.error &&
@@ -102,8 +130,8 @@ export function MapPage() {
               : `${stats.data.heroes.length} heroes shown`}
           </p>
           <p className="muted footnote">
-            Data collected <CollectedAt value={stats.data.capturedAt} />, all
-            ranks.
+            Data collected <CollectedAt value={stats.data.capturedAt} />,{" "}
+            {TIER_LABELS[filters.tier].toLowerCase()}.
           </p>
           <StatsTable
             heroes={stats.data.heroes}

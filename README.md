@@ -181,7 +181,7 @@ Every admin change (perks, counters, synergies, guides, patches, hero and map ed
 The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`:
 
 - `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
-- `weekly-maps`: every map, rank `ALL`
+- `weekly-maps`: every map, every rank for Competitive (about 310 requests, roughly 16 minutes with the 3 s pause), rank `ALL` for Quick Play
 - `weekly-console`, `weekly-other-regions`: disabled examples (`enabled: false`) for Console and other regions
 
 The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
