@@ -76,8 +76,8 @@ export function Header() {
           <div className="site-header__account">
             {!loading && user && (
               <>
-                <Link className="nav__link" to="/me">
-                  {user.displayName}
+                <Link className="nav__link" to="/me" title={user.displayName}>
+                  My Overlab
                 </Link>
                 <button
                   type="button"

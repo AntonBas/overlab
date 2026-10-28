@@ -1,11 +1,22 @@
 import { useState, type FormEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { resendVerification } from "../api/authApi";
 import { useAuth } from "../context/useAuth";
 import { AuthLayout } from "./AuthLayout";
+
+const OAUTH_ERRORS: Record<string, string> = {
+  email_in_use:
+    "This email is already registered with a password. Sign in with your email and password.",
+  oauth: "Google sign-in failed. Try again.",
+};
 
 export function LoginPage() {
   usePageTitle("Sign in");
@@ -15,7 +26,10 @@ export function LoginPage() {
   const returnTo = (location.state as { from?: string } | null)?.from ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [error, setError] = useState<string | null>(
+    OAUTH_ERRORS[searchParams.get("error") ?? ""] ?? null,
+  );
   const [unverified, setUnverified] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
