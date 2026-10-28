@@ -5,6 +5,8 @@ import gg.overlab.backend.user.personal.dto.FavoritesDto;
 import gg.overlab.backend.user.personal.dto.NoteDto;
 import gg.overlab.backend.user.personal.dto.NoteRequest;
 import gg.overlab.backend.user.personal.dto.PreferencesDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Personal library")
 @RestController
 @RequestMapping("/api/me")
 @RequiredArgsConstructor
@@ -26,62 +29,73 @@ public class PersonalController {
 
     private final PersonalService personalService;
 
+    @Operation(summary = "Get favorite heroes and maps")
     @GetMapping("/favorites")
     public FavoritesDto favorites(@AuthenticationPrincipal AuthenticatedUser user) {
         return personalService.favorites(user.id());
     }
 
+    @Operation(summary = "Add a hero to favorites")
     @PutMapping("/favorites/heroes/{slug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addHeroFavorite(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String slug) {
         personalService.addHeroFavorite(user.id(), slug);
     }
 
+    @Operation(summary = "Remove a hero from favorites")
     @DeleteMapping("/favorites/heroes/{slug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeHeroFavorite(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String slug) {
         personalService.removeHeroFavorite(user.id(), slug);
     }
 
+    @Operation(summary = "Add a map to favorites")
     @PutMapping("/favorites/maps/{slug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addMapFavorite(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String slug) {
         personalService.addMapFavorite(user.id(), slug);
     }
 
+    @Operation(summary = "Remove a map from favorites")
     @DeleteMapping("/favorites/maps/{slug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeMapFavorite(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String slug) {
         personalService.removeMapFavorite(user.id(), slug);
     }
 
+    @Operation(summary = "List personal hero notes")
     @GetMapping("/notes")
     public List<NoteDto> notes(@AuthenticationPrincipal AuthenticatedUser user) {
         return personalService.notes(user.id());
     }
 
+    @Operation(summary = "Get the personal note for a hero")
     @GetMapping("/notes/{heroSlug}")
     public NoteDto note(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug) {
         return personalService.note(user.id(), heroSlug);
     }
 
+    @Operation(summary = "Create or replace the personal note for a hero")
     @PutMapping("/notes/{heroSlug}")
     public NoteDto saveNote(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug,
                             @Valid @RequestBody NoteRequest request) {
         return personalService.saveNote(user.id(), heroSlug, request.content());
     }
 
+    @Operation(summary = "Delete the personal note for a hero")
     @DeleteMapping("/notes/{heroSlug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNote(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug) {
         personalService.deleteNote(user.id(), heroSlug);
     }
 
+    @Operation(summary = "Get default statistics filters")
     @GetMapping("/preferences")
     public PreferencesDto preferences(@AuthenticationPrincipal AuthenticatedUser user) {
         return personalService.preferences(user.id());
     }
 
+    @Operation(summary = "Save default statistics filters")
     @PutMapping("/preferences")
     public PreferencesDto savePreferences(@AuthenticationPrincipal AuthenticatedUser user,
                                           @RequestBody PreferencesDto request) {

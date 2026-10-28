@@ -4,6 +4,8 @@ import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.collector.run.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Collector (admin)")
 @RestController
 @RequestMapping("/api/admin/collector")
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class CollectorAdminController {
     private final CollectorRunRepository runRepository;
     private final AuditService auditService;
 
+    @Operation(summary = "List collector jobs with cron schedule and enabled flag")
     @GetMapping("/jobs")
     public List<CollectorJobDto> jobs() {
         return collectorService.jobs().stream()
@@ -30,11 +34,13 @@ public class CollectorAdminController {
                 .toList();
     }
 
+    @Operation(summary = "List recent collector runs")
     @GetMapping("/runs")
     public List<CollectorRunDto> runs() {
         return runRepository.findTop50ByOrderByStartedAtDesc().stream().map(CollectorRunDto::from).toList();
     }
 
+    @Operation(summary = "Run a collector job now")
     @PostMapping("/jobs/{name}/run")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CollectorRunDto run(@PathVariable String name) {

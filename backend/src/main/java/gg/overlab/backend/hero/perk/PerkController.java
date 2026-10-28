@@ -2,6 +2,8 @@ package gg.overlab.backend.hero.perk;
 
 import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.perk.dto.PerkRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,28 +17,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Perks")
 @RestController
 @RequiredArgsConstructor
 public class PerkController {
 
     private final PerkService perkService;
 
+    @Operation(summary = "List perks of a hero")
     @GetMapping("/api/heroes/{slug}/perks")
     public List<PerkDto> findByHero(@PathVariable String slug) {
         return perkService.findByHero(slug);
     }
 
+    @Operation(summary = "Create a perk")
     @PostMapping("/api/admin/perks")
     @ResponseStatus(HttpStatus.CREATED)
     public PerkDto create(@Valid @RequestBody PerkRequest request) {
         return perkService.create(request);
     }
 
+    @Operation(summary = "Update a perk")
     @PutMapping("/api/admin/perks/{id}")
     public PerkDto update(@PathVariable Long id, @Valid @RequestBody PerkRequest request) {
         return perkService.update(id, request);
     }
 
+    @Operation(summary = "Delete a perk")
     @DeleteMapping("/api/admin/perks/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

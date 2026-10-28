@@ -4,6 +4,8 @@ import gg.overlab.backend.common.PageResponse;
 import gg.overlab.backend.config.security.AuthenticatedUser;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
 import gg.overlab.backend.user.account.dto.SetEnabledRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Users (admin)")
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
+    @Operation(summary = "Search users by email or display name")
     @GetMapping
     public PageResponse<AdminUserDto> search(@RequestParam(required = false) String q,
                                              @RequestParam(defaultValue = "0") int page,
@@ -29,6 +33,7 @@ public class AdminUserController {
         return adminUserService.search(q, page, size);
     }
 
+    @Operation(summary = "Enable or disable a user")
     @PutMapping("/{id}/enabled")
     public AdminUserDto setEnabled(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser actor,
                                    @Valid @RequestBody SetEnabledRequest request) {
