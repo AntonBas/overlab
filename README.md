@@ -166,7 +166,9 @@ Email and password registration plus Google sign-in. Tokens are stored in `httpO
 | `GET`/`PUT /api/me/preferences` | Default mode, rank, platform and region for the statistics filters |
 | `GET /api/admin/users`, `PUT /api/admin/users/{id}/enabled` | Admin: search users, block or unblock (blocked users are signed out and cannot sign in; an admin cannot block themselves) |
 
-Password reset for a Google account sends an email that explains it signs in with Google instead of staying silent.
+Signing in with Google using an email that already has a password account links the two, so both ways work. If that account's email was not verified yet, its password is removed (use "Forgot your password?" to set a new one).
+
+Password reset for a Google-only account sends an email that explains it signs in with Google instead of staying silent.
 
 Authentication endpoints are rate limited per IP (Redis). `/api/admin/**` requires the `ADMIN` role. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit unless `.env` sets `MAIL_HOST` (and `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH=true`, `MAIL_STARTTLS=true`, `EMAIL_FROM`), for example with Brevo: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, the SMTP login and key from Brevo, and `EMAIL_FROM` set to a sender verified in Brevo; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables.
 
