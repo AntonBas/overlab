@@ -142,7 +142,7 @@ Public `GET /api/**` requests are limited per client IP in Redis: 120 per minute
 
 ### OpenAPI
 
-Swagger UI is at `/swagger-ui.html` and the OpenAPI document at `/v3/api-docs`; both require an administrator session (sign in through the site first).
+Swagger UI is at `/swagger-ui.html` and the OpenAPI document at `/v3/api-docs`; both require an administrator session (sign in through the site first). They are disabled in the `prod` profile.
 
 ### Authentication
 
