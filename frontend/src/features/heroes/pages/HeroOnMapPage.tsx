@@ -7,9 +7,9 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RateBar } from "../../../components/ui/RateBar";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
-import { formatDateTime } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { GuideList } from "../../guides/components/GuideList";
 import { fetchMap } from "../../maps/api/mapsApi";
@@ -117,8 +117,8 @@ export function HeroOnMapPage() {
               {overall
                 ? `${hero.data.name}'s all-maps values`
                 : "the all-maps values"}
-              . All ranks, PC, Europe. Snapshot from{" "}
-              {formatDateTime(onMap.capturedAt)}.
+              . All ranks, PC, Europe. Data collected{" "}
+              <CollectedAt value={onMap.capturedAt} />.
             </p>
           </>
         )}

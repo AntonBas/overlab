@@ -60,7 +60,7 @@ describe("StatsPage", () => {
         region: "EUROPE",
       }),
     );
-    expect(screen.getByText(/Snapshot from/)).toBeInTheDocument();
+    expect(screen.getByText(/Data collected/)).toBeInTheDocument();
   });
 
   it("filters the table by hero name without refetching", async () => {
