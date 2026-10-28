@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
@@ -5,6 +6,7 @@ import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime } from "../../../utils/format";
+import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { fetchStats } from "../api/statsApi";
 import { StatsFilters } from "../components/StatsFilters";
@@ -15,6 +17,7 @@ import { useFilterState } from "../hooks/useFilterState";
 export function StatsPage() {
   usePageTitle("Hero statistics");
   const { filters, update, changeSort, key } = useFilterState();
+  const [search, setSearch] = useState("");
   const maps = useFetch(fetchMaps, []);
   const stats = useFetch(() => fetchStats(filters), [key], {
     keepPrevious: true,
@@ -22,6 +25,8 @@ export function StatsPage() {
 
   const showDelta = filters.map !== ALL_MAPS;
   const snapshot = stats.data;
+  const visibleHeroes =
+    snapshot?.heroes.filter((hero) => matchesName(hero.heroName, search)) ?? [];
 
   return (
     <>
@@ -37,6 +42,8 @@ export function StatsPage() {
         filters={filters}
         maps={maps.data ?? []}
         onChange={update}
+        search={search}
+        onSearchChange={setSearch}
       />
       {stats.loading && <TableSkeleton label="Loading statistics" />}
       {stats.error &&
@@ -56,13 +63,13 @@ export function StatsPage() {
           <p className="visually-hidden" role="status">
             {stats.stale
               ? "Updating results"
-              : `${snapshot.heroes.length} heroes shown`}
+              : `${visibleHeroes.length} heroes shown`}
           </p>
-          {snapshot.heroes.length === 0 ? (
+          {visibleHeroes.length === 0 ? (
             <EmptyState>No heroes match these filters.</EmptyState>
           ) : (
             <StatsTable
-              heroes={snapshot.heroes}
+              heroes={visibleHeroes}
               showBan={!isQuickPlay(filters)}
               showDelta={showDelta}
               sort={filters.sort}

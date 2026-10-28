@@ -22,9 +22,17 @@ interface StatsFiltersProps {
   filters: Filters;
   maps: GameMap[];
   onChange: (patch: Partial<Filters>) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
-export function StatsFilters({ filters, maps, onChange }: StatsFiltersProps) {
+export function StatsFilters({
+  filters,
+  maps,
+  onChange,
+  search,
+  onSearchChange,
+}: StatsFiltersProps) {
   const quickPlay = isQuickPlay(filters);
   return (
     <form
@@ -111,6 +119,16 @@ export function StatsFilters({ filters, maps, onChange }: StatsFiltersProps) {
             </option>
           ))}
         </select>
+      </label>
+
+      <label className="field">
+        <span className="field__label">Hero</span>
+        <input
+          type="search"
+          value={search}
+          placeholder="Search by name"
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
       </label>
 
       <div className="segmented" role="group" aria-label="Role">
