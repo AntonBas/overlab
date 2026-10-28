@@ -1,6 +1,8 @@
 package gg.overlab.backend.audit;
 
 import gg.overlab.backend.common.PageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Audit log (admin)")
 @RestController
 @RequestMapping("/api/admin/audit")
 @RequiredArgsConstructor
@@ -16,6 +19,7 @@ public class AuditController {
 
     private final AuditQueryService queryService;
 
+    @Operation(summary = "Search the audit log")
     @GetMapping
     public PageResponse<AuditLogDto> search(
             @RequestParam(required = false) String entityType,
