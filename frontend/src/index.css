@@ -1407,3 +1407,67 @@ body.drawer-open {
     transform: none;
   }
 }
+
+.role-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.info-chip--plain {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.info-chip__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: help;
+}
+
+.info-chip__button:hover,
+.info-chip__button:focus-visible {
+  border-color: var(--accent);
+}
+
+.info-chip__tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: none;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.info-chip:hover .info-chip__tip,
+.info-chip:focus-within .info-chip__tip {
+  display: block;
+}
