@@ -4,6 +4,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { humanize } from "../../../utils/format";
 import {
   createRelation,
   deleteRelation,
@@ -238,7 +239,7 @@ export function RelationsAdminPage() {
           rowKey={(relation) => relation.id}
           emptyMessage="No relations yet."
           columns={[
-            { header: "Type", render: (relation) => relation.type },
+            { header: "Type", render: (relation) => humanize(relation.type) },
             { header: "Hero", render: (relation) => label(relation.heroSlug) },
             {
               header: "Related hero",

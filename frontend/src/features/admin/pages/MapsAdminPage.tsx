@@ -5,6 +5,7 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { MAP_MODE_LABELS } from "../../../utils/format";
 import type { GameMap, MapMode } from "../../../types/api";
 import {
   fetchAdminMaps,
@@ -69,7 +70,7 @@ function MapForm({
         <option value="">Unknown</option>
         {MODES.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {MAP_MODE_LABELS[value]}
           </option>
         ))}
       </SelectField>
@@ -130,7 +131,11 @@ export function MapsAdminPage() {
                 </span>
               ),
             },
-            { header: "Mode", render: (map) => map.mode ?? "Unknown" },
+            {
+              header: "Mode",
+              render: (map) =>
+                map.mode ? MAP_MODE_LABELS[map.mode] : "Unknown",
+            },
             {
               header: "Image",
               render: (map) => (map.imageUrl ? "Set" : "None"),

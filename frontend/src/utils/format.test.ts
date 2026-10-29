@@ -4,6 +4,7 @@ import {
   formatPercent,
   formatRelativeTime,
   formatSeconds,
+  humanize,
 } from "./format";
 
 describe("formatPercent", () => {
@@ -55,5 +56,13 @@ describe("formatRelativeTime", () => {
     );
     expect(formatRelativeTime("2026-10-28T10:00:00Z", now)).toBe("2 hours ago");
     expect(formatRelativeTime("2026-10-26T12:00:00Z", now)).toBe("2 days ago");
+  });
+});
+
+describe("humanize", () => {
+  it("turns enum values into readable text", () => {
+    expect(humanize("RECOMMENDED")).toBe("Recommended");
+    expect(humanize("PASSWORD_CHANGE")).toBe("Password change");
+    expect(humanize("LOCAL")).toBe("Local");
   });
 });

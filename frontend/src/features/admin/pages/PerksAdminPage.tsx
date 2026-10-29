@@ -6,6 +6,7 @@ import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { humanize } from "../../../utils/format";
 import type { Perk, PerkRecommendation, PerkSlot } from "../../../types/api";
 import {
   createPerk,
@@ -114,7 +115,7 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
       >
         {RECOMMENDATIONS.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {humanize(value)}
           </option>
         ))}
       </SelectField>
@@ -268,12 +269,15 @@ export function PerksAdminPage() {
                 </span>
               ),
             },
-            { header: "Slot", render: (perk) => perk.slot },
+            { header: "Slot", render: (perk) => humanize(perk.slot) },
             {
               header: "Icon",
               render: (perk) => (perk.iconUrl ? "Set" : "None"),
             },
-            { header: "Recommendation", render: (perk) => perk.recommendation },
+            {
+              header: "Recommendation",
+              render: (perk) => humanize(perk.recommendation),
+            },
             {
               header: "",
               render: (perk) => (

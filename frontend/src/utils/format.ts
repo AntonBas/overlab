@@ -101,3 +101,8 @@ export const MAP_MODE_LABELS: Record<MapMode, string> = {
   FLASHPOINT: "Flashpoint",
   CLASH: "Clash",
 };
+
+export function humanize(value: string): string {
+  const words = value.toLowerCase().replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
