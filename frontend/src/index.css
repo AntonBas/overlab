@@ -1248,4 +1248,25 @@ body.drawer-open {
 .role-badge__image {
   flex: none;
   display: inline-block;
+  width: 22px;
+  height: 22px;
+  background-color: var(--muted);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.role-badge--tank .role-badge__image {
+  background-color: var(--tank);
+}
+
+.role-badge--damage .role-badge__image {
+  background-color: var(--damage);
+}
+
+.role-badge--support .role-badge__image {
+  background-color: var(--support);
 }

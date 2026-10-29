@@ -26,12 +26,13 @@ function RoleIcon({ role }: { role: HeroRole }) {
 
   if (imageAvailable) {
     return (
-      <img
+      <span
         className="role-badge__image"
-        src={roleIconUrl(role)}
-        alt=""
-        width={22}
-        height={22}
+        aria-hidden="true"
+        style={{
+          maskImage: `url(${roleIconUrl(role)})`,
+          WebkitMaskImage: `url(${roleIconUrl(role)})`,
+        }}
       />
     );
   }
