@@ -29,7 +29,7 @@ public class HeroMapper {
                 hero.getRole(),
                 hero.getSubrole(),
                 hero.getDescription(),
-                hero.getPortraitUrl(),
+                mediaUrlResolver.resolve(hero.getPortraitUrl()),
                 hero.isActive());
     }
 }

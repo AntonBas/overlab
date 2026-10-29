@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { Perk, PerkRecommendation, PerkSlot } from "../../../types/api";
@@ -161,6 +163,7 @@ export function PerksAdminPage() {
   usePageTitle("Admin: perks");
   const heroes = useHeroOptions();
   const [heroSlug, setHeroSlug] = useState("");
+  const selectedHero = heroes.data?.find((hero) => hero.slug === heroSlug);
   const perks = useFetch(
     () => (heroSlug ? fetchPerks(heroSlug) : Promise.resolve([] as Perk[])),
     [heroSlug],
@@ -219,23 +222,32 @@ export function PerksAdminPage() {
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}
-      <SelectField
-        label="Hero"
-        name="hero"
-        value={heroSlug}
-        onChange={(event) => {
-          setHeroSlug(event.target.value);
-          setEditing(null);
-          removal.reset();
-        }}
-      >
-        <option value="">Choose a hero</option>
-        {heroes.data?.map((hero) => (
-          <option key={hero.slug} value={hero.slug}>
-            {hero.name}
-          </option>
-        ))}
-      </SelectField>
+      <div className="admin__picker">
+        <SelectField
+          label="Hero"
+          name="hero"
+          value={heroSlug}
+          onChange={(event) => {
+            setHeroSlug(event.target.value);
+            setEditing(null);
+            removal.reset();
+          }}
+        >
+          <option value="">Choose a hero</option>
+          {heroes.data?.map((hero) => (
+            <option key={hero.slug} value={hero.slug}>
+              {hero.name}
+            </option>
+          ))}
+        </SelectField>
+        {selectedHero && (
+          <HeroPortrait
+            name={selectedHero.name}
+            url={selectedHero.portraitUrl}
+            size={44}
+          />
+        )}
+      </div>
       <StatusMessage error={removal.error} success={removal.success} />
       {heroSlug && perks.loading && <Spinner />}
       {perks.error && (
@@ -247,7 +259,15 @@ export function PerksAdminPage() {
           rowKey={(perk) => perk.id}
           emptyMessage="This hero has no perks yet."
           columns={[
-            { header: "Name", render: (perk) => perk.name },
+            {
+              header: "Name",
+              render: (perk) => (
+                <span className="admin__name">
+                  <Thumbnail url={perk.iconUrl} width={28} height={28} />
+                  {perk.name}
+                </span>
+              ),
+            },
             { header: "Slot", render: (perk) => perk.slot },
             {
               header: "Icon",

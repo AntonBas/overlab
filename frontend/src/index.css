@@ -1270,3 +1270,15 @@ body.drawer-open {
 .role-badge--support .role-badge__image {
   background-color: var(--support);
 }
+
+.admin__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin__picker {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
