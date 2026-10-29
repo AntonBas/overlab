@@ -29,8 +29,18 @@ export async function updateHero(
   return data;
 }
 
+const REVALIDATE = { headers: { "Cache-Control": "no-cache" } };
+
 export async function fetchPerks(heroSlug: string): Promise<Perk[]> {
-  const { data } = await api.get<Perk[]>(`/heroes/${heroSlug}/perks`);
+  const { data } = await api.get<Perk[]>(
+    `/heroes/${heroSlug}/perks`,
+    REVALIDATE,
+  );
+  return data;
+}
+
+export async function fetchAdminMaps(): Promise<GameMap[]> {
+  const { data } = await api.get<GameMap[]>("/maps", REVALIDATE);
   return data;
 }
 
@@ -108,7 +118,7 @@ export async function deleteGuide(id: number): Promise<void> {
 }
 
 export async function fetchPatches(): Promise<Patch[]> {
-  const { data } = await api.get<Patch[]>("/patches");
+  const { data } = await api.get<Patch[]>("/patches", REVALIDATE);
   return data;
 }
 

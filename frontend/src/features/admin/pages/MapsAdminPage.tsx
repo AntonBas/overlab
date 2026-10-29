@@ -5,8 +5,12 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameMap, MapMode } from "../../../types/api";
-import { fetchMaps } from "../../maps/api/mapsApi";
-import { removeMapImage, updateMap, uploadMapImage } from "../api/adminApi";
+import {
+  fetchAdminMaps,
+  removeMapImage,
+  updateMap,
+  uploadMapImage,
+} from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
 import { SelectField } from "../components/Fields";
@@ -99,7 +103,7 @@ function MapForm({
 
 export function MapsAdminPage() {
   usePageTitle("Admin: maps");
-  const maps = useFetch(fetchMaps, []);
+  const maps = useFetch(fetchAdminMaps, []);
   const [editing, setEditing] = useState<string | null>(null);
   const selected = maps.data?.find((map) => map.slug === editing) ?? null;
 
