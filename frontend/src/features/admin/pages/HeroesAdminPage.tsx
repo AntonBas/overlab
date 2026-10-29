@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -97,7 +98,15 @@ export function HeroesAdminPage() {
           rowKey={(hero) => hero.slug}
           pageSize={30}
           columns={[
-            { header: "Name", render: (hero) => hero.name },
+            {
+              header: "Name",
+              render: (hero) => (
+                <span className="admin__name">
+                  <HeroPortrait name={hero.name} url={hero.portraitUrl} />
+                  {hero.name}
+                </span>
+              ),
+            },
             { header: "Role", render: (hero) => hero.role },
             {
               header: "Status",
