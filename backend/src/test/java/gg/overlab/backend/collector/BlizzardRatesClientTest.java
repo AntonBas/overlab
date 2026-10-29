@@ -54,6 +54,32 @@ class BlizzardRatesClientTest {
     }
 
     @Test
+    void switchesToTheOtherQueueWhenBlizzardRenumbersCompetitive() {
+        server.expect(queryParam("rq", "2"))
+                .andRespond(withSuccess(CollectorFixtures.WITHOUT_BAN_RATE_JSON, MediaType.APPLICATION_JSON));
+        server.expect(queryParam("rq", "1"))
+                .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON));
+        server.expect(queryParam("rq", "1"))
+                .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON));
+        BlizzardRatesClient client = client(1);
+
+        assertThat(fetch(client)).hasSize(2);
+        assertThat(fetch(client)).hasSize(2);
+        server.verify();
+    }
+
+    @Test
+    void failsWhenNoQueueHasBanRates() {
+        server.expect(queryParam("rq", "2"))
+                .andRespond(withSuccess(CollectorFixtures.WITHOUT_BAN_RATE_JSON, MediaType.APPLICATION_JSON));
+        server.expect(queryParam("rq", "1"))
+                .andRespond(withSuccess(CollectorFixtures.WITHOUT_BAN_RATE_JSON, MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> fetch(client(1))).isInstanceOf(InvalidSnapshotException.class);
+        server.verify();
+    }
+
+    @Test
     void quickPlayUsesQueueZero() {
         server.expect(queryParam("rq", "0"))
                 .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON));

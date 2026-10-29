@@ -25,6 +25,7 @@ public class CollectorAdminController {
     private final RatesCollectorService collectorService;
     private final CollectorRunRepository runRepository;
     private final AuditService auditService;
+    private final PerkImportService perkImportService;
 
     @Operation(summary = "List collector jobs with cron schedule and enabled flag")
     @GetMapping("/jobs")
@@ -47,6 +48,16 @@ public class CollectorAdminController {
         CollectorRunDto run = collectorService.startAsync(name, CollectorTrigger.MANUAL);
         auditService.logCreate("CollectorRun", run.id(), run);
         return run;
+    }
+
+    @Operation(summary = "Import perks from the Blizzard hero pages in the background")
+    @PostMapping("/perks/import")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public PerkImportStartedDto importPerks() {
+        return new PerkImportStartedDto(perkImportService.startAsync());
+    }
+
+    public record PerkImportStartedDto(int heroes) {
     }
 
     public record CollectorJobDto(String name, String cron, boolean enabled) {

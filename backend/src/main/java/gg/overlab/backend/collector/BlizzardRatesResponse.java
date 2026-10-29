@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record BlizzardRatesResponse(RatesPayload rates) {
+public record BlizzardRatesResponse(RatesPayload rates, List<Column> columns) {
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Column(String id) {
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record RatesPayload(List<HeroRate> rates) {
