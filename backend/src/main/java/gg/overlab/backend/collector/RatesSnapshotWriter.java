@@ -35,6 +35,7 @@ public class RatesSnapshotWriter {
     private final HeroStatRepository heroStatRepository;
     private final SnapshotQualityChecker qualityChecker;
     private final CollectorMetrics metrics;
+    private final HeroPortraitDownloader portraitDownloader;
 
     @Transactional
     public int save(Instant capturedAt, GameQueue queue, GameFormat gameFormat, Platform platform, Region region,
@@ -67,6 +68,7 @@ public class RatesSnapshotWriter {
         hero.setName(rate.hero().name());
         hero.setRole(HeroRole.valueOf(rate.hero().role().toUpperCase(Locale.ROOT)));
         hero.setSubrole(rate.hero().subrole());
+        portraitDownloader.ensurePortrait(hero, rate.hero().portrait());
     }
 
     private HeroStat toStat(Hero hero, GameMap map, GameQueue queue, GameFormat gameFormat, Platform platform,

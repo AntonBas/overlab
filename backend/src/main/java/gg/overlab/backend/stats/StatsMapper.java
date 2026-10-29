@@ -5,11 +5,16 @@ import gg.overlab.backend.stats.dto.HeroChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
 import gg.overlab.backend.stats.dto.HeroMapStatDto;
 import gg.overlab.backend.stats.dto.HeroStatDto;
+import gg.overlab.backend.media.MediaUrlResolver;
 import java.math.BigDecimal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class StatsMapper {
+
+    private final MediaUrlResolver mediaUrlResolver;
 
     public HeroStatDto toDto(HeroStat stat, HeroStat baseline) {
         Hero hero = stat.getHero();
@@ -23,7 +28,8 @@ public class StatsMapper {
                 stat.getBanRate(),
                 delta(stat.getWinRate(), baseline == null ? null : baseline.getWinRate()),
                 delta(stat.getPickRate(), baseline == null ? null : baseline.getPickRate()),
-                delta(stat.getBanRate(), baseline == null ? null : baseline.getBanRate()));
+                delta(stat.getBanRate(), baseline == null ? null : baseline.getBanRate()),
+                mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
     public HeroMapStatDto toMapDto(HeroStat stat, HeroStat baseline) {
@@ -59,7 +65,8 @@ public class StatsMapper {
                 delta(after.getPickRate(), before.getPickRate()),
                 before.getBanRate(),
                 after.getBanRate(),
-                delta(after.getBanRate(), before.getBanRate()));
+                delta(after.getBanRate(), before.getBanRate()),
+                mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
     private BigDecimal delta(BigDecimal value, BigDecimal baseline) {

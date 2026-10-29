@@ -9,11 +9,14 @@ import {
   createPerk,
   deletePerk,
   fetchPerks,
+  removePerkIcon,
   updatePerk,
+  uploadPerkIcon,
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
 import { SelectField, TextAreaField } from "../components/Fields";
+import { ImageUploadField } from "../components/ImageUploadField";
 import { StatusMessage } from "../components/StatusMessage";
 import { useHeroOptions } from "../components/useHeroOptions";
 import { useSave } from "../components/useSave";
@@ -119,6 +122,22 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
         error={save.fieldErrors.recommendationNote}
         onChange={(event) => setNote(event.target.value)}
       />
+      {perk ? (
+        <ImageUploadField
+          label="Icon"
+          imageUrl={perk.iconUrl}
+          onUpload={async (file) => {
+            await uploadPerkIcon(perk.id, file);
+            onSaved();
+          }}
+          onRemove={async () => {
+            await removePerkIcon(perk.id);
+            onSaved();
+          }}
+        />
+      ) : (
+        <p className="muted">Save the perk first, then add an icon.</p>
+      )}
       <StatusMessage error={save.error} />
       <div className="form__actions">
         <button type="submit" className="button" disabled={save.saving}>
@@ -211,6 +230,10 @@ export function PerksAdminPage() {
           columns={[
             { header: "Name", render: (perk) => perk.name },
             { header: "Slot", render: (perk) => perk.slot },
+            {
+              header: "Icon",
+              render: (perk) => (perk.iconUrl ? "Set" : "None"),
+            },
             { header: "Recommendation", render: (perk) => perk.recommendation },
             {
               header: "",
@@ -240,7 +263,11 @@ export function PerksAdminPage() {
         <PerkForm
           key={editing === "new" ? "new" : editing.id}
           heroSlug={heroSlug}
-          perk={editing === "new" ? null : editing}
+          perk={
+            editing === "new"
+              ? null
+              : (perks.data?.find((perk) => perk.id === editing.id) ?? editing)
+          }
           onSaved={perks.reload}
           onClose={() => setEditing(null)}
         />

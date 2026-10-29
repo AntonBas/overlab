@@ -65,6 +65,7 @@ describe("accessibility", () => {
               slot: "MAJOR",
               recommendation: "RECOMMENDED",
               recommendationNote: null,
+              iconUrl: null,
             },
           ]}
         />

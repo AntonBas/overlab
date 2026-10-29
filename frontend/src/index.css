@@ -1105,3 +1105,61 @@ select:disabled {
   white-space: pre-wrap;
   color: var(--muted);
 }
+
+.portrait {
+  flex: none;
+  display: inline-block;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.portrait--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.hero-search__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.thumbnail {
+  flex: none;
+  display: inline-block;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.thumbnail--banner {
+  border-radius: var(--radius);
+}
+
+.image-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.image-upload__preview {
+  max-width: 160px;
+  max-height: 90px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.card__icon {
+  align-self: flex-start;
+}

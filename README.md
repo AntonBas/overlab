@@ -35,17 +35,23 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | Address | Purpose |
 |---|---|
 | `/admin/heroes` | Edit hero description, hide or show a hero |
-| `/admin/perks` | Perks per hero: slot, recommendation, note |
+| `/admin/perks` | Perks per hero: slot, recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
 | `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
-| `/admin/patches`, `/admin/maps` | Patch notes; map mode and image URL |
+| `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
 | `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
 | `/admin/users` | Search users, block and unblock |
 | `/admin/audit` | Audit log with filters and "was → became" changes |
 
 Forms warn about unsaved changes when you leave the page.
 
-Hero and map images are not shown (see `.tasks/current/0008-images-and-storage.md`).
+### Images
+
+Images are files in the media directory (`MEDIA_DIRECTORY`, default `./media`, `/app/media` in Docker where it is the `media` volume), split into `heroes/`, `maps/` and `perks/`. The database stores only the relative path (`maps/busan-3fa9c21e.png`); the API turns it into a URL with `MEDIA_BASE_URL` (default `/media`), so the files can later move to a CDN by changing that one value. The backend serves `/media/**` with a 7 day cache; Caddy proxies it.
+
+- **Maps and perks:** upload in the admin panel (PNG, JPEG or WebP, up to 2 MB; SVG is refused). The file name contains a short hash, so a replaced image is never served stale, and the old file is deleted.
+- **Hero portraits:** the collector can download the portraits from the statistics response (256x256 PNG) into `heroes/`. This is off by default (`COLLECTOR_DOWNLOAD_PORTRAITS=false`) because the images are Blizzard's and the licence question is still open (see `.tasks/current/0008-images-and-storage.md`). Without it the site shows the first letter of the hero name.
+- The daily backup also archives the media volume (`overlab-media-<timestamp>.tar.gz`).
 
 ## Architecture
 

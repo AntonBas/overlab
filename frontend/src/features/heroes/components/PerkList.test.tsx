@@ -12,6 +12,7 @@ function perk(overrides: Partial<Perk>): Perk {
     slot: "MAJOR",
     recommendation: "RECOMMENDED",
     recommendationNote: null,
+    iconUrl: null,
     ...overrides,
   };
 }

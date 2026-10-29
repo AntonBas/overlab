@@ -1,0 +1,1 @@
+ALTER TABLE perks ADD COLUMN icon_url VARCHAR(512);

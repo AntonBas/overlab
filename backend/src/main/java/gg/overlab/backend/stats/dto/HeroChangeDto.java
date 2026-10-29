@@ -17,5 +17,6 @@ public record HeroChangeDto(
         @Schema(description = "Pick rate after minus before, in percentage points") BigDecimal pickRateChange,
         @Schema(description = "Ban rate before. Percent, 0-100") BigDecimal banRateBefore,
         @Schema(description = "Ban rate after. Percent, 0-100") BigDecimal banRateAfter,
-        @Schema(description = "Ban rate after minus before, in percentage points") BigDecimal banRateChange) implements Serializable {
+        @Schema(description = "Ban rate after minus before, in percentage points") BigDecimal banRateChange,
+        String portraitUrl) implements Serializable {
 }

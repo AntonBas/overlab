@@ -18,7 +18,7 @@ class StatsServiceTest {
 
     private final StatsSnapshotProvider snapshotProvider = mock(StatsSnapshotProvider.class);
     private final StatsService service = new StatsService(snapshotProvider, mock(HeroStatRepository.class),
-            mock(HeroService.class), new StatsMapper());
+            mock(HeroService.class), StatsFixtures.statsMapper());
 
     private final StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC,
             Region.EUROPE);
@@ -64,6 +64,6 @@ class StatsServiceTest {
 
     private HeroStatDto row(String name, HeroRole role, String winRate, String pickRate) {
         return new HeroStatDto(name.toLowerCase(), name, role, null, new BigDecimal(winRate), new BigDecimal(pickRate),
-                null, null, null, null);
+                null, null, null, null, null);
     }
 }

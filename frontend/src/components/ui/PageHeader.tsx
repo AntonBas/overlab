@@ -4,14 +4,23 @@ interface PageHeaderProps {
   title: string;
   subtitle?: ReactNode;
   actions?: ReactNode;
+  image?: ReactNode;
 }
 
-export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  image,
+}: PageHeaderProps) {
   return (
     <header className="page-header">
-      <div>
-        <h1>{title}</h1>
-        {subtitle && <p className="muted">{subtitle}</p>}
+      <div className="page-header__title">
+        {image}
+        <div>
+          <h1>{title}</h1>
+          {subtitle && <p className="muted">{subtitle}</p>}
+        </div>
       </div>
       {actions && <div className="page-header__actions">{actions}</div>}
     </header>

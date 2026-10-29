@@ -54,7 +54,9 @@ class SecurityMatrixIntegrationTest {
                 Arguments.of(HttpMethod.POST, "/api/admin/hero-relations", 401, 403, 400),
                 Arguments.of(HttpMethod.POST, "/api/admin/collector/jobs/missing/run", 401, 403, 404),
                 Arguments.of(HttpMethod.PUT, "/api/admin/heroes/missing", 401, 403, 400),
-                Arguments.of(HttpMethod.DELETE, "/api/admin/perks/999999", 401, 403, 404));
+                Arguments.of(HttpMethod.DELETE, "/api/admin/perks/999999", 401, 403, 404),
+                Arguments.of(HttpMethod.DELETE, "/api/admin/maps/missing/image", 401, 403, 404),
+                Arguments.of(HttpMethod.DELETE, "/api/admin/perks/999999/icon", 401, 403, 404));
     }
 
     @BeforeEach

@@ -22,6 +22,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -44,6 +45,12 @@ public class ApiErrorHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiError> handleBadRequest(BadRequestException exception, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleUploadTooLarge(MaxUploadSizeExceededException exception,
+                                                         HttpServletRequest request) {
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, "The uploaded file is too large", request, List.of());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

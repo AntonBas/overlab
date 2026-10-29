@@ -137,6 +137,41 @@ export async function updateMap(
   return data;
 }
 
+function imageForm(file: File): FormData {
+  const form = new FormData();
+  form.append("file", file);
+  return form;
+}
+
+export async function uploadMapImage(
+  slug: string,
+  file: File,
+): Promise<GameMap> {
+  const { data } = await api.put<GameMap>(
+    `/admin/maps/${slug}/image`,
+    imageForm(file),
+  );
+  return data;
+}
+
+export async function removeMapImage(slug: string): Promise<GameMap> {
+  const { data } = await api.delete<GameMap>(`/admin/maps/${slug}/image`);
+  return data;
+}
+
+export async function uploadPerkIcon(id: number, file: File): Promise<Perk> {
+  const { data } = await api.put<Perk>(
+    `/admin/perks/${id}/icon`,
+    imageForm(file),
+  );
+  return data;
+}
+
+export async function removePerkIcon(id: number): Promise<Perk> {
+  const { data } = await api.delete<Perk>(`/admin/perks/${id}/icon`);
+  return data;
+}
+
 export async function fetchCollectorJobs(): Promise<CollectorJob[]> {
   const { data } = await api.get<CollectorJob[]>("/admin/collector/jobs");
   return data;

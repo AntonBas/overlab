@@ -13,6 +13,7 @@ collector:
   retention:
     detailed-days: 180
   startup-job: ${COLLECTOR_STARTUP_JOB:}
+  download-portraits: ${COLLECTOR_DOWNLOAD_PORTRAITS:false}
   jobs:
     - name: daily-overview
       cron: "0 0 4 * * *"

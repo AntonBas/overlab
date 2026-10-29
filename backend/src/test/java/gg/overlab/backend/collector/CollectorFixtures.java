@@ -17,7 +17,7 @@ final class CollectorFixtures {
 
     static CollectorProperties properties(int maxAttempts, CollectorJob... jobs) {
         return new CollectorProperties("https://overwatch.example", "OverlabTest", Duration.ZERO,
-                GameFormat.FIVE_VS_FIVE, null,
+                GameFormat.FIVE_VS_FIVE, null, false,
                 new CollectorProperties.Retry(maxAttempts, Duration.ZERO),
                 new CollectorProperties.Timeouts(Duration.ofSeconds(1), Duration.ofSeconds(1)),
                 3, new CollectorProperties.Retention(180), List.of(jobs));
@@ -40,7 +40,7 @@ final class CollectorFixtures {
         return new BlizzardRatesResponse.HeroRate(id,
                 new BlizzardRatesResponse.Cells(id, new BigDecimal(win), new BigDecimal(pick),
                         ban == null ? null : new BigDecimal(ban)),
-                new BlizzardRatesResponse.HeroInfo(id, role, "initiator"));
+                new BlizzardRatesResponse.HeroInfo(id, role, "initiator", null));
     }
 
     static final String SAMPLE_JSON = """
