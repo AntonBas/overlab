@@ -1294,7 +1294,7 @@ body.drawer-open {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 20px;
 }
 
@@ -1787,4 +1787,215 @@ input[type="range"] {
 
 .chart__tooltip-change {
   font-size: 0.8rem;
+}
+
+.hero-perks-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.hero-perks {
+  --role-color: var(--accent);
+  position: relative;
+  height: 100%;
+  padding: 16px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--role-color) 10%, transparent),
+      transparent 45%
+    ),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+
+.hero-perks::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--role-color);
+}
+
+.hero-perks:hover {
+  border-color: color-mix(in srgb, var(--role-color) 60%, var(--border));
+  transform: translateY(-2px);
+}
+
+.hero-perks--tank {
+  --role-color: var(--tank);
+}
+
+.hero-perks--damage {
+  --role-color: var(--damage);
+}
+
+.hero-perks--support {
+  --role-color: var(--support);
+}
+
+.hero-perks__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.favorite-star {
+  flex-shrink: 0;
+  padding: 4px 6px;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.favorite-star:hover,
+.favorite-star[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.hero-perks__header {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.hero-perks__header .portrait {
+  border-radius: 50%;
+  border: 2px solid var(--role-color);
+}
+
+.hero-perks__title {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.hero-perks__title strong {
+  font-size: 1.15rem;
+}
+
+.hero-perks__title .muted {
+  font-size: 0.8rem;
+}
+
+.hero-perks .perk-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 8px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero-perks .perk-group h3::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.perk-row--compact {
+  gap: 8px;
+}
+
+.perk-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: help;
+  transition: background 0.15s;
+}
+
+.perk-tile:hover {
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--text) 8%);
+}
+
+.perk-tile .perk-tile__icon {
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.perk-tile__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.perk-tile__icon {
+  flex-shrink: 0;
+}
+
+.perk-tile.perk-card--left {
+  grid-column: 1;
+}
+
+.perk-tile.perk-card--right {
+  grid-column: 2;
+}
+
+.perk-row.perk-row--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.perk-tile__body strong {
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.perk-tile .tag {
+  max-width: 100%;
+  padding: 1px 6px;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+.map-card-wrap {
+  position: relative;
+}
+
+.map-card__favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.map-card__favorite .favorite-star {
+  color: #fff;
+  background: rgb(0 0 0 / 0.55);
+  border-radius: 999px;
+}
+
+.map-card__favorite .favorite-star:hover,
+.map-card__favorite .favorite-star[aria-pressed="true"] {
+  color: var(--accent);
 }

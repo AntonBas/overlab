@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PerkRepository extends JpaRepository<Perk, Long> {
 
     @EntityGraph(attributePaths = "hero")
+    List<Perk> findAllByOrderByHeroNameAscSlotAscPositionAsc();
+
+    @EntityGraph(attributePaths = "hero")
     List<Perk> findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(String heroSlug);
 
     Optional<Perk> findByHeroIdAndNameIgnoreCase(Long heroId, String name);

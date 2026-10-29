@@ -8,6 +8,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameMap, MapMode } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
+import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
 import { usePersonalData } from "../../personal/context/usePersonalData";
 import { fetchMaps } from "../api/mapsApi";
 import { MapCard } from "../components/MapCard";
@@ -33,7 +34,7 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
     <ul className="map-grid">
       {maps.map((map) => (
         <li key={map.slug}>
-          <MapCard map={map} />
+          <MapCard map={map} withFavorite />
         </li>
       ))}
     </ul>
@@ -46,6 +47,7 @@ export function MapsPage() {
   const { favoriteMaps } = usePersonalData();
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState<MapMode | null>(null);
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
 
   const available = maps.data ?? [];
   const modes = [
@@ -55,9 +57,10 @@ export function MapsPage() {
   );
   const matching = available.filter(
     (map) =>
-      (mode === null || map.mode === mode) && matchesName(map.name, search),
+      (mode === null || map.mode === mode) &&
+      (!onlyFavorites || favoriteMaps.has(map.slug)) &&
+      matchesName(map.name, search),
   );
-  const favorites = matching.filter((map) => favoriteMaps.has(map.slug));
 
   return (
     <>
@@ -81,40 +84,41 @@ export function MapsPage() {
                 onChange={(event) => setSearch(event.target.value)}
               />
             </label>
-            <div className="segmented" role="group" aria-label="Mode">
-              <button
-                type="button"
-                className={clsx("segmented__item", {
-                  "segmented__item--active": mode === null,
-                })}
-                aria-pressed={mode === null}
-                onClick={() => setMode(null)}
-              >
-                All modes
-              </button>
-              {modes.map((value) => (
+            <div className="field">
+              <span className="field__label">Mode</span>
+              <div className="segmented" role="group" aria-label="Mode">
                 <button
-                  key={value}
                   type="button"
                   className={clsx("segmented__item", {
-                    "segmented__item--active": mode === value,
+                    "segmented__item--active": mode === null,
                   })}
-                  aria-pressed={mode === value}
-                  onClick={() => setMode(value)}
+                  aria-pressed={mode === null}
+                  onClick={() => setMode(null)}
                 >
-                  {MAP_MODE_LABELS[value]}
+                  All modes
                 </button>
-              ))}
+                {modes.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={clsx("segmented__item", {
+                      "segmented__item--active": mode === value,
+                    })}
+                    aria-pressed={mode === value}
+                    onClick={() => setMode(value)}
+                  >
+                    {MAP_MODE_LABELS[value]}
+                  </button>
+                ))}
+              </div>
             </div>
+            <FavoritesFilterButton
+              active={onlyFavorites}
+              onToggle={() => setOnlyFavorites(!onlyFavorites)}
+            />
           </div>
           {matching.length === 0 && (
             <p className="muted">No maps match these filters.</p>
-          )}
-          {favorites.length > 0 && (
-            <section className="section">
-              <h2>Favorites</h2>
-              <MapGrid maps={favorites} />
-            </section>
           )}
           {groupByMode(matching).map(([label, group]) => (
             <section key={label} className="section">

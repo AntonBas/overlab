@@ -66,7 +66,42 @@ function PerkCard({ perk }: { perk: Perk }) {
   );
 }
 
-export function PerkList({ perks }: { perks: Perk[] }) {
+function CompactPerkTile({ perk }: { perk: Perk }) {
+  const position = positionOf(perk);
+  return (
+    <li
+      className={clsx(
+        "perk-tile",
+        `perk-card--${position.toLowerCase()}`,
+        `perk-card--${perk.recommendation.toLowerCase()}`,
+      )}
+      title={perk.description ?? undefined}
+    >
+      <Thumbnail
+        url={perk.iconUrl}
+        width={44}
+        height={44}
+        className="perk-tile__icon"
+      />
+      <span className="perk-tile__body">
+        <strong>{perk.name}</strong>
+        <span
+          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
+        >
+          {RECOMMENDATION_LABELS[perk.recommendation]}
+        </span>
+      </span>
+    </li>
+  );
+}
+
+export function PerkList({
+  perks,
+  compact = false,
+}: {
+  perks: Perk[];
+  compact?: boolean;
+}) {
   return (
     <>
       {SLOT_ORDER.map((slot) => {
@@ -81,10 +116,14 @@ export function PerkList({ perks }: { perks: Perk[] }) {
         return (
           <div key={slot} className="perk-group">
             <h3>{SLOT_LABELS[slot]}</h3>
-            <ul className="perk-row">
-              {group.map((perk) => (
-                <PerkCard key={perk.id} perk={perk} />
-              ))}
+            <ul className={clsx("perk-row", { "perk-row--compact": compact })}>
+              {group.map((perk) =>
+                compact ? (
+                  <CompactPerkTile key={perk.id} perk={perk} />
+                ) : (
+                  <PerkCard key={perk.id} perk={perk} />
+                ),
+              )}
             </ul>
           </div>
         );
