@@ -34,7 +34,7 @@ public class PerkService {
     @Transactional(readOnly = true)
     public List<PerkDto> findByHero(String heroSlug) {
         findHero(heroSlug);
-        return perkRepository.findAllByHeroSlugOrderBySlotAscNameAsc(heroSlug).stream()
+        return perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(heroSlug).stream()
                 .map(perkMapper::toDto)
                 .toList();
     }
@@ -45,6 +45,9 @@ public class PerkService {
         Hero hero = findHero(request.heroSlug());
         if (perkRepository.existsByHeroIdAndNameIgnoreCase(hero.getId(), request.name().trim())) {
             throw new ConflictException("Perk already exists for this hero: " + request.name());
+        }
+        if (perkRepository.existsByHeroIdAndSlotAndPosition(hero.getId(), request.slot(), request.position())) {
+            throw new ConflictException(positionTakenMessage(request));
         }
         Perk perk = new Perk();
         perk.setHero(hero);
@@ -61,6 +64,10 @@ public class PerkService {
         Hero hero = findHero(request.heroSlug());
         if (perkRepository.existsByHeroIdAndNameIgnoreCaseAndIdNot(hero.getId(), request.name().trim(), id)) {
             throw new ConflictException("Perk already exists for this hero: " + request.name());
+        }
+        if (perkRepository.existsByHeroIdAndSlotAndPositionAndIdNot(hero.getId(), request.slot(),
+                request.position(), id)) {
+            throw new ConflictException(positionTakenMessage(request));
         }
         PerkDto before = perkMapper.toDto(perk);
         perk.setHero(hero);
@@ -100,6 +107,11 @@ public class PerkService {
         PerkDto after = perkMapper.toDto(perk);
         auditService.logUpdate(AUDIT_TYPE, id, before, after);
         return after;
+    }
+
+    private String positionTakenMessage(PerkRequest request) {
+        return "This hero already has a " + request.slot().name().toLowerCase() + " perk on the "
+                + request.position().name().toLowerCase();
     }
 
     private Hero findHero(String slug) {

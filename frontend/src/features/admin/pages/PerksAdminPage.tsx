@@ -7,7 +7,12 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { humanize } from "../../../utils/format";
-import type { Perk, PerkRecommendation, PerkSlot } from "../../../types/api";
+import type {
+  Perk,
+  PerkPosition,
+  PerkRecommendation,
+  PerkSlot,
+} from "../../../types/api";
 import {
   createPerk,
   deletePerk,
@@ -45,6 +50,9 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
   const [name, setName] = useState(perk?.name ?? "");
   const [description, setDescription] = useState(perk?.description ?? "");
   const [slot, setSlot] = useState<PerkSlot>(perk?.slot ?? "MINOR");
+  const [position, setPosition] = useState<PerkPosition>(
+    perk?.position ?? "LEFT",
+  );
   const [recommendation, setRecommendation] = useState<PerkRecommendation>(
     perk?.recommendation ?? "OPTIONAL",
   );
@@ -54,6 +62,7 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
     name !== (perk?.name ?? "") ||
     description !== (perk?.description ?? "") ||
     slot !== (perk?.slot ?? "MINOR") ||
+    position !== (perk?.position ?? "LEFT") ||
     recommendation !== (perk?.recommendation ?? "OPTIONAL") ||
     note !== (perk?.recommendationNote ?? "");
   useUnsavedChanges(dirty && !save.success);
@@ -65,6 +74,7 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
       name: name.trim(),
       description: description.trim() === "" ? null : description,
       slot,
+      position,
       recommendation,
       recommendationNote: note.trim() === "" ? null : note,
     };
@@ -104,6 +114,16 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
       >
         <option value="MINOR">Minor</option>
         <option value="MAJOR">Major</option>
+      </SelectField>
+      <SelectField
+        label="Position"
+        name="position"
+        value={position}
+        error={save.fieldErrors.position}
+        onChange={(event) => setPosition(event.target.value as PerkPosition)}
+      >
+        <option value="LEFT">Left</option>
+        <option value="RIGHT">Right</option>
       </SelectField>
       <SelectField
         label="Recommendation"
@@ -270,6 +290,7 @@ export function PerksAdminPage() {
               ),
             },
             { header: "Slot", render: (perk) => humanize(perk.slot) },
+            { header: "Position", render: (perk) => humanize(perk.position) },
             {
               header: "Icon",
               render: (perk) => (perk.iconUrl ? "Set" : "None"),

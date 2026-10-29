@@ -144,6 +144,7 @@ export interface StatsComparison {
 }
 
 export type PerkSlot = "MINOR" | "MAJOR";
+export type PerkPosition = "LEFT" | "RIGHT";
 export type PerkRecommendation = "RECOMMENDED" | "OPTIONAL" | "AVOID";
 
 export interface Perk {
@@ -152,6 +153,7 @@ export interface Perk {
   name: string;
   description: string | null;
   slot: PerkSlot;
+  position: PerkPosition;
   recommendation: PerkRecommendation;
   recommendationNote: string | null;
   iconUrl: string | null;

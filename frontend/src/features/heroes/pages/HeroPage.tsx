@@ -4,11 +4,9 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
-import { RateBar } from "../../../components/ui/RateBar";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
-import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
 import { HeroMapPicks } from "../components/HeroMapPicks";
@@ -96,8 +94,12 @@ export function HeroPage() {
         <p className="prose">{hero.data.description}</p>
       )}
 
-      <section className="section">
-        <h2>Statistics</h2>
+      <HeroHistorySection
+        title="Statistics"
+        slug={slug}
+        queue={queue}
+        current={overall}
+      >
         {stats.loading && <Spinner label="Loading statistics" />}
         {stats.error &&
           (stats.error.status === 404 ? (
@@ -105,33 +107,17 @@ export function HeroPage() {
           ) : (
             <ErrorMessage failure={stats.error} onRetry={stats.reload} />
           ))}
-        {overall && (
-          <div className="stat-cards">
-            <div className="stat-card">
-              <span className="muted">Win rate</span>
-              <RateBar value={overall.winRate} tone="win" />
-            </div>
-            <div className="stat-card">
-              <span className="muted">Pick rate</span>
-              <RateBar value={overall.pickRate} tone="pick" max={40} />
-            </div>
-            {queue === "COMPETITIVE" && (
-              <div className="stat-card">
-                <span className="muted">Ban rate</span>
-                <RateBar value={overall.banRate} tone="ban" max={50} />
-              </div>
-            )}
-          </div>
-        )}
-        {overall && (
-          <p className="muted footnote">
-            All ranks, PC, Europe. Data collected{" "}
-            <CollectedAt value={overall.capturedAt} />.
-          </p>
-        )}
-      </section>
+      </HeroHistorySection>
 
-      <HeroHistorySection slug={slug} queue={queue} />
+      {perks.data && perks.data.length > 0 && (
+        <section className="section">
+          <h2>Perks</h2>
+          <PerkList perks={perks.data} />
+          <p>
+            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
+          </p>
+        </section>
+      )}
 
       {stats.data && stats.data.maps.length > 0 && (
         <HeroMapPicks
@@ -146,16 +132,6 @@ export function HeroPage() {
         <section className="section">
           <h2>By map</h2>
           <HeroMapTable maps={stats.data.maps} heroSlug={slug} />
-        </section>
-      )}
-
-      {perks.data && perks.data.length > 0 && (
-        <section className="section">
-          <h2>Perks</h2>
-          <PerkList perks={perks.data} />
-          <p>
-            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
-          </p>
         </section>
       )}
 

@@ -1,6 +1,7 @@
 import type {
   Hero,
   MapMode,
+  PerkPosition,
   PerkRecommendation,
   PerkSlot,
 } from "../../types/api";
@@ -33,6 +34,7 @@ export interface PerkPayload {
   name: string;
   description: string | null;
   slot: PerkSlot;
+  position: PerkPosition;
   recommendation: PerkRecommendation;
   recommendationNote: string | null;
 }

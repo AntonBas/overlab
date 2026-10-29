@@ -35,7 +35,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | Address | Purpose |
 |---|---|
 | `/admin/heroes` | Edit hero description, hide or show a hero |
-| `/admin/perks` | Perks per hero: slot, recommendation, note, icon upload |
+| `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
 | `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
@@ -50,7 +50,7 @@ Create and edit forms open in a side panel over the table (Esc, the close button
 Images are files in the media directory (`MEDIA_DIRECTORY`, default `./media`, `/app/media` in Docker where it is the `media` volume), split into `heroes/`, `maps/` and `perks/`. The database stores only the relative path (`maps/busan-3fa9c21e.png`); the API turns it into a URL with `MEDIA_BASE_URL` (default `/media`), so the files can later move to a CDN by changing that one value. The backend serves `/media/**` with a 7 day cache; Caddy proxies it.
 
 - **Role icons:** with the same flag the collector saves the three role icons (SVG, checked for scripts and handlers) as `roles/tank.svg`, `roles/damage.svg` and `roles/support.svg`; the site uses them next to hero names and falls back to its own simple icons when the files are missing.
-- **Perk import:** with `COLLECTOR_IMPORT_PERKS=true` the button "Import from Blizzard" on `/admin/perks` reads the perk section of every hero page (`/en-us/heroes/<slug>/`, about 3 minutes with the collector pause) and creates the missing perks with their description, slot and icon. New perks start as `OPTIONAL`; recommendations and notes stay yours, and an existing perk keeps its text, slot and icon (only a missing description or icon is filled). The page is HTML, so the parser (`HeroPerkParser`) may need an update when Blizzard changes the markup. Off by default for the same licence reason as portraits.
+- **Perk import:** with `COLLECTOR_IMPORT_PERKS=true` the button "Import from Blizzard" on `/admin/perks` reads the perk section of every hero page (`/en-us/heroes/<slug>/`, about 3 minutes with the collector pause) and creates the missing perks with their description, slot, left or right position and icon. New perks start as `OPTIONAL`; recommendations and notes stay yours, and an existing perk keeps its text, slot and icon (only a missing description or icon is filled). The page is HTML, so the parser (`HeroPerkParser`) may need an update when Blizzard changes the markup. Off by default for the same licence reason as portraits.
 - **Maps and perks:** upload in the admin panel (PNG, JPEG or WebP, up to 2 MB; SVG is refused). The file name contains a short hash, so a replaced image is never served stale, and the old file is deleted.
 - **Hero portraits:** the collector can download the portraits from the statistics response (256x256 PNG) into `heroes/`. This is off by default (`COLLECTOR_DOWNLOAD_PORTRAITS=false`) because the images are Blizzard's and the licence question is still open (see `.tasks/current/0008-images-and-storage.md`). Without it the site shows the first letter of the hero name.
 - The daily backup also archives the media volume (`overlab-media-<timestamp>.tar.gz`).

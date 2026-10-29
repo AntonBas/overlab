@@ -44,6 +44,10 @@ public class Perk extends TimestampedEntity {
     private PerkSlot slot;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 8)
+    private PerkPosition position = PerkPosition.LEFT;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private PerkRecommendation recommendation;
 

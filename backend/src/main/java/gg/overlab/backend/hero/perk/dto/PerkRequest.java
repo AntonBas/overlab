@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.perk.dto;
 
+import gg.overlab.backend.hero.perk.PerkPosition;
 import gg.overlab.backend.hero.perk.PerkRecommendation;
 import gg.overlab.backend.hero.perk.PerkSlot;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ public record PerkRequest(
         @NotBlank @Size(max = 128) String name,
         @Size(max = 2000) String description,
         @NotNull PerkSlot slot,
+        @NotNull PerkPosition position,
         @NotNull PerkRecommendation recommendation,
         @Size(max = 2000) String recommendationNote) {
 }
