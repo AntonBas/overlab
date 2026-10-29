@@ -43,7 +43,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/users` | Search users, block and unblock |
 | `/admin/audit` | Audit log with filters and "was → became" changes |
 
-Forms warn about unsaved changes when you leave the page.
+Create and edit forms open in a side panel over the table (Esc, the close button or a click outside closes it; unsaved changes ask for confirmation). Forms warn about unsaved changes when you leave the page.
 
 ### Images
 

@@ -12,6 +12,7 @@ import {
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { SelectField, TextAreaField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useHeroOptions } from "../components/useHeroOptions";
@@ -269,15 +270,17 @@ export function RelationsAdminPage() {
         />
       )}
       {editing && heroes.data && (
-        <RelationForm
-          key={editing === "new" ? "new" : editing.id}
-          relation={editing === "new" ? null : editing}
-          heroes={heroes.data}
-          existing={everything.data ?? []}
-          defaultHero={filter}
-          onSaved={reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Hero relation" onClose={() => setEditing(null)}>
+          <RelationForm
+            key={editing === "new" ? "new" : editing.id}
+            relation={editing === "new" ? null : editing}
+            heroes={heroes.data}
+            existing={everything.data ?? []}
+            defaultHero={filter}
+            onSaved={reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
       {deleting && (
         <ConfirmDialog
