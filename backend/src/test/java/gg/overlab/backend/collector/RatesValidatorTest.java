@@ -62,7 +62,7 @@ class RatesValidatorTest {
     @Test
     void rejectsEntryWithoutCells() {
         List<BlizzardRatesResponse.HeroRate> rates = replaceFirst(new BlizzardRatesResponse.HeroRate("hero-0", null,
-                new BlizzardRatesResponse.HeroInfo("Hero", "TANK", null, null)));
+                new BlizzardRatesResponse.HeroInfo("Hero", "TANK", null, null, null)));
 
         assertThatThrownBy(() -> validator.validate(rates)).isInstanceOf(InvalidSnapshotException.class);
     }

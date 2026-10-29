@@ -1,6 +1,8 @@
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 import type { HeroRole } from "../../types/api";
 import { ROLE_LABELS } from "../../utils/format";
+import { checkRoleIcon, roleIconUrl } from "../../utils/roleIcons";
 
 interface RoleBadgeProps {
   role: HeroRole;
@@ -8,6 +10,31 @@ interface RoleBadgeProps {
 }
 
 function RoleIcon({ role }: { role: HeroRole }) {
+  const [imageAvailable, setImageAvailable] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    checkRoleIcon(role).then((available) => {
+      if (active) {
+        setImageAvailable(available);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [role]);
+
+  if (imageAvailable) {
+    return (
+      <img
+        className="role-badge__image"
+        src={roleIconUrl(role)}
+        alt=""
+        width={22}
+        height={22}
+      />
+    );
+  }
   return (
     <svg
       className="role-badge__icon"

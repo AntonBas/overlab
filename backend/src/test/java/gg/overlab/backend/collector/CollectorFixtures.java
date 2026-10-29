@@ -40,7 +40,7 @@ final class CollectorFixtures {
         return new BlizzardRatesResponse.HeroRate(id,
                 new BlizzardRatesResponse.Cells(id, new BigDecimal(win), new BigDecimal(pick),
                         ban == null ? null : new BigDecimal(ban)),
-                new BlizzardRatesResponse.HeroInfo(id, role, "initiator", null));
+                new BlizzardRatesResponse.HeroInfo(id, role, "initiator", null, null));
     }
 
     static final String WITHOUT_BAN_RATE_JSON = """
