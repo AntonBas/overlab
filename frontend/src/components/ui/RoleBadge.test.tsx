@@ -34,11 +34,9 @@ describe("RoleBadge", () => {
     const { container } = render(<RoleBadge role="TANK" />);
 
     await waitFor(() =>
-      expect(container.querySelector("img")).toHaveAttribute(
-        "src",
-        "/media/roles/tank.svg",
-      ),
+      expect(container.querySelector(".role-badge__image")).not.toBeNull(),
     );
+    expect(container.querySelector("svg.role-badge__icon")).toBeNull();
     expect(screen.getByText("Tank")).toBeInTheDocument();
   });
 
@@ -50,13 +48,13 @@ describe("RoleBadge", () => {
     await waitFor(() =>
       expect(container.querySelector("svg.role-badge__icon")).not.toBeNull(),
     );
-    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector(".role-badge__image")).toBeNull();
   });
 
   it("only names the role for screen readers in the compact form", () => {
     const { container } = render(<RoleBadge role="SUPPORT" compact />);
 
     expect(screen.getByText("Support")).toHaveClass("visually-hidden");
-    expect(container.querySelector("svg, img")).not.toBeNull();
+    expect(container.querySelector("svg")).not.toBeNull();
   });
 });
