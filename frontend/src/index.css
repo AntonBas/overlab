@@ -1244,3 +1244,8 @@ body.drawer-open {
     animation: none;
   }
 }
+
+.role-badge__image {
+  flex: none;
+  display: inline-block;
+}

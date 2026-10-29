@@ -24,6 +24,6 @@ public record BlizzardRatesResponse(RatesPayload rates, List<Column> columns) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record HeroInfo(String name, String role, String subrole, String portrait) {
+    public record HeroInfo(String name, String role, String subrole, String portrait, String roleIcon) {
     }
 }
