@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useAuth } from "../../auth/context/useAuth";
-import { ForbiddenPage } from "../pages/ForbiddenPage";
+import { NotFoundPage } from "../../../pages/NotFoundPage";
 
 export function RequireAdmin({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -21,7 +21,7 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
     );
   }
   if (user.role !== "ADMIN") {
-    return <ForbiddenPage />;
+    return <NotFoundPage />;
   }
   return <>{children}</>;
 }

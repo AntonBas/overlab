@@ -55,12 +55,13 @@ describe("RequireAdmin", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows an access denied page to regular users", () => {
+  it("shows the not found page to regular users so the admin area stays hidden", () => {
     auth.state = { user: { role: "USER" }, loading: false };
     renderGuarded();
     expect(
-      screen.getByRole("heading", { name: "Access denied" }),
+      screen.getByRole("heading", { name: "Page not found" }),
     ).toBeInTheDocument();
+    expect(screen.queryByText("Access denied")).not.toBeInTheDocument();
     expect(screen.queryByText("admin content")).not.toBeInTheDocument();
   });
 
