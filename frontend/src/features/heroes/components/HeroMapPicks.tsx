@@ -133,10 +133,10 @@ export function HeroMapPicks({
         </section>
       </div>
       <p className="muted footnote">
-        Each map shows {heroName}&apos;s win rate there, how often he is picked
-        and, as the coloured number, how much his win rate on that map differs
-        from his all-maps win rate. Both lists are weighted by pick rate so rare
-        picks do not top them by chance.
+        Each map shows the win rate of {heroName} there, how often the hero is
+        picked and, as the coloured number, how much the win rate on that map
+        differs from the all-maps win rate. Both lists are weighted by pick rate
+        so rare picks do not top them by chance.
       </p>
     </section>
   );

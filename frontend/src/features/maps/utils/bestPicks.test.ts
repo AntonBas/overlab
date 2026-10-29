@@ -46,7 +46,7 @@ describe("picksByRole", () => {
     expect(slugs(tank.gainers)).toEqual(["improved"]);
   });
 
-  it("never lists a hero as a gainer when the map costs him win rate", () => {
+  it("never lists a hero as a gainer when the map costs win rate", () => {
     const heroes = [
       heroStat({
         heroSlug: "loses",
@@ -99,7 +99,7 @@ describe("picksByRole", () => {
     expect(slugs(tank.strongest).slice(0, 2)).toEqual(["common", "mid"]);
   });
 
-  it("ranks a hero picked about 5 percent of the time by his real gain, not behind a hugely popular one", () => {
+  it("ranks a hero picked about 5 percent of the time by the real gain, not behind a hugely popular one", () => {
     const heroes = [
       heroStat({
         heroSlug: "popular",
@@ -158,7 +158,7 @@ describe("picksByRole", () => {
     expect(slugs(support.weakest)).toEqual(["low", "drop", "ok"]);
   });
 
-  it("does not call a hero a dropper when the map helps him", () => {
+  it("does not call a hero a dropper when the map helps", () => {
     const heroes = [
       heroStat({
         heroSlug: "helped",
