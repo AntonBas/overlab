@@ -41,12 +41,14 @@ export function MapsPage() {
         groupByMode(maps.data).map(([label, group]) => (
           <section key={label} className="section">
             <h2>{label}</h2>
-            <ul className="chip-list">
+            <ul className="map-grid">
               {group.map((map) => (
                 <li key={map.slug}>
-                  <Link className="chip" to={`/maps/${map.slug}`}>
-                    <Thumbnail url={map.imageUrl} width={48} height={27} />
-                    {map.name}
+                  <Link className="map-card" to={`/maps/${map.slug}`}>
+                    <span className="map-card__image">
+                      <Thumbnail url={map.imageUrl} width={480} height={300} />
+                    </span>
+                    <span className="map-card__name">{map.name}</span>
                   </Link>
                 </li>
               ))}

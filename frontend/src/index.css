@@ -1288,3 +1288,122 @@ body.drawer-open {
   text-transform: none;
   letter-spacing: 0;
 }
+
+.map-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.map-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: #fff;
+  text-decoration: none;
+}
+
+.map-card:hover,
+.map-card:focus-visible {
+  border-color: var(--accent);
+}
+
+.map-card__image {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a3446, #151a24);
+}
+
+.map-card__image .thumbnail {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  transition: transform 0.25s ease-out;
+}
+
+.map-card:hover .map-card__image .thumbnail {
+  transform: scale(1.05);
+}
+
+.map-card__name {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 40px 16px 14px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.85));
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
+}
+
+.map-banner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 220px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #2a3446, #151a24);
+  color: #fff;
+}
+
+.map-banner__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.map-banner__content {
+  position: relative;
+  width: 100%;
+  padding: 80px 24px 20px;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.85));
+  text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
+}
+
+.map-banner__content h1 {
+  margin: 0 0 4px;
+  font-size: 2.2rem;
+}
+
+.map-banner__content p {
+  margin: 0;
+  max-width: 60ch;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.map-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 900px) {
+  .map-banner {
+    min-height: 340px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-card__image .thumbnail {
+    transition: none;
+  }
+
+  .map-card:hover .map-card__image .thumbnail {
+    transform: none;
+  }
+}
