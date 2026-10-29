@@ -22,7 +22,7 @@ function slugs(entries: HeroMapStat[]): (string | null)[] {
 }
 
 describe("mapPicks", () => {
-  it("lists the maps where the hero gains most and where he wins most", () => {
+  it("lists the maps where the hero gains most and where the win rate is highest", () => {
     const picks = mapPicks([
       entry({ mapSlug: "a", winRate: 56, winRateDelta: -1 }),
       entry({ mapSlug: "b", winRate: 46, winRateDelta: 3 }),
@@ -33,7 +33,7 @@ describe("mapPicks", () => {
     expect(picks.strongest[0].mapSlug).toBe("a");
   });
 
-  it("lists the maps where the hero drops most and where he wins least", () => {
+  it("lists the maps where the hero drops most and where the win rate is lowest", () => {
     const picks = mapPicks([
       entry({ mapSlug: "a", winRate: 44, winRateDelta: 1 }),
       entry({ mapSlug: "b", winRate: 52, winRateDelta: -4 }),
