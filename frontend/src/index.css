@@ -1655,13 +1655,45 @@ input[type="range"] {
   margin: 12px 0;
 }
 
-.stat-current {
-  display: flex;
+.hero-tags {
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  background: var(--surface);
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.stat-chips {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-left-width: 3px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stat-chip strong {
+  color: var(--text);
+}
+
+.stat-chip--win {
+  border-left-color: var(--bar-win);
+}
+
+.stat-chip--pick {
+  border-left-color: var(--bar-pick);
+}
+
+.stat-chip--ban {
+  border-left-color: var(--bar-ban);
 }

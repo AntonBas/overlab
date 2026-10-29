@@ -23,6 +23,7 @@ import {
   fetchSynergies,
 } from "../api/heroesApi";
 import { HeroMapTable } from "../components/HeroMapTable";
+import { StatChips } from "../components/StatChips";
 import { PerkList } from "../components/PerkList";
 import { RelatedHeroes } from "../components/RelatedHeroes";
 
@@ -74,7 +75,17 @@ export function HeroPage() {
           />
         }
         subtitle={
-          <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+          <span className="hero-tags">
+            <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+            {overall && (
+              <StatChips
+                winRate={overall.winRate}
+                pickRate={overall.pickRate}
+                banRate={overall.banRate}
+                showBan={queue === "COMPETITIVE"}
+              />
+            )}
+          </span>
         }
         actions={
           <>
@@ -94,21 +105,6 @@ export function HeroPage() {
         <p className="prose">{hero.data.description}</p>
       )}
 
-      <HeroHistorySection
-        title="Statistics"
-        slug={slug}
-        queue={queue}
-        current={overall}
-      >
-        {stats.loading && <Spinner label="Loading statistics" />}
-        {stats.error &&
-          (stats.error.status === 404 ? (
-            <EmptyState>No statistics collected for this hero yet.</EmptyState>
-          ) : (
-            <ErrorMessage failure={stats.error} onRetry={stats.reload} />
-          ))}
-      </HeroHistorySection>
-
       {perks.data && perks.data.length > 0 && (
         <section className="section">
           <h2>Perks</h2>
@@ -127,6 +123,21 @@ export function HeroPage() {
           linkSuffix={queue === "QUICK_PLAY" ? "?queue=quick_play" : ""}
         />
       )}
+
+      <HeroHistorySection
+        title="Statistics"
+        slug={slug}
+        queue={queue}
+        current={overall}
+      >
+        {stats.loading && <Spinner label="Loading statistics" />}
+        {stats.error &&
+          (stats.error.status === 404 ? (
+            <EmptyState>No statistics collected for this hero yet.</EmptyState>
+          ) : (
+            <ErrorMessage failure={stats.error} onRetry={stats.reload} />
+          ))}
+      </HeroHistorySection>
 
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">
