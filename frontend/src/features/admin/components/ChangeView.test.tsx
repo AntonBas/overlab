@@ -20,6 +20,17 @@ describe("ChangeView", () => {
     expect(screen.getByText('"Ana"')).toBeInTheDocument();
   });
 
+  it("shows enum values as readable text", () => {
+    render(
+      <ChangeView
+        action="UPDATE"
+        changes={{ recommendation: { from: "OPTIONAL", to: "RECOMMENDED" } }}
+      />,
+    );
+    expect(screen.getByText('"Optional"').tagName).toBe("DEL");
+    expect(screen.getByText('"Recommended"').tagName).toBe("INS");
+  });
+
   it("renders nothing without changes", () => {
     const { container } = render(<ChangeView action="LOGIN" changes={null} />);
     expect(container).toBeEmptyDOMElement();

@@ -1,6 +1,12 @@
+import { humanize } from "../../../utils/format";
 import type { AuditAction } from "../types";
 
+const ENUM_VALUE = /^[A-Z][A-Z_]+$/;
+
 function show(value: unknown): string {
+  if (typeof value === "string" && ENUM_VALUE.test(value)) {
+    return JSON.stringify(humanize(value));
+  }
   return value === undefined ? "" : JSON.stringify(value);
 }
 

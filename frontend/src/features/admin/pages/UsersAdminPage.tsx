@@ -5,6 +5,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { humanize } from "../../../utils/format";
 import { useAuth } from "../../auth/context/useAuth";
 import { fetchAdminUsers, setUserEnabled } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -92,8 +93,8 @@ export function UsersAdminPage() {
                     {entry.displayName}
                     <span className="muted"> {entry.email}</span>
                   </th>
-                  <td>{entry.role}</td>
-                  <td>{entry.provider}</td>
+                  <td>{humanize(entry.role)}</td>
+                  <td>{humanize(entry.provider)}</td>
                   <td>
                     {entry.lastLoginAt
                       ? new Date(entry.lastLoginAt).toLocaleString()

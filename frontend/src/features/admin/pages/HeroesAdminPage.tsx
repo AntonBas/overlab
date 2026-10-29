@@ -5,6 +5,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { ROLE_LABELS } from "../../../utils/format";
 import { fetchAdminHeroes, updateHero } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
@@ -107,7 +108,7 @@ export function HeroesAdminPage() {
                 </span>
               ),
             },
-            { header: "Role", render: (hero) => hero.role },
+            { header: "Role", render: (hero) => ROLE_LABELS[hero.role] },
             {
               header: "Status",
               render: (hero) => (hero.active ? "Active" : "Inactive"),

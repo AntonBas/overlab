@@ -4,6 +4,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { humanize } from "../../../utils/format";
 import {
   fetchCollectorJobs,
   fetchCollectorRuns,
@@ -99,8 +100,8 @@ export function CollectorAdminPage() {
           emptyMessage="No runs yet."
           columns={[
             { header: "Job", render: (run) => run.jobName },
-            { header: "Trigger", render: (run) => run.trigger },
-            { header: "Status", render: (run) => run.status },
+            { header: "Trigger", render: (run) => humanize(run.trigger) },
+            { header: "Status", render: (run) => humanize(run.status) },
             {
               header: "Started",
               render: (run) => new Date(run.startedAt).toLocaleString(),

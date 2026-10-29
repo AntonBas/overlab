@@ -5,6 +5,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { humanize } from "../../../utils/format";
 import { fetchAuditLog } from "../api/adminApi";
 import { ChangeView } from "../components/ChangeView";
 import { SelectField } from "../components/Fields";
@@ -65,7 +66,7 @@ export function AuditAdminPage() {
           <option value="">Any</option>
           {ACTIONS.map((value) => (
             <option key={value} value={value}>
-              {value}
+              {humanize(value)}
             </option>
           ))}
         </SelectField>
@@ -124,7 +125,7 @@ export function AuditAdminPage() {
                       <span className="muted"> ({entry.actorRole})</span>
                     )}
                   </td>
-                  <td>{entry.action}</td>
+                  <td>{humanize(entry.action)}</td>
                   <td>
                     {entry.entityType}
                     {entry.entityId && (
