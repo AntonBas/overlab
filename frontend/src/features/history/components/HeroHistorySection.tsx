@@ -18,10 +18,15 @@ import { LineChart } from "./LineChart";
 
 interface HeroHistorySectionProps {
   slug: string;
+  mapSlug?: string;
   queue: GameQueue;
 }
 
-export function HeroHistorySection({ slug, queue }: HeroHistorySectionProps) {
+export function HeroHistorySection({
+  slug,
+  mapSlug,
+  queue,
+}: HeroHistorySectionProps) {
   const [periodId, setPeriodId] = useState<HistoryPeriodId>("30d");
   const period = HISTORY_PERIODS.find((entry) => entry.id === periodId)!;
   const range = useMemo(() => periodRange(period.days), [period.days]);
@@ -32,9 +37,10 @@ export function HeroHistorySection({ slug, queue }: HeroHistorySectionProps) {
         tier: "ALL",
         platform: "PC",
         region: "EUROPE",
+        map: mapSlug,
         ...range,
       }),
-    [slug, queue, range],
+    [slug, mapSlug, queue, range],
     { keepPrevious: true },
   );
   const patches = useFetch(fetchPatches, []);

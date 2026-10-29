@@ -11,6 +11,7 @@ import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
 import { fetchGuides } from "../../guides/api/guidesApi";
+import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { GuideList } from "../../guides/components/GuideList";
 import { fetchMap } from "../../maps/api/mapsApi";
 import { fetchHeroMapStats } from "../../stats/api/statsApi";
@@ -123,6 +124,7 @@ export function HeroOnMapPage() {
           </>
         )}
       </section>
+      <HeroHistorySection slug={heroSlug} mapSlug={mapSlug} queue={queue} />
       <section className="section">
         <h2>
           Video guides for {hero.data.name} on {map.data.name}
