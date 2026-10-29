@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
@@ -6,7 +6,14 @@ import { renderWithRouter } from "../../../test/render";
 const personal = vi.hoisted(() => ({ favoriteMaps: new Set<string>() }));
 
 vi.mock("../../personal/context/usePersonalData", () => ({
-  usePersonalData: () => ({ favoriteMaps: personal.favoriteMaps }),
+  usePersonalData: () => ({
+    favoriteMaps: personal.favoriteMaps,
+    toggleMapFavorite: vi.fn(),
+    failure: null,
+  }),
+}));
+vi.mock("../../auth/context/useAuth", () => ({
+  useAuth: () => ({ user: { id: 1 } }),
 }));
 vi.mock("../api/mapsApi", () => ({
   fetchMaps: vi.fn(() =>
@@ -89,17 +96,16 @@ describe("MapsPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("puts favorite maps first", async () => {
+  it("shows only favorite maps when asked", async () => {
     personal.favoriteMaps = new Set(["havana"]);
     renderWithRouter(<MapsPage />);
+    await screen.findByRole("link", { name: "Busan" });
 
-    const favorites = (
-      await screen.findByRole("heading", { name: "Favorites" })
-    ).closest("section")!;
+    await userEvent.click(
+      screen.getByRole("button", { name: /only favorites/i }),
+    );
 
-    expect(
-      within(favorites).getByRole("link", { name: "Havana" }),
-    ).toBeVisible();
-    expect(within(favorites).queryByRole("link", { name: "Busan" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Havana" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Busan" })).toBeNull();
   });
 });

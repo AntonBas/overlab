@@ -27,6 +27,12 @@ public class PerkController {
 
     private final PerkService perkService;
 
+    @Operation(summary = "List perks of all heroes")
+    @GetMapping("/api/perks")
+    public List<PerkDto> findAll() {
+        return perkService.findAll();
+    }
+
     @Operation(summary = "List perks of a hero")
     @GetMapping("/api/heroes/{slug}/perks")
     public List<PerkDto> findByHero(@PathVariable String slug) {

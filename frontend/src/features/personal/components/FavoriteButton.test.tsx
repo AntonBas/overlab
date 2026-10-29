@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 import type { User } from "../../../types/api";
@@ -71,11 +72,24 @@ describe("FavoriteButton", () => {
     vi.mocked(removeFavoriteHero).mockReset();
   });
 
-  it("renders nothing for anonymous visitors", () => {
+  it("sends anonymous visitors to the login page", async () => {
     currentUser = null;
-    renderButton();
+    renderWithRouter(
+      <Routes>
+        <Route
+          path="/"
+          element={<FavoriteButton kind="hero" slug="ana" name="Ana" />}
+        />
+        <Route path="/login" element={<p>Login page</p>} />
+      </Routes>,
+    );
 
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add Ana to favorites" }),
+    );
+
+    expect(screen.getByText("Login page")).toBeInTheDocument();
+    expect(addFavoriteHero).not.toHaveBeenCalled();
   });
 
   it("marks the hero as favorite right away", async () => {

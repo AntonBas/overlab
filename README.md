@@ -17,6 +17,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |
 | `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
+| `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
 | `/heroes/:slug/counters`, `/heroes/:slug/perks` | Full counters and synergies, full perks |
 | `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
 | `/patches`, `/patches/:slug` | Patch list, notes and the change in statistics around the release |
@@ -137,6 +138,7 @@ Curated content, also public `GET` requests:
 
 | Endpoint | Description |
 |---|---|
+| `/api/perks` | Perks of all heroes |
 | `/api/heroes/{slug}/perks` | Perks with a recommendation (`RECOMMENDED`, `OPTIONAL`, `AVOID`) |
 | `/api/heroes/{slug}/counters` | Heroes this hero counters and heroes that counter it |
 | `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
