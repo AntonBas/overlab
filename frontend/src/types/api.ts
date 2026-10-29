@@ -63,6 +63,7 @@ export interface HeroStat {
   winRateDelta: number | null;
   pickRateDelta: number | null;
   banRateDelta: number | null;
+  portraitUrl: string | null;
 }
 
 export interface StatsSnapshot {
@@ -153,6 +154,7 @@ export interface Perk {
   slot: PerkSlot;
   recommendation: PerkRecommendation;
   recommendationNote: string | null;
+  iconUrl: string | null;
 }
 
 export interface RelatedHero {

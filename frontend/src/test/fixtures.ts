@@ -4,6 +4,7 @@ export function heroStat(overrides: Partial<HeroStat> = {}): HeroStat {
   return {
     heroSlug: "ana",
     heroName: "Ana",
+    portraitUrl: null,
     role: "SUPPORT",
     subrole: "tactician",
     winRate: 47.1,

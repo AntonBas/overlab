@@ -59,7 +59,6 @@ export interface PatchPayload {
 
 export interface MapPayload {
   mode: MapMode | null;
-  imageUrl: string | null;
 }
 
 export type CollectorRunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";

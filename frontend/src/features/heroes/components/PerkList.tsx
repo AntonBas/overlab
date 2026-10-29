@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { Perk, PerkRecommendation, PerkSlot } from "../../../types/api";
 
 const SLOT_ORDER: PerkSlot[] = ["MAJOR", "MINOR"];
@@ -26,6 +27,12 @@ export function PerkList({ perks }: { perks: Perk[] }) {
             <ul className="card-list">
               {group.map((perk) => (
                 <li key={perk.id} className="card">
+                  <Thumbnail
+                    url={perk.iconUrl}
+                    width={40}
+                    height={40}
+                    className="card__icon"
+                  />
                   <span className="card__body">
                     <strong>{perk.name}</strong>
                     {perk.description && (

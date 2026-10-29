@@ -2,10 +2,15 @@ package gg.overlab.backend.hero;
 
 import gg.overlab.backend.hero.dto.HeroAdminDto;
 import gg.overlab.backend.hero.dto.HeroDto;
+import gg.overlab.backend.media.MediaUrlResolver;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class HeroMapper {
+
+    private final MediaUrlResolver mediaUrlResolver;
 
     public HeroDto toDto(Hero hero) {
         return new HeroDto(
@@ -14,7 +19,7 @@ public class HeroMapper {
                 hero.getRole(),
                 hero.getSubrole(),
                 hero.getDescription(),
-                hero.getPortraitUrl());
+                mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
     public HeroAdminDto toAdminDto(Hero hero) {

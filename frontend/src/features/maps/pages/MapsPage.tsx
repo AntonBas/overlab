@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameMap } from "../../../types/api";
@@ -44,6 +45,7 @@ export function MapsPage() {
               {group.map((map) => (
                 <li key={map.slug}>
                   <Link className="chip" to={`/maps/${map.slug}`}>
+                    <Thumbnail url={map.imageUrl} width={48} height={27} />
                     {map.name}
                   </Link>
                 </li>

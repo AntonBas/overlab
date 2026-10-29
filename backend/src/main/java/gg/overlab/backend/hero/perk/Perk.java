@@ -49,4 +49,7 @@ public class Perk extends TimestampedEntity {
 
     @Column(name = "recommendation_note", columnDefinition = "text")
     private String recommendationNote;
+
+    @Column(name = "icon_url", length = 512)
+    private String iconUrl;
 }

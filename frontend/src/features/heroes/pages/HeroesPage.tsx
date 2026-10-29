@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
@@ -34,6 +35,7 @@ export function HeroesPage() {
                 .map((hero) => (
                   <li key={hero.slug}>
                     <Link className="chip" to={`/heroes/${hero.slug}`}>
+                      <HeroPortrait name={hero.name} url={hero.portraitUrl} />
                       <RoleBadge role={hero.role} compact />
                       {hero.name}
                     </Link>

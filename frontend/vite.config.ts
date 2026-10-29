@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": backend,
+      "/media": backend,
       "/oauth2": backend,
       "/login/oauth2": backend,
     },

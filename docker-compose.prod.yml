@@ -50,7 +50,10 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       COLLECTOR_GAME_FORMAT: ${COLLECTOR_GAME_FORMAT:-FIVE_VS_FIVE}
+      COLLECTOR_DOWNLOAD_PORTRAITS: ${COLLECTOR_DOWNLOAD_PORTRAITS:-false}
       TZ: ${TZ:-Europe/Kyiv}
+    volumes:
+      - media:/app/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,6 +111,7 @@ services:
       RCLONE_CONFIG: /config/rclone/rclone.conf
     volumes:
       - ${BACKUP_PATH:-./backups}:/backups
+      - media:/media:ro
       - ${RCLONE_CONFIG_DIR:-./docker/backup/rclone}:/config/rclone:ro
     depends_on:
       postgres:
@@ -150,6 +154,7 @@ networks:
     driver: bridge
 
 volumes:
+  media:
   pgdata:
   caddydata:
   caddyconfig:

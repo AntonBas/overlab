@@ -1,6 +1,7 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RateBar } from "../../../components/ui/RateBar";
@@ -66,6 +67,13 @@ export function HeroPage() {
     <>
       <PageHeader
         title={hero.data.name}
+        image={
+          <HeroPortrait
+            name={hero.data.name}
+            url={hero.data.portraitUrl}
+            size={72}
+          />
+        }
         subtitle={
           <>
             <RoleBadge role={hero.data.role} />

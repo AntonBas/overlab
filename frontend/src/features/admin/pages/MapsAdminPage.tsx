@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from "react";
-import { FormField } from "../../../components/ui/FormField";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
@@ -7,9 +6,10 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameMap, MapMode } from "../../../types/api";
 import { fetchMaps } from "../../maps/api/mapsApi";
-import { updateMap } from "../api/adminApi";
+import { removeMapImage, updateMap, uploadMapImage } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
 import { SelectField } from "../components/Fields";
+import { ImageUploadField } from "../components/ImageUploadField";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import { useUnsavedChanges } from "../components/unsavedChanges";
@@ -33,11 +33,8 @@ function MapForm({
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<string>(map.mode ?? "");
-  const [imageUrl, setImageUrl] = useState(map.imageUrl ?? "");
   const save = useSave();
-  useUnsavedChanges(
-    mode !== (map.mode ?? "") || imageUrl !== (map.imageUrl ?? ""),
-  );
+  useUnsavedChanges(mode !== (map.mode ?? ""));
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -45,7 +42,6 @@ function MapForm({
       () =>
         updateMap(map.slug, {
           mode: mode === "" ? null : (mode as MapMode),
-          imageUrl: imageUrl.trim() === "" ? null : imageUrl.trim(),
         }),
       "Map saved.",
     );
@@ -71,13 +67,17 @@ function MapForm({
           </option>
         ))}
       </SelectField>
-      <FormField
-        label="Image URL"
-        name="imageUrl"
-        type="url"
-        value={imageUrl}
-        error={save.fieldErrors.imageUrl}
-        onChange={(event) => setImageUrl(event.target.value)}
+      <ImageUploadField
+        label="Image"
+        imageUrl={map.imageUrl}
+        onUpload={async (file) => {
+          await uploadMapImage(map.slug, file);
+          onSaved();
+        }}
+        onRemove={async () => {
+          await removeMapImage(map.slug);
+          onSaved();
+        }}
       />
       <StatusMessage error={save.error} success={save.success} />
       <div className="form__actions">

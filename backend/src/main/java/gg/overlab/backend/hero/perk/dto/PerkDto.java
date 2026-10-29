@@ -11,5 +11,6 @@ public record PerkDto(
         String description,
         PerkSlot slot,
         PerkRecommendation recommendation,
-        String recommendationNote) implements Serializable {
+        String recommendationNote,
+        String iconUrl) implements Serializable {
 }

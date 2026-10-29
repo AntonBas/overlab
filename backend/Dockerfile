@@ -9,9 +9,11 @@ RUN ./gradlew --no-daemon --console=plain bootJar -x test
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S overlab && adduser -S overlab -G overlab
 WORKDIR /app
+RUN mkdir -p /app/media && chown overlab:overlab /app/media
 COPY --from=build /workspace/build/libs/app.jar app.jar
 USER overlab
 ENV SPRING_PROFILES_ACTIVE=prod \
+    MEDIA_DIRECTORY=/app/media \
     JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 EXPOSE 8080 9091
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \

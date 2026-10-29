@@ -9,11 +9,14 @@ import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.perk.dto.PerkRequest;
+import gg.overlab.backend.media.ImageStore;
+import gg.overlab.backend.media.MediaFolder;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class PerkService {
     private final HeroRepository heroRepository;
     private final PerkMapper perkMapper;
     private final AuditService auditService;
+    private final ImageStore imageStore;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'perks:' + #heroSlug")
     @Transactional(readOnly = true)
@@ -72,6 +76,30 @@ public class PerkService {
         Perk perk = perkRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Perk", id));
         auditService.logDelete(AUDIT_TYPE, id, perkMapper.toDto(perk));
         perkRepository.delete(perk);
+        imageStore.remove(perk.getIconUrl());
+    }
+
+    @EvictContentCaches
+    @Transactional
+    public PerkDto replaceIcon(Long id, MultipartFile file) {
+        Perk perk = perkRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Perk", id));
+        PerkDto before = perkMapper.toDto(perk);
+        perk.setIconUrl(imageStore.replace(MediaFolder.PERKS, "perk-" + id, perk.getIconUrl(), file));
+        PerkDto after = perkMapper.toDto(perk);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
+    }
+
+    @EvictContentCaches
+    @Transactional
+    public PerkDto removeIcon(Long id) {
+        Perk perk = perkRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Perk", id));
+        PerkDto before = perkMapper.toDto(perk);
+        imageStore.remove(perk.getIconUrl());
+        perk.setIconUrl(null);
+        PerkDto after = perkMapper.toDto(perk);
+        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        return after;
     }
 
     private Hero findHero(String slug) {

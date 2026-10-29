@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class StatsMapperTest {
 
-    private final StatsMapper mapper = new StatsMapper();
+    private final StatsMapper mapper = StatsFixtures.statsMapper();
 
     @Test
     void changeIsTheDifferenceBetweenAfterAndBefore() {
@@ -27,6 +27,20 @@ class StatsMapperTest {
         assertThat(change.banRateChange()).isEqualByComparingTo("0");
         assertThat(change.winRateBefore()).isEqualByComparingTo("47.10");
         assertThat(change.winRateAfter()).isEqualByComparingTo("45.60");
+    }
+
+    @Test
+    void portraitUrlIsResolvedAgainstTheMediaBase() {
+        Hero hero = new Hero();
+        hero.setSlug("ana");
+        hero.setName("Ana");
+        hero.setRole(HeroRole.SUPPORT);
+        hero.setPortraitUrl("heroes/ana.png");
+
+        assertThat(mapper.toDto(stat(hero, "47.10", "20.00", "10.00"), null).portraitUrl())
+                .isEqualTo("/media/heroes/ana.png");
+        assertThat(mapper.toChangeDto(stat(hero, "47.10", "20.00", "10.00"), stat(hero, "45.60", "24.50", "10.00"))
+                .portraitUrl()).isEqualTo("/media/heroes/ana.png");
     }
 
     @Test

@@ -20,6 +20,7 @@ public record CollectorProperties(
         @NotNull Duration pause,
         @NotNull GameFormat gameFormat,
         String startupJob,
+        @DefaultValue("false") boolean downloadPortraits,
         @DefaultValue @Valid Retry retry,
         @DefaultValue @Valid Timeouts timeouts,
         @DefaultValue("30") @Min(1) int minHeroes,

@@ -6,6 +6,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -51,6 +52,14 @@ export function MapPage() {
     <>
       <PageHeader
         title={map.data.name}
+        image={
+          <Thumbnail
+            url={map.data.imageUrl}
+            width={128}
+            height={72}
+            className="thumbnail--banner"
+          />
+        }
         subtitle={
           map.data.mode
             ? `${MAP_MODE_LABELS[map.data.mode]} map. Small numbers show the difference from the all-maps value.`

@@ -9,7 +9,15 @@
 		-Server
 	}
 
-	@backend path /api/* /oauth2/* /login/oauth2/*
+	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
+	handle @uploads {
+		request_body {
+			max_size 3MB
+		}
+		reverse_proxy backend:8080
+	}
+
+	@backend path /api/* /oauth2/* /login/oauth2/* /media/*
 	handle @backend {
 		request_body {
 			max_size 1MB

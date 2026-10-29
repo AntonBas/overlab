@@ -2,10 +2,15 @@ package gg.overlab.backend.hero.perk;
 
 import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.perk.dto.PerkRequest;
+import gg.overlab.backend.media.MediaUrlResolver;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PerkMapper {
+
+    private final MediaUrlResolver mediaUrlResolver;
 
     public PerkDto toDto(Perk perk) {
         return new PerkDto(
@@ -15,7 +20,8 @@ public class PerkMapper {
                 perk.getDescription(),
                 perk.getSlot(),
                 perk.getRecommendation(),
-                perk.getRecommendationNote());
+                perk.getRecommendationNote(),
+                mediaUrlResolver.resolve(perk.getIconUrl()));
     }
 
     public void apply(PerkRequest request, Perk perk) {

@@ -15,5 +15,6 @@ public record HeroStatDto(
         @Schema(description = "Ban rate. Percent, 0-100. Null for QUICK_PLAY") BigDecimal banRate,
         @Schema(description = "Win rate minus the all-maps win rate, in percentage points. Null when the all-maps view is requested") BigDecimal winRateDelta,
         @Schema(description = "Pick rate minus the all-maps pick rate, in percentage points. Null when the all-maps view is requested") BigDecimal pickRateDelta,
-        @Schema(description = "Ban rate minus the all-maps ban rate, in percentage points. Null when the all-maps view is requested") BigDecimal banRateDelta) implements Serializable {
+        @Schema(description = "Ban rate minus the all-maps ban rate, in percentage points. Null when the all-maps view is requested") BigDecimal banRateDelta,
+        @Schema(description = "Hero portrait URL, null when there is no image") String portraitUrl) implements Serializable {
 }

@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { RateBar } from "../../../components/ui/RateBar";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroStat, SortDirection, StatsSort } from "../../../types/api";
 
@@ -94,6 +95,7 @@ export function StatsTable({
             <tr key={hero.heroSlug}>
               <th scope="row">
                 <span className="table__hero">
+                  <HeroPortrait name={hero.heroName} url={hero.portraitUrl} />
                   <RoleBadge role={hero.role} compact />
                   <Link
                     to={
