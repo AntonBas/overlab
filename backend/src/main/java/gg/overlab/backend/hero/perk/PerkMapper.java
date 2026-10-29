@@ -19,6 +19,7 @@ public class PerkMapper {
                 perk.getName(),
                 perk.getDescription(),
                 perk.getSlot(),
+                perk.getPosition(),
                 perk.getRecommendation(),
                 perk.getRecommendationNote(),
                 mediaUrlResolver.resolve(perk.getIconUrl()));
@@ -28,6 +29,7 @@ public class PerkMapper {
         perk.setName(request.name().trim());
         perk.setDescription(request.description());
         perk.setSlot(request.slot());
+        perk.setPosition(request.position());
         perk.setRecommendation(request.recommendation());
         perk.setRecommendationNote(request.recommendationNote());
     }

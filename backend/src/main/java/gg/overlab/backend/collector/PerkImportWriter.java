@@ -42,6 +42,7 @@ public class PerkImportWriter {
                 perk.setHero(hero);
                 perk.setName(parsed.name());
                 perk.setSlot(parsed.slot());
+                perk.setPosition(parsed.position());
                 perk.setRecommendation(PerkRecommendation.OPTIONAL);
                 perk.setDescription(parsed.description());
                 perk = perkRepository.save(perk);

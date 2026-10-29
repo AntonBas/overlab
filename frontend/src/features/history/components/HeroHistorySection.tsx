@@ -1,8 +1,10 @@
 import clsx from "clsx";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { RateBar } from "../../../components/ui/RateBar";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue } from "../../../types/api";
@@ -16,18 +18,54 @@ import {
 } from "../utils/chart";
 import { LineChart } from "./LineChart";
 
+type Metric = "win" | "pick" | "ban";
+
+interface MetricDefinition {
+  id: Metric;
+  label: string;
+  tone: "win" | "pick" | "ban";
+  barMax: number;
+}
+
+const METRICS: MetricDefinition[] = [
+  { id: "win", label: "Win rate", tone: "win", barMax: 100 },
+  { id: "pick", label: "Pick rate", tone: "pick", barMax: 40 },
+  { id: "ban", label: "Ban rate", tone: "ban", barMax: 50 },
+];
+
+export interface CurrentStats {
+  winRate: number;
+  pickRate: number;
+  banRate: number | null;
+  capturedAt: string;
+}
+
 interface HeroHistorySectionProps {
   slug: string;
   mapSlug?: string;
   queue: GameQueue;
+  title?: string;
+  current?: CurrentStats | null;
+  children?: ReactNode;
+}
+
+function currentValue(current: CurrentStats, metric: Metric): number | null {
+  if (metric === "win") {
+    return current.winRate;
+  }
+  return metric === "pick" ? current.pickRate : current.banRate;
 }
 
 export function HeroHistorySection({
   slug,
   mapSlug,
   queue,
+  title = "History",
+  current = null,
+  children,
 }: HeroHistorySectionProps) {
   const [periodId, setPeriodId] = useState<HistoryPeriodId>("30d");
+  const [selectedMetric, setSelectedMetric] = useState<Metric>("win");
   const period = HISTORY_PERIODS.find((entry) => entry.id === periodId)!;
   const range = useMemo(() => periodRange(period.days), [period.days]);
   const history = useFetch(
@@ -45,38 +83,72 @@ export function HeroHistorySection({
   );
   const patches = useFetch(fetchPatches, []);
 
+  const metrics = METRICS.filter(
+    (entry) => entry.id !== "ban" || queue === "COMPETITIVE",
+  );
+  const metric =
+    metrics.find((entry) => entry.id === selectedMetric) ?? metrics[0];
   const points = history.data?.points ?? [];
-  const toSeries = (pick: (point: (typeof points)[number]) => number | null) =>
-    points.flatMap((point) => {
-      const value = pick(point);
-      return value === null
-        ? []
-        : [{ time: Date.parse(point.capturedAt), value }];
-    });
+  const series = points.flatMap((point) => {
+    const value =
+      metric.id === "win"
+        ? point.winRate
+        : metric.id === "pick"
+          ? point.pickRate
+          : point.banRate;
+    return value === null
+      ? []
+      : [{ time: Date.parse(point.capturedAt), value }];
+  });
   const markers = (patches.data ?? []).map((patch) => ({
     time: Date.parse(patch.releasedAt),
     label: `Patch ${patch.version}`,
   }));
-  const enough = points.length >= 2;
+  const enough = series.length >= 2;
+  const now = current ? currentValue(current, metric.id) : null;
 
   return (
     <section className="section" aria-labelledby="history-heading">
-      <h2 id="history-heading">History</h2>
-      <div className="segmented" role="group" aria-label="Period">
-        {HISTORY_PERIODS.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            className={clsx("segmented__item", {
-              "segmented__item--active": entry.id === periodId,
-            })}
-            aria-pressed={entry.id === periodId}
-            onClick={() => setPeriodId(entry.id)}
-          >
-            {entry.label}
-          </button>
-        ))}
+      <h2 id="history-heading">{title}</h2>
+      {children}
+      <div className="stat-switch">
+        <div className="segmented" role="group" aria-label="Statistic">
+          {metrics.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": entry.id === metric.id,
+              })}
+              aria-pressed={entry.id === metric.id}
+              onClick={() => setSelectedMetric(entry.id)}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
+        <div className="segmented" role="group" aria-label="Period">
+          {HISTORY_PERIODS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": entry.id === periodId,
+              })}
+              aria-pressed={entry.id === periodId}
+              onClick={() => setPeriodId(entry.id)}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
       </div>
+      {current && (
+        <div className="stat-current">
+          <span className="muted">{metric.label} now</span>
+          <RateBar value={now} tone={metric.tone} max={metric.barMax} />
+        </div>
+      )}
       {history.loading && <Spinner label="Loading history" />}
       {history.error && (
         <ErrorMessage failure={history.error} onRetry={history.reload} />
@@ -95,32 +167,24 @@ export function HeroHistorySection({
           aria-busy={history.stale}
         >
           <LineChart
-            title="Win rate"
-            tone="win"
-            points={toSeries((point) => point.winRate)}
+            title={metric.label}
+            tone={metric.tone}
+            points={series}
             markers={markers}
           />
-          <LineChart
-            title="Pick rate"
-            tone="pick"
-            points={toSeries((point) => point.pickRate)}
-            markers={markers}
-          />
-          {queue === "COMPETITIVE" &&
-            toSeries((point) => point.banRate).length >= 2 && (
-              <LineChart
-                title="Ban rate"
-                tone="ban"
-                points={toSeries((point) => point.banRate)}
-                markers={markers}
-              />
-            )}
-          <p className="muted footnote">
-            All ranks, PC, Europe. Dashed lines mark patch releases.{" "}
-            <Link to="/changes">See what changed across all heroes</Link>.
-          </p>
         </div>
       )}
+      <p className="muted footnote">
+        All ranks, PC, Europe.
+        {current && (
+          <>
+            {" "}
+            Data collected <CollectedAt value={current.capturedAt} />.
+          </>
+        )}{" "}
+        Dashed lines mark patch releases.{" "}
+        <Link to="/changes">See what changed across all heroes</Link>.
+      </p>
     </section>
   );
 }

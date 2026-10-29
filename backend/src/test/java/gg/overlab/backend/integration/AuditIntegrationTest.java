@@ -36,7 +36,7 @@ class AuditIntegrationTest {
 
     private static final long ADMIN_ID = 900003L;
     private static final String PERK_BODY = "{\"heroSlug\":\"audit-hero\",\"name\":\"Audit Perk\",\"slot\":\"MAJOR\","
-            + "\"recommendation\":\"%s\"}";
+            + "\"position\":\"LEFT\",\"recommendation\":\"%s\"}";
 
     @Autowired
     private WebApplicationContext context;
@@ -74,7 +74,7 @@ class AuditIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        perkRepository.deleteAll(perkRepository.findAllByHeroSlugOrderBySlotAscNameAsc("audit-hero"));
+        perkRepository.deleteAll(perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc("audit-hero"));
         heroRepository.findBySlug("audit-hero").ifPresent(heroRepository::delete);
         auditLogRepository.deleteAll(auditLogRepository.findAll().stream()
                 .filter(entry -> Long.valueOf(ADMIN_ID).equals(entry.getActorId())).toList());

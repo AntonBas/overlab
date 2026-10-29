@@ -63,6 +63,7 @@ describe("accessibility", () => {
               name: "Perk",
               description: "Text",
               slot: "MAJOR",
+              position: "LEFT",
               recommendation: "RECOMMENDED",
               recommendationNote: null,
               iconUrl: null,

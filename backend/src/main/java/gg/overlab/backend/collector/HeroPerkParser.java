@@ -1,5 +1,6 @@
 package gg.overlab.backend.collector;
 
+import gg.overlab.backend.hero.perk.PerkPosition;
 import gg.overlab.backend.hero.perk.PerkSlot;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,8 @@ public class HeroPerkParser {
                     continue;
                 }
                 Element icon = details.selectFirst(".perk-details-icon img");
-                perks.add(new ParsedPerk(slot, name, textOf(details.selectFirst("div[slot=description]")),
+                PerkPosition position = details.hasClass("right") ? PerkPosition.RIGHT : PerkPosition.LEFT;
+                perks.add(new ParsedPerk(slot, position, name, textOf(details.selectFirst("div[slot=description]")),
                         icon == null ? null : icon.attr("src")));
             }
         }

@@ -2,6 +2,7 @@ package gg.overlab.backend.collector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import gg.overlab.backend.hero.perk.PerkPosition;
 import gg.overlab.backend.hero.perk.PerkSlot;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,9 @@ class HeroPerkParserTest {
         List<ParsedPerk> perks = parser.parse(PAGE);
 
         assertThat(perks).containsExactly(
-                new ParsedPerk(PerkSlot.MINOR, "Quick Dart", "Fires faster.", "https://cdn.example/quick.png"),
-                new ParsedPerk(PerkSlot.MINOR, "Long Dart", null, "https://cdn.example/long.png"),
-                new ParsedPerk(PerkSlot.MAJOR, "Big Dart", "Hits harder.", null));
+                new ParsedPerk(PerkSlot.MINOR, PerkPosition.LEFT, "Quick Dart", "Fires faster.", "https://cdn.example/quick.png"),
+                new ParsedPerk(PerkSlot.MINOR, PerkPosition.RIGHT, "Long Dart", null, "https://cdn.example/long.png"),
+                new ParsedPerk(PerkSlot.MAJOR, PerkPosition.LEFT, "Big Dart", "Hits harder.", null));
     }
 
     @Test
