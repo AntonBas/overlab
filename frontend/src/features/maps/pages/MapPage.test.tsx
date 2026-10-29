@@ -96,26 +96,70 @@ describe("MapPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("lists the best and worst heroes of the map", async () => {
+  it("lists the biggest gains and the highest win rates of each role", async () => {
     fetchStatsMock.mockResolvedValue(
       snapshot({
         heroes: [
-          heroStat({ heroSlug: "ana", heroName: "Ana", winRateDelta: 3 }),
-          heroStat({ heroSlug: "genji", heroName: "Genji", winRateDelta: -2 }),
+          heroStat({
+            heroSlug: "rein",
+            heroName: "Reinhardt",
+            role: "TANK",
+            winRate: 53,
+            winRateDelta: 2,
+            pickRate: 20,
+          }),
+          heroStat({
+            heroSlug: "ana",
+            heroName: "Ana",
+            role: "SUPPORT",
+            winRate: 52,
+            winRateDelta: 1.5,
+            pickRate: 20,
+          }),
         ],
       }),
     );
     renderPage();
 
-    const over = await screen.findByRole("region", {
-      name: "Over-performing on this map",
-    });
-    const under = screen.getByRole("region", {
-      name: "Under-performing on this map",
-    });
+    const tank = await screen.findByRole("region", { name: "tank picks" });
+    const support = screen.getByRole("region", { name: "support picks" });
 
-    expect(within(over).getByText("Ana")).toBeInTheDocument();
-    expect(within(under).getByText("Genji")).toBeInTheDocument();
+    expect(within(tank).getByText("Biggest gain here")).toBeInTheDocument();
+    expect(within(tank).getByText("Highest win rate here")).toBeInTheDocument();
+    expect(within(tank).getAllByText("Reinhardt")).toHaveLength(2);
+    expect(within(support).getAllByText("Ana")).toHaveLength(2);
+    expect(
+      screen.getByRole("heading", { name: "Best picks on this map" }),
+    ).toBeInTheDocument();
+  });
+
+  it("switches to the worst picks of the map", async () => {
+    fetchStatsMock.mockResolvedValue(
+      snapshot({
+        heroes: [
+          heroStat({
+            heroSlug: "rein",
+            heroName: "Reinhardt",
+            role: "TANK",
+            winRate: 45,
+            winRateDelta: -3,
+            pickRate: 20,
+          }),
+        ],
+      }),
+    );
+    renderPage();
+    const tank = await screen.findByRole("region", { name: "tank picks" });
+    expect(within(tank).queryByText("Biggest drop here")).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Worst picks" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Worst picks on this map" }),
+    ).toBeInTheDocument();
+    expect(within(tank).getByText("Biggest drop here")).toBeInTheDocument();
+    expect(within(tank).getByText("Lowest win rate here")).toBeInTheDocument();
+    expect(within(tank).getAllByText("Reinhardt")).toHaveLength(2);
   });
 
   it("links to the neighbouring maps and to other maps of the same mode", async () => {

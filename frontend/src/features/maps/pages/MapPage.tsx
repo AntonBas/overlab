@@ -30,7 +30,7 @@ import {
   type StatsFilters,
 } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
-import { MapHighlightsCards } from "../components/MapHighlightsCards";
+import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
 import { fetchMap, fetchMaps } from "../api/mapsApi";
 
@@ -95,11 +95,7 @@ export function MapPage() {
         />
       </div>
       {stats.data && (
-        <MapHighlightsCards
-          mapSlug={slug}
-          heroes={heroes}
-          linkSuffix={linkSuffix}
-        />
+        <MapBestPicks mapSlug={slug} heroes={heroes} linkSuffix={linkSuffix} />
       )}
       <div className="filters">
         <label className="field">

@@ -1504,11 +1504,34 @@ body.drawer-open {
 }
 
 .highlight__hero {
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "portrait name delta"
+    "portrait stats stats";
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
   color: var(--text);
   text-decoration: none;
+}
+
+.highlight__portrait {
+  grid-area: portrait;
+  display: inline-flex;
+}
+
+.highlight__name {
+  grid-area: name;
+}
+
+.highlight__delta {
+  grid-area: delta;
+}
+
+.highlight__stats {
+  grid-area: stats;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .highlight__hero:hover .highlight__name {
@@ -1516,8 +1539,10 @@ body.drawer-open {
 }
 
 .highlight__name {
-  flex: 1;
+  overflow: hidden;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .map-grid--compact {
@@ -1534,4 +1559,26 @@ body.drawer-open {
 input[type="range"] {
   padding: 0;
   accent-color: var(--accent);
+}
+
+.highlight__label {
+  margin: 12px 0 6px;
+  font-size: 0.8rem;
+}
+
+.highlight h3 {
+  display: flex;
+  align-items: center;
+}
+
+.section__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.section__heading h2 {
+  margin: 0;
 }
