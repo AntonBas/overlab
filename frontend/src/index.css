@@ -1582,3 +1582,11 @@ input[type="range"] {
 .section__heading h2 {
   margin: 0;
 }
+
+.highlight__hero--map {
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+}
+
+.highlight__hero--map .thumbnail {
+  border-radius: 4px;
+}
