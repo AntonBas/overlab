@@ -5,7 +5,7 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RateBar } from "../../../components/ui/RateBar";
-import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
@@ -75,12 +75,7 @@ export function HeroPage() {
           />
         }
         subtitle={
-          <>
-            <RoleBadge role={hero.data.role} />
-            {hero.data.subrole && (
-              <span className="muted"> {hero.data.subrole}</span>
-            )}
-          </>
+          <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
         }
         actions={
           <>
