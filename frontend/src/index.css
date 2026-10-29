@@ -1471,3 +1471,67 @@ body.drawer-open {
 .info-chip:focus-within .info-chip__tip {
   display: block;
 }
+
+.map-actions__start {
+  margin-right: auto;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.highlight {
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.highlight h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.highlight__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.highlight__hero {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.highlight__hero:hover .highlight__name {
+  text-decoration: underline;
+}
+
+.highlight__name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.map-grid--compact {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.map-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+input[type="range"] {
+  padding: 0;
+  accent-color: var(--accent);
+}

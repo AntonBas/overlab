@@ -47,6 +47,7 @@ export async function fetchHeroMapStats(
 }
 
 export interface HistoryParams extends HeroStatsParams {
+  map?: string;
   from: string;
   to: string;
 }

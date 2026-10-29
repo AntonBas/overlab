@@ -1,6 +1,8 @@
 import clsx from "clsx";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { InfoChip } from "../../../components/ui/InfoChip";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
@@ -9,6 +11,8 @@ import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { MAP_PLACEHOLDER_URL, MODE_DESCRIPTIONS } from "../../../utils/modes";
+import { matchesName } from "../../../utils/search";
 import {
   MAP_MODE_LABELS,
   ROLE_LABELS,
@@ -26,7 +30,9 @@ import {
   type StatsFilters,
 } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
-import { fetchMap } from "../api/mapsApi";
+import { MapHighlightsCards } from "../components/MapHighlightsCards";
+import { MapNavigation } from "../components/MapNavigation";
+import { fetchMap, fetchMaps } from "../api/mapsApi";
 
 export function MapPage() {
   const { slug = "" } = useParams();
@@ -36,6 +42,13 @@ export function MapPage() {
     keepPrevious: true,
   });
   const guides = useFetch(() => fetchGuides({ map: slug }), [slug]);
+  const maps = useFetch(fetchMaps, []);
+  const [search, setSearch] = useState("");
+  const heroes = stats.data?.heroes ?? [];
+  const visibleHeroes = heroes.filter((hero) =>
+    matchesName(hero.heroName, search),
+  );
+  const linkSuffix = isQuickPlay(filters) ? "?queue=quick_play" : "";
   usePageTitle(map.data?.name);
 
   if (map.loading) {
@@ -51,7 +64,7 @@ export function MapPage() {
     <>
       <section className="map-banner">
         <Thumbnail
-          url={map.data.imageUrl}
+          url={map.data.imageUrl ?? MAP_PLACEHOLDER_URL}
           width={1280}
           height={400}
           className="map-banner__image"
@@ -66,12 +79,28 @@ export function MapPage() {
         </div>
       </section>
       <div className="map-actions">
+        <div className="map-actions__start">
+          {map.data.mode && (
+            <InfoChip description={MODE_DESCRIPTIONS[map.data.mode]}>
+              <span className="role-badge">
+                {MAP_MODE_LABELS[map.data.mode]}
+              </span>
+            </InfoChip>
+          )}
+        </div>
         <FavoriteButton kind="map" slug={slug} name={map.data.name} />
         <QueueToggle
           value={filters.queue}
           onChange={(queue) => update({ queue })}
         />
       </div>
+      {stats.data && (
+        <MapHighlightsCards
+          mapSlug={slug}
+          heroes={heroes}
+          linkSuffix={linkSuffix}
+        />
+      )}
       <div className="filters">
         <label className="field">
           <span className="field__label">Rank</span>
@@ -89,6 +118,15 @@ export function MapPage() {
               </option>
             ))}
           </select>
+        </label>
+        <label className="field">
+          <span className="field__label">Hero</span>
+          <input
+            type="search"
+            value={search}
+            placeholder="Search by name"
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </label>
         <div className="segmented" role="group" aria-label="Role">
           <button
@@ -133,22 +171,26 @@ export function MapPage() {
           <p className="visually-hidden" role="status">
             {stats.stale
               ? "Updating results"
-              : `${stats.data.heroes.length} heroes shown`}
+              : `${visibleHeroes.length} heroes shown`}
           </p>
           <p className="muted footnote">
             Data collected <CollectedAt value={stats.data.capturedAt} />,{" "}
             {TIER_LABELS[filters.tier].toLowerCase()}.
           </p>
-          <StatsTable
-            heroes={stats.data.heroes}
-            showBan={!isQuickPlay(filters)}
-            showDelta
-            sort={filters.sort}
-            direction={filters.direction}
-            onSort={changeSort}
-            heroLinkSuffix={isQuickPlay(filters) ? "?queue=quick_play" : ""}
-            mapSlug={slug}
-          />
+          {visibleHeroes.length === 0 ? (
+            <EmptyState>No heroes match these filters.</EmptyState>
+          ) : (
+            <StatsTable
+              heroes={visibleHeroes}
+              showBan={!isQuickPlay(filters)}
+              showDelta
+              sort={filters.sort}
+              direction={filters.direction}
+              onSort={changeSort}
+              heroLinkSuffix={linkSuffix}
+              mapSlug={slug}
+            />
+          )}
         </div>
       )}
       {guides.data && (
@@ -160,6 +202,9 @@ export function MapPage() {
             <EmptyState>No guides for this map yet.</EmptyState>
           )}
         </section>
+      )}
+      {map.data && maps.data && (
+        <MapNavigation current={map.data} maps={maps.data} />
       )}
     </>
   );
