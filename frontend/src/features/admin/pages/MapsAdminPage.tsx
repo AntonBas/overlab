@@ -8,6 +8,7 @@ import type { GameMap, MapMode } from "../../../types/api";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { removeMapImage, updateMap, uploadMapImage } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { SelectField } from "../components/Fields";
 import { ImageUploadField } from "../components/ImageUploadField";
 import { StatusMessage } from "../components/StatusMessage";
@@ -137,12 +138,14 @@ export function MapsAdminPage() {
         />
       )}
       {selected && (
-        <MapForm
-          key={selected.slug}
-          map={selected}
-          onSaved={maps.reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Edit map" onClose={() => setEditing(null)}>
+          <MapForm
+            key={selected.slug}
+            map={selected}
+            onSaved={maps.reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
     </>
   );

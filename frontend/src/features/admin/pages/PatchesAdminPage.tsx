@@ -14,6 +14,7 @@ import {
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { TextAreaField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
@@ -203,12 +204,14 @@ export function PatchesAdminPage() {
         />
       )}
       {editing && (
-        <PatchForm
-          key={editing === "new" ? "new" : editing.id}
-          patch={editing === "new" ? null : editing}
-          onSaved={patches.reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Patch" onClose={() => setEditing(null)}>
+          <PatchForm
+            key={editing === "new" ? "new" : editing.id}
+            patch={editing === "new" ? null : editing}
+            onSaved={patches.reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
       {deleting && (
         <ConfirmDialog

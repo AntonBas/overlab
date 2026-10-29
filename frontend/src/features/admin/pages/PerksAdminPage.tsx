@@ -16,6 +16,7 @@ import {
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { SelectField, TextAreaField } from "../components/Fields";
 import { ImageUploadField } from "../components/ImageUploadField";
 import { StatusMessage } from "../components/StatusMessage";
@@ -278,17 +279,20 @@ export function PerksAdminPage() {
         />
       )}
       {heroSlug && editing && (
-        <PerkForm
-          key={editing === "new" ? "new" : editing.id}
-          heroSlug={heroSlug}
-          perk={
-            editing === "new"
-              ? null
-              : (perks.data?.find((perk) => perk.id === editing.id) ?? editing)
-          }
-          onSaved={perks.reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Perk" onClose={() => setEditing(null)}>
+          <PerkForm
+            key={editing === "new" ? "new" : editing.id}
+            heroSlug={heroSlug}
+            perk={
+              editing === "new"
+                ? null
+                : (perks.data?.find((perk) => perk.id === editing.id) ??
+                  editing)
+            }
+            onSaved={perks.reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
       {deleting && (
         <ConfirmDialog

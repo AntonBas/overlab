@@ -6,6 +6,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { fetchAdminHeroes, updateHero } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { CheckboxField, TextAreaField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
@@ -118,12 +119,14 @@ export function HeroesAdminPage() {
         />
       )}
       {selected && (
-        <HeroForm
-          key={selected.slug}
-          hero={selected}
-          onSaved={heroes.reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Edit hero" onClose={() => setEditing(null)}>
+          <HeroForm
+            key={selected.slug}
+            hero={selected}
+            onSaved={heroes.reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
     </>
   );

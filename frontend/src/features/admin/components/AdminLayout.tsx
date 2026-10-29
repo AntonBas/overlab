@@ -16,7 +16,8 @@ export function AdminLayout() {
   const setDirty = useCallback((value: boolean) => {
     dirty.current = value;
   }, []);
-  const context = useMemo(() => ({ setDirty }), [setDirty]);
+  const isDirty = useCallback(() => dirty.current, []);
+  const context = useMemo(() => ({ setDirty, isDirty }), [setDirty, isDirty]);
 
   useEffect(() => {
     const meta = document.createElement("meta");

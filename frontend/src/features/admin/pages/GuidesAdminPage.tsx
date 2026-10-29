@@ -10,6 +10,7 @@ import type { Guide } from "../../../types/api";
 import { deleteGuide, fetchAdminGuides } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
+import { Drawer } from "../components/Drawer";
 import { SelectField } from "../components/Fields";
 import { GuideForm } from "../components/GuideForm";
 import { StatusMessage } from "../components/StatusMessage";
@@ -119,14 +120,16 @@ export function GuidesAdminPage() {
         />
       )}
       {editing && heroes.data && (
-        <GuideForm
-          key={editing === "new" ? "new" : editing.id}
-          guide={editing === "new" ? null : editing}
-          heroes={heroes.data}
-          maps={maps.data ?? []}
-          onSaved={guides.reload}
-          onClose={() => setEditing(null)}
-        />
+        <Drawer label="Guide" onClose={() => setEditing(null)}>
+          <GuideForm
+            key={editing === "new" ? "new" : editing.id}
+            guide={editing === "new" ? null : editing}
+            heroes={heroes.data}
+            maps={maps.data ?? []}
+            onSaved={guides.reload}
+            onClose={() => setEditing(null)}
+          />
+        </Drawer>
       )}
       {deleting && (
         <ConfirmDialog

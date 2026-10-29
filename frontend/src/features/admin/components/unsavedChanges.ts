@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect } from "react";
 
 export interface UnsavedChangesValue {
   setDirty: (dirty: boolean) => void;
+  isDirty: () => boolean;
 }
 
 export const UnsavedChangesContext = createContext<UnsavedChangesValue | null>(
