@@ -16,6 +16,10 @@ final class StatsFixtures {
     private StatsFixtures() {
     }
 
+    static SnapshotChecks noChecks() {
+        return new SnapshotChecks(org.mockito.Mockito.mock(SnapshotCheckRepository.class));
+    }
+
     static StatsMapper statsMapper() {
         return new StatsMapper(new MediaUrlResolver(new MediaProperties(Path.of("media"), "/media")));
     }

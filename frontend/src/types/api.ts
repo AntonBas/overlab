@@ -66,6 +66,14 @@ export interface HeroStat {
   portraitUrl: string | null;
 }
 
+export interface DataFreshness {
+  capturedAt: string;
+  lastCheckedAt: string;
+  valuesSince: string;
+  snapshotCount: number;
+  changeObserved: boolean;
+}
+
 export interface StatsSnapshot {
   capturedAt: string;
   queue: GameQueue;

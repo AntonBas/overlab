@@ -41,7 +41,7 @@ public class RatesCollectorService {
     private final CollectorProperties properties;
     private final BlizzardRatesClient client;
     private final RatesValidator validator;
-    private final RatesSnapshotWriter writer;
+    private final SnapshotRecorder recorder;
     private final GameMapRepository gameMapRepository;
     private final CacheManager cacheManager;
     private final CollectorRunRepository runRepository;
@@ -50,14 +50,14 @@ public class RatesCollectorService {
     private final Set<String> runningJobs = ConcurrentHashMap.newKeySet();
 
     public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
-                                 RatesValidator validator, RatesSnapshotWriter writer,
+                                 RatesValidator validator, SnapshotRecorder recorder,
                                  GameMapRepository gameMapRepository, CacheManager cacheManager,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
                                  @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
         this.client = client;
         this.validator = validator;
-        this.writer = writer;
+        this.recorder = recorder;
         this.gameMapRepository = gameMapRepository;
         this.cacheManager = cacheManager;
         this.runRepository = runRepository;
@@ -178,9 +178,21 @@ public class RatesCollectorService {
 
     private int collectOne(Instant capturedAt, GameQueue queue, Platform platform, Region region, RankTier tier,
                            String mapSlug) {
-        List<BlizzardRatesResponse.HeroRate> rates = client.fetch(queue, platform, region, tier, mapSlug);
-        validator.validate(rates);
-        return writer.save(capturedAt, queue, properties.gameFormat(), platform, region, tier, mapSlug, rates);
+        String knownEtag = recorder.knownEtag(queue, platform, region, tier, mapSlug).orElse(null);
+        RatesFetch fetched = client.fetch(queue, platform, region, tier, mapSlug, knownEtag);
+        if (fetched.notModified()
+                && recorder.markUnchanged(capturedAt, queue, platform, region, tier, mapSlug)) {
+            metrics.recordUnchangedSnapshot();
+            return 0;
+        }
+        RatesFetch usable = fetched.notModified() ? client.fetch(queue, platform, region, tier, mapSlug) : fetched;
+        validator.validate(usable.rates());
+        SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
+                region, tier, mapSlug, usable.rates(), usable.etag());
+        if (!outcome.changed()) {
+            metrics.recordUnchangedSnapshot();
+        }
+        return outcome.rowsSaved();
     }
 
     private List<String> resolveMapSlugs(CollectorJob job) {

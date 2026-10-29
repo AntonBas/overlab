@@ -13,6 +13,7 @@ import gg.overlab.backend.exception.api.ApiErrorHandler;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
+import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
 import java.time.Instant;
@@ -26,13 +27,26 @@ class StatsControllerTest {
 
     private final StatsService statsService = mock(StatsService.class);
     private final StatsHistoryService historyService = mock(StatsHistoryService.class);
+    private final StatsFreshnessService freshnessService = mock(StatsFreshnessService.class);
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService, historyService))
+        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService, historyService, freshnessService))
                 .setControllerAdvice(new ApiErrorHandler())
                 .build();
+    }
+
+    @Test
+    void freshnessUsesCompetitiveEuropeDefaults() throws Exception {
+        StatsFilter expected = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE);
+        when(freshnessService.freshness(eq(expected))).thenReturn(new DataFreshnessDto(
+                StatsFixtures.CAPTURED_AT, StatsFixtures.CAPTURED_AT, StatsFixtures.CAPTURED_AT, 3, false));
+
+        mockMvc.perform(get("/api/stats/freshness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.snapshotCount").value(3))
+                .andExpect(jsonPath("$.changeObserved").value(false));
     }
 
     @Test

@@ -9,8 +9,10 @@ import gg.overlab.backend.stats.dto.HeroMapStatsDto;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class StatsService {
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final StatsMapper statsMapper;
+    private final SnapshotChecks snapshotChecks;
 
     public StatsSnapshotDto getStats(StatsFilter filter, HeroRole role, StatsSort sort, boolean descending) {
         StatsSnapshotDto snapshot = snapshotProvider.getSnapshot(filter);
@@ -48,12 +51,20 @@ public class StatsService {
         }
 
         HeroStat overallStat = stats.stream().filter(stat -> stat.getMap() == null).findFirst().orElse(null);
-        HeroMapStatDto overall = overallStat == null ? null : statsMapper.toMapDto(overallStat, null);
+        Map<String, Instant> checkedAt = snapshotChecks.lastCheckedByMap(queue, platform, region, effectiveTier);
+        HeroMapStatDto overall = overallStat == null
+                ? null
+                : checkedAt(statsMapper.toMapDto(overallStat, null), StatsFilter.ALL_MAPS, checkedAt);
         List<HeroMapStatDto> maps = stats.stream()
                 .filter(stat -> stat.getMap() != null)
-                .map(stat -> statsMapper.toMapDto(stat, overallStat))
+                .map(stat -> checkedAt(statsMapper.toMapDto(stat, overallStat), stat.getMap().getSlug(), checkedAt))
                 .sorted(Comparator.comparing(HeroMapStatDto::mapName))
                 .toList();
         return new HeroMapStatsDto(hero, queue, effectiveTier, platform, region, overall, maps);
+    }
+
+    private HeroMapStatDto checkedAt(HeroMapStatDto stat, String mapKey, Map<String, Instant> checkedAt) {
+        Instant checked = checkedAt.get(mapKey);
+        return checked != null && checked.isAfter(stat.capturedAt()) ? stat.withCapturedAt(checked) : stat;
     }
 }

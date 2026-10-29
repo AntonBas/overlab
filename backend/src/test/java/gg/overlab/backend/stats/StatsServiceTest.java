@@ -18,7 +18,7 @@ class StatsServiceTest {
 
     private final StatsSnapshotProvider snapshotProvider = mock(StatsSnapshotProvider.class);
     private final StatsService service = new StatsService(snapshotProvider, mock(HeroStatRepository.class),
-            mock(HeroService.class), StatsFixtures.statsMapper());
+            mock(HeroService.class), StatsFixtures.statsMapper(), StatsFixtures.noChecks());
 
     private final StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC,
             Region.EUROPE);

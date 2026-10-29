@@ -16,6 +16,8 @@ import gg.overlab.backend.stats.HeroStat;
 import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
+import gg.overlab.backend.stats.SnapshotCheck;
+import gg.overlab.backend.stats.SnapshotCheckRepository;
 import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
@@ -61,6 +63,9 @@ class StatsQueriesIntegrationTest {
 
     @Autowired
     private PatchRepository patchRepository;
+
+    @Autowired
+    private SnapshotCheckRepository snapshotCheckRepository;
 
     @Autowired
     private CacheManager cacheManager;
@@ -176,6 +181,50 @@ class StatsQueriesIntegrationTest {
 
         assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, laterSameDay);
         assertThat(history.points().get(1).winRate()).isEqualByComparingTo("49.00");
+    }
+
+    @Test
+    void historyIsExtendedToTheLastCheckWhenTheNumbersDidNotChange() {
+        Instant checked = NEW.plus(Duration.ofDays(3));
+        saveCheck(checked);
+
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
+                NEW.plus(Duration.ofDays(5)));
+
+        assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, NEW, checked);
+        assertThat(history.points().get(2).winRate()).isEqualByComparingTo("47.00");
+    }
+
+    @Test
+    void historyIsNotExtendedWithinTheDayOfTheLastSnapshot() {
+        saveCheck(NEW.plus(Duration.ofHours(5)));
+
+        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
+                NEW.plus(Duration.ofDays(5)));
+
+        assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, NEW);
+    }
+
+    @Test
+    void theSnapshotShowsWhenTheNumbersWereLastChecked() {
+        Instant checked = NEW.plus(Duration.ofDays(2));
+        saveCheck(checked);
+
+        assertThat(statsService.getStats(allMaps(), null, StatsSort.PICK_RATE, true).capturedAt())
+                .isEqualTo(checked);
+    }
+
+    private void saveCheck(Instant checkedAt) {
+        SnapshotCheck check = new SnapshotCheck();
+        check.setQueue(GameQueue.COMPETITIVE);
+        check.setPlatform(Platform.PC);
+        check.setRegion(Region.EUROPE);
+        check.setTier(RankTier.ALL);
+        check.setMapKey("all-maps");
+        check.setSignature("test");
+        check.setLastChangedAt(NEW);
+        check.setLastCheckedAt(checkedAt);
+        snapshotCheckRepository.saveAndFlush(check);
     }
 
     @Test

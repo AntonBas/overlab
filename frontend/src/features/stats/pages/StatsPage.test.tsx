@@ -6,7 +6,18 @@ import { snapshot } from "../../../test/fixtures";
 import { renderWithRouter } from "../../../test/render";
 import type { RequestFailure } from "../../../services/api";
 
-vi.mock("../api/statsApi", () => ({ fetchStats: vi.fn() }));
+vi.mock("../api/statsApi", () => ({
+  fetchStats: vi.fn(),
+  fetchFreshness: vi.fn(() =>
+    Promise.resolve({
+      capturedAt: "2026-10-29T10:00:00Z",
+      lastCheckedAt: "2026-10-29T10:00:00Z",
+      valuesSince: "2026-10-29T10:00:00Z",
+      snapshotCount: 1,
+      changeObserved: false,
+    }),
+  ),
+}));
 vi.mock("../../maps/api/mapsApi", () => ({
   fetchMaps: vi.fn(() =>
     Promise.resolve([
@@ -15,7 +26,7 @@ vi.mock("../../maps/api/mapsApi", () => ({
   ),
 }));
 
-import { fetchStats } from "../api/statsApi";
+import { fetchFreshness, fetchStats } from "../api/statsApi";
 import { StatsPage } from "./StatsPage";
 
 const fetchStatsMock = vi.mocked(fetchStats);
@@ -60,7 +71,7 @@ describe("StatsPage", () => {
         region: "EUROPE",
       }),
     );
-    expect(screen.getByText(/Data collected/)).toBeInTheDocument();
+    expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
 
   it("filters the table by hero name without refetching", async () => {
@@ -73,6 +84,25 @@ describe("StatsPage", () => {
     expect(screen.getByRole("link", { name: "Genji" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Ana" })).not.toBeInTheDocument();
     expect(fetchStatsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("explains when Blizzard last changed the numbers", async () => {
+    fetchStatsMock.mockResolvedValue(snapshot());
+    vi.mocked(fetchFreshness).mockResolvedValueOnce({
+      capturedAt: "2026-10-29T10:00:00Z",
+      lastCheckedAt: "2026-10-29T10:00:00Z",
+      valuesSince: "2026-10-27T10:00:00Z",
+      snapshotCount: 5,
+      changeObserved: true,
+    });
+
+    renderPage();
+
+    expect(
+      await screen.findByText(
+        /Blizzard last changed these numbers on 27 Oct 2026/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("takes the filters from the address", async () => {

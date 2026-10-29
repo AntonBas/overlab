@@ -4,6 +4,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../../stats/api/statsApi", () => ({
+  fetchFreshness: vi.fn(() =>
+    Promise.resolve({
+      capturedAt: "2026-10-29T10:00:00Z",
+      lastCheckedAt: "2026-10-29T10:00:00Z",
+      valuesSince: "2026-10-29T10:00:00Z",
+      snapshotCount: 1,
+      changeObserved: false,
+    }),
+  ),
   fetchHeroHistory: vi.fn(() => Promise.resolve({ hero: {}, points: [] })),
 }));
 vi.mock("../../patches/api/patchesApi", () => ({
@@ -98,7 +107,7 @@ describe("HeroHistorySection", () => {
 
     expect(screen.queryByText(/now$/)).toBeNull();
     expect(screen.queryByText("51.2%")).toBeNull();
-    expect(screen.getByText(/Data collected/)).toBeInTheDocument();
+    expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
 
   it("has no ban rate in Quick Play", async () => {

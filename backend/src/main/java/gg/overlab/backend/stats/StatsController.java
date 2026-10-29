@@ -2,6 +2,7 @@ package gg.overlab.backend.stats;
 
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.exception.core.BadRequestException;
+import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroMapStatsDto;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
@@ -27,6 +28,7 @@ public class StatsController {
 
     private final StatsService statsService;
     private final StatsHistoryService historyService;
+    private final StatsFreshnessService freshnessService;
 
     @Operation(summary = "Latest hero statistics for the selected filters")
     @GetMapping
@@ -67,6 +69,16 @@ public class StatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to) {
         StatsFilter filter = StatsFilter.of(queue, tier, mapSlug, platform, region);
         return historyService.getHeroHistory(slug, filter, from, to);
+    }
+
+    @Operation(summary = "When the numbers collected from Blizzard last changed")
+    @GetMapping("/freshness")
+    public DataFreshnessDto freshness(
+            @RequestParam(defaultValue = "COMPETITIVE") GameQueue queue,
+            @RequestParam(defaultValue = "ALL") RankTier tier,
+            @RequestParam(defaultValue = "PC") Platform platform,
+            @RequestParam(defaultValue = "EUROPE") Region region) {
+        return freshnessService.freshness(StatsFilter.of(queue, tier, StatsFilter.ALL_MAPS, platform, region));
     }
 
     @Operation(summary = "Compare statistics between two periods or around a patch")

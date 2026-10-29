@@ -1,5 +1,6 @@
 import { api } from "../../../services/api";
 import type {
+  DataFreshness,
   GameQueue,
   HeroHistory,
   HeroMapStats,
@@ -10,6 +11,18 @@ import type {
   StatsSnapshot,
 } from "../../../types/api";
 import type { StatsFilters } from "../filters";
+
+export async function fetchFreshness(
+  queue: GameQueue,
+  tier: RankTier,
+  platform: Platform,
+  region: Region,
+): Promise<DataFreshness> {
+  const { data } = await api.get<DataFreshness>("/stats/freshness", {
+    params: { queue, tier, platform, region },
+  });
+  return data;
+}
 
 export async function fetchStats(
   filters: StatsFilters,

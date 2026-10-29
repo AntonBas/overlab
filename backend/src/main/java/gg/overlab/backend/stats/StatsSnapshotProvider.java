@@ -4,6 +4,7 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class StatsSnapshotProvider {
 
     private final HeroStatRepository heroStatRepository;
     private final StatsMapper statsMapper;
+    private final SnapshotChecks snapshotChecks;
 
     @Cacheable(value = CACHE_NAME, key = "'snapshot:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
@@ -37,7 +39,9 @@ public class StatsSnapshotProvider {
         List<HeroStatDto> heroes = stats.stream()
                 .map(stat -> statsMapper.toDto(stat, baselineByHero.get(stat.getHero().getId())))
                 .toList();
-        return new StatsSnapshotDto(stats.get(0).getCapturedAt(), filter.queue(), filter.tier(), filter.mapSlug(),
+        Instant checkedAt = SnapshotChecks.latest(stats.get(0).getCapturedAt(), snapshotChecks.lastChecked(
+                filter.queue(), filter.platform(), filter.region(), filter.tier(), filter.mapSlug()));
+        return new StatsSnapshotDto(checkedAt, filter.queue(), filter.tier(), filter.mapSlug(),
                 filter.platform(), filter.region(), heroes);
     }
 

@@ -18,7 +18,8 @@ import org.junit.jupiter.api.Test;
 class StatsSnapshotProviderTest {
 
     private final HeroStatRepository repository = mock(HeroStatRepository.class);
-    private final StatsSnapshotProvider provider = new StatsSnapshotProvider(repository, StatsFixtures.statsMapper());
+    private final StatsSnapshotProvider provider = new StatsSnapshotProvider(repository, StatsFixtures.statsMapper(),
+            StatsFixtures.noChecks());
 
     private final Hero ana = StatsFixtures.hero(1, "ana", "Ana", HeroRole.SUPPORT);
     private final Hero genji = StatsFixtures.hero(2, "genji", "Genji", HeroRole.DAMAGE);
