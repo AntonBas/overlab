@@ -17,7 +17,7 @@ final class CollectorFixtures {
 
     static CollectorProperties properties(int maxAttempts, CollectorJob... jobs) {
         return new CollectorProperties("https://overwatch.example", "OverlabTest", Duration.ZERO,
-                GameFormat.FIVE_VS_FIVE, null, false,
+                GameFormat.FIVE_VS_FIVE, null, false, false,
                 new CollectorProperties.Retry(maxAttempts, Duration.ZERO),
                 new CollectorProperties.Timeouts(Duration.ofSeconds(1), Duration.ofSeconds(1)),
                 3, new CollectorProperties.Retention(180), List.of(jobs));
@@ -43,12 +43,21 @@ final class CollectorFixtures {
                 new BlizzardRatesResponse.HeroInfo(id, role, "initiator", null));
     }
 
+    static final String WITHOUT_BAN_RATE_JSON = """
+            {"rates":{"rates":[
+              {"id":"ana","cells":{"name":"Ana","winrate":47.1,"pickrate":23.1,"banrate":0},
+               "hero":{"name":"Ana","role":"SUPPORT","subrole":"tactician"}}],
+              "extrema":{},"selected":{}},
+              "columns":[{"id":"name"},{"id":"pickrate"},{"id":"winrate"}]}
+            """;
+
     static final String SAMPLE_JSON = """
             {"rates":{"rates":[
               {"id":"ana","cells":{"name":"Ana","winrate":47.1,"pickrate":23.1,"banrate":11.9},
                "hero":{"name":"Ana","role":"SUPPORT","subrole":"tactician","portrait":"x","color":"48699eff"}},
               {"id":"dva","cells":{"name":"D.Va","winrate":50.2,"pickrate":9.4,"banrate":0},
                "hero":{"name":"D.Va","role":"TANK","subrole":"initiator","portrait":"y"}}],
-              "extrema":{},"selected":{}},"columns":[]}
+              "extrema":{},"selected":{}},
+              "columns":[{"id":"name"},{"id":"pickrate"},{"id":"winrate"},{"id":"banrate"}]}
             """;
 }

@@ -9,6 +9,7 @@ import {
   createPerk,
   deletePerk,
   fetchPerks,
+  importPerks,
   removePerkIcon,
   updatePerk,
   uploadPerkIcon,
@@ -166,6 +167,7 @@ export function PerksAdminPage() {
   const [editing, setEditing] = useState<Perk | "new" | null>(null);
   const [deleting, setDeleting] = useState<Perk | null>(null);
   const removal = useSave();
+  const importing = useSave();
 
   async function confirmDelete() {
     if (!deleting) {
@@ -186,17 +188,33 @@ export function PerksAdminPage() {
       <PageHeader
         title="Perks"
         actions={
-          heroSlug && (
+          <>
             <button
               type="button"
-              className="button"
-              onClick={() => setEditing("new")}
+              className="button button--ghost"
+              disabled={importing.saving}
+              onClick={() =>
+                importing.run(
+                  importPerks,
+                  "Import started. It takes a few minutes, reload the list afterwards.",
+                )
+              }
             >
-              New perk
+              Import from Blizzard
             </button>
-          )
+            {heroSlug && (
+              <button
+                type="button"
+                className="button"
+                onClick={() => setEditing("new")}
+              >
+                New perk
+              </button>
+            )}
+          </>
         }
       />
+      <StatusMessage error={importing.error} success={importing.success} />
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

@@ -172,6 +172,13 @@ export async function removePerkIcon(id: number): Promise<Perk> {
   return data;
 }
 
+export async function importPerks(): Promise<{ heroes: number }> {
+  const { data } = await api.post<{ heroes: number }>(
+    "/admin/collector/perks/import",
+  );
+  return data;
+}
+
 export async function fetchCollectorJobs(): Promise<CollectorJob[]> {
   const { data } = await api.get<CollectorJob[]>("/admin/collector/jobs");
   return data;

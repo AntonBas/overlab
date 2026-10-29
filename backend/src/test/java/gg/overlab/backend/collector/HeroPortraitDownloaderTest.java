@@ -33,7 +33,7 @@ class HeroPortraitDownloaderTest {
     }
 
     private HeroPortraitDownloader downloader(MediaStorage storage) {
-        return new HeroPortraitDownloader(builder, "test-agent", storage, true);
+        return new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent"), storage, true);
     }
 
     private Hero hero(String portraitUrl) {
@@ -59,7 +59,7 @@ class HeroPortraitDownloaderTest {
     void doesNothingWhileDownloadsAreDisabled() {
         Hero hero = hero(null);
 
-        new HeroPortraitDownloader(builder, "test-agent", storage(), false).ensurePortrait(hero, SOURCE);
+        new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent"), storage(), false).ensurePortrait(hero, SOURCE);
 
         assertThat(hero.getPortraitUrl()).isNull();
         server.verify();

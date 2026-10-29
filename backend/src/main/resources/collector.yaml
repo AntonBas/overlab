@@ -14,6 +14,7 @@ collector:
     detailed-days: 180
   startup-job: ${COLLECTOR_STARTUP_JOB:}
   download-portraits: ${COLLECTOR_DOWNLOAD_PORTRAITS:false}
+  import-perks: ${COLLECTOR_IMPORT_PERKS:false}
   jobs:
     - name: daily-overview
       cron: "0 0 4 * * *"
