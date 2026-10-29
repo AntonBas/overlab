@@ -170,7 +170,7 @@ export function MapPage() {
               : `${visibleHeroes.length} heroes shown`}
           </p>
           <p className="muted footnote">
-            Data collected <CollectedAt value={stats.data.capturedAt} />,{" "}
+            Checked <CollectedAt value={stats.data.capturedAt} />,{" "}
             {TIER_LABELS[filters.tier].toLowerCase()}.
           </p>
           {visibleHeroes.length === 0 ? (

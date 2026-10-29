@@ -9,6 +9,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { fetchStats } from "../api/statsApi";
+import { DataFreshness } from "../components/DataFreshness";
 import { StatsFilters } from "../components/StatsFilters";
 import { StatsTable } from "../components/StatsTable";
 import { ALL_MAPS, isQuickPlay } from "../filters";
@@ -35,7 +36,13 @@ export function StatsPage() {
         subtitle={
           snapshot ? (
             <>
-              Data collected <CollectedAt value={snapshot.capturedAt} />
+              Checked <CollectedAt value={snapshot.capturedAt} />.{" "}
+              <DataFreshness
+                queue={filters.queue}
+                tier={filters.tier}
+                platform={filters.platform}
+                region={filters.region}
+              />
             </>
           ) : (
             "Win, pick and ban rates collected from Blizzard's public statistics"

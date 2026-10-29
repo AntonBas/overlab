@@ -21,6 +21,7 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
+import gg.overlab.backend.stats.SnapshotCheckRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
@@ -39,7 +40,7 @@ class RatesCollectorServiceTest {
 
     private final BlizzardRatesClient client = mock(BlizzardRatesClient.class);
     private final RatesValidator validator = mock(RatesValidator.class);
-    private final RatesSnapshotWriter writer = mock(RatesSnapshotWriter.class);
+    private final SnapshotRecorder recorder = mock(SnapshotRecorder.class);
     private final CollectorRunRepository runRepository = mock(CollectorRunRepository.class);
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final List<Runnable> queuedTasks = new ArrayList<>();
@@ -54,9 +55,9 @@ class RatesCollectorServiceTest {
     @BeforeEach
     void setUp() {
         CollectorProperties properties = CollectorFixtures.properties(1, job);
-        metrics = new CollectorMetrics(meterRegistry, runRepository, properties);
+        metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
         metrics.registerLastSuccessGauges();
-        service = new RatesCollectorService(properties, client, validator, writer, mock(GameMapRepository.class),
+        service = new RatesCollectorService(properties, client, validator, recorder, mock(GameMapRepository.class),
                 mock(CacheManager.class), runRepository, metrics, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
@@ -65,8 +66,10 @@ class RatesCollectorServiceTest {
             }
             return run;
         });
-        when(client.fetch(any(), any(), any(), any(), any())).thenReturn(CollectorFixtures.rates(5));
-        when(writer.save(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(5);
+        when(client.fetch(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag-1", false));
+        when(recorder.record(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new SnapshotRecorder.Outcome(5, true));
     }
 
     @Test
@@ -82,6 +85,33 @@ class RatesCollectorServiceTest {
         assertThat(run.getErrorSummary()).isNull();
         assertThat(meterRegistry.get("collector.requests").tag("result", "success").counter().count()).isEqualTo(3.0);
         assertThat(meterRegistry.get("collector.rows.saved").counter().count()).isEqualTo(15.0);
+    }
+
+    @Test
+    void unchangedSnapshotsAreCountedAndSaveNoRows() {
+        when(recorder.record(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new SnapshotRecorder.Outcome(0, false));
+
+        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+
+        CollectorRun run = lastSavedRun();
+        assertThat(run.getRowsSaved()).isZero();
+        assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.SUCCESS);
+        assertThat(meterRegistry.get("collector.unchanged.snapshots").counter().count()).isEqualTo(3.0);
+    }
+
+    @Test
+    void aNotModifiedAnswerSkipsValidationAndStorage() {
+        when(recorder.knownEtag(any(), any(), any(), any(), any())).thenReturn(Optional.of("etag-1"));
+        when(client.fetch(any(), any(), any(), any(), any(), eq("etag-1"))).thenReturn(RatesFetch.unchanged());
+        when(recorder.markUnchanged(any(), any(), any(), any(), any(), any())).thenReturn(true);
+
+        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+
+        verify(validator, times(0)).validate(any());
+        verify(recorder, times(0)).record(any(), any(), any(), any(), any(), any(), any(), any(), any());
+        assertThat(lastSavedRun().getRowsSaved()).isZero();
+        assertThat(meterRegistry.get("collector.unchanged.snapshots").counter().count()).isEqualTo(3.0);
     }
 
     @Test
@@ -104,10 +134,11 @@ class RatesCollectorServiceTest {
     void quickPlayIsRequestedOnlyForTierAll() {
         service.runBlocking("daily", CollectorTrigger.SCHEDULED);
 
-        verify(client).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.ALL, "all-maps");
-        verify(client, times(0)).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.GOLD, "all-maps");
-        verify(client).fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD, "all-maps");
-        verify(writer, times(3)).save(any(), any(), eq(GameFormat.FIVE_VS_FIVE), any(), any(), any(), any(), any());
+        verify(client).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.ALL, "all-maps", null);
+        verify(client, times(0)).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.GOLD, "all-maps", null);
+        verify(client).fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD, "all-maps", null);
+        verify(recorder, times(3)).record(any(), any(), eq(GameFormat.FIVE_VS_FIVE), any(), any(), any(), any(), any(),
+                any());
     }
 
     @Test
@@ -121,13 +152,13 @@ class RatesCollectorServiceTest {
         assertThat(run.getRequestsFailed()).isEqualTo(1);
         assertThat(run.getRowsSaved()).isEqualTo(10);
         assertThat(run.getErrorSummary()).contains("bad numbers");
-        verify(writer, times(2)).save(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(recorder, times(2)).record(any(), any(), any(), any(), any(), any(), any(), any(), any());
         assertThat(meterRegistry.get("collector.requests").tag("result", "failure").counter().count()).isEqualTo(1.0);
     }
 
     @Test
     void runWhereEveryRequestFailsIsFailedAndNotCountedAsSuccess() {
-        when(client.fetch(any(), any(), any(), any(), any())).thenThrow(new IllegalStateException("blizzard down"));
+        when(client.fetch(any(), any(), any(), any(), any(), any())).thenThrow(new IllegalStateException("blizzard down"));
 
         service.runBlocking("daily", CollectorTrigger.SCHEDULED);
 
@@ -168,7 +199,7 @@ class RatesCollectorServiceTest {
 
         service.runBlocking("daily", CollectorTrigger.SCHEDULED);
 
-        verify(client, times(0)).fetch(any(), any(), any(), any(), any());
+        verify(client, times(0)).fetch(any(), any(), any(), any(), any(), any());
     }
 
     @Test

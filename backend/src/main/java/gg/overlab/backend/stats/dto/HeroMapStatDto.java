@@ -15,5 +15,11 @@ public record HeroMapStatDto(
         @Schema(description = "Ban rate. Percent, 0-100. Null for QUICK_PLAY") BigDecimal banRate,
         @Schema(description = "Win rate on this map minus the hero's overall win rate, in percentage points") BigDecimal winRateDelta,
         @Schema(description = "Pick rate on this map minus the hero's overall pick rate, in percentage points") BigDecimal pickRateDelta,
-        @Schema(description = "When the snapshot was collected from Blizzard") Instant capturedAt) implements Serializable {
+        @Schema(description = "When the numbers were last checked against Blizzard") Instant capturedAt)
+        implements Serializable {
+
+    public HeroMapStatDto withCapturedAt(Instant checkedAt) {
+        return new HeroMapStatDto(mapSlug, mapName, mode, winRate, pickRate, banRate, winRateDelta, pickRateDelta,
+                checkedAt);
+    }
 }

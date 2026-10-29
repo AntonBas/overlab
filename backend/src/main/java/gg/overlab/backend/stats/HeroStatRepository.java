@@ -1,14 +1,41 @@
 package gg.overlab.backend.stats;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
+
+    @Query("""
+            select distinct s.capturedAt from HeroStat s
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+            order by s.capturedAt desc
+            """)
+    List<Instant> findRecentCaptureTimes(@Param("queue") GameQueue queue,
+                                         @Param("platform") Platform platform,
+                                         @Param("region") Region region,
+                                         @Param("tier") RankTier tier,
+                                         Pageable pageable);
+
+    @Query("""
+            select new gg.overlab.backend.stats.RateRow(s.hero.id, s.winRate, s.pickRate, s.banRate, s.capturedAt)
+            from HeroStat s
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.capturedAt in :capturedAt
+            """)
+    List<RateRow> findRatesAt(@Param("queue") GameQueue queue,
+                              @Param("platform") Platform platform,
+                              @Param("region") Region region,
+                              @Param("tier") RankTier tier,
+                              @Param("capturedAt") Collection<Instant> capturedAt);
 
     @Query("""
             select s from HeroStat s join fetch s.hero

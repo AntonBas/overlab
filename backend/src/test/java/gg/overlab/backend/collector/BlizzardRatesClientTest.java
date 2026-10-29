@@ -2,6 +2,8 @@ package gg.overlab.backend.collector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.headerDoesNotExist;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -31,7 +33,7 @@ class BlizzardRatesClientTest {
     }
 
     private List<BlizzardRatesResponse.HeroRate> fetch(BlizzardRatesClient client) {
-        return client.fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD, "rialto");
+        return client.fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD, "rialto").rates();
     }
 
     @Test
@@ -76,6 +78,43 @@ class BlizzardRatesClientTest {
                 .andRespond(withSuccess(CollectorFixtures.WITHOUT_BAN_RATE_JSON, MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> fetch(client(1))).isInstanceOf(InvalidSnapshotException.class);
+        server.verify();
+    }
+
+    @Test
+    void sendsTheKnownEtagAndReportsNotModified() {
+        server.expect(header("If-None-Match", "W/\"abc\""))
+                .andRespond(withStatus(HttpStatus.NOT_MODIFIED));
+
+        RatesFetch fetched = client(1).fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD,
+                "rialto", "W/\"abc\"");
+
+        assertThat(fetched.notModified()).isTrue();
+        assertThat(fetched.rates()).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void returnsTheEtagOfAFreshResponse() {
+        server.expect(requestTo(org.hamcrest.Matchers.startsWith("https://overwatch.example")))
+                .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON)
+                        .header("ETag", "W/\"fresh\""));
+
+        RatesFetch fetched = client(1).fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD,
+                "rialto", null);
+
+        assertThat(fetched.notModified()).isFalse();
+        assertThat(fetched.etag()).isEqualTo("W/\"fresh\"");
+        assertThat(fetched.rates()).hasSize(2);
+    }
+
+    @Test
+    void sendsNoConditionHeaderWithoutAKnownEtag() {
+        server.expect(headerDoesNotExist("If-None-Match"))
+                .andRespond(withSuccess(CollectorFixtures.SAMPLE_JSON, MediaType.APPLICATION_JSON));
+
+        client(1).fetch(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD, "rialto");
+
         server.verify();
     }
 

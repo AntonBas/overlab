@@ -15,11 +15,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ public class StatsHistoryService {
     private final HeroService heroService;
     private final PatchService patchService;
     private final StatsMapper statsMapper;
+    private final SnapshotChecks snapshotChecks;
 
     @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
             key = "'history:' + #heroSlug + ':' + #filter.cacheKey() + ':' + #from + ':' + #to")
@@ -57,7 +60,8 @@ public class StatsHistoryService {
                 filter.region(), filter.tier(), start, end)
                 : heroStatRepository.findHistoryForMap(heroSlug, filter.mapSlug(), filter.queue(), filter.platform(),
                 filter.region(), filter.tier(), start, end);
-        List<HeroHistoryPointDto> points = latestPerDay(stats.stream().map(statsMapper::toHistoryPoint).toList());
+        List<HeroHistoryPointDto> points = extendToLastCheck(
+                latestPerDay(stats.stream().map(statsMapper::toHistoryPoint).toList()), filter, end);
         return new HeroHistoryDto(hero, filter.queue(), filter.tier(), filter.mapSlug(), filter.platform(),
                 filter.region(), start, end, points);
     }
@@ -110,6 +114,24 @@ public class StatsHistoryService {
                 filter.tier(), capturedAt)
                 : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), filter.platform(),
                 filter.region(), filter.tier(), capturedAt);
+    }
+
+    private List<HeroHistoryPointDto> extendToLastCheck(List<HeroHistoryPointDto> points, StatsFilter filter,
+                                                        Instant end) {
+        if (points.isEmpty()) {
+            return points;
+        }
+        HeroHistoryPointDto last = points.get(points.size() - 1);
+        Optional<Instant> checked = snapshotChecks.lastChecked(filter.queue(), filter.platform(), filter.region(),
+                filter.tier(), filter.mapSlug());
+        if (checked.isEmpty() || !checked.get().isAfter(last.capturedAt()) || checked.get().isAfter(end)
+                || LocalDate.ofInstant(checked.get(), ZoneOffset.UTC)
+                .equals(LocalDate.ofInstant(last.capturedAt(), ZoneOffset.UTC))) {
+            return points;
+        }
+        List<HeroHistoryPointDto> extended = new ArrayList<>(points);
+        extended.add(new HeroHistoryPointDto(checked.get(), last.winRate(), last.pickRate(), last.banRate()));
+        return List.copyOf(extended);
     }
 
     private static List<HeroHistoryPointDto> latestPerDay(List<HeroHistoryPointDto> points) {

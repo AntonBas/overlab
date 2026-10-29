@@ -63,6 +63,22 @@ export function buildChartGeometry(
   return { path, dots, minValue, maxValue, minTime, maxTime, xOf };
 }
 
+export function nearestDotIndex(
+  dots: { x: number }[],
+  x: number,
+): number | null {
+  if (dots.length === 0) {
+    return null;
+  }
+  let nearest = 0;
+  dots.forEach((dot, index) => {
+    if (Math.abs(dot.x - x) < Math.abs(dots[nearest].x - x)) {
+      nearest = index;
+    }
+  });
+  return nearest;
+}
+
 export const HISTORY_PERIODS = [
   { id: "7d", label: "7 days", days: 7 },
   { id: "30d", label: "30 days", days: 30 },

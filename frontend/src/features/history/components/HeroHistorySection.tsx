@@ -10,6 +10,7 @@ import type { GameQueue } from "../../../types/api";
 import { formatDateTime } from "../../../utils/format";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchHeroHistory } from "../../stats/api/statsApi";
+import { DataFreshness } from "../../stats/components/DataFreshness";
 import {
   HISTORY_PERIODS,
   periodRange,
@@ -163,10 +164,20 @@ export function HeroHistorySection({
         {current && (
           <>
             {" "}
-            Data collected <CollectedAt value={current.capturedAt} />.
+            Checked <CollectedAt value={current.capturedAt} />.
           </>
         )}{" "}
         Dashed lines mark patch releases.{" "}
+        {!mapSlug && (
+          <>
+            <DataFreshness
+              queue={queue}
+              tier="ALL"
+              platform="PC"
+              region="EUROPE"
+            />{" "}
+          </>
+        )}
         <Link to="/changes">See what changed across all heroes</Link>.
       </p>
     </section>

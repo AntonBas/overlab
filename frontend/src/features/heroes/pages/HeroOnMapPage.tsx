@@ -118,7 +118,7 @@ export function HeroOnMapPage() {
               {overall
                 ? `${hero.data.name}'s all-maps values`
                 : "the all-maps values"}
-              . All ranks, PC, Europe. Data collected{" "}
+              . All ranks, PC, Europe. Checked{" "}
               <CollectedAt value={onMap.capturedAt} />.
             </p>
           </>

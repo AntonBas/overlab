@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -47,11 +49,15 @@ public class BlizzardRatesClient {
                 .build();
     }
 
-    public List<BlizzardRatesResponse.HeroRate> fetch(GameQueue queue, Platform platform, Region region,
-                                                       RankTier tier, String mapSlug) {
+    public RatesFetch fetch(GameQueue queue, Platform platform, Region region, RankTier tier, String mapSlug) {
+        return fetch(queue, platform, region, tier, mapSlug, null);
+    }
+
+    public RatesFetch fetch(GameQueue queue, Platform platform, Region region, RankTier tier, String mapSlug,
+                            String knownEtag) {
         for (int attempt = 1; ; attempt++) {
             try {
-                return fetchOnce(queue, platform, region, tier, mapSlug);
+                return fetchOnce(queue, platform, region, tier, mapSlug, knownEtag);
             } catch (ResourceAccessException | HttpServerErrorException | HttpClientErrorException.TooManyRequests
                      exception) {
                 if (attempt >= retry.maxAttempts()) {
@@ -65,16 +71,28 @@ public class BlizzardRatesClient {
         }
     }
 
-    private List<BlizzardRatesResponse.HeroRate> fetchOnce(GameQueue queue, Platform platform, Region region,
-                                                           RankTier tier, String mapSlug) {
+    private RatesFetch fetchOnce(GameQueue queue, Platform platform, Region region, RankTier tier,
+                                 String mapSlug, String knownEtag) {
         if (queue == GameQueue.QUICK_PLAY) {
-            return heroes(request(QUICK_PLAY_QUEUE, platform, region, tier, mapSlug));
+            ResponseEntity<BlizzardRatesResponse> entity =
+                    request(QUICK_PLAY_QUEUE, platform, region, tier, mapSlug, knownEtag);
+            return entity.getStatusCode() == HttpStatus.NOT_MODIFIED
+                    ? RatesFetch.unchanged()
+                    : new RatesFetch(heroes(entity.getBody()), etagOf(entity), false);
         }
+        String etagForFirstCandidate = knownEtag;
         for (int candidate : competitiveCandidates()) {
-            BlizzardRatesResponse response = request(candidate, platform, region, tier, mapSlug);
+            ResponseEntity<BlizzardRatesResponse> entity =
+                    request(candidate, platform, region, tier, mapSlug, etagForFirstCandidate);
+            etagForFirstCandidate = null;
+            if (entity.getStatusCode() == HttpStatus.NOT_MODIFIED) {
+                competitiveQueue = candidate;
+                return RatesFetch.unchanged();
+            }
+            BlizzardRatesResponse response = entity.getBody();
             if (heroes(response).isEmpty() || hasBanRateColumn(response)) {
                 competitiveQueue = candidate;
-                return heroes(response);
+                return new RatesFetch(heroes(response), etagOf(entity), false);
             }
             log.warn("Queue {} returned no ban rate column, trying the next Competitive queue", candidate);
             sleep(pause);
@@ -89,9 +107,9 @@ public class BlizzardRatesClient {
                 COMPETITIVE_QUEUES.stream().filter(candidate -> candidate != current)).toList();
     }
 
-    private BlizzardRatesResponse request(int queueCode, Platform platform, Region region, RankTier tier,
-                                          String mapSlug) {
-        return restClient.get()
+    private ResponseEntity<BlizzardRatesResponse> request(int queueCode, Platform platform, Region region,
+                                                          RankTier tier, String mapSlug, String knownEtag) {
+        RestClient.RequestHeadersSpec<?> spec = restClient.get()
                 .uri(uriBuilder -> uriBuilder.path(RATES_PATH)
                         .queryParam("input", platformParameter(platform))
                         .queryParam("map", mapSlug)
@@ -99,9 +117,15 @@ public class BlizzardRatesClient {
                         .queryParam("role", "All")
                         .queryParam("rq", queueCode)
                         .queryParam("tier", capitalized(tier))
-                        .build())
-                .retrieve()
-                .body(BlizzardRatesResponse.class);
+                        .build());
+        if (knownEtag != null) {
+            spec = spec.header(HttpHeaders.IF_NONE_MATCH, knownEtag);
+        }
+        return spec.retrieve().toEntity(BlizzardRatesResponse.class);
+    }
+
+    private String etagOf(ResponseEntity<?> entity) {
+        return entity.getHeaders().getFirst(HttpHeaders.ETAG);
     }
 
     private List<BlizzardRatesResponse.HeroRate> heroes(BlizzardRatesResponse response) {
