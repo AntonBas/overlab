@@ -30,8 +30,23 @@ function positionOf(perk: Perk): PerkPosition {
 function PerkCard({ perk }: { perk: Perk }) {
   const position = positionOf(perk);
   return (
-    <li className={clsx("perk-card", `perk-card--${position.toLowerCase()}`)}>
-      <span className="perk-card__side muted">{POSITION_LABELS[position]}</span>
+    <li
+      className={clsx(
+        "perk-card",
+        `perk-card--${position.toLowerCase()}`,
+        `perk-card--${perk.recommendation.toLowerCase()}`,
+      )}
+    >
+      <span className="perk-card__header">
+        <span className="perk-card__side muted">
+          {POSITION_LABELS[position]}
+        </span>
+        <span
+          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
+        >
+          {RECOMMENDATION_LABELS[perk.recommendation]}
+        </span>
+      </span>
       <span className="perk-card__main">
         <Thumbnail
           url={perk.iconUrl}
@@ -46,11 +61,6 @@ function PerkCard({ perk }: { perk: Perk }) {
           )}
           {perk.recommendationNote && <span>{perk.recommendationNote}</span>}
         </span>
-      </span>
-      <span
-        className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
-      >
-        {RECOMMENDATION_LABELS[perk.recommendation]}
       </span>
     </li>
   );
