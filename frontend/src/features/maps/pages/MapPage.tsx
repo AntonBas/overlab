@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -50,31 +49,29 @@ export function MapPage() {
 
   return (
     <>
-      <PageHeader
-        title={map.data.name}
-        image={
-          <Thumbnail
-            url={map.data.imageUrl}
-            width={128}
-            height={72}
-            className="thumbnail--banner"
-          />
-        }
-        subtitle={
-          map.data.mode
-            ? `${MAP_MODE_LABELS[map.data.mode]} map. Small numbers show the difference from the all-maps value.`
-            : "Small numbers show the difference from the all-maps value."
-        }
-        actions={
-          <>
-            <FavoriteButton kind="map" slug={slug} name={map.data.name} />
-            <QueueToggle
-              value={filters.queue}
-              onChange={(queue) => update({ queue })}
-            />
-          </>
-        }
-      />
+      <section className="map-banner">
+        <Thumbnail
+          url={map.data.imageUrl}
+          width={1280}
+          height={400}
+          className="map-banner__image"
+        />
+        <div className="map-banner__content">
+          <h1>{map.data.name}</h1>
+          <p>
+            {map.data.mode
+              ? `${MAP_MODE_LABELS[map.data.mode]} map. Small numbers show the difference from the all-maps value.`
+              : "Small numbers show the difference from the all-maps value."}
+          </p>
+        </div>
+      </section>
+      <div className="map-actions">
+        <FavoriteButton kind="map" slug={slug} name={map.data.name} />
+        <QueueToggle
+          value={filters.queue}
+          onChange={(queue) => update({ queue })}
+        />
+      </div>
       <div className="filters">
         <label className="field">
           <span className="field__label">Rank</span>
