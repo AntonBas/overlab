@@ -43,7 +43,7 @@ describe("HeroHistorySection", () => {
     );
   });
 
-  it("shows the three statistics as one section you switch between", async () => {
+  it("switches one chart between win, pick and ban rate", async () => {
     renderWithRouter(
       <HeroHistorySection
         slug="ana"
@@ -61,21 +61,44 @@ describe("HeroHistorySection", () => {
     expect(
       await screen.findByRole("heading", { name: "Statistics" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Win rate now")).toBeInTheDocument();
-    expect(screen.getByText("51.2%")).toBeInTheDocument();
-
     const switcher = screen.getByRole("group", { name: "Statistic" });
+    expect(
+      within(switcher).getByRole("button", { name: "Win rate" }),
+    ).toHaveAttribute("aria-pressed", "true");
+
     await userEvent.click(
       within(switcher).getByRole("button", { name: "Pick rate" }),
     );
-    expect(screen.getByText("Pick rate now")).toBeInTheDocument();
-    expect(screen.getByText("12.3%")).toBeInTheDocument();
+    expect(
+      within(switcher).getByRole("button", { name: "Pick rate" }),
+    ).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(
       within(switcher).getByRole("button", { name: "Ban rate" }),
     );
-    expect(screen.getByText("Ban rate now")).toBeInTheDocument();
-    expect(screen.getByText("7.5%")).toBeInTheDocument();
+    expect(
+      within(switcher).getByRole("button", { name: "Ban rate" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("does not repeat the current values, the page header shows them", async () => {
+    renderWithRouter(
+      <HeroHistorySection
+        slug="ana"
+        queue="COMPETITIVE"
+        current={{
+          winRate: 51.2,
+          pickRate: 12.3,
+          banRate: 7.5,
+          capturedAt: "2026-10-29T10:00:00Z",
+        }}
+      />,
+    );
+    await screen.findByRole("group", { name: "Statistic" });
+
+    expect(screen.queryByText(/now$/)).toBeNull();
+    expect(screen.queryByText("51.2%")).toBeNull();
+    expect(screen.getByText(/Data collected/)).toBeInTheDocument();
   });
 
   it("has no ban rate in Quick Play", async () => {

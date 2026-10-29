@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { RateBar } from "../../../components/ui/RateBar";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue } from "../../../types/api";
@@ -24,13 +23,12 @@ interface MetricDefinition {
   id: Metric;
   label: string;
   tone: "win" | "pick" | "ban";
-  barMax: number;
 }
 
 const METRICS: MetricDefinition[] = [
-  { id: "win", label: "Win rate", tone: "win", barMax: 100 },
-  { id: "pick", label: "Pick rate", tone: "pick", barMax: 40 },
-  { id: "ban", label: "Ban rate", tone: "ban", barMax: 50 },
+  { id: "win", label: "Win rate", tone: "win" },
+  { id: "pick", label: "Pick rate", tone: "pick" },
+  { id: "ban", label: "Ban rate", tone: "ban" },
 ];
 
 export interface CurrentStats {
@@ -47,13 +45,6 @@ interface HeroHistorySectionProps {
   title?: string;
   current?: CurrentStats | null;
   children?: ReactNode;
-}
-
-function currentValue(current: CurrentStats, metric: Metric): number | null {
-  if (metric === "win") {
-    return current.winRate;
-  }
-  return metric === "pick" ? current.pickRate : current.banRate;
 }
 
 export function HeroHistorySection({
@@ -105,7 +96,6 @@ export function HeroHistorySection({
     label: `Patch ${patch.version}`,
   }));
   const enough = series.length >= 2;
-  const now = current ? currentValue(current, metric.id) : null;
 
   return (
     <section className="section" aria-labelledby="history-heading">
@@ -143,12 +133,6 @@ export function HeroHistorySection({
           ))}
         </div>
       </div>
-      {current && (
-        <div className="stat-current">
-          <span className="muted">{metric.label} now</span>
-          <RateBar value={now} tone={metric.tone} max={metric.barMax} />
-        </div>
-      )}
       {history.loading && <Spinner label="Loading history" />}
       {history.error && (
         <ErrorMessage failure={history.error} onRetry={history.reload} />
