@@ -11,6 +11,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
+import { HeroMapPicks } from "../components/HeroMapPicks";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { GuideList } from "../../guides/components/GuideList";
@@ -131,6 +132,15 @@ export function HeroPage() {
       </section>
 
       <HeroHistorySection slug={slug} queue={queue} />
+
+      {stats.data && stats.data.maps.length > 0 && (
+        <HeroMapPicks
+          heroSlug={slug}
+          heroName={hero.data.name}
+          maps={stats.data.maps}
+          linkSuffix={queue === "QUICK_PLAY" ? "?queue=quick_play" : ""}
+        />
+      )}
 
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">
