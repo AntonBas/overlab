@@ -1,5 +1,6 @@
 export const ADMIN_SECTIONS = [
   { to: "/admin/heroes", label: "Heroes" },
+  { to: "/admin/abilities", label: "Abilities" },
   { to: "/admin/perks", label: "Perks" },
   { to: "/admin/relations", label: "Counters and synergies" },
   { to: "/admin/guides", label: "Guides" },

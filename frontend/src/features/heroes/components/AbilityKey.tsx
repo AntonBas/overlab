@@ -5,15 +5,7 @@ import {
   CONTROL_SCHEME_LABELS,
   useControlScheme,
 } from "../context/controlSchemeContext";
-
-const CONTROL_LABELS: Record<AbilityControl, string> = {
-  PRIMARY_FIRE: "Primary fire",
-  SECONDARY_FIRE: "Secondary fire",
-  ABILITY_1: "Ability 1",
-  ABILITY_2: "Ability 2",
-  ULTIMATE: "Ultimate",
-  PASSIVE: "Passive",
-};
+import { ABILITY_CONTROL_LABELS } from "../utils/abilityControls";
 
 export function AbilityKey({
   control,
@@ -27,7 +19,7 @@ export function AbilityKey({
     return null;
   }
   const key = CONTROL_KEYS[scheme][control];
-  const label = CONTROL_LABELS[control];
+  const label = ABILITY_CONTROL_LABELS[control];
   const title = key
     ? `${label} (${key} on ${CONTROL_SCHEME_LABELS[scheme]} by default)`
     : label;

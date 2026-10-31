@@ -56,6 +56,11 @@ const GuidesAdminPage = lazy(() =>
     default: module.GuidesAdminPage,
   })),
 );
+const AbilitiesAdminPage = lazy(() =>
+  import("../features/admin/pages/AbilitiesAdminPage").then((module) => ({
+    default: module.AbilitiesAdminPage,
+  })),
+);
 const HeroesAdminPage = lazy(() =>
   import("../features/admin/pages/HeroesAdminPage").then((module) => ({
     default: module.HeroesAdminPage,
@@ -147,6 +152,7 @@ export function AppRoutes() {
         >
           <Route index element={<AdminHomePage />} />
           <Route path="heroes" element={<HeroesAdminPage />} />
+          <Route path="abilities" element={<AbilitiesAdminPage />} />
           <Route path="perks" element={<PerksAdminPage />} />
           <Route path="relations" element={<RelationsAdminPage />} />
           <Route path="guides" element={<GuidesAdminPage />} />

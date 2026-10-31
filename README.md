@@ -36,6 +36,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | Address | Purpose |
 |---|---|
 | `/admin/heroes` | Edit hero description, hide or show a hero |
+| `/admin/abilities` | Abilities per hero: choose the control slot (primary or secondary fire, ability 1 or 2, ultimate, passive); saved at once and written to the audit log |
 | `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
 | `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
