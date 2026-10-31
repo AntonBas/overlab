@@ -227,6 +227,35 @@ ul {
   max-width: 70ch;
 }
 
+.hero-traits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.hero-traits__column {
+  border-left: 3px solid var(--border, currentColor);
+  padding-left: 12px;
+}
+
+.hero-traits__column--strong {
+  border-left-color: #2e9e5b;
+}
+
+.hero-traits__column--weak {
+  border-left-color: #d1495b;
+}
+
+.hero-traits__column ul {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.hero-traits__column li + li {
+  margin-top: 6px;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

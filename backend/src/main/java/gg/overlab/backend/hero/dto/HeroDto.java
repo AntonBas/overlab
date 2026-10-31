@@ -9,5 +9,7 @@ public record HeroDto(
         HeroRole role,
         String subrole,
         String description,
+        String strengths,
+        String weaknesses,
         String portraitUrl) implements Serializable {
 }

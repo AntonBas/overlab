@@ -9,6 +9,8 @@ function hero(slug: string, name: string): Hero {
     role: "DAMAGE",
     subrole: null,
     description: null,
+    strengths: null,
+    weaknesses: null,
     portraitUrl: null,
   };
 }

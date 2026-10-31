@@ -43,6 +43,12 @@ public class Hero extends TimestampedEntity {
     @Column(columnDefinition = "text")
     private String description;
 
+    @Column(columnDefinition = "text")
+    private String strengths;
+
+    @Column(columnDefinition = "text")
+    private String weaknesses;
+
     @Column(nullable = false)
     private boolean active = true;
 }

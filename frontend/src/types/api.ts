@@ -23,6 +23,8 @@ export interface Hero {
   role: HeroRole;
   subrole: string | null;
   description: string | null;
+  strengths: string | null;
+  weaknesses: string | null;
   portraitUrl: string | null;
 }
 
