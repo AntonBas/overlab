@@ -27,6 +27,7 @@ import { HeroMapTable } from "../components/HeroMapTable";
 import { StatChips } from "../components/StatChips";
 import { AbilityList } from "../components/AbilityList";
 import { AbilityText } from "../components/AbilityText";
+import { ControlSchemeToggle } from "../components/ControlSchemeToggle";
 import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
 import { RelationTabs } from "../components/RelationTabs";
@@ -118,7 +119,10 @@ export function HeroPage() {
 
       {abilities.data && abilities.data.length > 0 && (
         <section className="section">
-          <h2>Abilities</h2>
+          <div className="section__heading">
+            <h2>Abilities</h2>
+            <ControlSchemeToggle />
+          </div>
           <AbilityList abilities={abilities.data} />
         </section>
       )}

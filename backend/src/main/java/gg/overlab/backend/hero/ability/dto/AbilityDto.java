@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.ability.dto;
 
+import gg.overlab.backend.hero.ability.AbilityControl;
 import java.io.Serializable;
 
 public record AbilityDto(
@@ -7,5 +8,6 @@ public record AbilityDto(
         String slug,
         String name,
         String description,
-        String iconUrl) implements Serializable {
+        String iconUrl,
+        AbilityControl control) implements Serializable {
 }
