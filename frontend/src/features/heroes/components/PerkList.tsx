@@ -6,6 +6,7 @@ import type {
   PerkRecommendation,
   PerkSlot,
 } from "../../../types/api";
+import { AbilityText } from "./AbilityText";
 
 const SLOT_ORDER: PerkSlot[] = ["MINOR", "MAJOR"];
 const SLOT_LABELS: Record<PerkSlot, string> = {
@@ -59,7 +60,11 @@ function PerkCard({ perk }: { perk: Perk }) {
           {perk.description && (
             <span className="muted">{perk.description}</span>
           )}
-          {perk.recommendationNote && <span>{perk.recommendationNote}</span>}
+          {perk.recommendationNote && (
+            <span className="perk-card__note">
+              <AbilityText text={perk.recommendationNote} />
+            </span>
+          )}
         </span>
       </span>
     </li>
