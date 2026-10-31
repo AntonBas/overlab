@@ -6,6 +6,7 @@ import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { AbilityControl } from "../../../types/api";
+import { CONTROL_KEYS } from "../../heroes/context/controlSchemeContext";
 import {
   ABILITY_CONTROLS,
   ABILITY_CONTROL_LABELS,
@@ -20,6 +21,13 @@ import { SelectField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import type { AdminAbility } from "../types";
+
+function optionLabel(control: AbilityControl): string {
+  const key = CONTROL_KEYS.PC[control];
+  return key
+    ? `${ABILITY_CONTROL_LABELS[control]} (${key})`
+    : ABILITY_CONTROL_LABELS[control];
+}
 
 function isControl(value: string): value is AbilityControl {
   return ABILITY_CONTROLS.some((control) => control === value);
@@ -89,7 +97,7 @@ function AbilityRows({ heroSlug }: { heroSlug: string }) {
                 <option value="">Not set</option>
                 {ABILITY_CONTROLS.map((control) => (
                   <option key={control} value={control}>
-                    {ABILITY_CONTROL_LABELS[control]}
+                    {optionLabel(control)}
                   </option>
                 ))}
               </SelectField>
@@ -120,7 +128,7 @@ export function AbilitiesAdminPage() {
           <SelectField
             label="Hero"
             name="hero"
-            hint="Choose the slot each ability uses. The site shows the matching button on PC, Xbox, PlayStation and Switch."
+            hint="Choose the slot each ability uses; the key in brackets is the PC default. The site shows the matching button on PC, Xbox, PlayStation and Switch."
             value={selected}
             onChange={(event) => setHeroSlug(event.target.value)}
           >
