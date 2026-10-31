@@ -2255,3 +2255,9 @@ input[type="range"] {
 .section__heading h2 {
   margin: 0;
 }
+
+.perk-card__note {
+  margin-top: 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
