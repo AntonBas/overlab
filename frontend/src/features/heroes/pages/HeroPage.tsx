@@ -117,35 +117,6 @@ export function HeroPage() {
         weaknesses={hero.data.weaknesses}
       />
 
-      {abilities.data && abilities.data.length > 0 && (
-        <section className="section">
-          <div className="section__heading">
-            <h2>Abilities</h2>
-            <ControlSchemeToggle />
-          </div>
-          <AbilityList abilities={abilities.data} />
-        </section>
-      )}
-
-      {perks.data && perks.data.length > 0 && (
-        <section className="section">
-          <h2>Perks</h2>
-          <PerkList perks={perks.data} />
-          <p>
-            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
-          </p>
-        </section>
-      )}
-
-      {stats.data && stats.data.maps.length > 0 && (
-        <HeroMapPicks
-          heroSlug={slug}
-          heroName={hero.data.name}
-          maps={stats.data.maps}
-          linkSuffix={queue === "QUICK_PLAY" ? "?queue=quick_play" : ""}
-        />
-      )}
-
       <HeroHistorySection
         title="Statistics"
         slug={slug}
@@ -160,6 +131,15 @@ export function HeroPage() {
             <ErrorMessage failure={stats.error} onRetry={stats.reload} />
           ))}
       </HeroHistorySection>
+
+      {stats.data && stats.data.maps.length > 0 && (
+        <HeroMapPicks
+          heroSlug={slug}
+          heroName={hero.data.name}
+          maps={stats.data.maps}
+          linkSuffix={queue === "QUICK_PLAY" ? "?queue=quick_play" : ""}
+        />
+      )}
 
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">
@@ -192,6 +172,26 @@ export function HeroPage() {
         <p className="muted footnote">
           Counters and synergies are curated recommendations, not statistics.
         </p>
+      )}
+
+      {abilities.data && abilities.data.length > 0 && (
+        <section className="section">
+          <div className="section__heading">
+            <h2>Abilities</h2>
+            <ControlSchemeToggle />
+          </div>
+          <AbilityList abilities={abilities.data} />
+        </section>
+      )}
+
+      {perks.data && perks.data.length > 0 && (
+        <section className="section">
+          <h2>Perks</h2>
+          <PerkList perks={perks.data} />
+          <p>
+            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
+          </p>
+        </section>
       )}
 
       {guides.data && guides.data.length > 0 && (
