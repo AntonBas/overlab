@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
@@ -54,6 +54,25 @@ describe("AbilitiesAdminPage", () => {
     expect(await screen.findByText("Charge")).toBeInTheDocument();
     expect(screen.getByLabelText("Control of Charge")).toHaveValue("ABILITY_1");
     expect(screen.getByLabelText("Control of Earthshatter")).toHaveValue("");
+  });
+
+  it("shows the default PC key next to every slot", async () => {
+    renderWithRouter(<AbilitiesAdminPage />);
+
+    const select = await screen.findByLabelText("Control of Charge");
+
+    expect(
+      within(select).getByRole("option", { name: "Primary fire (LMB)" }),
+    ).toBeInTheDocument();
+    expect(
+      within(select).getByRole("option", { name: "Ability 1 (Shift)" }),
+    ).toBeInTheDocument();
+    expect(
+      within(select).getByRole("option", { name: "Ultimate (Q)" }),
+    ).toBeInTheDocument();
+    expect(
+      within(select).getByRole("option", { name: "Passive" }),
+    ).toBeInTheDocument();
   });
 
   it("saves the chosen slot right away", async () => {
