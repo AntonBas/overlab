@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { GameMap } from "../../../types/api";
+import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 
 interface MapCardProps {
@@ -19,6 +21,12 @@ export function MapCard({ map, withFavorite = false }: MapCardProps) {
           height={300}
         />
       </span>
+      {map.mode && (
+        <span className="map-card__mode">
+          <ModeIcon mode={map.mode} />
+          {MAP_MODE_LABELS[map.mode]}
+        </span>
+      )}
       <span className="map-card__name">{map.name}</span>
     </Link>
   );
