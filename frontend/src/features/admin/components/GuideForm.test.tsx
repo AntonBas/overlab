@@ -18,6 +18,8 @@ const heroes: AdminHero[] = [
     role: "SUPPORT",
     subrole: null,
     description: null,
+    strengths: null,
+    weaknesses: null,
     portraitUrl: null,
     active: true,
   },

@@ -8,6 +8,8 @@ public record HeroAdminDto(
         HeroRole role,
         String subrole,
         String description,
+        String strengths,
+        String weaknesses,
         String portraitUrl,
         boolean active) {
 }

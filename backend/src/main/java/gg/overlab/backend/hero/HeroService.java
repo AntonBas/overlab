@@ -51,6 +51,8 @@ public class HeroService {
                 .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
         HeroAdminDto before = heroMapper.toAdminDto(hero);
         hero.setDescription(request.description());
+        hero.setStrengths(request.strengths());
+        hero.setWeaknesses(request.weaknesses());
         hero.setActive(request.active());
         HeroAdminDto after = heroMapper.toAdminDto(hero);
         auditService.logUpdate("Hero", slug, before, after);

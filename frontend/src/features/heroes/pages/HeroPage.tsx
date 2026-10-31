@@ -24,6 +24,7 @@ import {
 } from "../api/heroesApi";
 import { HeroMapTable } from "../components/HeroMapTable";
 import { StatChips } from "../components/StatChips";
+import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
 import { RelatedHeroes } from "../components/RelatedHeroes";
 
@@ -104,6 +105,10 @@ export function HeroPage() {
       {hero.data.description && (
         <p className="prose">{hero.data.description}</p>
       )}
+      <HeroTraits
+        strengths={hero.data.strengths}
+        weaknesses={hero.data.weaknesses}
+      />
 
       {perks.data && perks.data.length > 0 && (
         <section className="section">

@@ -19,6 +19,8 @@ public class HeroMapper {
                 hero.getRole(),
                 hero.getSubrole(),
                 hero.getDescription(),
+                hero.getStrengths(),
+                hero.getWeaknesses(),
                 mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
@@ -29,6 +31,8 @@ public class HeroMapper {
                 hero.getRole(),
                 hero.getSubrole(),
                 hero.getDescription(),
+                hero.getStrengths(),
+                hero.getWeaknesses(),
                 mediaUrlResolver.resolve(hero.getPortraitUrl()),
                 hero.isActive());
     }

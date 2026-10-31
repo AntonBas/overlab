@@ -25,10 +25,15 @@ function HeroForm({
   onClose: () => void;
 }) {
   const [description, setDescription] = useState(hero.description ?? "");
+  const [strengths, setStrengths] = useState(hero.strengths ?? "");
+  const [weaknesses, setWeaknesses] = useState(hero.weaknesses ?? "");
   const [active, setActive] = useState(hero.active);
   const save = useSave();
   const dirty =
-    description !== (hero.description ?? "") || active !== hero.active;
+    description !== (hero.description ?? "") ||
+    strengths !== (hero.strengths ?? "") ||
+    weaknesses !== (hero.weaknesses ?? "") ||
+    active !== hero.active;
   useUnsavedChanges(dirty);
 
   async function submit(event: FormEvent) {
@@ -37,6 +42,8 @@ function HeroForm({
       () =>
         updateHero(hero.slug, {
           description: description.trim() === "" ? null : description,
+          strengths: strengths.trim() === "" ? null : strengths,
+          weaknesses: weaknesses.trim() === "" ? null : weaknesses,
           active,
         }),
       "Hero saved.",
@@ -55,6 +62,22 @@ function HeroForm({
         value={description}
         error={save.fieldErrors.description}
         onChange={(event) => setDescription(event.target.value)}
+      />
+      <TextAreaField
+        label="Strengths"
+        name="strengths"
+        hint="One point per line."
+        value={strengths}
+        error={save.fieldErrors.strengths}
+        onChange={(event) => setStrengths(event.target.value)}
+      />
+      <TextAreaField
+        label="Weaknesses"
+        name="weaknesses"
+        hint="One point per line."
+        value={weaknesses}
+        error={save.fieldErrors.weaknesses}
+        onChange={(event) => setWeaknesses(event.target.value)}
       />
       <CheckboxField
         label="Active"
