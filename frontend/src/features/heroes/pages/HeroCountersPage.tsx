@@ -6,7 +6,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { fetchCounters, fetchHero, fetchSynergies } from "../api/heroesApi";
 import { HeroSubpageHeader } from "../components/HeroSubpageHeader";
-import { RelatedHeroes } from "../components/RelatedHeroes";
+import { RelationTabs } from "../components/RelationTabs";
 
 export function HeroCountersPage() {
   const { slug = "" } = useParams();
@@ -35,24 +35,11 @@ export function HeroCountersPage() {
           No counters or synergies have been added for {hero.data.name} yet.
         </EmptyState>
       )}
-      {strongAgainst.length > 0 && (
-        <section className="section">
-          <h2>Strong against</h2>
-          <RelatedHeroes heroes={strongAgainst} />
-        </section>
-      )}
-      {counteredBy.length > 0 && (
-        <section className="section">
-          <h2>Struggles against</h2>
-          <RelatedHeroes heroes={counteredBy} />
-        </section>
-      )}
-      {synergies.data.length > 0 && (
-        <section className="section">
-          <h2>Works well with</h2>
-          <RelatedHeroes heroes={synergies.data} />
-        </section>
-      )}
+      <RelationTabs
+        strongAgainst={strongAgainst}
+        counteredBy={counteredBy}
+        synergies={synergies.data}
+      />
       {!empty && (
         <p className="muted footnote">
           Counters and synergies are curated recommendations, not statistics.

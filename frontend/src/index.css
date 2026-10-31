@@ -2192,3 +2192,13 @@ input[type="range"] {
   flex: none;
   border-radius: 8px;
 }
+
+.segmented__count {
+  margin-left: 4px;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.relation-tabs__panel {
+  margin-top: 12px;
+}

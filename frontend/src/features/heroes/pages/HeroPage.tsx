@@ -29,7 +29,7 @@ import { AbilityList } from "../components/AbilityList";
 import { AbilityText } from "../components/AbilityText";
 import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
-import { RelatedHeroes } from "../components/RelatedHeroes";
+import { RelationTabs } from "../components/RelationTabs";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
@@ -164,23 +164,12 @@ export function HeroPage() {
         </section>
       )}
 
-      {counters.data && counters.data.counters.length > 0 && (
-        <section className="section">
-          <h2>Strong against</h2>
-          <RelatedHeroes heroes={counters.data.counters} />
-        </section>
-      )}
-      {counters.data && counters.data.counteredBy.length > 0 && (
-        <section className="section">
-          <h2>Struggles against</h2>
-          <RelatedHeroes heroes={counters.data.counteredBy} />
-        </section>
-      )}
-      {synergies.data && synergies.data.length > 0 && (
-        <section className="section">
-          <h2>Works well with</h2>
-          <RelatedHeroes heroes={synergies.data} />
-        </section>
+      {counters.data && synergies.data && (
+        <RelationTabs
+          strongAgainst={counters.data.counters}
+          counteredBy={counters.data.counteredBy}
+          synergies={synergies.data}
+        />
       )}
       {(counters.data?.counters.length ?? 0) +
         (counters.data?.counteredBy.length ?? 0) +
