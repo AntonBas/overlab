@@ -25,22 +25,27 @@ public class PerkImportService {
     private final HeroRepository heroRepository;
     private final BlizzardHeroPageClient pageClient;
     private final HeroPerkParser parser;
+    private final HeroAbilityParser abilityParser;
     private final ImageDownloader imageDownloader;
     private final PerkImportWriter writer;
+    private final AbilityImportWriter abilityWriter;
     private final CacheManager cacheManager;
     private final TaskExecutor executor;
     private final AtomicBoolean running = new AtomicBoolean();
 
     public PerkImportService(CollectorProperties properties, HeroRepository heroRepository,
                              BlizzardHeroPageClient pageClient, HeroPerkParser parser,
-                             ImageDownloader imageDownloader, PerkImportWriter writer, CacheManager cacheManager,
+                             HeroAbilityParser abilityParser, ImageDownloader imageDownloader,
+                             PerkImportWriter writer, AbilityImportWriter abilityWriter, CacheManager cacheManager,
                              @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
         this.heroRepository = heroRepository;
         this.pageClient = pageClient;
         this.parser = parser;
+        this.abilityParser = abilityParser;
         this.imageDownloader = imageDownloader;
         this.writer = writer;
+        this.abilityWriter = abilityWriter;
         this.cacheManager = cacheManager;
         this.executor = executor;
     }
@@ -79,7 +84,7 @@ public class PerkImportService {
                 sleep(properties.pause());
             }
             clearContentCache();
-            log.info("Perk import finished: {} created, {} updated, {} of {} heroes failed", created, updated,
+            log.info("Perk and ability import finished: {} created, {} updated, {} of {} heroes failed", created, updated,
                     failed, slugs.size());
         } finally {
             running.set(false);
@@ -92,8 +97,11 @@ public class PerkImportService {
             log.warn("No Blizzard page for hero {}", slug);
             return new PerkImportWriter.Counts(0, 0);
         }
-        List<ParsedPerk> perks = parser.parse(page.get());
-        return writer.write(slug, perks, imageDownloader::downloadPng);
+        PerkImportWriter.Counts perkCounts = writer.write(slug, parser.parse(page.get()), imageDownloader::downloadPng);
+        PerkImportWriter.Counts abilityCounts = abilityWriter.write(slug, abilityParser.parse(page.get()),
+                imageDownloader::downloadPng);
+        return new PerkImportWriter.Counts(perkCounts.created() + abilityCounts.created(),
+                perkCounts.updated() + abilityCounts.updated());
     }
 
     private void clearContentCache() {

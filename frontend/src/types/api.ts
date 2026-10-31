@@ -28,6 +28,14 @@ export interface Hero {
   portraitUrl: string | null;
 }
 
+export interface Ability {
+  heroSlug: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  iconUrl: string | null;
+}
+
 export interface Favorites {
   heroes: Hero[];
   maps: GameMap[];

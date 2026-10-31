@@ -1,3 +1,5 @@
+import { AbilityText } from "./AbilityText";
+
 interface HeroTraitsProps {
   strengths: string | null;
   weaknesses: string | null;
@@ -24,7 +26,9 @@ function TraitList({
       <h2>{title}</h2>
       <ul>
         {points.map((point) => (
-          <li key={point}>{point}</li>
+          <li key={point}>
+            <AbilityText text={point} />
+          </li>
         ))}
       </ul>
     </div>

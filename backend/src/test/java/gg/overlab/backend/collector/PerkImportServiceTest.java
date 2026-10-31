@@ -25,17 +25,19 @@ class PerkImportServiceTest {
     private final BlizzardHeroPageClient pageClient = mock(BlizzardHeroPageClient.class);
     private final HeroPerkParser parser = new HeroPerkParser();
     private final PerkImportWriter writer = mock(PerkImportWriter.class);
+    private final AbilityImportWriter abilityWriter = mock(AbilityImportWriter.class);
 
     @BeforeEach
     void setUp() {
+        when(abilityWriter.write(any(), any(), any())).thenReturn(new PerkImportWriter.Counts(0, 0));
         when(heroRepository.findAll()).thenReturn(List.of(hero("ana", true), hero("hidden", false), hero("dva", true)));
     }
 
     private PerkImportService service(boolean enabled) {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, enabled, null, null, 3, null, List.of());
-        return new PerkImportService(properties, heroRepository, pageClient, parser, mock(ImageDownloader.class),
-                writer, mock(CacheManager.class), Runnable::run);
+        return new PerkImportService(properties, heroRepository, pageClient, parser, new HeroAbilityParser(),
+                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheManager.class), Runnable::run);
     }
 
     private Hero hero(String slug, boolean active) {
