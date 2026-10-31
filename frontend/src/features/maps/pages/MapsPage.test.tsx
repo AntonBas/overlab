@@ -40,7 +40,7 @@ describe("MapsPage", () => {
   it("shows a card with the image for a map that has one", async () => {
     const { container } = renderWithRouter(<MapsPage />);
 
-    const link = await screen.findByRole("link", { name: "Busan" });
+    const link = await screen.findByRole("link", { name: /Busan/ });
 
     expect(link).toHaveAttribute("href", "/maps/busan");
     expect(
@@ -51,7 +51,7 @@ describe("MapsPage", () => {
   it("shows the placeholder image for a map without an image", async () => {
     const { container } = renderWithRouter(<MapsPage />);
 
-    expect(await screen.findByRole("link", { name: "Rialto" })).toBeVisible();
+    expect(await screen.findByRole("link", { name: /Rialto/ })).toBeVisible();
     expect(
       container.querySelector('img[src="/images/map-placeholder.svg"]'),
     ).not.toBeNull();
@@ -59,26 +59,26 @@ describe("MapsPage", () => {
 
   it("filters the maps by name", async () => {
     renderWithRouter(<MapsPage />);
-    await screen.findByRole("link", { name: "Busan" });
+    await screen.findByRole("link", { name: /Busan/ });
 
     await userEvent.type(screen.getByRole("searchbox"), "ria");
 
-    expect(screen.getByRole("link", { name: "Rialto" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Rialto/ })).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Busan" }),
+      screen.queryByRole("link", { name: /Busan/ }),
     ).not.toBeInTheDocument();
   });
 
   it("filters the maps by mode", async () => {
     renderWithRouter(<MapsPage />);
-    await screen.findByRole("link", { name: "Busan" });
+    await screen.findByRole("link", { name: /Busan/ });
 
     await userEvent.click(screen.getByRole("button", { name: "Escort" }));
 
     expect(
-      screen.queryByRole("link", { name: "Busan" }),
+      screen.queryByRole("link", { name: /Busan/ }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Havana" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Havana/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Escort" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -87,7 +87,7 @@ describe("MapsPage", () => {
 
   it("says when nothing matches", async () => {
     renderWithRouter(<MapsPage />);
-    await screen.findByRole("link", { name: "Busan" });
+    await screen.findByRole("link", { name: /Busan/ });
 
     await userEvent.type(screen.getByRole("searchbox"), "zzz");
 
@@ -99,13 +99,13 @@ describe("MapsPage", () => {
   it("shows only favorite maps when asked", async () => {
     personal.favoriteMaps = new Set(["havana"]);
     renderWithRouter(<MapsPage />);
-    await screen.findByRole("link", { name: "Busan" });
+    await screen.findByRole("link", { name: /Busan/ });
 
     await userEvent.click(
       screen.getByRole("button", { name: /only favorites/i }),
     );
 
-    expect(screen.getByRole("link", { name: "Havana" })).toBeVisible();
-    expect(screen.queryByRole("link", { name: "Busan" })).toBeNull();
+    expect(screen.getByRole("link", { name: /Havana/ })).toBeVisible();
+    expect(screen.queryByRole("link", { name: /Busan/ })).toBeNull();
   });
 });

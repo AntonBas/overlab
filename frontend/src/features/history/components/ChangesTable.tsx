@@ -1,3 +1,4 @@
+import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -6,7 +7,7 @@ import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroChange, HeroRole } from "../../../types/api";
-import { ROLE_LABELS, formatPercent } from "../../../utils/format";
+import { formatPercent } from "../../../utils/format";
 import { ROLES } from "../../stats/filters";
 import { sortChanges, type ChangeSort } from "../utils/changes";
 
@@ -68,7 +69,7 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
           aria-pressed={role === null}
           onClick={() => setRole(null)}
         >
-          All roles
+          <AllRolesBadge label="All roles" />
         </button>
         {ROLES.map((entry) => (
           <button
@@ -80,7 +81,7 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
             aria-pressed={role === entry}
             onClick={() => setRole(entry)}
           >
-            {ROLE_LABELS[entry]}
+            <RoleBadge role={entry} />
           </button>
         ))}
       </div>

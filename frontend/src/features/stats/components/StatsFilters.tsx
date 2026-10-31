@@ -1,10 +1,11 @@
+import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
+import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
 import type { GameMap, HeroRole } from "../../../types/api";
 import {
   PLATFORM_LABELS,
   QUEUE_LABELS,
   REGION_LABELS,
-  ROLE_LABELS,
   TIER_LABELS,
 } from "../../../utils/format";
 import {
@@ -140,7 +141,7 @@ export function StatsFilters({
           aria-pressed={filters.role === null}
           onClick={() => onChange({ role: null })}
         >
-          All roles
+          <AllRolesBadge label="All roles" />
         </button>
         {ROLES.map((role: HeroRole) => (
           <button
@@ -152,7 +153,7 @@ export function StatsFilters({
             aria-pressed={filters.role === role}
             onClick={() => onChange({ role })}
           >
-            {ROLE_LABELS[role]}
+            <RoleBadge role={role} />
           </button>
         ))}
       </div>

@@ -1,3 +1,5 @@
+import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
+import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -13,11 +15,7 @@ import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { MAP_PLACEHOLDER_URL, MODE_DESCRIPTIONS } from "../../../utils/modes";
 import { matchesName } from "../../../utils/search";
-import {
-  MAP_MODE_LABELS,
-  ROLE_LABELS,
-  TIER_LABELS,
-} from "../../../utils/format";
+import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { GuideList } from "../../guides/components/GuideList";
@@ -133,7 +131,7 @@ export function MapPage() {
             aria-pressed={filters.role === null}
             onClick={() => update({ role: null })}
           >
-            All roles
+            <AllRolesBadge label="All roles" />
           </button>
           {ROLES.map((role) => (
             <button
@@ -145,7 +143,7 @@ export function MapPage() {
               aria-pressed={filters.role === role}
               onClick={() => update({ role })}
             >
-              {ROLE_LABELS[role]}
+              <RoleBadge role={role} />
             </button>
           ))}
         </div>

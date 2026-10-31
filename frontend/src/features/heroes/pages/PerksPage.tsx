@@ -1,10 +1,12 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
+import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -12,7 +14,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { usePersonalData } from "../../personal/context/usePersonalData";
-import { humanize, ROLE_LABELS } from "../../../utils/format";
+import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import type { HeroRole } from "../../../types/api";
 import { ROLES } from "../../stats/filters";
@@ -89,7 +91,11 @@ export function PerksPage() {
                 aria-pressed={role === value}
                 onClick={() => setRole(value)}
               >
-                {value ? ROLE_LABELS[value] : "All"}
+                {value ? (
+                  <RoleBadge role={value} />
+                ) : (
+                  <AllRolesBadge label="All" />
+                )}
               </button>
             ))}
           </div>
@@ -128,9 +134,11 @@ export function PerksPage() {
                     <span className="hero-perks__title">
                       <strong>{hero.name}</strong>
                       <span className="muted">
-                        {hero.subrole
-                          ? humanize(hero.subrole)
-                          : ROLE_LABELS[hero.role]}
+                        {hero.subrole ? (
+                          <SubroleBadge subrole={hero.subrole} />
+                        ) : (
+                          ROLE_LABELS[hero.role]
+                        )}
                       </span>
                     </span>
                     <RoleBadge role={hero.role} compact />

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -15,11 +16,17 @@ import { MapCard } from "../components/MapCard";
 
 const OTHER = "Other";
 
-function groupByMode(maps: GameMap[]): [string, GameMap[]][] {
-  const groups = new Map<string, GameMap[]>();
+interface ModeGroup {
+  mode: MapMode | null;
+  maps: GameMap[];
+}
+
+function groupByMode(maps: GameMap[]): [string, ModeGroup][] {
+  const groups = new Map<string, ModeGroup>();
   maps.forEach((map) => {
     const label = map.mode ? MAP_MODE_LABELS[map.mode] : OTHER;
-    groups.set(label, [...(groups.get(label) ?? []), map]);
+    const group = groups.get(label) ?? { mode: map.mode, maps: [] };
+    groups.set(label, { ...group, maps: [...group.maps, map] });
   });
   return [...groups.entries()].sort(([first], [second]) => {
     if (first === OTHER) {
@@ -107,6 +114,7 @@ export function MapsPage() {
                     aria-pressed={mode === value}
                     onClick={() => setMode(value)}
                   >
+                    <ModeIcon mode={value} />
                     {MAP_MODE_LABELS[value]}
                   </button>
                 ))}
@@ -122,8 +130,11 @@ export function MapsPage() {
           )}
           {groupByMode(matching).map(([label, group]) => (
             <section key={label} className="section">
-              <h2>{label}</h2>
-              <MapGrid maps={group} />
+              <h2 className="mode-heading">
+                {group.mode && <ModeIcon mode={group.mode} />}
+                {label}
+              </h2>
+              <MapGrid maps={group.maps} />
             </section>
           ))}
         </>
