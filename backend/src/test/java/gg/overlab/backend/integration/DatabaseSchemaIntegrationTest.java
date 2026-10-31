@@ -18,7 +18,7 @@ class DatabaseSchemaIntegrationTest {
         List<String> versions = jdbcTemplate.queryForList(
                 "select version from flyway_schema_history where success order by installed_rank", String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13");
+        assertThat(versions).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
     }
 
     @Test
@@ -35,7 +35,7 @@ class DatabaseSchemaIntegrationTest {
         List<String> tables = jdbcTemplate.queryForList(
                 "select table_name from information_schema.tables where table_schema = 'public'", String.class);
 
-        assertThat(tables).contains("heroes", "maps", "patches", "perks", "hero_relations", "guides", "hero_stats",
+        assertThat(tables).contains("heroes", "maps", "patches", "perks", "hero_abilities", "hero_relations", "guides", "hero_stats",
                 "users", "user_tokens", "audit_log", "collector_runs");
     }
 

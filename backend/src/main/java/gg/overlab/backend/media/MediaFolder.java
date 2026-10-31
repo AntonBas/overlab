@@ -1,6 +1,7 @@
 package gg.overlab.backend.media;
 
 public enum MediaFolder {
+    ABILITIES("abilities"),
     HEROES("heroes"),
     MAPS("maps"),
     PERKS("perks"),

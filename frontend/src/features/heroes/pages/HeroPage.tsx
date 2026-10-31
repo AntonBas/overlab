@@ -20,10 +20,13 @@ import {
   fetchCounters,
   fetchHero,
   fetchPerks,
+  fetchHeroAbilities,
   fetchSynergies,
 } from "../api/heroesApi";
 import { HeroMapTable } from "../components/HeroMapTable";
 import { StatChips } from "../components/StatChips";
+import { AbilityList } from "../components/AbilityList";
+import { AbilityText } from "../components/AbilityText";
 import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
 import { RelatedHeroes } from "../components/RelatedHeroes";
@@ -50,6 +53,7 @@ export function HeroPage() {
   const perks = useFetch(() => fetchPerks(slug), [slug]);
   const counters = useFetch(() => fetchCounters(slug), [slug]);
   const synergies = useFetch(() => fetchSynergies(slug), [slug]);
+  const abilities = useFetch(() => fetchHeroAbilities(slug), [slug]);
   const guides = useFetch(() => fetchGuides({ hero: slug }), [slug]);
   usePageTitle(hero.data?.name);
 
@@ -103,12 +107,21 @@ export function HeroPage() {
         }
       />
       {hero.data.description && (
-        <p className="prose">{hero.data.description}</p>
+        <p className="prose">
+          <AbilityText text={hero.data.description} />
+        </p>
       )}
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
       />
+
+      {abilities.data && abilities.data.length > 0 && (
+        <section className="section">
+          <h2>Abilities</h2>
+          <AbilityList abilities={abilities.data} />
+        </section>
+      )}
 
       {perks.data && perks.data.length > 0 && (
         <section className="section">

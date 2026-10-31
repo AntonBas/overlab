@@ -1,5 +1,11 @@
 import { api } from "../../../services/api";
-import type { Hero, HeroCounters, Perk, RelatedHero } from "../../../types/api";
+import type {
+  Ability,
+  Hero,
+  HeroCounters,
+  Perk,
+  RelatedHero,
+} from "../../../types/api";
 
 export async function fetchHeroes(): Promise<Hero[]> {
   const { data } = await api.get<Hero[]>("/heroes");
@@ -28,5 +34,15 @@ export async function fetchCounters(slug: string): Promise<HeroCounters> {
 
 export async function fetchSynergies(slug: string): Promise<RelatedHero[]> {
   const { data } = await api.get<RelatedHero[]>(`/heroes/${slug}/synergies`);
+  return data;
+}
+
+export async function fetchAbilities(): Promise<Ability[]> {
+  const { data } = await api.get<Ability[]>("/abilities");
+  return data;
+}
+
+export async function fetchHeroAbilities(slug: string): Promise<Ability[]> {
+  const { data } = await api.get<Ability[]>(`/heroes/${slug}/abilities`);
   return data;
 }

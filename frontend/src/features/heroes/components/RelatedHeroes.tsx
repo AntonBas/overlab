@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { AbilityText } from "./AbilityText";
 import type { RelatedHero } from "../../../types/api";
 
 function Strength({ value }: { value: number }) {
@@ -34,7 +35,11 @@ export function RelatedHeroes({ heroes }: { heroes: RelatedHero[] }) {
                 <strong>{hero.name}</strong>
               </Link>
             </span>
-            {hero.note && <span className="muted">{hero.note}</span>}
+            {hero.note && (
+              <span className="muted">
+                <AbilityText text={hero.note} />
+              </span>
+            )}
           </span>
           <Strength value={hero.strength} />
         </li>

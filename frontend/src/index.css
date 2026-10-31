@@ -2114,3 +2114,81 @@ input[type="range"] {
   flex: none;
   display: inline-block;
 }
+
+.ability-chip {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.ability-chip__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9em;
+  line-height: 1.6;
+  cursor: help;
+}
+
+.ability-chip__button:hover,
+.ability-chip__button:focus-visible {
+  border-color: var(--accent);
+}
+
+.ability-chip__icon {
+  border-radius: 4px;
+}
+
+.ability-chip__tip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.ability-chip:hover .ability-chip__tip,
+.ability-chip:focus-within .ability-chip__tip {
+  display: flex;
+}
+
+.ability-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ability-list__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.ability-list__icon {
+  flex: none;
+  border-radius: 8px;
+}
