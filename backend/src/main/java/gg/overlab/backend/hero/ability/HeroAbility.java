@@ -4,6 +4,8 @@ import gg.overlab.backend.common.TimestampedEntity;
 import gg.overlab.backend.hero.Hero;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,6 +44,10 @@ public class HeroAbility extends TimestampedEntity {
 
     @Column(name = "icon_url", length = 512)
     private String iconUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "control_key", length = 16)
+    private AbilityControl control;
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;

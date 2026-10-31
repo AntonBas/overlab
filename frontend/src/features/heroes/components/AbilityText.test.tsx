@@ -10,6 +10,7 @@ const defenseMatrix: Ability = {
   name: "Defense Matrix",
   description: "Shoot incoming projectiles out of the air.",
   iconUrl: null,
+  control: "ABILITY_2",
 };
 
 function renderText(text: string) {
@@ -38,6 +39,7 @@ describe("AbilityText", () => {
     expect(screen.getByRole("tooltip")).toHaveTextContent(
       "Shoot incoming projectiles out of the air.",
     );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Ability 2");
     expect(screen.getByText(/every time\./)).toBeInTheDocument();
   });
 

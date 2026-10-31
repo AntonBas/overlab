@@ -28,12 +28,21 @@ export interface Hero {
   portraitUrl: string | null;
 }
 
+export type AbilityControl =
+  | "PRIMARY_FIRE"
+  | "SECONDARY_FIRE"
+  | "ABILITY_1"
+  | "ABILITY_2"
+  | "ULTIMATE"
+  | "PASSIVE";
+
 export interface Ability {
   heroSlug: string;
   slug: string;
   name: string;
   description: string | null;
   iconUrl: string | null;
+  control: AbilityControl | null;
 }
 
 export interface Favorites {

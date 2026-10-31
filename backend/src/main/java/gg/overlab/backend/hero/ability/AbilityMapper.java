@@ -17,6 +17,7 @@ public class AbilityMapper {
                 ability.getSlug(),
                 ability.getName(),
                 ability.getDescription(),
-                mediaUrlResolver.resolve(ability.getIconUrl()));
+                mediaUrlResolver.resolve(ability.getIconUrl()),
+                ability.getControl());
     }
 }

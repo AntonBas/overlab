@@ -1,5 +1,6 @@
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { Ability } from "../../../types/api";
+import { AbilityKey } from "./AbilityKey";
 
 export function AbilityList({ abilities }: { abilities: Ability[] }) {
   return (
@@ -13,7 +14,10 @@ export function AbilityList({ abilities }: { abilities: Ability[] }) {
             className="ability-list__icon"
           />
           <span className="card__body">
-            <strong>{ability.name}</strong>
+            <span className="ability-list__title">
+              <strong>{ability.name}</strong>
+              <AbilityKey control={ability.control} showLabel />
+            </span>
             {ability.description && (
               <span className="muted">{ability.description}</span>
             )}

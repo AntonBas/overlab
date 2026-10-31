@@ -2142,7 +2142,11 @@ input[type="range"] {
 }
 
 .ability-chip__icon {
+  width: auto;
+  max-width: 56px;
+  height: 20px;
   border-radius: 4px;
+  object-fit: contain;
 }
 
 .ability-chip__tip {
@@ -2190,7 +2194,43 @@ input[type="range"] {
 
 .ability-list__icon {
   flex: none;
+  width: auto;
+  max-width: 96px;
+  height: 48px;
   border-radius: 8px;
+  object-fit: contain;
+}
+
+.ability-list__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ability-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.ability-key__cap {
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ability-key--ultimate .ability-key__cap {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .segmented__count {
@@ -2201,4 +2241,17 @@ input[type="range"] {
 
 .relation-tabs__panel {
   margin-top: 12px;
+}
+
+.section__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section__heading h2 {
+  margin: 0;
 }

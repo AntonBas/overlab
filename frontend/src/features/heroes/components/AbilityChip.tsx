@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { Ability } from "../../../types/api";
+import { AbilityKey } from "./AbilityKey";
 
 export function AbilityChip({ ability }: { ability: Ability }) {
   const tipId = useId();
@@ -22,6 +23,7 @@ export function AbilityChip({ ability }: { ability: Ability }) {
       </button>
       <span id={tipId} role="tooltip" className="ability-chip__tip">
         <strong>{ability.name}</strong>
+        <AbilityKey control={ability.control} showLabel />
         {ability.description && <span>{ability.description}</span>}
       </span>
     </span>
