@@ -1,4 +1,5 @@
 import type {
+  AbilityControl,
   Hero,
   MapMode,
   PerkPosition,
@@ -8,6 +9,14 @@ import type {
 
 export interface AdminHero extends Hero {
   active: boolean;
+}
+
+export interface AdminAbility {
+  id: number;
+  heroSlug: string;
+  name: string;
+  iconUrl: string | null;
+  control: AbilityControl | null;
 }
 
 export type RelationType = "COUNTER" | "SYNERGY";
