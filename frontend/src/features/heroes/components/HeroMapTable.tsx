@@ -5,10 +5,9 @@ import { RateBar } from "../../../components/ui/RateBar";
 import type { HeroMapStat } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 
-type MapSort = "WIN_DELTA" | "WIN_RATE" | "PICK_RATE" | "NAME";
+type MapSort = "WIN_RATE" | "PICK_RATE" | "NAME";
 
 const SORT_LABELS: Record<MapSort, string> = {
-  WIN_DELTA: "Win rate vs overall",
   WIN_RATE: "Win rate",
   PICK_RATE: "Pick rate",
   NAME: "Map name",
@@ -16,8 +15,6 @@ const SORT_LABELS: Record<MapSort, string> = {
 
 function compare(sort: MapSort, first: HeroMapStat, second: HeroMapStat) {
   switch (sort) {
-    case "WIN_DELTA":
-      return (second.winRateDelta ?? 0) - (first.winRateDelta ?? 0);
     case "WIN_RATE":
       return second.winRate - first.winRate;
     case "PICK_RATE":
@@ -34,7 +31,7 @@ export function HeroMapTable({
   maps: HeroMapStat[];
   heroSlug: string;
 }) {
-  const [sort, setSort] = useState<MapSort>("WIN_DELTA");
+  const [sort, setSort] = useState<MapSort>("WIN_RATE");
   const sorted = useMemo(
     () => [...maps].sort((first, second) => compare(sort, first, second)),
     [maps, sort],
