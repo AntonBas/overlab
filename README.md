@@ -18,7 +18,8 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
-| `/heroes/:slug/counters`, `/heroes/:slug/perks` | Full counters and synergies, full perks |
+| `/heroes/:slug/counters` | Full counters and synergies |
+| `/heroes/:slug/perks` | Redirects to `/perks` |
 | `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
 | `/patches`, `/patches/:slug` | Patch list, notes and the change in statistics around the release |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |

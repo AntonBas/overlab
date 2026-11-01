@@ -71,7 +71,13 @@ function PerkCard({ perk }: { perk: Perk }) {
   );
 }
 
-function CompactPerkTile({ perk }: { perk: Perk }) {
+function CompactPerkTile({
+  perk,
+  detailed,
+}: {
+  perk: Perk;
+  detailed: boolean;
+}) {
   const position = positionOf(perk);
   return (
     <li
@@ -79,8 +85,8 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
         "perk-tile",
         `perk-card--${position.toLowerCase()}`,
         `perk-card--${perk.recommendation.toLowerCase()}`,
+        { "perk-tile--detailed": detailed },
       )}
-      title={perk.description ?? undefined}
     >
       <Thumbnail
         url={perk.iconUrl}
@@ -89,12 +95,24 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
         className="perk-tile__icon"
       />
       <span className="perk-tile__body">
-        <strong>{perk.name}</strong>
-        <span
-          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
-        >
-          {RECOMMENDATION_LABELS[perk.recommendation]}
+        <span className="perk-tile__heading">
+          <strong>{perk.name}</strong>
+          <span
+            className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
+          >
+            {RECOMMENDATION_LABELS[perk.recommendation]}
+          </span>
         </span>
+        {detailed && perk.description && (
+          <span className="perk-tile__description muted">
+            {perk.description}
+          </span>
+        )}
+        {detailed && perk.recommendationNote && (
+          <span className="perk-tile__note">
+            <AbilityText text={perk.recommendationNote} />
+          </span>
+        )}
       </span>
     </li>
   );
@@ -103,9 +121,11 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
 export function PerkList({
   perks,
   compact = false,
+  detailed = false,
 }: {
   perks: Perk[];
   compact?: boolean;
+  detailed?: boolean;
 }) {
   return (
     <>
@@ -121,10 +141,19 @@ export function PerkList({
         return (
           <div key={slot} className="perk-group">
             <h3>{SLOT_LABELS[slot]}</h3>
-            <ul className={clsx("perk-row", { "perk-row--compact": compact })}>
+            <ul
+              className={clsx("perk-row", {
+                "perk-row--compact": compact,
+                "perk-row--detailed": compact && detailed,
+              })}
+            >
               {group.map((perk) =>
                 compact ? (
-                  <CompactPerkTile key={perk.id} perk={perk} />
+                  <CompactPerkTile
+                    key={perk.id}
+                    perk={perk}
+                    detailed={detailed}
+                  />
                 ) : (
                   <PerkCard key={perk.id} perk={perk} />
                 ),

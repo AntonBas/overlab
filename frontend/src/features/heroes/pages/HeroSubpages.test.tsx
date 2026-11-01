@@ -33,9 +33,21 @@ vi.mock("../api/heroesApi", () => ({
 }));
 
 import { HeroCountersPage } from "./HeroCountersPage";
-import { HeroPerksPage } from "./HeroPerksPage";
+import { HeroPerksRedirect } from "./HeroPerksRedirect";
 
 describe("hero subpages", () => {
+  it("sends the old hero perks address to the perks page", async () => {
+    renderWithRouter(
+      <Routes>
+        <Route path="/heroes/:slug/perks" element={<HeroPerksRedirect />} />
+        <Route path="/perks" element={<p>Perks overview</p>} />
+      </Routes>,
+      "/heroes/ana/perks",
+    );
+
+    expect(await screen.findByText("Perks overview")).toBeInTheDocument();
+  });
+
   it("lists counters with notes and a link back to the hero", async () => {
     renderWithRouter(
       <Routes>
@@ -50,18 +62,5 @@ describe("hero subpages", () => {
       "href",
       "/heroes/ana",
     );
-  });
-
-  it("shows an empty state for a hero without perks", async () => {
-    renderWithRouter(
-      <Routes>
-        <Route path="/heroes/:slug/perks" element={<HeroPerksPage />} />
-      </Routes>,
-      "/heroes/ana/perks",
-    );
-
-    expect(
-      await screen.findByText("No perks have been added for Ana yet."),
-    ).toBeInTheDocument();
   });
 });
