@@ -1958,17 +1958,11 @@ input[type="range"] {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  cursor: help;
   transition: background 0.15s;
 }
 
 .perk-tile:hover {
   background: color-mix(in srgb, var(--surface-2) 70%, var(--text) 8%);
-}
-
-.perk-tile .perk-tile__icon {
-  border-radius: 8px;
-  background: var(--bg);
 }
 
 .perk-tile__body {
@@ -2260,4 +2254,56 @@ input[type="range"] {
   margin-top: 4px;
   padding-left: 10px;
   border-left: 2px solid var(--border);
+}
+
+.hero-perks__description {
+  display: -webkit-box;
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.perk-tile .perk-tile__icon {
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.perk-tile__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.perk-row.perk-row--detailed {
+  grid-template-columns: 1fr;
+}
+
+.perk-row.perk-row--detailed .perk-tile {
+  grid-column: 1;
+  align-items: flex-start;
+}
+
+.perk-row--detailed .perk-tile__heading {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.perk-tile__description,
+.perk-tile__note {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.perk-tile__note {
+  padding-left: 8px;
+  border-left: 2px solid var(--accent);
+}
+
+.hero-perks-grid--detailed {
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
 }

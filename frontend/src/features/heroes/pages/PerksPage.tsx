@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
@@ -19,6 +20,7 @@ import { matchesName } from "../../../utils/search";
 import type { HeroRole } from "../../../types/api";
 import { ROLES } from "../../stats/filters";
 import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
+import { AbilityText } from "../components/AbilityText";
 import { PerkList } from "../components/PerkList";
 
 export function PerksPage() {
@@ -28,6 +30,7 @@ export function PerksPage() {
   const [role, setRole] = useState<HeroRole | null>(null);
   const [query, setQuery] = useState("");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [detailed, setDetailed] = useState(false);
   const { favoriteHeroes } = usePersonalData();
 
   if (heroes.loading || perks.loading) {
@@ -104,6 +107,33 @@ export function PerksPage() {
           active={onlyFavorites}
           onToggle={() => setOnlyFavorites(!onlyFavorites)}
         />
+        <div className="field">
+          <span className="field__label">View</span>
+          <div className="segmented" role="group" aria-label="View">
+            <button
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": !detailed,
+              })}
+              aria-pressed={!detailed}
+              onClick={() => setDetailed(false)}
+            >
+              <LayoutGrid aria-hidden="true" size={16} />
+              Compact
+            </button>
+            <button
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": detailed,
+              })}
+              aria-pressed={detailed}
+              onClick={() => setDetailed(true)}
+            >
+              <List aria-hidden="true" size={16} />
+              Detailed
+            </button>
+          </div>
+        </div>
       </div>
       {visibleHeroes.length === 0 ? (
         <EmptyState>
@@ -112,7 +142,11 @@ export function PerksPage() {
             : "No heroes match the filters."}
         </EmptyState>
       ) : (
-        <ul className="hero-perks-grid">
+        <ul
+          className={clsx("hero-perks-grid", {
+            "hero-perks-grid--detailed": detailed,
+          })}
+        >
           {visibleHeroes.map((hero) => (
             <li key={hero.slug}>
               <article
@@ -150,8 +184,14 @@ export function PerksPage() {
                     name={hero.name}
                   />
                 </div>
+                {hero.description && (
+                  <p className="hero-perks__description muted">
+                    <AbilityText text={hero.description} />
+                  </p>
+                )}
                 <PerkList
                   compact
+                  detailed={detailed}
                   perks={allPerks.filter((perk) => perk.heroSlug === hero.slug)}
                 />
               </article>

@@ -188,9 +188,6 @@ export function HeroPage() {
         <section className="section">
           <h2>Perks</h2>
           <PerkList perks={perks.data} />
-          <p>
-            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
-          </p>
         </section>
       )}
 
