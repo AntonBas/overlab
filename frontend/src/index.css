@@ -213,6 +213,7 @@ ul {
 .page-header__actions {
   display: flex;
   flex: none;
+  max-width: 100%;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
@@ -348,6 +349,8 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .field--inline {
@@ -392,12 +395,15 @@ select:disabled {
 
 .segmented {
   display: inline-flex;
+  max-width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .segmented__item {
+  flex: none;
   padding: 8px 12px;
   background: var(--surface-2);
   color: var(--muted);
@@ -2432,6 +2438,7 @@ input[type="range"] {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-height: 28px;
 }
 
 .tag--kind-setup {

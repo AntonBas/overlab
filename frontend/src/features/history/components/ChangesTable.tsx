@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroChange, HeroRole } from "../../../types/api";
 import { formatPercent } from "../../../utils/format";
@@ -14,11 +15,16 @@ import { sortChanges, type ChangeSort } from "../utils/changes";
 interface ChangesTableProps {
   changes: HeroChange[];
   showBan: boolean;
+  portraits?: Record<string, string | null>;
 }
 
 const DELTA_TITLE = "Change between the two snapshots";
 
-export function ChangesTable({ changes, showBan }: ChangesTableProps) {
+export function ChangesTable({
+  changes,
+  showBan,
+  portraits = {},
+}: ChangesTableProps) {
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
   const [role, setRole] = useState<HeroRole | null>(null);
@@ -124,10 +130,14 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
               <tr key={change.heroSlug}>
                 <th scope="row">
                   <span className="table__hero">
-                    <RoleBadge role={change.role} compact />
+                    <HeroPortrait
+                      name={change.heroName}
+                      url={portraits[change.heroSlug] ?? null}
+                    />
                     <Link to={`/heroes/${change.heroSlug}`}>
                       {change.heroName}
                     </Link>
+                    <RoleBadge role={change.role} compact />
                   </span>
                 </th>
                 <td>
