@@ -1,5 +1,7 @@
 package gg.overlab.backend.guide.dto;
 
+import gg.overlab.backend.guide.GuideKind;
+import gg.overlab.backend.guide.GuideSide;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,5 +18,10 @@ public record GuideRequest(
         @Min(0) Integer startSeconds,
         @Size(max = 2000) String description,
         Integer sortOrder,
-        Boolean published) {
+        Boolean published,
+        GuideKind kind,
+        GuideSide side,
+        @Pattern(regexp = "^[a-z0-9]+(-[a-z0-9]+)*$", message = "must contain lowercase letters, digits and dashes")
+        @Size(max = 100) String abilitySlug,
+        @Min(1) Integer endSeconds) {
 }

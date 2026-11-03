@@ -21,9 +21,18 @@ public class GuideMapper {
                 guide.getTitle(),
                 guide.getYoutubeId(),
                 guide.getStartSeconds(),
-                EMBED_BASE_URL + guide.getYoutubeId() + "?start=" + guide.getStartSeconds(),
+                guide.getEndSeconds(),
+                guide.getKind(),
+                guide.getSide(),
+                guide.getAbilitySlug(),
+                embedUrl(guide),
                 guide.getDescription(),
                 guide.getSortOrder(),
                 guide.isPublished());
+    }
+
+    private String embedUrl(Guide guide) {
+        String url = EMBED_BASE_URL + guide.getYoutubeId() + "?start=" + guide.getStartSeconds();
+        return guide.getEndSeconds() == null ? url : url + "&end=" + guide.getEndSeconds();
     }
 }
