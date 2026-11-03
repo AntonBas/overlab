@@ -1,4 +1,6 @@
+import clsx from "clsx";
 import { useId, type ReactNode } from "react";
+import { useFloatingTip } from "../../hooks/useFloatingTip";
 
 interface InfoChipProps {
   description?: string;
@@ -7,12 +9,13 @@ interface InfoChipProps {
 
 export function InfoChip({ description, children }: InfoChipProps) {
   const tipId = useId();
+  const { open, style, triggerRef, tipRef, triggerProps } = useFloatingTip();
 
   if (!description) {
     return <span className="info-chip info-chip--plain">{children}</span>;
   }
   return (
-    <span className="info-chip">
+    <span className="info-chip" ref={triggerRef} {...triggerProps}>
       <button
         type="button"
         className="info-chip__button"
@@ -20,7 +23,15 @@ export function InfoChip({ description, children }: InfoChipProps) {
       >
         {children}
       </button>
-      <span id={tipId} role="tooltip" className="info-chip__tip">
+      <span
+        id={tipId}
+        role="tooltip"
+        ref={tipRef}
+        className={clsx("info-chip__tip", {
+          "info-chip__tip--open": open,
+        })}
+        style={style}
+      >
         {description}
       </span>
     </span>
