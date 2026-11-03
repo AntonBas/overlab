@@ -25,6 +25,7 @@ import {
   fetchSynergies,
 } from "../api/heroesApi";
 import { HeroMapTable } from "../components/HeroMapTable";
+import { StatChips } from "../components/StatChips";
 import { AbilityList } from "../components/AbilityList";
 import { AbilityText } from "../components/AbilityText";
 import { ControlSchemeToggle } from "../components/ControlSchemeToggle";
@@ -115,7 +116,17 @@ export function HeroPage() {
           />
         }
         subtitle={
-          <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+          <span className="hero-tags">
+            <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+            {focus && (
+              <StatChips
+                winRate={focus.winRate}
+                pickRate={focus.pickRate}
+                banRate={focus.banRate}
+                showBan={queue === "COMPETITIVE"}
+              />
+            )}
+          </span>
         }
         actions={
           <>
