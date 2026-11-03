@@ -27,6 +27,8 @@ export const CONTROL_KEYS: Record<
     ABILITY_1: "Shift",
     ABILITY_2: "E",
     ULTIMATE: "Q",
+    JUMP: "Space",
+    CROUCH: "Ctrl",
     PASSIVE: "",
   },
   XBOX: {
@@ -35,6 +37,8 @@ export const CONTROL_KEYS: Record<
     ABILITY_1: "LB",
     ABILITY_2: "RB",
     ULTIMATE: "LB + RB",
+    JUMP: "A",
+    CROUCH: "RS",
     PASSIVE: "",
   },
   PLAYSTATION: {
@@ -43,6 +47,8 @@ export const CONTROL_KEYS: Record<
     ABILITY_1: "L1",
     ABILITY_2: "R1",
     ULTIMATE: "L1 + R1",
+    JUMP: "Cross",
+    CROUCH: "R3",
     PASSIVE: "",
   },
   SWITCH: {
@@ -51,6 +57,8 @@ export const CONTROL_KEYS: Record<
     ABILITY_1: "L",
     ABILITY_2: "R",
     ULTIMATE: "L + R",
+    JUMP: "B",
+    CROUCH: "RS",
     PASSIVE: "",
   },
 };

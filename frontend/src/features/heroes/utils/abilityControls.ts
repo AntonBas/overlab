@@ -6,6 +6,8 @@ export const ABILITY_CONTROLS: readonly AbilityControl[] = [
   "ABILITY_1",
   "ABILITY_2",
   "ULTIMATE",
+  "JUMP",
+  "CROUCH",
   "PASSIVE",
 ];
 
@@ -15,5 +17,7 @@ export const ABILITY_CONTROL_LABELS: Record<AbilityControl, string> = {
   ABILITY_1: "Ability 1",
   ABILITY_2: "Ability 2",
   ULTIMATE: "Ultimate",
+  JUMP: "Jump",
+  CROUCH: "Crouch",
   PASSIVE: "Passive",
 };

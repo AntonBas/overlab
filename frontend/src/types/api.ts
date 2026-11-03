@@ -34,6 +34,8 @@ export type AbilityControl =
   | "ABILITY_1"
   | "ABILITY_2"
   | "ULTIMATE"
+  | "JUMP"
+  | "CROUCH"
   | "PASSIVE";
 
 export interface Ability {
