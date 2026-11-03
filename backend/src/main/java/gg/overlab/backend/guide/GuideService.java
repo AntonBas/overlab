@@ -4,6 +4,7 @@ import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
+import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
@@ -118,6 +119,13 @@ public class GuideService {
         guide.setTitle(request.title().trim());
         guide.setYoutubeId(request.youtubeId());
         guide.setStartSeconds(request.startSeconds() == null ? 0 : request.startSeconds());
+        if (request.endSeconds() != null && request.endSeconds() <= guide.getStartSeconds()) {
+            throw new BadRequestException("End time must be after the start time");
+        }
+        guide.setEndSeconds(request.endSeconds());
+        guide.setKind(request.kind() == null ? GuideKind.TIP : request.kind());
+        guide.setSide(request.side() == null ? GuideSide.BOTH : request.side());
+        guide.setAbilitySlug(StringUtils.hasText(request.abilitySlug()) ? request.abilitySlug() : null);
         guide.setDescription(request.description());
         guide.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         guide.setPublished(Boolean.TRUE.equals(request.published()));

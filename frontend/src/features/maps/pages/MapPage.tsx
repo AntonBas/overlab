@@ -18,7 +18,7 @@ import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { GuideList } from "../../guides/components/GuideList";
+import { SpotsSection } from "../../guides/components/SpotsSection";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
 import {
@@ -188,14 +188,12 @@ export function MapPage() {
         </div>
       )}
       {guides.data && (
-        <section className="section">
-          <h2>Video guides on this map</h2>
-          {guides.data.length > 0 ? (
-            <GuideList guides={guides.data} />
-          ) : (
-            <EmptyState>No guides for this map yet.</EmptyState>
-          )}
-        </section>
+        <SpotsSection
+          title="Spots & setups"
+          guides={guides.data}
+          groupBy="hero"
+          emptyMessage="No spots or setups for this map yet."
+        />
       )}
       {map.data && maps.data && (
         <MapNavigation current={map.data} maps={maps.data} />

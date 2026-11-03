@@ -20,10 +20,10 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
 | `/heroes/:slug/counters` | Full counters and synergies |
 | `/heroes/:slug/perks` | Redirects to `/perks` |
-| `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
+| `/heroes/:slug?map=<map>` | A hero on a map: the map picker on a hero page switches the rates, history and guides to that map; `/maps/:map/:hero` redirects here |
 | `/patches`, `/patches/:slug` | Patch list, notes and the change in statistics around the release |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
-| `/guides/:id-:slug` | Video guide (YouTube embed) |
+| `/guides/:id-:slug` | A single spot or setup video (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
 | `/me` | Favorites, notes and default filters |
 | `/me/settings` | Change name, password and email, download or delete your data |
@@ -40,7 +40,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/abilities` | Abilities per hero: choose the control slot (primary or secondary fire, ability 1 or 2, ultimate, passive); saved at once and written to the audit log |
 | `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
-| `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
+| `/admin/guides` | Spots and setups: paste a YouTube link (`youtu.be/...`, `watch?v=...`), hero, map, type (setup, position, ultimate spot, tip), side (attack, defense, both), optional ability, start and end time as `1:23`, video preview, publish and order. Shown on the map page grouped by hero and on the hero page grouped by map |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
 | `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
 | `/admin/users` | Search users, block and unblock |
@@ -147,7 +147,7 @@ Curated content, also public `GET` requests:
 | `/api/heroes/{slug}/abilities` | Abilities of a hero with description and icon |
 | `/api/heroes/{slug}/counters` | Heroes this hero counters and heroes that counter it |
 | `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
-| `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published video guides (YouTube embeds) |
+| `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published spots and setups (YouTube embeds; `kind`, `side`, `abilitySlug`, `startSeconds`, `endSeconds`) |
 | `/api/patches`, `/api/patches/{slug}`, `/api/patches/at?date=` | Patches and the patch active at a date |
 
 Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.

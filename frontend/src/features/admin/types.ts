@@ -1,4 +1,6 @@
 import type {
+  GuideKind,
+  GuideSide,
   AbilityControl,
   Hero,
   MapMode,
@@ -55,6 +57,10 @@ export interface GuidePayload {
   slug: string | null;
   youtubeId: string;
   startSeconds: number;
+  endSeconds: number | null;
+  kind: GuideKind;
+  side: GuideSide;
+  abilitySlug: string | null;
   description: string | null;
   sortOrder: number;
   published: boolean;
