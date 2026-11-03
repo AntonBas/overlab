@@ -7,7 +7,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue } from "../../../types/api";
-import { formatDateTime, formatPercent } from "../../../utils/format";
+import { formatDateTime } from "../../../utils/format";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchHeroHistory } from "../../stats/api/statsApi";
 import { DataFreshness } from "../../stats/components/DataFreshness";
@@ -31,13 +31,6 @@ const METRICS: MetricDefinition[] = [
   { id: "pick", label: "Pick rate", tone: "pick" },
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
-
-function metricValue(metric: Metric, current: CurrentStats): number | null {
-  if (metric === "win") {
-    return current.winRate;
-  }
-  return metric === "pick" ? current.pickRate : current.banRate;
-}
 
 export interface CurrentStats {
   winRate: number;
@@ -127,11 +120,6 @@ export function HeroHistorySection({
               onClick={() => setSelectedMetric(entry.id)}
             >
               {entry.label}
-              {current && metricValue(entry.id, current) !== null && (
-                <strong className="segmented__value">
-                  {formatPercent(metricValue(entry.id, current) ?? 0)}
-                </strong>
-              )}
             </button>
           ))}
         </div>

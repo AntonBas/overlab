@@ -2302,16 +2302,6 @@ input[type="range"] {
   margin: 0;
 }
 
-.segmented__value {
-  margin-left: 4px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.segmented__item--active .segmented__value {
-  color: inherit;
-}
-
 .spot-groups {
   margin: 0 0 16px;
   padding: 0;
@@ -2519,4 +2509,47 @@ input[type="range"] {
 
 .spot-rail__arrow--forward {
   right: -12px;
+}
+
+.hero-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.stat-chips {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stat-chip strong {
+  color: var(--text);
+}
+
+.stat-chip--win {
+  border-left-color: var(--bar-win);
+}
+
+.stat-chip--pick {
+  border-left-color: var(--bar-pick);
+}
+
+.stat-chip--ban {
+  border-left-color: var(--bar-ban);
 }

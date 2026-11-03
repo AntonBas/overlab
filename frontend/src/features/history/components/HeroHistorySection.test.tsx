@@ -90,27 +90,6 @@ describe("HeroHistorySection", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("shows the current values inside the statistic tabs", async () => {
-    renderWithRouter(
-      <HeroHistorySection
-        slug="ana"
-        queue="COMPETITIVE"
-        current={{
-          winRate: 51.2,
-          pickRate: 12.3,
-          banRate: 7.5,
-          capturedAt: "2026-10-29T10:00:00Z",
-        }}
-      />,
-    );
-    const switcher = await screen.findByRole("group", { name: "Statistic" });
-
-    expect(within(switcher).getByText("51.2%")).toBeInTheDocument();
-    expect(within(switcher).getByText("12.3%")).toBeInTheDocument();
-    expect(within(switcher).getByText("7.5%")).toBeInTheDocument();
-    expect(screen.getByText(/Checked/)).toBeInTheDocument();
-  });
-
   it("has no ban rate in Quick Play", async () => {
     renderWithRouter(<HeroHistorySection slug="ana" queue="QUICK_PLAY" />);
 
