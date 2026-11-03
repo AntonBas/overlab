@@ -9,8 +9,6 @@ import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
 import { PerksPage } from "../features/heroes/pages/PerksPage";
 import { HeroPerksRedirect } from "../features/heroes/pages/HeroPerksRedirect";
 import { ChangesPage } from "../features/history/pages/ChangesPage";
-import { PatchPage } from "../features/patches/pages/PatchPage";
-import { PatchesPage } from "../features/patches/pages/PatchesPage";
 import { MapPage } from "../features/maps/pages/MapPage";
 import { MapsPage } from "../features/maps/pages/MapsPage";
 import { StatsPage } from "../features/stats/pages/StatsPage";
@@ -130,8 +128,7 @@ export function AppRoutes() {
         <Route path="heroes/:slug/perks" element={<HeroPerksRedirect />} />
         <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
         <Route path="changes" element={<ChangesPage />} />
-        <Route path="patches" element={<PatchesPage />} />
-        <Route path="patches/:slug" element={<PatchPage />} />
+        <Route path="patches/*" element={<Navigate to="/changes" replace />} />
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
