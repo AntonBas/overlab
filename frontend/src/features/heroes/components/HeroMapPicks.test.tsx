@@ -46,7 +46,7 @@ const maps = [
 ];
 
 describe("HeroMapPicks", () => {
-  it("shows the best maps first with links to the hero on the map", async () => {
+  it("shows the best maps first with links that select the map on the hero page", async () => {
     renderWithRouter(
       <HeroMapPicks heroSlug="ana" heroName="Ana" maps={maps} linkSuffix="" />,
     );
@@ -58,7 +58,7 @@ describe("HeroMapPicks", () => {
     ).toBeInTheDocument();
     expect(within(gain).getByRole("link", { name: /Busan/ })).toHaveAttribute(
       "href",
-      "/maps/busan/ana",
+      "/heroes/ana?map=busan",
     );
     expect(within(gain).queryByText("Rialto")).toBeNull();
   });
@@ -95,7 +95,7 @@ describe("HeroMapPicks", () => {
 
     expect(within(gain).getByRole("link", { name: /Busan/ })).toHaveAttribute(
       "href",
-      "/maps/busan/ana?queue=quick_play",
+      "/heroes/ana?map=busan&queue=quick_play",
     );
   });
 

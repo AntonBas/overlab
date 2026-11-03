@@ -72,25 +72,25 @@ describe("HeroHistorySection", () => {
     ).toBeInTheDocument();
     const switcher = screen.getByRole("group", { name: "Statistic" });
     expect(
-      within(switcher).getByRole("button", { name: "Win rate" }),
+      within(switcher).getByRole("button", { name: /^Win rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(
-      within(switcher).getByRole("button", { name: "Pick rate" }),
+      within(switcher).getByRole("button", { name: /^Pick rate/ }),
     );
     expect(
-      within(switcher).getByRole("button", { name: "Pick rate" }),
+      within(switcher).getByRole("button", { name: /^Pick rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(
-      within(switcher).getByRole("button", { name: "Ban rate" }),
+      within(switcher).getByRole("button", { name: /^Ban rate/ }),
     );
     expect(
-      within(switcher).getByRole("button", { name: "Ban rate" }),
+      within(switcher).getByRole("button", { name: /^Ban rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("does not repeat the current values, the page header shows them", async () => {
+  it("shows the current values inside the statistic tabs", async () => {
     renderWithRouter(
       <HeroHistorySection
         slug="ana"
@@ -103,10 +103,11 @@ describe("HeroHistorySection", () => {
         }}
       />,
     );
-    await screen.findByRole("group", { name: "Statistic" });
+    const switcher = await screen.findByRole("group", { name: "Statistic" });
 
-    expect(screen.queryByText(/now$/)).toBeNull();
-    expect(screen.queryByText("51.2%")).toBeNull();
+    expect(within(switcher).getByText("51.2%")).toBeInTheDocument();
+    expect(within(switcher).getByText("12.3%")).toBeInTheDocument();
+    expect(within(switcher).getByText("7.5%")).toBeInTheDocument();
     expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
 
@@ -116,7 +117,7 @@ describe("HeroHistorySection", () => {
     const switcher = await screen.findByRole("group", { name: "Statistic" });
 
     expect(
-      within(switcher).queryByRole("button", { name: "Ban rate" }),
+      within(switcher).queryByRole("button", { name: /^Ban rate/ }),
     ).toBeNull();
     expect(within(switcher).getAllByRole("button")).toHaveLength(2);
   });

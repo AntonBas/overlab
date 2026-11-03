@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { RateBar } from "../../../components/ui/RateBar";
+import { heroOnMapPath } from "../utils/heroOnMapPath";
 import type { HeroMapStat } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 
@@ -27,9 +28,11 @@ function compare(sort: MapSort, first: HeroMapStat, second: HeroMapStat) {
 export function HeroMapTable({
   maps,
   heroSlug,
+  linkSuffix,
 }: {
   maps: HeroMapStat[];
   heroSlug: string;
+  linkSuffix: string;
 }) {
   const [sort, setSort] = useState<MapSort>("WIN_RATE");
   const sorted = useMemo(
@@ -66,7 +69,13 @@ export function HeroMapTable({
               <tr key={map.mapSlug}>
                 <th scope="row">
                   <span className="table__hero">
-                    <Link to={`/maps/${map.mapSlug}/${heroSlug}`}>
+                    <Link
+                      to={heroOnMapPath(
+                        heroSlug,
+                        map.mapSlug ?? "",
+                        linkSuffix,
+                      )}
+                    >
                       {map.mapName}
                     </Link>
                     {map.mode && (
