@@ -26,6 +26,7 @@ public class CollectorAdminController {
     private final CollectorRunRepository runRepository;
     private final AuditService auditService;
     private final PerkImportService perkImportService;
+    private final PatchImportService patchImportService;
 
     @Operation(summary = "List collector jobs with cron schedule and enabled flag")
     @GetMapping("/jobs")
@@ -55,6 +56,15 @@ public class CollectorAdminController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PerkImportStartedDto importPerks() {
         return new PerkImportStartedDto(perkImportService.startAsync());
+    }
+
+    @Operation(summary = "Import new balance patches from the Blizzard patch notes page")
+    @PostMapping("/patches/import")
+    public PatchImportResultDto importPatches() {
+        return new PatchImportResultDto(patchImportService.importNew());
+    }
+
+    public record PatchImportResultDto(int created) {
     }
 
     public record PerkImportStartedDto(int heroes) {

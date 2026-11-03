@@ -171,6 +171,13 @@ export async function deletePatch(id: number): Promise<void> {
   await api.delete(`/admin/patches/${id}`);
 }
 
+export async function importPatches(): Promise<{ created: number }> {
+  const { data } = await api.post<{ created: number }>(
+    "/admin/collector/patches/import",
+  );
+  return data;
+}
+
 export async function updateMap(
   slug: string,
   payload: MapPayload,
