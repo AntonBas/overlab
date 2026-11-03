@@ -11,7 +11,6 @@ const LINKS = [
   { to: "/perks", label: "Perks" },
   { to: "/maps", label: "Maps" },
   { to: "/changes", label: "Changes" },
-  { to: "/patches", label: "Patches" },
 ];
 
 export function Header() {
