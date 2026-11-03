@@ -148,7 +148,7 @@ export function PerksPage() {
           })}
         >
           {visibleHeroes.map((hero) => (
-            <li key={hero.slug}>
+            <li key={hero.slug} className="hero-perks-item">
               <article
                 className={clsx(
                   "hero-perks",
@@ -184,11 +184,9 @@ export function PerksPage() {
                     name={hero.name}
                   />
                 </div>
-                {hero.description && (
-                  <p className="hero-perks__description muted">
-                    <AbilityText text={hero.description} />
-                  </p>
-                )}
+                <p className="hero-perks__description muted">
+                  {hero.description && <AbilityText text={hero.description} />}
+                </p>
                 <PerkList
                   compact
                   detailed={detailed}

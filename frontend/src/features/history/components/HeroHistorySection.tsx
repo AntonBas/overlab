@@ -7,7 +7,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue } from "../../../types/api";
-import { formatDateTime } from "../../../utils/format";
+import { formatDateTime, formatPercent } from "../../../utils/format";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchHeroHistory } from "../../stats/api/statsApi";
 import { DataFreshness } from "../../stats/components/DataFreshness";
@@ -32,6 +32,13 @@ const METRICS: MetricDefinition[] = [
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
 
+function metricValue(metric: Metric, current: CurrentStats): number | null {
+  if (metric === "win") {
+    return current.winRate;
+  }
+  return metric === "pick" ? current.pickRate : current.banRate;
+}
+
 export interface CurrentStats {
   winRate: number;
   pickRate: number;
@@ -45,6 +52,7 @@ interface HeroHistorySectionProps {
   queue: GameQueue;
   title?: string;
   current?: CurrentStats | null;
+  headerAction?: ReactNode;
   children?: ReactNode;
 }
 
@@ -54,6 +62,7 @@ export function HeroHistorySection({
   queue,
   title = "History",
   current = null,
+  headerAction,
   children,
 }: HeroHistorySectionProps) {
   const [periodId, setPeriodId] = useState<HistoryPeriodId>("30d");
@@ -100,7 +109,10 @@ export function HeroHistorySection({
 
   return (
     <section className="section" aria-labelledby="history-heading">
-      <h2 id="history-heading">{title}</h2>
+      <div className="section__heading">
+        <h2 id="history-heading">{title}</h2>
+        {headerAction}
+      </div>
       {children}
       <div className="stat-switch">
         <div className="segmented" role="group" aria-label="Statistic">
@@ -115,6 +127,11 @@ export function HeroHistorySection({
               onClick={() => setSelectedMetric(entry.id)}
             >
               {entry.label}
+              {current && metricValue(entry.id, current) !== null && (
+                <strong className="segmented__value">
+                  {formatPercent(metricValue(entry.id, current) ?? 0)}
+                </strong>
+              )}
             </button>
           ))}
         </div>

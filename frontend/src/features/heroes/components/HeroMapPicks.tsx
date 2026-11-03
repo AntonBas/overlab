@@ -8,6 +8,7 @@ import type { HeroMapStat } from "../../../types/api";
 import { formatPercent } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { fetchMaps } from "../../maps/api/mapsApi";
+import { heroOnMapPath } from "../utils/heroOnMapPath";
 import { mapPicks } from "../utils/mapPicks";
 
 interface HeroMapPicksProps {
@@ -48,7 +49,7 @@ function MapList({
           <li key={entry.mapSlug}>
             <Link
               className="highlight__hero highlight__hero--map"
-              to={`/maps/${entry.mapSlug}/${heroSlug}${linkSuffix}`}
+              to={heroOnMapPath(heroSlug, entry.mapSlug ?? "", linkSuffix)}
             >
               <span className="highlight__portrait">
                 <Thumbnail

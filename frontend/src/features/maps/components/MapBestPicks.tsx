@@ -1,3 +1,4 @@
+import { heroOnMapPath } from "../../heroes/utils/heroOnMapPath";
 import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -36,7 +37,7 @@ function PickList({
           <li key={hero.heroSlug}>
             <Link
               className="highlight__hero"
-              to={`/maps/${mapSlug}/${hero.heroSlug}${linkSuffix}`}
+              to={heroOnMapPath(hero.heroSlug, mapSlug, linkSuffix)}
             >
               <span className="highlight__portrait">
                 <HeroPortrait

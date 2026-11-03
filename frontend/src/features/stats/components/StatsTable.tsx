@@ -1,3 +1,4 @@
+import { heroOnMapPath } from "../../heroes/utils/heroOnMapPath";
 import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -100,7 +101,7 @@ export function StatsTable({
                   <Link
                     to={
                       mapSlug
-                        ? `/maps/${mapSlug}/${hero.heroSlug}${heroLinkSuffix}`
+                        ? heroOnMapPath(hero.heroSlug, mapSlug, heroLinkSuffix)
                         : `/heroes/${hero.heroSlug}${heroLinkSuffix}`
                     }
                   >

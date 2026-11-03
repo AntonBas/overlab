@@ -33,6 +33,7 @@ vi.mock("../api/heroesApi", () => ({
 }));
 
 import { HeroCountersPage } from "./HeroCountersPage";
+import { HeroOnMapRedirect } from "./HeroOnMapRedirect";
 import { HeroPerksRedirect } from "./HeroPerksRedirect";
 
 describe("hero subpages", () => {
@@ -46,6 +47,18 @@ describe("hero subpages", () => {
     );
 
     expect(await screen.findByText("Perks overview")).toBeInTheDocument();
+  });
+
+  it("sends the old hero on map address to the hero page with the map selected", async () => {
+    renderWithRouter(
+      <Routes>
+        <Route path="/maps/:map/:hero" element={<HeroOnMapRedirect />} />
+        <Route path="/heroes/:slug" element={<p>Hero page</p>} />
+      </Routes>,
+      "/maps/busan/ana?queue=quick_play",
+    );
+
+    expect(await screen.findByText("Hero page")).toBeInTheDocument();
   });
 
   it("lists counters with notes and a link back to the hero", async () => {
