@@ -1,6 +1,7 @@
 package gg.overlab.backend.collector;
 
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.stats.GameQueue;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,17 @@ public class RatesValidator {
             validatePercent(rate.id(), "winrate", rate.cells().winrate(), false);
             validatePercent(rate.id(), "pickrate", rate.cells().pickrate(), false);
             validatePercent(rate.id(), "banrate", rate.cells().banrate(), true);
+        }
+    }
+
+    public void validateBanRates(GameQueue queue, List<BlizzardRatesResponse.HeroRate> rates) {
+        if (queue != GameQueue.COMPETITIVE) {
+            return;
+        }
+        for (BlizzardRatesResponse.HeroRate rate : rates) {
+            if (rate.cells().banrate() == null) {
+                throw new InvalidSnapshotException("banrate is missing for " + rate.id());
+            }
         }
     }
 

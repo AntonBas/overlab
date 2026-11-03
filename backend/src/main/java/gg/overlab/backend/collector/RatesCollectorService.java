@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
@@ -48,6 +49,7 @@ public class RatesCollectorService {
     private final CollectorMetrics metrics;
     private final TaskExecutor executor;
     private final Set<String> runningJobs = ConcurrentHashMap.newKeySet();
+    private final ReentrantLock requestsLock = new ReentrantLock();
 
     public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
                                  RatesValidator validator, SnapshotRecorder recorder,
@@ -112,7 +114,7 @@ public class RatesCollectorService {
 
     private void finish(CollectorJob job, CollectorRun run) {
         try {
-            execute(job, run);
+            executeExclusively(job, run);
         } catch (RuntimeException exception) {
             log.error("Collector job '{}' crashed", job.name(), exception);
             run.setStatus(CollectorRunStatus.FAILED);
@@ -123,6 +125,16 @@ public class RatesCollectorService {
             metrics.recordRun(job.name(), run.getStatus(), run.getRowsSaved(),
                     Duration.between(run.getStartedAt(), run.getFinishedAt()));
             runningJobs.remove(job.name());
+        }
+    }
+
+    private void executeExclusively(CollectorJob job, CollectorRun run) {
+        requestsLock.lock();
+        try {
+            run.setStartedAt(Instant.now());
+            execute(job, run);
+        } finally {
+            requestsLock.unlock();
         }
     }
 
@@ -187,6 +199,7 @@ public class RatesCollectorService {
         }
         RatesFetch usable = fetched.notModified() ? client.fetch(queue, platform, region, tier, mapSlug) : fetched;
         validator.validate(usable.rates());
+        validator.validateBanRates(queue, usable.rates());
         SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
                 region, tier, mapSlug, usable.rates(), usable.etag());
         if (!outcome.changed()) {
