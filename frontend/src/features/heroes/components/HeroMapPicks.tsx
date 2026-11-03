@@ -123,21 +123,12 @@ export function HeroMapPicks({
             images={images}
           />
         </section>
-        <section className="highlight" aria-label="by win rate">
-          <MapList
-            title={best ? "Highest win rate" : "Lowest win rate"}
-            entries={best ? picks.strongest : picks.weakest}
-            heroSlug={heroSlug}
-            linkSuffix={linkSuffix}
-            images={images}
-          />
-        </section>
       </div>
       <p className="muted footnote">
         Each map shows the win rate of {heroName} there, how often the hero is
         picked and, as the coloured number, how much the win rate on that map
-        differs from the all-maps win rate. Both lists are weighted by pick rate
-        so rare picks do not top them by chance.
+        differs from the all-maps win rate. The list is weighted by pick rate so
+        rare picks do not top it by chance.
       </p>
     </section>
   );
