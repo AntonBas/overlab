@@ -3,6 +3,7 @@ package gg.overlab.backend.collector;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import gg.overlab.backend.stats.GameQueue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,16 @@ class RatesValidatorTest {
         rates.set(0, CollectorFixtures.rate("hero-0", "DAMAGE", "50", "10", null));
 
         assertThatCode(() -> validator.validate(rates)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsMissingBanRateInCompetitiveOnly() {
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>(CollectorFixtures.rates(3));
+        rates.set(0, CollectorFixtures.rate("hero-0", "DAMAGE", "50", "10", null));
+
+        assertThatThrownBy(() -> validator.validateBanRates(GameQueue.COMPETITIVE, rates))
+                .isInstanceOf(InvalidSnapshotException.class).hasMessageContaining("banrate");
+        assertThatCode(() -> validator.validateBanRates(GameQueue.QUICK_PLAY, rates)).doesNotThrowAnyException();
     }
 
     @Test
