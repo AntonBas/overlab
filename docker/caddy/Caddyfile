@@ -17,13 +17,34 @@
 		reverse_proxy backend:8080
 	}
 
-	@backend path /api/* /oauth2/* /login/oauth2/* /media/*
+	@mapImages path /media/maps/*
+	handle @mapImages {
+		reverse_proxy backend:8080 {
+			header_down Cache-Control "public, max-age=31536000, immutable"
+			header_down -Pragma
+			header_down -Expires
+		}
+	}
+
+	@media path /media/*
+	handle @media {
+		reverse_proxy backend:8080 {
+			header_down Cache-Control "public, max-age=86400"
+			header_down -Pragma
+			header_down -Expires
+		}
+	}
+
+	@backend path /api/* /oauth2/* /login/oauth2/*
 	handle @backend {
 		request_body {
 			max_size 1MB
 		}
 		reverse_proxy backend:8080
 	}
+
+	@hashedAssets path /assets/*
+	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
 
 	handle {
 		root * /srv

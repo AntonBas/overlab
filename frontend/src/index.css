@@ -7,6 +7,7 @@
   --text: #e8ecf3;
   --muted: #98a3b8;
   --accent: #f99e1a;
+  --accent-text: #f99e1a;
   --accent-contrast: #1a1204;
   --link: #8ec5ff;
   --good: #3ecf8e;
@@ -30,9 +31,10 @@
     --text: #151a24;
     --muted: #596277;
     --accent: #d97e00;
+    --accent-text: #8a4d00;
     --accent-contrast: #1a1204;
     --link: #0b5fc5;
-    --good: #138a55;
+    --good: #0b6b40;
     --bad: #c93030;
     --tank: #1f6fd1;
     --damage: #c93030;
@@ -172,7 +174,7 @@ ul {
 }
 
 .brand svg {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .nav {
@@ -1678,7 +1680,7 @@ input[type="range"] {
 
 .tag--optional {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .perk-card--right {
@@ -1862,7 +1864,7 @@ input[type="range"] {
 
 .favorite-star:hover,
 .favorite-star[aria-pressed="true"] {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .hero-perks__header {
@@ -1989,7 +1991,7 @@ input[type="range"] {
 
 .map-card__favorite .favorite-star:hover,
 .map-card__favorite .favorite-star[aria-pressed="true"] {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .segmented__item .role-badge {
@@ -2042,7 +2044,7 @@ input[type="range"] {
 .mode-heading .mode-icon {
   width: 24px;
   height: 24px;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .map-card__mode {
@@ -2190,7 +2192,6 @@ input[type="range"] {
 
 .ability-key--ultimate .ability-key__cap {
   border-color: var(--accent);
-  color: var(--accent);
 }
 
 .segmented__count {
@@ -2422,7 +2423,7 @@ input[type="range"] {
 }
 
 .spot-card__body h3 a:hover {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .spot-card__body p {
@@ -2443,7 +2444,7 @@ input[type="range"] {
 
 .tag--kind-setup {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .tag--kind-position {
