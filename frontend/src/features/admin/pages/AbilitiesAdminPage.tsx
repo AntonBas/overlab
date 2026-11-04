@@ -76,7 +76,12 @@ function AbilityRows({ heroSlug }: { heroSlug: string }) {
             header: "Ability",
             render: (ability) => (
               <span className="admin__name">
-                <Thumbnail url={ability.iconUrl} width={32} height={32} />
+                <Thumbnail
+                  url={ability.iconUrl}
+                  width={40}
+                  height={40}
+                  className="thumbnail--icon"
+                />
                 {ability.name}
               </span>
             ),

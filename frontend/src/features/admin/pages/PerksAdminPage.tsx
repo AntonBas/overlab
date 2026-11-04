@@ -284,7 +284,12 @@ export function PerksAdminPage() {
               header: "Name",
               render: (perk) => (
                 <span className="admin__name">
-                  <Thumbnail url={perk.iconUrl} width={28} height={28} />
+                  <Thumbnail
+                    url={perk.iconUrl}
+                    width={40}
+                    height={40}
+                    className="thumbnail--icon"
+                  />
                   {perk.name}
                 </span>
               ),
