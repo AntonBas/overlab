@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 
 class PatchImportServiceTest {
 
@@ -26,7 +27,7 @@ class PatchImportServiceTest {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, false, null, null, 3, null, List.of());
         return new PatchImportService(properties, client, new PatchNotesParser(), patchRepository,
-                new SlugService());
+                new SlugService(), mock(ApplicationEventPublisher.class));
     }
 
     @Test
