@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { BarChart3, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
@@ -21,7 +21,13 @@ export function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <Link to="/" className="brand">
-          <BarChart3 aria-hidden="true" size={22} />
+          <img
+            src="/favicon.svg"
+            alt=""
+            width={28}
+            height={28}
+            className="brand__logo"
+          />
           Overlab
         </Link>
         <button
