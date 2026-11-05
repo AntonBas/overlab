@@ -2576,3 +2576,29 @@ input[type="range"] {
 .stat-chip--ban {
   border-left-color: var(--bar-ban);
 }
+
+.place-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+.highlight__name .mode-icon {
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+.spot-card__place {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+}
+
+.spot-groups .portrait,
+.spot-groups .mode-icon {
+  margin-right: 4px;
+  vertical-align: middle;
+}

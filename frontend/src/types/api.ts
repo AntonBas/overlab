@@ -194,6 +194,7 @@ export interface RelatedHero {
   role: HeroRole;
   strength: number;
   note: string | null;
+  portraitUrl: string | null;
 }
 
 export interface HeroCounters {

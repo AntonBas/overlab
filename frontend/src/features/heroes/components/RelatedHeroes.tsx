@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { AbilityText } from "./AbilityText";
 import type { RelatedHero } from "../../../types/api";
@@ -28,6 +29,9 @@ export function RelatedHeroes({ heroes }: { heroes: RelatedHero[] }) {
     <ul className="card-list">
       {heroes.map((hero) => (
         <li key={hero.slug} className="card">
+          <span className="card__icon">
+            <HeroPortrait name={hero.name} url={hero.portraitUrl} size={40} />
+          </span>
           <span className="card__body">
             <span className="card__title">
               <RoleBadge role={hero.role} compact />

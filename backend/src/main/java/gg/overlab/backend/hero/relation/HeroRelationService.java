@@ -11,6 +11,7 @@ import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
 import gg.overlab.backend.hero.relation.dto.RelationDto;
+import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -33,6 +34,7 @@ public class HeroRelationService {
     private final HeroRelationRepository relationRepository;
     private final HeroRepository heroRepository;
     private final AuditService auditService;
+    private final MediaUrlResolver mediaUrlResolver;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'counters:' + #heroSlug")
     @Transactional(readOnly = true)
@@ -125,7 +127,7 @@ public class HeroRelationService {
 
     private RelatedHeroDto related(Hero hero, HeroRelation relation) {
         return new RelatedHeroDto(hero.getSlug(), hero.getName(), hero.getRole(), relation.getStrength(),
-                relation.getNote());
+                relation.getNote(), mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
     private RelationDto toDto(HeroRelation relation) {

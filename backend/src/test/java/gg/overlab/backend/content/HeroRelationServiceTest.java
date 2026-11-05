@@ -21,6 +21,7 @@ import gg.overlab.backend.hero.relation.HeroRelationService;
 import gg.overlab.backend.hero.relation.RelationType;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
+import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ class HeroRelationServiceTest {
     private final HeroRelationRepository relationRepository = mock(HeroRelationRepository.class);
     private final HeroRepository heroRepository = mock(HeroRepository.class);
     private final HeroRelationService service = new HeroRelationService(relationRepository, heroRepository,
-            mock(AuditService.class));
+            mock(AuditService.class), mock(MediaUrlResolver.class));
 
     private final Hero ana = hero(1, "ana", "Ana", HeroRole.SUPPORT);
     private final Hero genji = hero(2, "genji", "Genji", HeroRole.DAMAGE);

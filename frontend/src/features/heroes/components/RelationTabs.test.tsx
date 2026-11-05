@@ -6,7 +6,14 @@ import type { RelatedHero } from "../../../types/api";
 import { RelationTabs } from "./RelationTabs";
 
 function related(slug: string, name: string): RelatedHero {
-  return { slug, name, role: "DAMAGE", strength: 2, note: null };
+  return {
+    slug,
+    name,
+    role: "DAMAGE",
+    strength: 2,
+    note: null,
+    portraitUrl: null,
+  };
 }
 
 function renderTabs(

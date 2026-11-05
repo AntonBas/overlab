@@ -2,10 +2,11 @@ import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import type { HeroMapStat } from "../../../types/api";
-import { formatPercent } from "../../../utils/format";
+import { MAP_MODE_LABELS, formatPercent } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { mapPagePath } from "../utils/mapPagePath";
@@ -55,7 +56,17 @@ function MapList({
                   height={36}
                 />
               </span>
-              <span className="highlight__name">{entry.mapName}</span>
+              <span className="highlight__name">
+                {entry.mode && (
+                  <span title={MAP_MODE_LABELS[entry.mode]}>
+                    <ModeIcon mode={entry.mode} />
+                    <span className="visually-hidden">
+                      {MAP_MODE_LABELS[entry.mode]}{" "}
+                    </span>
+                  </span>
+                )}
+                {entry.mapName}
+              </span>
               <span className="highlight__delta">
                 <DeltaValue value={entry.winRateDelta} />
               </span>
