@@ -19,7 +19,8 @@ public record CollectorJob(
         @NotEmpty List<Platform> platforms,
         @NotEmpty List<Region> regions,
         @NotEmpty List<RankTier> tiers,
-        @NotEmpty List<@NotBlank String> maps) {
+        @NotEmpty List<@NotBlank String> maps,
+        @DefaultValue("true") boolean runOnPatch) {
 
     @AssertTrue(message = "cron must be a valid Spring cron expression")
     public boolean isCronValid() {

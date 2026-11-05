@@ -25,7 +25,7 @@ final class CollectorFixtures {
 
     static CollectorJob job(String name, List<GameQueue> queues, List<RankTier> tiers, List<String> maps) {
         return new CollectorJob(name, "0 0 4 * * *", true, queues, List.of(Platform.PC), List.of(Region.EUROPE), tiers,
-                maps);
+                maps, true);
     }
 
     static List<BlizzardRatesResponse.HeroRate> rates(int count) {

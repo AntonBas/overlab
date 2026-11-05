@@ -79,7 +79,7 @@ export interface MapPayload {
 }
 
 export type CollectorRunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";
-export type CollectorTrigger = "SCHEDULED" | "MANUAL" | "STARTUP";
+export type CollectorTrigger = "SCHEDULED" | "MANUAL" | "STARTUP" | "PATCH";
 
 export interface CollectorJob {
   name: string;
