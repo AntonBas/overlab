@@ -28,11 +28,11 @@ import {
   fetchHeroAbilities,
   fetchSynergies,
 } from "../api/heroesApi";
-import { HeroMapTable } from "../components/HeroMapTable";
 import { StatChips } from "../components/StatChips";
 import { AbilityList } from "../components/AbilityList";
 import { AbilityText } from "../components/AbilityText";
 import { ControlSchemeToggle } from "../components/ControlSchemeToggle";
+import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
 import { RelationTabs } from "../components/RelationTabs";
@@ -85,6 +85,36 @@ export function HeroPage() {
   const overall = stats.data?.overall ?? null;
   const focus = overall;
   const spots = guides.data ?? [];
+  const hasMaps = (stats.data?.maps.length ?? 0) > 0;
+  const heroCategoryMatchups = categories.data?.matchups.filter(
+    (matchup) => matchup.heroSlug === slug,
+  );
+  const hasRelations =
+    (counters.data?.counters.length ?? 0) +
+      (counters.data?.counteredBy.length ?? 0) +
+      (synergies.data?.length ?? 0) +
+      (heroCategoryMatchups?.length ?? 0) >
+    0;
+  const navigationSections = [
+    { id: "hero-statistics", label: "Statistics", visible: true },
+    { id: "hero-counters", label: "Counters", visible: hasRelations },
+    {
+      id: "hero-abilities",
+      label: "Abilities",
+      visible: (abilities.data?.length ?? 0) > 0,
+    },
+    {
+      id: "hero-perks",
+      label: "Perks",
+      visible: (perks.data?.length ?? 0) > 0,
+    },
+    { id: "hero-maps", label: "Maps", visible: hasMaps },
+    {
+      id: "hero-spots",
+      label: "Spots",
+      visible: (guides.data?.length ?? 0) > 0,
+    },
+  ].filter((section) => section.visible);
 
   return (
     <>
@@ -138,6 +168,8 @@ export function HeroPage() {
         weaknesses={hero.data.weaknesses}
       />
 
+      <HeroSectionNav sections={navigationSections} />
+
       <div id="hero-statistics">
         <HeroHistorySection
           title="Statistics"
@@ -157,43 +189,23 @@ export function HeroPage() {
         </HeroHistorySection>
       </div>
 
-      {stats.data && stats.data.maps.length > 0 && (
-        <HeroMapPicks
-          heroName={hero.data.name}
-          maps={stats.data.maps}
-          linkSuffix={linkSuffix}
-        />
-      )}
-
-      {stats.data && stats.data.maps.length > 0 && (
-        <section className="section">
-          <h2>By map</h2>
-          <HeroMapTable maps={stats.data.maps} linkSuffix={linkSuffix} />
-        </section>
-      )}
-
-      {counters.data && synergies.data && (
-        <RelationTabs
-          strongAgainst={counters.data.counters}
-          counteredBy={counters.data.counteredBy}
-          synergies={synergies.data}
-          categories={categories.data?.categories}
-          categoryMatchups={categories.data?.matchups.filter(
-            (matchup) => matchup.heroSlug === slug,
-          )}
-        />
-      )}
-      {(counters.data?.counters.length ?? 0) +
-        (counters.data?.counteredBy.length ?? 0) +
-        (synergies.data?.length ?? 0) >
-        0 && (
-        <p className="muted footnote">
-          Counters and synergies are curated recommendations, not statistics.
-        </p>
+      {hasRelations && counters.data && synergies.data && (
+        <div id="hero-counters">
+          <RelationTabs
+            strongAgainst={counters.data.counters}
+            counteredBy={counters.data.counteredBy}
+            synergies={synergies.data}
+            categories={categories.data?.categories}
+            categoryMatchups={heroCategoryMatchups}
+          />
+          <p className="muted footnote">
+            Counters and synergies are curated recommendations, not statistics.
+          </p>
+        </div>
       )}
 
       {abilities.data && abilities.data.length > 0 && (
-        <section className="section">
+        <section className="section" id="hero-abilities">
           <div className="section__heading">
             <h2>Abilities</h2>
             <ControlSchemeToggle />
@@ -203,19 +215,31 @@ export function HeroPage() {
       )}
 
       {perks.data && perks.data.length > 0 && (
-        <section className="section">
+        <section className="section" id="hero-perks">
           <h2>Perks</h2>
           <PerkList perks={perks.data} />
         </section>
       )}
 
+      {hasMaps && stats.data && (
+        <div id="hero-maps">
+          <HeroMapPicks
+            heroName={hero.data.name}
+            maps={stats.data.maps}
+            linkSuffix={linkSuffix}
+          />
+        </div>
+      )}
+
       {guides.data && guides.data.length > 0 && (
-        <SpotsSection
-          title="Spots & setups"
-          guides={spots}
-          groupBy="map"
-          emptyMessage="No spots or setups yet."
-        />
+        <div id="hero-spots">
+          <SpotsSection
+            title="Spots & setups"
+            guides={spots}
+            groupBy="map"
+            emptyMessage="No spots or setups yet."
+          />
+        </div>
       )}
 
       <HeroNote key={slug} heroSlug={slug} />

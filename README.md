@@ -21,7 +21,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
 | `/heroes/:slug/counters` | Redirects to the hero page |
 | `/heroes/:slug/perks` | Redirects to `/perks` |
-| `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps, a by-map table (every map links to its map page), perks, counters, spots; `/maps/:map/:hero` redirects here |
+| `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps (expandable to every map, each links to its map page), abilities, perks, counters, spots; `/maps/:map/:hero` redirects here |
 | `/patches` | Redirects to `/changes`; patches are shown as dashed lines on the statistics chart and as views in `/changes` |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
 | `/guides/:id-:slug` | A single spot or setup video (YouTube embed) |

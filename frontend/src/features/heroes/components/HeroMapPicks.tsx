@@ -10,7 +10,7 @@ import { MAP_MODE_LABELS, formatPercent } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { mapPagePath } from "../utils/mapPagePath";
-import { mapPicks } from "../utils/mapPicks";
+import { mapPicks, mapsByGain } from "../utils/mapPicks";
 
 interface HeroMapPicksProps {
   heroName: string;
@@ -92,8 +92,13 @@ export function HeroMapPicks({
   const images = Object.fromEntries(
     (allMaps.data ?? []).map((map) => [map.slug, map.imageUrl]),
   );
+  const [expanded, setExpanded] = useState(false);
   const picks = mapPicks(maps);
   const best = view === "best";
+  const ranked = mapsByGain(maps);
+  const fullList = best ? ranked : [...ranked].reverse();
+  const shortList = best ? picks.best : picks.worst;
+  const canExpand = fullList.length > shortList.length;
 
   if (maps.length === 0) {
     return null;
@@ -128,12 +133,22 @@ export function HeroMapPicks({
                 ? "Best compared with the hero's average"
                 : "Weakest compared with the hero's average"
             }
-            entries={best ? picks.best : picks.worst}
+            entries={expanded ? fullList : shortList}
             linkSuffix={linkSuffix}
             images={images}
           />
         </section>
       </div>
+      {canExpand && (
+        <button
+          type="button"
+          className="button button--ghost"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {expanded ? "Show fewer maps" : `Show all ${fullList.length} maps`}
+        </button>
+      )}
       <p className="muted footnote">
         Each map shows the win rate of {heroName} there, how often the hero is
         picked and, as the coloured number, how much the win rate on that map
