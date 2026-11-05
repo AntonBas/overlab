@@ -76,9 +76,43 @@ describe("HeroMapPicks", () => {
       screen.getByRole("heading", { name: "Worst maps for Ana" }),
     ).toBeInTheDocument();
     expect(
-      within(drop).getByText("Biggest drop on the map"),
+      within(drop).getByText("Weakest compared with the hero's average"),
     ).toBeInTheDocument();
     expect(within(drop).getByText("Rialto")).toBeInTheDocument();
+  });
+
+  it("lists the weakest maps even when the hero is above average everywhere", async () => {
+    const allAbove = [
+      entry({
+        mapSlug: "busan",
+        mapName: "Busan",
+        winRate: 60,
+        winRateDelta: 5,
+      }),
+      entry({
+        mapSlug: "rialto",
+        mapName: "Rialto",
+        winRate: 58,
+        winRateDelta: 2,
+      }),
+    ];
+    renderWithRouter(
+      <HeroMapPicks
+        heroSlug="ana"
+        heroName="Ana"
+        maps={allAbove}
+        linkSuffix=""
+      />,
+    );
+    await screen.findByRole("region", { name: "by gain" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
+
+    expect(
+      within(screen.getByRole("region", { name: "by gain" })).getByText(
+        "Rialto",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("keeps the quick play query in the links", async () => {
@@ -112,7 +146,6 @@ describe("HeroMapPicks", () => {
       />,
     );
     await screen.findByRole("region", { name: "by gain" });
-    await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
 
     expect(
       container.querySelector('img[src="/images/map-placeholder.svg"]'),

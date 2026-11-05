@@ -1,17 +1,15 @@
 import type { HeroMapStat } from "../../../types/api";
-import { rankPicks } from "../../stats/utils/ranking";
+import { rankRelative } from "../../stats/utils/ranking";
 
 const LIST_SIZE = 5;
 
 export interface MapPicks {
-  gainers: HeroMapStat[];
-  strongest: HeroMapStat[];
-  droppers: HeroMapStat[];
-  weakest: HeroMapStat[];
+  best: HeroMapStat[];
+  worst: HeroMapStat[];
 }
 
 export function mapPicks(maps: HeroMapStat[]): MapPicks {
-  return rankPicks(
+  return rankRelative(
     maps.filter((entry) => entry.mapSlug !== null),
     LIST_SIZE,
   );

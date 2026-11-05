@@ -57,3 +57,22 @@ export function rankPicks<T extends WinRateEntry & GainEntry>(
     weakest: byWinRate.slice(-size).reverse(),
   };
 }
+
+export function rankRelative<T extends GainEntry>(entries: T[], size: number) {
+  const ranked = entries
+    .flatMap((entry) => {
+      const gain = weightedGain(entry);
+      return gain === null ? [] : [{ entry, gain }];
+    })
+    .sort((first, second) => second.gain - first.gain);
+  const limit = Math.min(size, Math.ceil(ranked.length / 2));
+  const best = ranked.slice(0, limit);
+  const worst = [...ranked]
+    .reverse()
+    .slice(0, limit)
+    .filter((change) => !best.includes(change));
+  return {
+    best: best.map((change) => change.entry),
+    worst: worst.map((change) => change.entry),
+  };
+}

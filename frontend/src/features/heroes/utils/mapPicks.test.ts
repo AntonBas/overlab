@@ -22,26 +22,26 @@ function slugs(entries: HeroMapStat[]): (string | null)[] {
 }
 
 describe("mapPicks", () => {
-  it("lists the maps where the hero gains most and where the win rate is highest", () => {
+  it("lists the best and the weakest maps compared with the hero's average", () => {
     const picks = mapPicks([
       entry({ mapSlug: "a", winRate: 56, winRateDelta: -1 }),
       entry({ mapSlug: "b", winRate: 46, winRateDelta: 3 }),
       entry({ mapSlug: "c", winRate: 50, winRateDelta: 0.5 }),
+      entry({ mapSlug: "d", winRate: 40, winRateDelta: -4 }),
     ]);
 
-    expect(slugs(picks.gainers)).toEqual(["b", "c"]);
-    expect(picks.strongest[0].mapSlug).toBe("a");
+    expect(slugs(picks.best)).toEqual(["b", "c"]);
+    expect(slugs(picks.worst)).toEqual(["d", "a"]);
   });
 
-  it("lists the maps where the hero drops most and where the win rate is lowest", () => {
+  it("still lists the weakest maps when the hero is above average on every map", () => {
     const picks = mapPicks([
-      entry({ mapSlug: "a", winRate: 44, winRateDelta: 1 }),
-      entry({ mapSlug: "b", winRate: 52, winRateDelta: -4 }),
-      entry({ mapSlug: "c", winRate: 55, winRateDelta: -1 }),
+      entry({ mapSlug: "a", winRate: 60, winRateDelta: 5 }),
+      entry({ mapSlug: "b", winRate: 58, winRateDelta: 2 }),
     ]);
 
-    expect(slugs(picks.droppers)).toEqual(["b", "c"]);
-    expect(picks.weakest[0].mapSlug).toBe("a");
+    expect(slugs(picks.best)).toEqual(["a"]);
+    expect(slugs(picks.worst)).toEqual(["b"]);
   });
 
   it("ignores the overall row that has no map", () => {
@@ -50,14 +50,14 @@ describe("mapPicks", () => {
       entry({ mapSlug: "a" }),
     ]);
 
-    expect(slugs(picks.strongest)).toEqual(["a"]);
+    expect(slugs(picks.best)).toEqual(["a"]);
   });
 
   it("shows at most five maps per list", () => {
-    const maps = Array.from({ length: 8 }, (_, index) =>
+    const maps = Array.from({ length: 12 }, (_, index) =>
       entry({ mapSlug: `m${index}`, winRateDelta: index + 1 }),
     );
 
-    expect(mapPicks(maps).gainers).toHaveLength(5);
+    expect(mapPicks(maps).best).toHaveLength(5);
   });
 });
