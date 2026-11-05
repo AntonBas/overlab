@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -182,14 +182,6 @@ export function HeroPage() {
             (matchup) => matchup.heroSlug === slug,
           )}
         />
-      )}
-      {(counters.data?.counters.length ?? 0) +
-        (counters.data?.counteredBy.length ?? 0) +
-        (synergies.data?.length ?? 0) >
-        0 && (
-        <p>
-          <Link to="/counters">Counters and synergies of all heroes</Link>
-        </p>
       )}
       {(counters.data?.counters.length ?? 0) +
         (counters.data?.counteredBy.length ?? 0) +
