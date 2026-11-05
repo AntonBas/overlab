@@ -12,6 +12,7 @@ import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { MAP_PLACEHOLDER_URL, MODE_DESCRIPTIONS } from "../../../utils/modes";
 import { matchesName } from "../../../utils/search";
@@ -48,6 +49,11 @@ export function MapPage() {
   );
   const linkSuffix = isQuickPlay(filters) ? "?queue=quick_play" : "";
   usePageTitle(map.data?.name);
+  usePageDescription(
+    map.data
+      ? `${map.data.name}: win, pick and ban rates of every Overwatch 2 hero on this map.`
+      : null,
+  );
 
   if (map.loading) {
     return <Spinner />;

@@ -17,6 +17,22 @@
 		reverse_proxy backend:8080
 	}
 
+	@sitemap path /sitemap.xml
+	handle @sitemap {
+		rewrite * /api/sitemap.xml
+		reverse_proxy backend:8080
+	}
+
+	@robots path /robots.txt
+	handle @robots {
+		header Content-Type text/plain
+		respond <<ROBOTS
+			User-agent: *
+			Disallow: /admin
+			Sitemap: {scheme}://{hostport}/sitemap.xml
+			ROBOTS 200
+	}
+
 	@mapImages path /media/maps/*
 	handle @mapImages {
 		reverse_proxy backend:8080 {
