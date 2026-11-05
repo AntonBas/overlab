@@ -199,9 +199,10 @@ public class RatesCollectorService {
         }
         RatesFetch usable = fetched.notModified() ? client.fetch(queue, platform, region, tier, mapSlug) : fetched;
         validator.validate(usable.rates());
-        validator.validateBanRates(queue, usable.rates());
+        List<BlizzardRatesResponse.HeroRate> heroesWithData = validator.withoutEmptyEntries(usable.rates());
+        validator.validateBanRates(queue, heroesWithData);
         SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
-                region, tier, mapSlug, usable.rates(), usable.etag());
+                region, tier, mapSlug, heroesWithData, usable.etag());
         if (!outcome.changed()) {
             metrics.recordUnchangedSnapshot();
         }
