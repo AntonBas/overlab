@@ -1,5 +1,8 @@
 import clsx from "clsx";
+import { useId } from "react";
+import { createPortal } from "react-dom";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
+import { useFloatingTip } from "../../../hooks/useFloatingTip";
 import type {
   Perk,
   PerkPosition,
@@ -79,6 +82,10 @@ function CompactPerkTile({
   detailed: boolean;
 }) {
   const position = positionOf(perk);
+  const tipId = useId();
+  const { open, style, triggerRef, tipRef, triggerProps } = useFloatingTip();
+  const hasTip =
+    !detailed && Boolean(perk.description || perk.recommendationNote);
   return (
     <li
       className={clsx(
@@ -88,32 +95,87 @@ function CompactPerkTile({
         { "perk-tile--detailed": detailed },
       )}
     >
-      <Thumbnail
-        url={perk.iconUrl}
-        width={44}
-        height={44}
-        className="perk-tile__icon"
-      />
-      <span className="perk-tile__body">
-        <span className="perk-tile__heading">
-          <strong>{perk.name}</strong>
-          <span
-            className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
-          >
-            {RECOMMENDATION_LABELS[perk.recommendation]}
+      <span
+        className="perk-tile__trigger"
+        ref={triggerRef}
+        tabIndex={hasTip ? 0 : undefined}
+        aria-describedby={hasTip ? tipId : undefined}
+        {...(hasTip ? triggerProps : {})}
+      >
+        <Thumbnail
+          url={perk.iconUrl}
+          width={44}
+          height={44}
+          className="perk-tile__icon"
+        />
+        <span className="perk-tile__body">
+          <span className="perk-tile__heading">
+            <strong>{perk.name}</strong>
+            <span
+              className={clsx(
+                "tag",
+                `tag--${perk.recommendation.toLowerCase()}`,
+              )}
+            >
+              {RECOMMENDATION_LABELS[perk.recommendation]}
+            </span>
           </span>
+          {detailed && perk.description && (
+            <span className="perk-tile__description muted">
+              {perk.description}
+            </span>
+          )}
+          {detailed && perk.recommendationNote && (
+            <span className="perk-tile__note">
+              <AbilityText text={perk.recommendationNote} />
+            </span>
+          )}
         </span>
-        {detailed && perk.description && (
-          <span className="perk-tile__description muted">
-            {perk.description}
-          </span>
-        )}
-        {detailed && perk.recommendationNote && (
-          <span className="perk-tile__note">
-            <AbilityText text={perk.recommendationNote} />
-          </span>
-        )}
       </span>
+      {hasTip &&
+        open &&
+        createPortal(
+          <span
+            id={tipId}
+            role="tooltip"
+            ref={tipRef}
+            className={clsx(
+              "perk-tip",
+              `perk-tip--${perk.recommendation.toLowerCase()}`,
+            )}
+            style={style}
+          >
+            <span className="perk-tip__header">
+              <Thumbnail
+                url={perk.iconUrl}
+                width={36}
+                height={36}
+                className="perk-tip__icon"
+              />
+              <span className="perk-tip__title">
+                <strong>{perk.name}</strong>
+                <span
+                  className={clsx(
+                    "tag",
+                    `tag--${perk.recommendation.toLowerCase()}`,
+                  )}
+                >
+                  {RECOMMENDATION_LABELS[perk.recommendation]}
+                </span>
+              </span>
+            </span>
+            {perk.description && (
+              <span className="perk-tip__text">{perk.description}</span>
+            )}
+            {perk.recommendationNote && (
+              <span className="perk-tip__note">
+                <span className="perk-tip__label">Why this rating</span>
+                <AbilityText text={perk.recommendationNote} />
+              </span>
+            )}
+          </span>,
+          document.body,
+        )}
     </li>
   );
 }
