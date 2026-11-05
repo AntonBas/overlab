@@ -184,20 +184,8 @@ class StatsQueriesIntegrationTest {
     }
 
     @Test
-    void historyIsExtendedToTheLastCheckWhenTheNumbersDidNotChange() {
-        Instant checked = NEW.plus(Duration.ofDays(3));
-        saveCheck(checked);
-
-        HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
-                NEW.plus(Duration.ofDays(5)));
-
-        assertThat(history.points()).extracting(point -> point.capturedAt()).containsExactly(OLD, NEW, checked);
-        assertThat(history.points().get(2).winRate()).isEqualByComparingTo("47.00");
-    }
-
-    @Test
-    void historyIsNotExtendedWithinTheDayOfTheLastSnapshot() {
-        saveCheck(NEW.plus(Duration.ofHours(5)));
+    void historyContainsOnlySavedSnapshotsEvenWhenLaterChecksFoundNoChange() {
+        saveCheck(NEW.plus(Duration.ofDays(3)));
 
         HeroHistoryDto history = historyService.getHeroHistory("ana-test", allMaps(), OLD.minus(Duration.ofDays(1)),
                 NEW.plus(Duration.ofDays(5)));
