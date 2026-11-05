@@ -116,8 +116,12 @@ export function HeroMapPicks({
       <div className="highlights">
         <section className="highlight" aria-label="by gain">
           <MapList
-            title={best ? "Biggest gain on the map" : "Biggest drop on the map"}
-            entries={best ? picks.gainers : picks.droppers}
+            title={
+              best
+                ? "Best compared with the hero's average"
+                : "Weakest compared with the hero's average"
+            }
+            entries={best ? picks.best : picks.worst}
             heroSlug={heroSlug}
             linkSuffix={linkSuffix}
             images={images}
