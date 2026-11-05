@@ -1,4 +1,3 @@
-import { heroOnMapPath } from "../../heroes/utils/heroOnMapPath";
 import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,7 +15,6 @@ interface StatsTableProps {
   direction: SortDirection;
   onSort: (sort: StatsSort) => void;
   heroLinkSuffix?: string;
-  mapSlug?: string;
 }
 
 interface Column {
@@ -32,7 +30,6 @@ export function StatsTable({
   direction,
   onSort,
   heroLinkSuffix = "",
-  mapSlug,
 }: StatsTableProps) {
   const columns: Column[] = [
     { sort: "WIN_RATE", label: "Win rate" },
@@ -98,13 +95,7 @@ export function StatsTable({
                 <span className="table__hero">
                   <HeroPortrait name={hero.heroName} url={hero.portraitUrl} />
                   <RoleBadge role={hero.role} compact />
-                  <Link
-                    to={
-                      mapSlug
-                        ? heroOnMapPath(hero.heroSlug, mapSlug, heroLinkSuffix)
-                        : `/heroes/${hero.heroSlug}${heroLinkSuffix}`
-                    }
-                  >
+                  <Link to={`/heroes/${hero.heroSlug}${heroLinkSuffix}`}>
                     {hero.heroName}
                   </Link>
                 </span>

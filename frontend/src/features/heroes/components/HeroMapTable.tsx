@@ -1,10 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { RateBar } from "../../../components/ui/RateBar";
-import { heroOnMapPath } from "../utils/heroOnMapPath";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
+import { useFetch } from "../../../hooks/useFetch";
+import { mapPagePath } from "../utils/mapPagePath";
 import type { HeroMapStat } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
+import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
+import { fetchMaps } from "../../maps/api/mapsApi";
 
 type MapSort = "WIN_RATE" | "PICK_RATE" | "NAME";
 
@@ -27,14 +32,16 @@ function compare(sort: MapSort, first: HeroMapStat, second: HeroMapStat) {
 
 export function HeroMapTable({
   maps,
-  heroSlug,
   linkSuffix,
 }: {
   maps: HeroMapStat[];
-  heroSlug: string;
   linkSuffix: string;
 }) {
   const [sort, setSort] = useState<MapSort>("WIN_RATE");
+  const allMaps = useFetch(fetchMaps, []);
+  const images = Object.fromEntries(
+    (allMaps.data ?? []).map((map) => [map.slug, map.imageUrl]),
+  );
   const sorted = useMemo(
     () => [...maps].sort((first, second) => compare(sort, first, second)),
     [maps, sort],
@@ -69,17 +76,19 @@ export function HeroMapTable({
               <tr key={map.mapSlug}>
                 <th scope="row">
                   <span className="table__hero">
-                    <Link
-                      to={heroOnMapPath(
-                        heroSlug,
-                        map.mapSlug ?? "",
-                        linkSuffix,
-                      )}
-                    >
+                    <Thumbnail
+                      url={images[map.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL}
+                      width={64}
+                      height={36}
+                    />
+                    <Link to={mapPagePath(map.mapSlug ?? "", linkSuffix)}>
                       {map.mapName}
                     </Link>
                     {map.mode && (
-                      <span className="muted">{MAP_MODE_LABELS[map.mode]}</span>
+                      <span className="muted table__mode">
+                        <ModeIcon mode={map.mode} />
+                        {MAP_MODE_LABELS[map.mode]}
+                      </span>
                     )}
                   </span>
                 </th>
