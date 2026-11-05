@@ -61,6 +61,9 @@ describe("LineChart", () => {
       />,
     );
     expect(container.querySelectorAll(".chart__marker")).toHaveLength(1);
+    expect(container.querySelector(".chart__marker-label")).toHaveTextContent(
+      "Patch inside",
+    );
   });
 
   it("renders nothing without points", () => {

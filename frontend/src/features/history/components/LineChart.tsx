@@ -11,6 +11,7 @@ import {
 export interface ChartMarker {
   time: number;
   label: string;
+  detail?: string | null;
 }
 
 interface LineChartProps {
@@ -25,6 +26,8 @@ const SIZE: ChartSize = {
   height: 180,
   padding: { top: 12, right: 12, bottom: 24, left: 44 },
 };
+
+const MARKER_LABEL_SPACING = 110;
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -180,8 +183,15 @@ export function LineChart({
             >
               {formatDate(geometry.maxTime)}
             </text>
-            {visibleMarkers.map((marker) => {
+            {visibleMarkers.map((marker, index) => {
               const x = geometry.xOf(marker.time);
+              const previousX =
+                index > 0
+                  ? geometry.xOf(visibleMarkers[index - 1].time)
+                  : Number.NEGATIVE_INFINITY;
+              const showLabel = x - previousX >= MARKER_LABEL_SPACING;
+              const nearRightEdge =
+                x > SIZE.width - SIZE.padding.right - MARKER_LABEL_SPACING;
               return (
                 <g key={`${marker.time}-${marker.label}`}>
                   <line
@@ -191,7 +201,17 @@ export function LineChart({
                     y2={bottom}
                     className="chart__marker"
                   />
-                  <title>{marker.label}</title>
+                  {showLabel && (
+                    <text
+                      x={nearRightEdge ? x - 4 : x + 4}
+                      y={SIZE.padding.top + 10}
+                      textAnchor={nearRightEdge ? "end" : "start"}
+                      className="chart__marker-label"
+                    >
+                      {marker.label}
+                    </text>
+                  )}
+                  <title>{marker.detail ?? marker.label}</title>
                 </g>
               );
             })}

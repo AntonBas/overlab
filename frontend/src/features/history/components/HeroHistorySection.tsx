@@ -32,6 +32,14 @@ const METRICS: MetricDefinition[] = [
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
 
+const MARKER_LABEL_LENGTH = 24;
+
+function shorten(text: string): string {
+  return text.length > MARKER_LABEL_LENGTH
+    ? `${text.slice(0, MARKER_LABEL_LENGTH - 1).trimEnd()}…`
+    : text;
+}
+
 export interface CurrentStats {
   winRate: number;
   pickRate: number;
@@ -96,7 +104,8 @@ export function HeroHistorySection({
   });
   const markers = (patches.data ?? []).map((patch) => ({
     time: Date.parse(patch.releasedAt),
-    label: `Patch ${patch.version}`,
+    label: shorten(patch.title ?? `Patch ${patch.version}`),
+    detail: patch.title ? `${patch.title} (${patch.version})` : null,
   }));
   const enough = series.length >= 2;
 

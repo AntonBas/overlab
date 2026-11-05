@@ -1101,6 +1101,11 @@ select:disabled {
   stroke-dasharray: 4 4;
 }
 
+.chart__marker-label {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
 .chart__label {
   fill: var(--muted);
   font-size: 11px;
