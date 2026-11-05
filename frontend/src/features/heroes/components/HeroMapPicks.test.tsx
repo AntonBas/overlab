@@ -140,4 +140,29 @@ describe("HeroMapPicks", () => {
       container.querySelector('img[src="/images/map-placeholder.svg"]'),
     ).not.toBeNull();
   });
+
+  it("expands to every map, worst first in the worst view", async () => {
+    const many = ["a", "b", "c", "d", "e", "f", "g", "h"].map((slug, index) =>
+      entry({
+        mapSlug: slug,
+        mapName: `Map ${slug}`,
+        winRateDelta: 4 - index,
+      }),
+    );
+    renderWithRouter(<HeroMapPicks heroName="Ana" maps={many} linkSuffix="" />);
+    const list = await screen.findByRole("region", { name: "by gain" });
+    expect(within(list).getAllByRole("link")).toHaveLength(4);
+
+    await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Show all 8 maps" }),
+    );
+
+    const names = within(screen.getByRole("region", { name: "by gain" }))
+      .getAllByRole("link")
+      .map((link) => link.textContent);
+    expect(names).toHaveLength(8);
+    expect(names[0]).toContain("Map h");
+    expect(names[7]).toContain("Map a");
+  });
 });

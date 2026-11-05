@@ -3036,3 +3036,45 @@ input[type="range"] {
 .relation-tabs__chips--struggles {
   --column-color: var(--bad);
 }
+
+.section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 8px 0;
+  background: var(--bg);
+}
+
+.section-nav__link {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.section-nav__link:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.section-nav__link--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+#hero-statistics,
+#hero-counters,
+#hero-abilities,
+#hero-perks,
+#hero-maps,
+#hero-spots {
+  scroll-margin-top: 56px;
+}
