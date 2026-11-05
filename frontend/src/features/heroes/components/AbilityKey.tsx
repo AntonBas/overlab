@@ -6,6 +6,7 @@ import {
   useControlScheme,
 } from "../context/controlSchemeContext";
 import { ABILITY_CONTROL_LABELS } from "../utils/abilityControls";
+import { ControlGlyph } from "./ControlGlyph";
 
 export function AbilityKey({
   control,
@@ -28,7 +29,11 @@ export function AbilityKey({
       className={clsx("ability-key", `ability-key--${control.toLowerCase()}`)}
       title={title}
     >
-      {key && <kbd className="ability-key__cap">{key}</kbd>}
+      {key && (
+        <kbd className="ability-key__cap">
+          <ControlGlyph scheme={scheme} name={key} />
+        </kbd>
+      )}
       {(showLabel || !key) && (
         <span className="ability-key__label">{label}</span>
       )}
