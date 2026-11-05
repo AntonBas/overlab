@@ -3023,3 +3023,16 @@ input[type="range"] {
 .section__header h2 {
   margin: 0;
 }
+
+.relation-tabs__chips {
+  margin-bottom: 12px;
+  --column-color: var(--link);
+}
+
+.relation-tabs__chips--strong {
+  --column-color: var(--good);
+}
+
+.relation-tabs__chips--struggles {
+  --column-color: var(--bad);
+}

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import type { RelatedHero } from "../../../types/api";
+import type { HeroCategory, RelatedHero } from "../../../types/api";
 import { RelationTabs } from "./RelationTabs";
 
 function related(slug: string, name: string): RelatedHero {
@@ -91,5 +91,56 @@ describe("RelationTabs", () => {
     expect(
       screen.getByRole("tab", { name: /Works well with/ }),
     ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("shows category chips above the hero cards and counts them", async () => {
+    const flying: HeroCategory = {
+      slug: "flying",
+      name: "Flying",
+      description: null,
+      heroes: [
+        { slug: "pharah", name: "Pharah", role: "DAMAGE", portraitUrl: null },
+      ],
+    };
+    renderTabs({
+      categories: [flying],
+      categoryMatchups: [
+        {
+          heroSlug: "dva",
+          categorySlug: "flying",
+          type: "WEAK_AGAINST",
+          strength: 2,
+          note: null,
+        },
+      ],
+    });
+
+    expect(screen.getByRole("button", { name: /Flying/ })).toBeInTheDocument();
+    expect(screen.getByText("Zarya")).toBeInTheDocument();
+    expect(
+      screen.getByRole("tab", { name: /Struggles against 3/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens a tab that only has a category chip", () => {
+    renderTabs({
+      strongAgainst: [],
+      counteredBy: [],
+      synergies: [],
+      categories: [
+        { slug: "beam", name: "Beam", description: null, heroes: [] },
+      ],
+      categoryMatchups: [
+        {
+          heroSlug: "dva",
+          categorySlug: "beam",
+          type: "WEAK_AGAINST",
+          strength: 3,
+          note: null,
+        },
+      ],
+    });
+
+    expect(screen.getByRole("button", { name: /Beam/ })).toBeInTheDocument();
   });
 });
