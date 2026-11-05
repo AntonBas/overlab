@@ -1,7 +1,13 @@
 import clsx from "clsx";
 import { useId, type KeyboardEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { RelatedHero } from "../../../types/api";
+import type {
+  CategoryMatchup,
+  CategoryMatchupType,
+  HeroCategory,
+  RelatedHero,
+} from "../../../types/api";
+import { CategoryChip } from "./CategoryChip";
 import { RelatedHeroes } from "./RelatedHeroes";
 
 type RelationTabId = "strong" | "struggles" | "synergies";
@@ -10,13 +16,22 @@ interface RelationTab {
   id: RelationTabId;
   label: string;
   heroes: RelatedHero[];
+  matchups: CategoryMatchup[];
 }
 
 interface RelationTabsProps {
   strongAgainst: RelatedHero[];
   counteredBy: RelatedHero[];
   synergies: RelatedHero[];
+  categoryMatchups?: CategoryMatchup[];
+  categories?: HeroCategory[];
 }
+
+const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
+  strong: "STRONG_AGAINST",
+  struggles: "WEAK_AGAINST",
+  synergies: "WORKS_WITH",
+};
 
 const PREFERRED_TAB: RelationTabId = "struggles";
 
@@ -24,15 +39,43 @@ export function RelationTabs({
   strongAgainst,
   counteredBy,
   synergies,
+  categoryMatchups = [],
+  categories = [],
 }: RelationTabsProps) {
   const baseId = useId();
   const [searchParams, setSearchParams] = useSearchParams();
+  const categoriesBySlug = new Map(
+    categories.map((category) => [category.slug, category]),
+  );
+  const matchupsOf = (id: RelationTabId) =>
+    categoryMatchups.filter(
+      (matchup) =>
+        matchup.type === MATCHUP_TYPES[id] &&
+        categoriesBySlug.has(matchup.categorySlug),
+    );
   const allTabs: RelationTab[] = [
-    { id: "strong", label: "Strong against", heroes: strongAgainst },
-    { id: "struggles", label: "Struggles against", heroes: counteredBy },
-    { id: "synergies", label: "Works well with", heroes: synergies },
+    {
+      id: "strong",
+      label: "Strong against",
+      heroes: strongAgainst,
+      matchups: matchupsOf("strong"),
+    },
+    {
+      id: "struggles",
+      label: "Struggles against",
+      heroes: counteredBy,
+      matchups: matchupsOf("struggles"),
+    },
+    {
+      id: "synergies",
+      label: "Works well with",
+      heroes: synergies,
+      matchups: matchupsOf("synergies"),
+    },
   ];
-  const tabs = allTabs.filter((tab) => tab.heroes.length > 0);
+  const tabs = allTabs.filter(
+    (tab) => tab.heroes.length + tab.matchups.length > 0,
+  );
 
   if (tabs.length === 0) {
     return null;
@@ -93,7 +136,9 @@ export function RelationTabs({
             }}
           >
             {tab.label}{" "}
-            <span className="segmented__count">{tab.heroes.length}</span>
+            <span className="segmented__count">
+              {tab.heroes.length + tab.matchups.length}
+            </span>
           </button>
         ))}
       </div>
@@ -103,7 +148,27 @@ export function RelationTabs({
         aria-labelledby={`${baseId}-tab-${active.id}`}
         className="relation-tabs__panel"
       >
-        <RelatedHeroes heroes={active.heroes} />
+        {active.matchups.length > 0 && (
+          <ul
+            className={clsx(
+              "matchup__list",
+              "relation-tabs__chips",
+              `relation-tabs__chips--${active.id}`,
+            )}
+          >
+            {active.matchups.map((matchup) => {
+              const category = categoriesBySlug.get(matchup.categorySlug);
+              return category ? (
+                <CategoryChip
+                  key={matchup.categorySlug}
+                  category={category}
+                  matchup={matchup}
+                />
+              ) : null;
+            })}
+          </ul>
+        )}
+        {active.heroes.length > 0 && <RelatedHeroes heroes={active.heroes} />}
       </div>
     </section>
   );

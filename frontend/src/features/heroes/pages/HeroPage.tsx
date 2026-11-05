@@ -23,6 +23,7 @@ import { fetchHeroMapStats } from "../../stats/api/statsApi";
 import {
   fetchCounters,
   fetchHero,
+  fetchHeroCategories,
   fetchPerks,
   fetchHeroAbilities,
   fetchSynergies,
@@ -60,6 +61,7 @@ export function HeroPage() {
   const perks = useFetch(() => fetchPerks(slug), [slug]);
   const counters = useFetch(() => fetchCounters(slug), [slug]);
   const synergies = useFetch(() => fetchSynergies(slug), [slug]);
+  const categories = useFetch(fetchHeroCategories, []);
   const abilities = useFetch(() => fetchHeroAbilities(slug), [slug]);
   const guides = useFetch(() => fetchGuides({ hero: slug }), [slug]);
   usePageTitle(hero.data?.name);
@@ -175,6 +177,10 @@ export function HeroPage() {
           strongAgainst={counters.data.counters}
           counteredBy={counters.data.counteredBy}
           synergies={synergies.data}
+          categories={categories.data?.categories}
+          categoryMatchups={categories.data?.matchups.filter(
+            (matchup) => matchup.heroSlug === slug,
+          )}
         />
       )}
       {(counters.data?.counters.length ?? 0) +

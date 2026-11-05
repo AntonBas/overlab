@@ -15,7 +15,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | Address | Page |
 |---|---|
 | `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |
-| `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
+| `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies (with category chips above the hero cards) and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
 | `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
