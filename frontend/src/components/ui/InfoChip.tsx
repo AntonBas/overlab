@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useId, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useFloatingTip } from "../../hooks/useFloatingTip";
 
 interface InfoChipProps {
@@ -23,17 +24,20 @@ export function InfoChip({ description, children }: InfoChipProps) {
       >
         {children}
       </button>
-      <span
-        id={tipId}
-        role="tooltip"
-        ref={tipRef}
-        className={clsx("info-chip__tip", {
-          "info-chip__tip--open": open,
-        })}
-        style={style}
-      >
-        {description}
-      </span>
+      {createPortal(
+        <span
+          id={tipId}
+          role="tooltip"
+          ref={tipRef}
+          className={clsx("info-chip__tip", {
+            "info-chip__tip--open": open,
+          })}
+          style={style}
+        >
+          {description}
+        </span>,
+        document.body,
+      )}
     </span>
   );
 }

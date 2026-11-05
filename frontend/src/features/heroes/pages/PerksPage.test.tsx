@@ -136,8 +136,14 @@ describe("PerksPage", () => {
     await screen.findByText("Sharp Eye");
     expect(screen.queryByText("Better aim")).not.toBeInTheDocument();
 
+    fireEvent.mouseEnter(
+      screen.getByText("Sharp Eye").closest(".perk-tile__trigger") as Element,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Better aim");
+
     fireEvent.click(screen.getByRole("button", { name: "Detailed" }));
 
+    expect(screen.queryByRole("tooltip")).toBeNull();
     expect(screen.getByText("Better aim")).toBeInTheDocument();
     expect(screen.getByText("Take it on ranged maps")).toBeInTheDocument();
   });
