@@ -24,17 +24,17 @@ describe("AbilityKey", () => {
 
   it("shows console buttons on Xbox and PlayStation", () => {
     const { unmount } = renderKey("XBOX", "ULTIMATE");
-    expect(screen.getByText("LB + RB")).toBeInTheDocument();
+    expect(screen.getByText("Y")).toBeInTheDocument();
     unmount();
 
     renderKey("PLAYSTATION", "ULTIMATE");
-    expect(screen.getByText("L1 + R1")).toBeInTheDocument();
+    expect(screen.getByText("Triangle")).toBeInTheDocument();
   });
 
   it("shows Nintendo Switch buttons", () => {
     renderKey("SWITCH", "ULTIMATE");
 
-    expect(screen.getByText("L + R")).toBeInTheDocument();
+    expect(screen.getByText("X")).toBeInTheDocument();
   });
 
   it("labels a passive without a key", () => {
