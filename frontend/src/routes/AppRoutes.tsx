@@ -4,7 +4,8 @@ import { Layout } from "../components/layout/Layout";
 import { GuidePage } from "../features/guides/pages/GuidePage";
 import { HeroPage } from "../features/heroes/pages/HeroPage";
 import { HeroesPage } from "../features/heroes/pages/HeroesPage";
-import { HeroCountersPage } from "../features/heroes/pages/HeroCountersPage";
+import { CountersPage } from "../features/heroes/pages/CountersPage";
+import { HeroCountersRedirect } from "../features/heroes/pages/HeroCountersRedirect";
 import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
 import { PerksPage } from "../features/heroes/pages/PerksPage";
 import { HeroPerksRedirect } from "../features/heroes/pages/HeroPerksRedirect";
@@ -79,6 +80,11 @@ const PerksAdminPage = lazy(() =>
     default: module.PerksAdminPage,
   })),
 );
+const CategoriesAdminPage = lazy(() =>
+  import("../features/admin/pages/CategoriesAdminPage").then((module) => ({
+    default: module.CategoriesAdminPage,
+  })),
+);
 const RelationsAdminPage = lazy(() =>
   import("../features/admin/pages/RelationsAdminPage").then((module) => ({
     default: module.RelationsAdminPage,
@@ -123,7 +129,11 @@ export function AppRoutes() {
         <Route path="stats" element={<StatsPage />} />
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
-        <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
+        <Route path="counters" element={<CountersPage />} />
+        <Route
+          path="heroes/:slug/counters"
+          element={<HeroCountersRedirect />}
+        />
         <Route path="perks" element={<PerksPage />} />
         <Route path="heroes/:slug/perks" element={<HeroPerksRedirect />} />
         <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
@@ -152,6 +162,7 @@ export function AppRoutes() {
           <Route path="abilities" element={<AbilitiesAdminPage />} />
           <Route path="perks" element={<PerksAdminPage />} />
           <Route path="relations" element={<RelationsAdminPage />} />
+          <Route path="categories" element={<CategoriesAdminPage />} />
           <Route path="guides" element={<GuidesAdminPage />} />
           <Route path="patches" element={<PatchesAdminPage />} />
           <Route path="maps" element={<MapsAdminPage />} />

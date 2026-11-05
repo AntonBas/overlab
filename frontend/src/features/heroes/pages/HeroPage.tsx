@@ -182,9 +182,7 @@ export function HeroPage() {
         (synergies.data?.length ?? 0) >
         0 && (
         <p>
-          <Link to={`/heroes/${slug}/counters`}>
-            All counters and synergies
-          </Link>
+          <Link to="/counters">Counters and synergies of all heroes</Link>
         </p>
       )}
       {(counters.data?.counters.length ?? 0) +

@@ -3,6 +3,7 @@ export const ADMIN_SECTIONS = [
   { to: "/admin/abilities", label: "Abilities" },
   { to: "/admin/perks", label: "Perks" },
   { to: "/admin/relations", label: "Counters and synergies" },
+  { to: "/admin/categories", label: "Hero categories" },
   { to: "/admin/guides", label: "Guides" },
   { to: "/admin/patches", label: "Patches" },
   { to: "/admin/maps", label: "Maps" },

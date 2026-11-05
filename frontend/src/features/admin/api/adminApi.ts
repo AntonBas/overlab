@@ -8,10 +8,14 @@ import type {
 } from "../../../types/api";
 import type {
   AdminAbility,
+  AdminCategory,
+  AdminCategoryMatchup,
   AdminHero,
   AdminUser,
   AuditEntry,
   AuditFilters,
+  CategoryMatchupPayload,
+  CategoryPayload,
   CollectorJob,
   CollectorRun,
   GuidePayload,
@@ -125,6 +129,68 @@ export async function updateRelation(
 
 export async function deleteRelation(id: number): Promise<void> {
   await api.delete(`/admin/hero-relations/${id}`);
+}
+
+export async function fetchCategories(): Promise<AdminCategory[]> {
+  const { data } = await api.get<AdminCategory[]>("/admin/hero-categories");
+  return data;
+}
+
+export async function createCategory(
+  payload: CategoryPayload,
+): Promise<AdminCategory> {
+  const { data } = await api.post<AdminCategory>(
+    "/admin/hero-categories",
+    payload,
+  );
+  return data;
+}
+
+export async function updateCategory(
+  id: number,
+  payload: CategoryPayload,
+): Promise<AdminCategory> {
+  const { data } = await api.put<AdminCategory>(
+    `/admin/hero-categories/${id}`,
+    payload,
+  );
+  return data;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await api.delete(`/admin/hero-categories/${id}`);
+}
+
+export async function fetchCategoryMatchups(): Promise<AdminCategoryMatchup[]> {
+  const { data } = await api.get<AdminCategoryMatchup[]>(
+    "/admin/hero-category-relations",
+  );
+  return data;
+}
+
+export async function createCategoryMatchup(
+  payload: CategoryMatchupPayload,
+): Promise<AdminCategoryMatchup> {
+  const { data } = await api.post<AdminCategoryMatchup>(
+    "/admin/hero-category-relations",
+    payload,
+  );
+  return data;
+}
+
+export async function updateCategoryMatchup(
+  id: number,
+  payload: CategoryMatchupPayload,
+): Promise<AdminCategoryMatchup> {
+  const { data } = await api.put<AdminCategoryMatchup>(
+    `/admin/hero-category-relations/${id}`,
+    payload,
+  );
+  return data;
+}
+
+export async function deleteCategoryMatchup(id: number): Promise<void> {
+  await api.delete(`/admin/hero-category-relations/${id}`);
 }
 
 export async function fetchAdminGuides(): Promise<Guide[]> {

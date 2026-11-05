@@ -9,11 +9,15 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
+import gg.overlab.backend.hero.relation.dto.HeroRelationsDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
 import gg.overlab.backend.hero.relation.dto.RelationDto;
 import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +62,38 @@ public class HeroRelationService {
         relationRepository.findAllByRelatedHeroSlugAndType(heroSlug, RelationType.SYNERGY)
                 .forEach(relation -> keepStronger(bySlug, related(relation.getHero(), relation)));
         return bySlug.values().stream().sorted(BY_STRENGTH_THEN_NAME).toList();
+    }
+
+    @Cacheable(value = CacheNames.CONTENT, key = "'relations:all'")
+    @Transactional(readOnly = true)
+    public List<HeroRelationsDto> findAllRelations() {
+        Map<String, List<RelatedHeroDto>> counters = new HashMap<>();
+        Map<String, List<RelatedHeroDto>> counteredBy = new HashMap<>();
+        Map<String, Map<String, RelatedHeroDto>> synergies = new HashMap<>();
+        for (HeroRelation relation : relationRepository.findAllByOrderByIdAsc()) {
+            Hero hero = relation.getHero();
+            Hero relatedHero = relation.getRelatedHero();
+            if (relation.getType() == RelationType.COUNTER) {
+                counters.computeIfAbsent(hero.getSlug(), slug -> new ArrayList<>()).add(related(relatedHero, relation));
+                counteredBy.computeIfAbsent(relatedHero.getSlug(), slug -> new ArrayList<>())
+                        .add(related(hero, relation));
+            } else {
+                keepStronger(synergies.computeIfAbsent(hero.getSlug(), slug -> new LinkedHashMap<>()),
+                        related(relatedHero, relation));
+                keepStronger(synergies.computeIfAbsent(relatedHero.getSlug(), slug -> new LinkedHashMap<>()),
+                        related(hero, relation));
+            }
+        }
+        return heroRepository.findAllByActiveTrueOrderByNameAsc().stream()
+                .map(hero -> new HeroRelationsDto(hero.getSlug(),
+                        sorted(counters.getOrDefault(hero.getSlug(), List.of())),
+                        sorted(counteredBy.getOrDefault(hero.getSlug(), List.of())),
+                        sorted(synergies.getOrDefault(hero.getSlug(), Map.of()).values())))
+                .toList();
+    }
+
+    private List<RelatedHeroDto> sorted(Collection<RelatedHeroDto> heroes) {
+        return heroes.stream().sorted(BY_STRENGTH_THEN_NAME).toList();
     }
 
     @Transactional(readOnly = true)

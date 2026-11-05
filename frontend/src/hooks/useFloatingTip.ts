@@ -9,6 +9,7 @@ import {
 
 const VIEWPORT_MARGIN = 8;
 const TRIGGER_GAP = 8;
+const HIDE_DELAY_MS = 150;
 
 export function useFloatingTip() {
   const triggerRef = useRef<HTMLSpanElement>(null);
@@ -16,8 +17,22 @@ export function useFloatingTip() {
   const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<CSSProperties>({});
 
-  const show = useCallback(() => setOpen(true), []);
-  const hide = useCallback(() => setOpen(false), []);
+  const hideTimer = useRef<number | undefined>(undefined);
+
+  const show = useCallback(() => {
+    window.clearTimeout(hideTimer.current);
+    setOpen(true);
+  }, []);
+  const hide = useCallback(() => {
+    window.clearTimeout(hideTimer.current);
+    setOpen(false);
+  }, []);
+  const hideSoon = useCallback(() => {
+    window.clearTimeout(hideTimer.current);
+    hideTimer.current = window.setTimeout(() => setOpen(false), HIDE_DELAY_MS);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(hideTimer.current), []);
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -66,9 +81,13 @@ export function useFloatingTip() {
     tipRef,
     triggerProps: {
       onMouseEnter: show,
-      onMouseLeave: hide,
+      onMouseLeave: hideSoon,
       onFocus: show,
       onBlur: hide,
+    },
+    tipProps: {
+      onMouseEnter: show,
+      onMouseLeave: hideSoon,
     },
   };
 }

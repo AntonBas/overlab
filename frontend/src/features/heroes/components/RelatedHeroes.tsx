@@ -4,7 +4,7 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { AbilityText } from "./AbilityText";
 import type { RelatedHero } from "../../../types/api";
 
-function Strength({ value }: { value: number }) {
+export function Strength({ value }: { value: number }) {
   return (
     <span
       className="strength"

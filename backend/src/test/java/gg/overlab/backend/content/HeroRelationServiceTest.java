@@ -20,6 +20,7 @@ import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import gg.overlab.backend.hero.relation.HeroRelationService;
 import gg.overlab.backend.hero.relation.RelationType;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
+import gg.overlab.backend.hero.relation.dto.HeroRelationsDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
 import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
@@ -71,6 +72,26 @@ class HeroRelationServiceTest {
 
         assertThat(result).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
         assertThat(result.get(0).strength()).isEqualTo(3);
+    }
+
+    @Test
+    void allRelationsGroupCountersAndSynergiesPerHero() {
+        when(heroRepository.findAllByActiveTrueOrderByNameAsc()).thenReturn(List.of(ana, genji, reinhardt));
+        when(relationRepository.findAllByOrderByIdAsc()).thenReturn(List.of(
+                relation(ana, genji, RelationType.COUNTER, 1), relation(ana, reinhardt, RelationType.COUNTER, 3),
+                relation(genji, ana, RelationType.COUNTER, 2), relation(ana, reinhardt, RelationType.SYNERGY, 2),
+                relation(reinhardt, ana, RelationType.SYNERGY, 3)));
+
+        List<HeroRelationsDto> result = service.findAllRelations();
+
+        assertThat(result).extracting(HeroRelationsDto::heroSlug).containsExactly("ana", "genji", "reinhardt");
+        HeroRelationsDto forAna = result.get(0);
+        assertThat(forAna.counters()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
+        assertThat(forAna.counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("genji");
+        assertThat(forAna.synergies()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt");
+        assertThat(forAna.synergies().get(0).strength()).isEqualTo(3);
+        assertThat(result.get(2).counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("ana");
+        assertThat(result.get(2).synergies()).extracting(RelatedHeroDto::slug).containsExactly("ana");
     }
 
     @Test
