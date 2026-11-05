@@ -8,6 +8,10 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import {
+  plainDescription,
+  usePageDescription,
+} from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
 import { HeroMapPicks } from "../components/HeroMapPicks";
@@ -62,6 +66,13 @@ export function HeroPage() {
   const guides = useFetch(() => fetchGuides({ hero: slug }), [slug]);
   const heroLoaded = Boolean(hero.data);
   usePageTitle(hero.data?.name);
+  usePageDescription(
+    hero.data
+      ? plainDescription(
+          `${hero.data.name}: ${hero.data.description ?? "Overwatch 2 hero statistics, perks and counters."}`,
+        )
+      : null,
+  );
 
   useEffect(() => {
     if (mapSlug && heroLoaded) {
