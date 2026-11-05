@@ -2254,15 +2254,6 @@ input[type="range"] {
   border-left: 2px solid var(--border);
 }
 
-.hero-perks__description {
-  display: -webkit-box;
-  margin: 0 0 4px;
-  font-size: 0.85rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
 .perk-tile .perk-tile__icon {
   border-radius: 8px;
   background: var(--bg);
@@ -2326,10 +2317,6 @@ input[type="range"] {
 
 .hero-perks-item .perk-group {
   align-self: start;
-}
-
-.hero-perks__description {
-  min-height: calc(3 * 1.5em);
 }
 
 .hero-perks__top {

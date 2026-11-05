@@ -20,7 +20,6 @@ import { matchesName } from "../../../utils/search";
 import type { HeroRole } from "../../../types/api";
 import { ROLES } from "../../stats/filters";
 import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
-import { AbilityText } from "../components/AbilityText";
 import { PerkList } from "../components/PerkList";
 
 export function PerksPage() {
@@ -184,9 +183,6 @@ export function PerksPage() {
                     name={hero.name}
                   />
                 </div>
-                <p className="hero-perks__description muted">
-                  {hero.description && <AbilityText text={hero.description} />}
-                </p>
                 <PerkList
                   compact
                   detailed={detailed}
