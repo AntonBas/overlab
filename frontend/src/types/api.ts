@@ -202,6 +202,43 @@ export interface HeroCounters {
   counteredBy: RelatedHero[];
 }
 
+export interface HeroRelations {
+  heroSlug: string;
+  counters: RelatedHero[];
+  counteredBy: RelatedHero[];
+  synergies: RelatedHero[];
+}
+
+export interface CategoryMember {
+  slug: string;
+  name: string;
+  role: HeroRole;
+  portraitUrl: string | null;
+}
+
+export interface HeroCategory {
+  slug: string;
+  name: string;
+  description: string | null;
+  heroes: CategoryMember[];
+}
+
+export type CategoryMatchupType =
+  "STRONG_AGAINST" | "WEAK_AGAINST" | "WORKS_WITH";
+
+export interface CategoryMatchup {
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
+  strength: number;
+  note: string | null;
+}
+
+export interface HeroCategories {
+  categories: HeroCategory[];
+  matchups: CategoryMatchup[];
+}
+
 export type GuideKind = "SETUP" | "POSITION" | "ULTIMATE" | "TIP";
 export type GuideSide = "ATTACK" | "DEFENSE" | "BOTH";
 

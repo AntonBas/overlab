@@ -1,6 +1,7 @@
 package gg.overlab.backend.hero.relation;
 
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
+import gg.overlab.backend.hero.relation.dto.HeroRelationsDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
 import gg.overlab.backend.hero.relation.dto.RelationDto;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
@@ -26,6 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class HeroRelationController {
 
     private final HeroRelationService relationService;
+
+    @Operation(summary = "Curated counters and synergies of all heroes (recommendations, not statistics)")
+    @GetMapping("/api/hero-relations")
+    public List<HeroRelationsDto> findAllRelations() {
+        return relationService.findAllRelations();
+    }
 
     @Operation(summary = "Curated counter-picks for a hero (recommendations, not statistics)")
     @GetMapping("/api/heroes/{slug}/counters")

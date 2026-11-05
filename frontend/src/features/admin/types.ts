@@ -40,6 +40,41 @@ export interface RelationPayload {
   note: string | null;
 }
 
+export type CategoryMatchupType =
+  "STRONG_AGAINST" | "WEAK_AGAINST" | "WORKS_WITH";
+
+export interface AdminCategory {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  heroSlugs: string[];
+}
+
+export interface CategoryPayload {
+  slug: string;
+  name: string;
+  description: string | null;
+  heroSlugs: string[];
+}
+
+export interface AdminCategoryMatchup {
+  id: number;
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
+  strength: number;
+  note: string | null;
+}
+
+export interface CategoryMatchupPayload {
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
+  strength: number;
+  note: string | null;
+}
+
 export interface PerkPayload {
   heroSlug: string;
   name: string;

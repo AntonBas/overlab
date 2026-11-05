@@ -18,7 +18,8 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
-| `/heroes/:slug/counters` | Full counters and synergies |
+| `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
+| `/heroes/:slug/counters` | Redirects to the hero page |
 | `/heroes/:slug/perks` | Redirects to `/perks` |
 | `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps, a by-map table (every map links to its map page), perks, counters, spots; `/maps/:map/:hero` redirects here |
 | `/patches` | Redirects to `/changes`; patches are shown as dashed lines on the statistics chart and as views in `/changes` |
@@ -40,6 +41,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/abilities` | Abilities per hero: choose the control slot (primary or secondary fire, ability 1 or 2, ultimate, passive); saved at once and written to the audit log |
 | `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
+| `/admin/categories` | Hero categories (name, slug, member heroes) and matchups of a hero against a category (strong, weak or works well with, strength, note) |
 | `/admin/guides` | Spots and setups: paste a YouTube link (`youtu.be/...`, `watch?v=...`), hero, map, type (setup, position, ultimate spot, tip), side (attack, defense, both), optional ability, start and end time as `1:23`, video preview, publish and order. Shown on the map page grouped by hero and on the hero page grouped by map |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
 | `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
@@ -146,13 +148,15 @@ Curated content, also public `GET` requests:
 | `/api/heroes/{slug}/perks` | Perks with a recommendation (`RECOMMENDED`, `OPTIONAL`, `AVOID`) |
 | `/api/abilities` | Abilities of all heroes |
 | `/api/heroes/{slug}/abilities` | Abilities of a hero with description and icon |
+| `/api/hero-categories` | Hero categories (for example beam or dive) with their members, and curated hero-versus-category matchups (strong against, struggles against or works well with a category); shown as chips on `/counters`, where heroes covered by a chip of equal or higher strength are not repeated as separate avatars |
+| `/api/hero-relations` | Counters, counters against and synergies of all heroes in one response |
 | `/api/heroes/{slug}/counters` | Heroes this hero counters and heroes that counter it |
 | `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
 | `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published spots and setups (YouTube embeds; `kind`, `side`, `abilitySlug`, `startSeconds`, `endSeconds`) |
 | `/api/patches`, `/api/patches/{slug}`, `/api/patches/at?date=` | Patches and the patch active at a date |
 | `/api/sitemap.xml` | Sitemap of the public pages (static pages, active heroes, maps); served as `/sitemap.xml` by the edge proxy, which also answers `/robots.txt` with the sitemap link |
 
-Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.
+Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/hero-categories`, `/api/admin/hero-category-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.
 
 ### Limits and caching
 
