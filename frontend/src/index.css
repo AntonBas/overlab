@@ -2602,3 +2602,66 @@ input[type="range"] {
   margin-right: 4px;
   vertical-align: middle;
 }
+
+.ability-key__cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glyph--ps {
+  display: block;
+}
+
+.glyph--triangle {
+  color: #0f9d78;
+}
+
+.glyph--circle {
+  color: #d6364f;
+}
+
+.glyph--cross {
+  color: #2f6fdb;
+}
+
+.glyph--square {
+  color: #c4488f;
+}
+
+.glyph--face {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  background: #1d1f23;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.glyph--xbox-a {
+  color: #52b043;
+}
+
+.glyph--xbox-b {
+  color: #e0443e;
+}
+
+.glyph--xbox-x {
+  color: #3b8de0;
+}
+
+.glyph--xbox-y {
+  color: #ffbf00;
+}
+
+.glyph--plain-a,
+.glyph--plain-b,
+.glyph--plain-x,
+.glyph--plain-y {
+  background: #3b3d42;
+  color: #f2f2f2;
+}
