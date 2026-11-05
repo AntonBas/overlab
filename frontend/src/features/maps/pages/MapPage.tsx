@@ -98,9 +98,7 @@ export function MapPage() {
           onChange={(queue) => update({ queue })}
         />
       </div>
-      {stats.data && (
-        <MapBestPicks mapSlug={slug} heroes={heroes} linkSuffix={linkSuffix} />
-      )}
+      {stats.data && <MapBestPicks heroes={heroes} linkSuffix={linkSuffix} />}
       <div className="filters">
         <label className="field">
           <span className="field__label">Rank</span>
@@ -188,7 +186,6 @@ export function MapPage() {
               direction={filters.direction}
               onSort={changeSort}
               heroLinkSuffix={linkSuffix}
-              mapSlug={slug}
             />
           )}
         </div>

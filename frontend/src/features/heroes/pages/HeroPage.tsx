@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -45,7 +44,6 @@ export function HeroPage() {
       ? "QUICK_PLAY"
       : "COMPETITIVE";
 
-  const mapSlug = searchParams.get("map");
   const linkSuffix = queue === "QUICK_PLAY" ? "?queue=quick_play" : "";
 
   const hero = useFetch(() => fetchHero(slug), [slug]);
@@ -64,7 +62,6 @@ export function HeroPage() {
   const synergies = useFetch(() => fetchSynergies(slug), [slug]);
   const abilities = useFetch(() => fetchHeroAbilities(slug), [slug]);
   const guides = useFetch(() => fetchGuides({ hero: slug }), [slug]);
-  const heroLoaded = Boolean(hero.data);
   usePageTitle(hero.data?.name);
   usePageDescription(
     hero.data
@@ -73,14 +70,6 @@ export function HeroPage() {
         )
       : null,
   );
-
-  useEffect(() => {
-    if (mapSlug && heroLoaded) {
-      document
-        .getElementById("hero-statistics")
-        ?.scrollIntoView({ block: "start" });
-    }
-  }, [mapSlug, heroLoaded]);
 
   if (hero.loading) {
     return <Spinner />;
@@ -92,28 +81,8 @@ export function HeroPage() {
   }
 
   const overall = stats.data?.overall ?? null;
-  const onMap = mapSlug
-    ? (stats.data?.maps.find((entry) => entry.mapSlug === mapSlug) ?? null)
-    : null;
-  const focus = onMap ?? overall;
-  const spots = onMap
-    ? [
-        ...(guides.data ?? []).filter(
-          (guide) => guide.mapSlug === onMap.mapSlug,
-        ),
-        ...(guides.data ?? []).filter((guide) => guide.mapSlug === null),
-      ]
-    : (guides.data ?? []);
-
-  function selectMap(next: string) {
-    const params = new URLSearchParams(searchParams);
-    if (next) {
-      params.set("map", next);
-    } else {
-      params.delete("map");
-    }
-    setSearchParams(params);
-  }
+  const focus = overall;
+  const spots = guides.data ?? [];
 
   return (
     <>
@@ -169,30 +138,10 @@ export function HeroPage() {
 
       <div id="hero-statistics">
         <HeroHistorySection
-          key={onMap?.mapSlug ?? "all"}
-          title={onMap ? `Statistics on ${onMap.mapName}` : "Statistics"}
+          title="Statistics"
           slug={slug}
-          mapSlug={onMap?.mapSlug ?? undefined}
           queue={queue}
           current={focus}
-          headerAction={
-            stats.data && stats.data.maps.length > 0 ? (
-              <label className="field field--inline hero-map-picker">
-                <span className="field__label">Map</span>
-                <select
-                  value={onMap?.mapSlug ?? ""}
-                  onChange={(event) => selectMap(event.target.value)}
-                >
-                  <option value="">All maps</option>
-                  {stats.data.maps.map((entry) => (
-                    <option key={entry.mapSlug} value={entry.mapSlug ?? ""}>
-                      {entry.mapName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : undefined
-          }
         >
           {stats.loading && <Spinner label="Loading statistics" />}
           {stats.error &&
@@ -208,7 +157,6 @@ export function HeroPage() {
 
       {stats.data && stats.data.maps.length > 0 && (
         <HeroMapPicks
-          heroSlug={slug}
           heroName={hero.data.name}
           maps={stats.data.maps}
           linkSuffix={linkSuffix}
@@ -218,11 +166,7 @@ export function HeroPage() {
       {stats.data && stats.data.maps.length > 0 && (
         <section className="section">
           <h2>By map</h2>
-          <HeroMapTable
-            maps={stats.data.maps}
-            heroSlug={slug}
-            linkSuffix={linkSuffix}
-          />
+          <HeroMapTable maps={stats.data.maps} linkSuffix={linkSuffix} />
         </section>
       )}
 
@@ -271,12 +215,9 @@ export function HeroPage() {
 
       {guides.data && guides.data.length > 0 && (
         <SpotsSection
-          key={onMap?.mapSlug ?? "all"}
-          title={
-            onMap ? `Spots & setups on ${onMap.mapName}` : "Spots & setups"
-          }
+          title="Spots & setups"
           guides={spots}
-          groupBy={onMap ? "none" : "map"}
+          groupBy="map"
           emptyMessage="No spots or setups yet."
         />
       )}

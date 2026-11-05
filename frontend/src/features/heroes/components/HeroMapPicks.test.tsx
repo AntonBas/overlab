@@ -47,9 +47,7 @@ const maps = [
 
 describe("HeroMapPicks", () => {
   it("shows the best maps first with links that select the map on the hero page", async () => {
-    renderWithRouter(
-      <HeroMapPicks heroSlug="ana" heroName="Ana" maps={maps} linkSuffix="" />,
-    );
+    renderWithRouter(<HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />);
 
     const gain = await screen.findByRole("region", { name: "by gain" });
 
@@ -58,15 +56,13 @@ describe("HeroMapPicks", () => {
     ).toBeInTheDocument();
     expect(within(gain).getByRole("link", { name: /Busan/ })).toHaveAttribute(
       "href",
-      "/heroes/ana?map=busan",
+      "/maps/busan",
     );
     expect(within(gain).queryByText("Rialto")).toBeNull();
   });
 
   it("switches to the worst maps", async () => {
-    renderWithRouter(
-      <HeroMapPicks heroSlug="ana" heroName="Ana" maps={maps} linkSuffix="" />,
-    );
+    renderWithRouter(<HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />);
     await screen.findByRole("region", { name: "by gain" });
 
     await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
@@ -97,12 +93,7 @@ describe("HeroMapPicks", () => {
       }),
     ];
     renderWithRouter(
-      <HeroMapPicks
-        heroSlug="ana"
-        heroName="Ana"
-        maps={allAbove}
-        linkSuffix=""
-      />,
+      <HeroMapPicks heroName="Ana" maps={allAbove} linkSuffix="" />,
     );
     await screen.findByRole("region", { name: "by gain" });
 
@@ -118,7 +109,6 @@ describe("HeroMapPicks", () => {
   it("keeps the quick play query in the links", async () => {
     renderWithRouter(
       <HeroMapPicks
-        heroSlug="ana"
         heroName="Ana"
         maps={maps}
         linkSuffix="?queue=quick_play"
@@ -129,14 +119,13 @@ describe("HeroMapPicks", () => {
 
     expect(within(gain).getByRole("link", { name: /Busan/ })).toHaveAttribute(
       "href",
-      "/heroes/ana?map=busan&queue=quick_play",
+      "/maps/busan?queue=quick_play",
     );
   });
 
   it("shows the placeholder image for a map without a picture", async () => {
     const { container } = renderWithRouter(
       <HeroMapPicks
-        heroSlug="ana"
         heroName="Ana"
         maps={[maps[1], entry({ mapSlug: "rialto", winRateDelta: -4 })].slice(
           0,

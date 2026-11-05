@@ -1,4 +1,3 @@
-import { heroOnMapPath } from "../../heroes/utils/heroOnMapPath";
 import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -10,7 +9,6 @@ import { formatPercent } from "../../../utils/format";
 import { picksByRole } from "../utils/bestPicks";
 
 interface MapBestPicksProps {
-  mapSlug: string;
   heroes: HeroStat[];
   linkSuffix: string;
 }
@@ -18,12 +16,10 @@ interface MapBestPicksProps {
 function PickList({
   title,
   heroes,
-  mapSlug,
   linkSuffix,
 }: {
   title: string;
   heroes: HeroStat[];
-  mapSlug: string;
   linkSuffix: string;
 }) {
   if (heroes.length === 0) {
@@ -37,7 +33,7 @@ function PickList({
           <li key={hero.heroSlug}>
             <Link
               className="highlight__hero"
-              to={heroOnMapPath(hero.heroSlug, mapSlug, linkSuffix)}
+              to={`/heroes/${hero.heroSlug}${linkSuffix}`}
             >
               <span className="highlight__portrait">
                 <HeroPortrait
@@ -69,11 +65,7 @@ const VIEW_LABELS: Record<PickView, string> = {
   worst: "Worst picks",
 };
 
-export function MapBestPicks({
-  mapSlug,
-  heroes,
-  linkSuffix,
-}: MapBestPicksProps) {
+export function MapBestPicks({ heroes, linkSuffix }: MapBestPicksProps) {
   const [view, setView] = useState<PickView>("best");
   const roles = picksByRole(heroes);
   if (roles.length === 0) {
@@ -114,7 +106,6 @@ export function MapBestPicks({
                 view === "best" ? "Biggest gain here" : "Biggest drop here"
               }
               heroes={view === "best" ? gainers : droppers}
-              mapSlug={mapSlug}
               linkSuffix={linkSuffix}
             />
             <PickList
@@ -124,7 +115,6 @@ export function MapBestPicks({
                   : "Lowest win rate here"
               }
               heroes={view === "best" ? strongest : weakest}
-              mapSlug={mapSlug}
               linkSuffix={linkSuffix}
             />
           </section>

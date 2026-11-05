@@ -487,6 +487,13 @@ select:disabled {
   color: var(--text);
 }
 
+.table__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+}
+
 .rate-bar {
   display: inline-flex;
   align-items: center;
@@ -2315,10 +2322,6 @@ input[type="range"] {
 
 .hero-perks__top {
   align-self: start;
-}
-
-.section__heading .hero-map-picker {
-  margin: 0;
 }
 
 .spot-groups {

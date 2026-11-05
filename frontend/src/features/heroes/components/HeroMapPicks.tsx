@@ -8,11 +8,10 @@ import type { HeroMapStat } from "../../../types/api";
 import { formatPercent } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { fetchMaps } from "../../maps/api/mapsApi";
-import { heroOnMapPath } from "../utils/heroOnMapPath";
+import { mapPagePath } from "../utils/mapPagePath";
 import { mapPicks } from "../utils/mapPicks";
 
 interface HeroMapPicksProps {
-  heroSlug: string;
   heroName: string;
   maps: HeroMapStat[];
   linkSuffix: string;
@@ -28,13 +27,11 @@ const VIEW_LABELS: Record<PickView, string> = {
 function MapList({
   title,
   entries,
-  heroSlug,
   linkSuffix,
   images,
 }: {
   title: string;
   entries: HeroMapStat[];
-  heroSlug: string;
   linkSuffix: string;
   images: Record<string, string | null>;
 }) {
@@ -49,7 +46,7 @@ function MapList({
           <li key={entry.mapSlug}>
             <Link
               className="highlight__hero highlight__hero--map"
-              to={heroOnMapPath(heroSlug, entry.mapSlug ?? "", linkSuffix)}
+              to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
             >
               <span className="highlight__portrait">
                 <Thumbnail
@@ -75,7 +72,6 @@ function MapList({
 }
 
 export function HeroMapPicks({
-  heroSlug,
   heroName,
   maps,
   linkSuffix,
@@ -122,7 +118,6 @@ export function HeroMapPicks({
                 : "Weakest compared with the hero's average"
             }
             entries={best ? picks.best : picks.worst}
-            heroSlug={heroSlug}
             linkSuffix={linkSuffix}
             images={images}
           />
