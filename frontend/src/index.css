@@ -173,8 +173,9 @@ ul {
   text-decoration: none;
 }
 
-.brand svg {
-  color: var(--accent-text);
+.brand__logo {
+  display: block;
+  border-radius: 7px;
 }
 
 .nav {
