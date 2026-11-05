@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { MapVisual } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/api";
 import { SpotCard } from "./SpotCard";
 
@@ -7,9 +8,17 @@ interface SpotRailProps {
   guides: Guide[];
   showHero: boolean;
   showMap: boolean;
+  heroPortraits: Record<string, string | null>;
+  mapVisuals: Record<string, MapVisual>;
 }
 
-export function SpotRail({ guides, showHero, showMap }: SpotRailProps) {
+export function SpotRail({
+  guides,
+  showHero,
+  showMap,
+  heroPortraits,
+  mapVisuals,
+}: SpotRailProps) {
   const railRef = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
 
@@ -58,7 +67,13 @@ export function SpotRail({ guides, showHero, showMap }: SpotRailProps) {
       <ul ref={railRef} className="spot-rail" onScroll={updateEdges}>
         {guides.map((guide) => (
           <li key={guide.id}>
-            <SpotCard guide={guide} showHero={showHero} showMap={showMap} />
+            <SpotCard
+              guide={guide}
+              showHero={showHero}
+              showMap={showMap}
+              heroPortraits={heroPortraits}
+              mapVisuals={mapVisuals}
+            />
           </li>
         ))}
       </ul>

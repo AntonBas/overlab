@@ -1,6 +1,9 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
+import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import type { Guide, GuideKind } from "../../../types/api";
 import { GUIDE_KIND_LABELS, GUIDE_KINDS } from "../labels";
 import { SpotRail } from "./SpotRail";
@@ -45,6 +48,8 @@ export function SpotsSection({
   emptyMessage,
 }: SpotsSectionProps) {
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
+  const heroPortraits = useHeroPortraits();
+  const mapVisuals = useMapVisuals();
   const [kindFilter, setKindFilter] = useState<GuideKind | null>(null);
 
   const groups = new Map<string, Group>();
@@ -131,6 +136,16 @@ export function SpotsSection({
                 aria-pressed={groupFilter === group.key}
                 onClick={() => selectGroup(group.key)}
               >
+                {groupBy === "hero" && (
+                  <HeroPortrait
+                    name={group.label}
+                    url={heroPortraits[group.key] ?? null}
+                    size={20}
+                  />
+                )}
+                {groupBy === "map" && mapVisuals[group.key]?.mode && (
+                  <ModeIcon mode={mapVisuals[group.key].mode ?? "CONTROL"} />
+                )}
                 {group.label} <span className="muted">{group.count}</span>
               </button>
             </li>
@@ -146,6 +161,8 @@ export function SpotsSection({
           guides={visible}
           showHero={groupBy === "hero"}
           showMap={groupBy !== "hero"}
+          heroPortraits={heroPortraits}
+          mapVisuals={mapVisuals}
         />
       )}
     </section>

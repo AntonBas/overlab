@@ -78,6 +78,7 @@ describe("accessibility", () => {
               role: "DAMAGE",
               strength: 2,
               note: null,
+              portraitUrl: null,
             },
           ]}
         />

@@ -2,6 +2,9 @@ import clsx from "clsx";
 import { Play } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
+import type { MapVisual } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/api";
 import { formatSeconds } from "../../../utils/format";
 import { AbilityText } from "../../heroes/components/AbilityText";
@@ -11,18 +14,20 @@ interface SpotCardProps {
   guide: Guide;
   showHero?: boolean;
   showMap?: boolean;
+  heroPortraits?: Record<string, string | null>;
+  mapVisuals?: Record<string, MapVisual>;
 }
 
 export function SpotCard({
   guide,
   showHero = false,
   showMap = false,
+  heroPortraits = {},
+  mapVisuals = {},
 }: SpotCardProps) {
   const [playing, setPlaying] = useState(false);
-  const place = [
-    showHero ? guide.heroName : null,
-    showMap ? (guide.mapName ?? "Any map") : null,
-  ].filter(Boolean);
+  const mapMode = guide.mapSlug ? mapVisuals[guide.mapSlug]?.mode : null;
+  const hasPlace = showHero || showMap;
 
   return (
     <article className="spot-card">
@@ -84,7 +89,27 @@ export function SpotCard({
         <h3>
           <Link to={`/guides/${guide.path}`}>{guide.title}</Link>
         </h3>
-        {place.length > 0 && <p className="muted">{place.join(" on ")}</p>}
+        {hasPlace && (
+          <p className="muted spot-card__place">
+            {showHero && (
+              <span className="place-icon">
+                <HeroPortrait
+                  name={guide.heroName}
+                  url={heroPortraits[guide.heroSlug] ?? null}
+                  size={20}
+                />
+                {guide.heroName}
+              </span>
+            )}
+            {showHero && showMap && " on "}
+            {showMap && (
+              <span className="place-icon">
+                {mapMode && <ModeIcon mode={mapMode} />}
+                {guide.mapName ?? "Any map"}
+              </span>
+            )}
+          </p>
+        )}
         {guide.description && (
           <p className="muted spot-card__description">{guide.description}</p>
         )}
