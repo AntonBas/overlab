@@ -576,6 +576,17 @@ select:disabled {
   gap: 8px;
 }
 
+.chip-list--centered {
+  justify-content: center;
+}
+
+.role-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
