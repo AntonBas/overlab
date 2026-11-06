@@ -7,6 +7,7 @@ import { IconSelect, type IconSelectOption } from "./IconSelect";
 interface RankFilterProps {
   value: RankTier;
   onChange: (tier: RankTier) => void;
+  disabled?: boolean;
 }
 
 const RANK_OPTIONS: readonly IconSelectOption<RankTier>[] = TIERS.map(
@@ -28,12 +29,17 @@ const RANK_OPTIONS: readonly IconSelectOption<RankTier>[] = TIERS.map(
   }),
 );
 
-export function RankFilter({ value, onChange }: RankFilterProps) {
+export function RankFilter({
+  value,
+  onChange,
+  disabled = false,
+}: RankFilterProps) {
   return (
     <IconSelect
       label="Rank"
       value={value}
       options={RANK_OPTIONS}
+      disabled={disabled}
       onChange={onChange}
     />
   );

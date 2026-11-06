@@ -20,7 +20,9 @@ public class CollectorScheduler implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar registrar) {
         for (CollectorJob job : properties.jobs()) {
-            if (job.enabled()) {
+            if (job.isChained()) {
+                log.info("Collector job '{}' follows '{}' when it finds changes", job.name(), job.after());
+            } else if (job.enabled()) {
                 registrar.addCronTask(() -> collectorService.runBlocking(job.name(), CollectorTrigger.SCHEDULED),
                         job.cron());
             } else {

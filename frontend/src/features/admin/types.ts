@@ -110,12 +110,15 @@ export interface MapPayload {
 }
 
 export type CollectorRunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";
-export type CollectorTrigger = "SCHEDULED" | "MANUAL" | "STARTUP" | "PATCH";
+export type CollectorTrigger =
+  "SCHEDULED" | "MANUAL" | "STARTUP" | "PATCH" | "CHAINED";
 
 export interface CollectorJob {
   name: string;
-  cron: string;
+  cron: string | null;
   enabled: boolean;
+  after: string | null;
+  minInterval: string | null;
 }
 
 export interface CollectorRun {

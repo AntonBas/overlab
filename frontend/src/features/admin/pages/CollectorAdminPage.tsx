@@ -16,7 +16,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import type { CollectorJob, CollectorRunStatus } from "../types";
-import { describeCron } from "../utils/cron";
+import { describeCron, describeInterval } from "../utils/cron";
 import { splitWords } from "../utils/audit";
 
 const POLL_INTERVAL_MS = 3000;
@@ -99,6 +99,21 @@ export function CollectorAdminPage() {
             {
               header: "Schedule",
               render: (job) => {
+                if (!job.cron) {
+                  return (
+                    <>
+                      After {splitWords(job.after ?? "")} finds changes
+                      {job.minInterval && (
+                        <>
+                          <br />
+                          <span className="muted">
+                            at most once per {describeInterval(job.minInterval)}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  );
+                }
                 const description = describeCron(job.cron);
                 return description ? (
                   <>

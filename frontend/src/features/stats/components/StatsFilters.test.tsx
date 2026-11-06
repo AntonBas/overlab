@@ -40,6 +40,31 @@ describe("StatsFilters", () => {
     expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
   });
 
+  it("keeps rank and map enabled for PC in Europe", () => {
+    renderFilters();
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeEnabled();
+    expect(screen.queryByText(/available for PC in Europe only/i)).toBeNull();
+  });
+
+  it("disables rank and map for other regions and explains why", () => {
+    renderFilters({ ...DEFAULT_FILTERS, region: "ASIA" });
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeDisabled();
+    expect(
+      screen.getByText(/available for PC in Europe only/i),
+    ).toBeInTheDocument();
+  });
+
+  it("disables rank and map for console", () => {
+    renderFilters({ ...DEFAULT_FILTERS, platform: "CONSOLE" });
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeDisabled();
+  });
+
   it("shows the rank filter for Competitive", () => {
     renderFilters();
 

@@ -2,6 +2,7 @@ package gg.overlab.backend.collector;
 
 import gg.overlab.backend.stats.GameFormat;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -27,6 +28,17 @@ public record CollectorProperties(
         @DefaultValue("30") @Min(1) int minHeroes,
         @DefaultValue @Valid Retention retention,
         @NotEmpty List<@Valid CollectorJob> jobs) {
+
+    @AssertTrue(message = "a chained job must follow another configured job, not itself")
+    public boolean isChainValid() {
+        if (jobs == null) {
+            return true;
+        }
+        return jobs.stream()
+                .filter(CollectorJob::isChained)
+                .allMatch(job -> !job.after().equals(job.name())
+                        && jobs.stream().anyMatch(other -> other.name().equals(job.after())));
+    }
 
     public record Retry(@DefaultValue("3") @Min(1) int maxAttempts, @DefaultValue("5s") @NotNull Duration backoff) {
     }

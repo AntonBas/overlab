@@ -3457,3 +3457,14 @@ input[type="range"] {
 .hero-banner--backdrop .prose:last-child {
   margin-bottom: 0;
 }
+
+.filters__note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.icon-select__trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

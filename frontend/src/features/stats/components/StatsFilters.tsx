@@ -21,6 +21,7 @@ import {
   QUEUES,
   REGIONS,
   ROLES,
+  hasDetailedCoverage,
   isQuickPlay,
   type StatsFilters as Filters,
 } from "../filters";
@@ -64,6 +65,7 @@ export function StatsFilters({
   onSearchChange,
 }: StatsFiltersProps) {
   const quickPlay = isQuickPlay(filters);
+  const detailed = hasDetailedCoverage(filters);
   const mapOptions: IconSelectOption<string>[] = [
     { value: ALL_MAPS, label: "All maps", icon: <AllItemsIcon /> },
     ...maps.map((map) => ({
@@ -104,6 +106,7 @@ export function StatsFilters({
       {!quickPlay && (
         <RankFilter
           value={filters.tier}
+          disabled={!detailed}
           onChange={(tier) => onChange({ tier })}
         />
       )}
@@ -113,6 +116,7 @@ export function StatsFilters({
         value={filters.map}
         options={mapOptions}
         wide
+        disabled={!detailed}
         onChange={(map) => onChange({ map })}
       />
 
@@ -165,6 +169,12 @@ export function StatsFilters({
           </button>
         ))}
       </div>
+      {!detailed && (
+        <p className="filters__note muted">
+          Ranks and maps are available for PC in Europe only. Other platforms
+          and regions show overall statistics.
+        </p>
+      )}
     </form>
   );
 }

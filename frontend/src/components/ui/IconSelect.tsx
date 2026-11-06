@@ -18,6 +18,7 @@ interface IconSelectProps<T extends string> {
   value: T;
   options: readonly IconSelectOption<T>[];
   wide?: boolean;
+  disabled?: boolean;
   onChange: (value: T) => void;
 }
 
@@ -43,6 +44,7 @@ export function IconSelect<T extends string>({
   value,
   options,
   wide = false,
+  disabled = false,
   onChange,
 }: IconSelectProps<T>) {
   const values = options.map((option) => option.value);
@@ -129,6 +131,7 @@ export function IconSelect<T extends string>({
         aria-controls={listId}
         aria-activedescendant={open ? optionId(highlighted) : undefined}
         title={selected.label}
+        disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
       >

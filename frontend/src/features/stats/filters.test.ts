@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  ALL_MAPS,
   DEFAULT_FILTERS,
+  hasDetailedCoverage,
   parseFilters,
   toSearchParams,
   type StatsFilters,
@@ -14,7 +16,7 @@ describe("parseFilters", () => {
   it("reads lower-case values from the address", () => {
     const filters = parseFilters(
       new URLSearchParams(
-        "queue=competitive&tier=gold&map=rialto&platform=console&region=asia&role=tank&sort=win_rate&direction=asc",
+        "queue=competitive&tier=gold&map=rialto&platform=pc&region=europe&role=tank&sort=win_rate&direction=asc",
       ),
     );
 
@@ -22,8 +24,8 @@ describe("parseFilters", () => {
       queue: "COMPETITIVE",
       tier: "GOLD",
       map: "rialto",
-      platform: "CONSOLE",
-      region: "ASIA",
+      platform: "PC",
+      region: "EUROPE",
       role: "TANK",
       sort: "WIN_RATE",
       direction: "ASC",
@@ -53,6 +55,34 @@ describe("parseFilters", () => {
   });
 });
 
+describe("coverage", () => {
+  it("keeps ranks and maps for PC in Europe", () => {
+    expect(hasDetailedCoverage({ platform: "PC", region: "EUROPE" })).toBe(
+      true,
+    );
+  });
+
+  it("limits other regions to overall statistics", () => {
+    const filters = parseFilters(
+      new URLSearchParams("tier=gold&map=rialto&region=asia"),
+    );
+
+    expect(filters.region).toBe("ASIA");
+    expect(filters.tier).toBe("ALL");
+    expect(filters.map).toBe(ALL_MAPS);
+  });
+
+  it("limits console to overall statistics", () => {
+    const filters = parseFilters(
+      new URLSearchParams("tier=master&map=busan&platform=console"),
+    );
+
+    expect(filters.platform).toBe("CONSOLE");
+    expect(filters.tier).toBe("ALL");
+    expect(filters.map).toBe(ALL_MAPS);
+  });
+});
+
 describe("toSearchParams", () => {
   it("leaves out values that equal the defaults", () => {
     expect(toSearchParams(DEFAULT_FILTERS).toString()).toBe("");
@@ -79,7 +109,6 @@ describe("toSearchParams", () => {
       ...DEFAULT_FILTERS,
       tier: "PLATINUM",
       map: "blizzard-world",
-      region: "AMERICAS",
       direction: "ASC",
     };
 

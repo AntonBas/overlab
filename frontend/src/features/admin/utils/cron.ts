@@ -59,3 +59,19 @@ export function describeCron(cron: string): string | null {
   const weekday = weekdayName(dayOfWeek);
   return weekday ? `Every ${weekday} at ${time}` : null;
 }
+
+export function describeInterval(duration: string): string {
+  const match = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(duration);
+  if (!match) {
+    return duration;
+  }
+  const totalHours =
+    Number(match[1] ?? 0) +
+    Number(match[2] ?? 0) / 60 +
+    Number(match[3] ?? 0) / 3600;
+  if (totalHours >= 24 && totalHours % 24 === 0) {
+    const days = totalHours / 24;
+    return days === 1 ? "day" : `${days} days`;
+  }
+  return totalHours === 1 ? "hour" : `${totalHours} hours`;
+}
