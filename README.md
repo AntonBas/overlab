@@ -206,8 +206,13 @@ Every admin change (perks, counters, synergies, guides, patches, hero and map ed
 The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`:
 
 - `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
-- `weekly-maps`: every map, every rank for Competitive (about 310 requests, roughly 16 minutes with the 3 s pause), rank `ALL` for Quick Play
-- `weekly-console`, `weekly-other-regions`: disabled examples (`enabled: false`) for Console and other regions
+- `daily-maps`: every map, rank `ALL`, both queues (about 62 requests). It has no schedule: it starts right after `daily-overview` and only when that job saved new rows, and at most once per 2 days (`min-interval: 2d`)
+- `weekly-maps`: every map, every rank from Bronze to Grandmaster for Competitive (about 248 requests, roughly 12 minutes with the 3 s pause). Same rule: runs after `daily-overview` found changes, at most once per 7 days
+- A job with `after: <job name>` instead of `cron` is chained. It starts when the job it follows saved rows, skips itself if its last successful run is younger than `min-interval`, and is shown in the admin panel as "After ... finds changes". Runs started by a patch are not chained, because a patch already runs every job
+- `daily-other-regions`: PC in Americas and Asia, both queues, rank `ALL`, all maps combined
+- `daily-console`: Console in every region, both queues, rank `ALL`, all maps combined
+
+Ranks and maps are collected only for PC in Europe. For every other platform and region the statistics page disables the rank and map filters and shows overall numbers (`hasDetailedCoverage` in `frontend/src/features/stats/filters.ts`); change that rule together with the collector jobs.
 
 The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
 

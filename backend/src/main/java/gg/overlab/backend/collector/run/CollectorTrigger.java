@@ -4,5 +4,6 @@ public enum CollectorTrigger {
     SCHEDULED,
     MANUAL,
     STARTUP,
-    PATCH
+    PATCH,
+    CHAINED
 }

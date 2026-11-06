@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeCron } from "./cron";
+import { describeCron, describeInterval } from "./cron";
 
 describe("describeCron", () => {
   it("describes a daily schedule", () => {
@@ -21,5 +21,16 @@ describe("describeCron", () => {
   it("returns null for schedules it cannot describe", () => {
     expect(describeCron("0 */5 * * * *")).toBeNull();
     expect(describeCron("not a cron")).toBeNull();
+  });
+});
+
+describe("describeInterval", () => {
+  it("describes whole days", () => {
+    expect(describeInterval("PT48H")).toBe("2 days");
+    expect(describeInterval("PT168H")).toBe("7 days");
+  });
+
+  it("describes hours", () => {
+    expect(describeInterval("PT6H")).toBe("6 hours");
   });
 });

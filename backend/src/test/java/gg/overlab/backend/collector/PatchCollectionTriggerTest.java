@@ -22,7 +22,7 @@ class PatchCollectionTriggerTest {
 
     private CollectorJob job(String name, boolean runOnPatch) {
         return new CollectorJob(name, "0 0 4 * * *", false, List.of(GameQueue.COMPETITIVE), List.of(Platform.PC),
-                List.of(Region.EUROPE), List.of(RankTier.ALL), List.of("all-maps"), runOnPatch);
+                List.of(Region.EUROPE), List.of(RankTier.ALL), List.of("all-maps"), runOnPatch, null, null);
     }
 
     @Test

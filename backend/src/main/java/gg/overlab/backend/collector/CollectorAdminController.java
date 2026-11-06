@@ -32,7 +32,8 @@ public class CollectorAdminController {
     @GetMapping("/jobs")
     public List<CollectorJobDto> jobs() {
         return collectorService.jobs().stream()
-                .map(job -> new CollectorJobDto(job.name(), job.cron(), job.enabled()))
+                .map(job -> new CollectorJobDto(job.name(), job.cron(), job.enabled(), job.after(),
+                        job.minInterval() == null ? null : job.minInterval().toString()))
                 .toList();
     }
 
@@ -70,6 +71,6 @@ public class CollectorAdminController {
     public record PerkImportStartedDto(int heroes) {
     }
 
-    public record CollectorJobDto(String name, String cron, boolean enabled) {
+    public record CollectorJobDto(String name, String cron, boolean enabled, String after, String minInterval) {
     }
 }

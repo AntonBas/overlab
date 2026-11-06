@@ -74,7 +74,10 @@ public class RatesCollectorService {
     public CollectorRunDto startAsync(String jobName, CollectorTrigger trigger) {
         CollectorJob job = findJob(jobName);
         CollectorRun run = begin(job, trigger);
-        executor.execute(() -> finish(job, run));
+        executor.execute(() -> {
+            finish(job, run);
+            runDependents(job, run);
+        });
         return CollectorRunDto.from(run);
     }
 
@@ -83,9 +86,44 @@ public class RatesCollectorService {
         try {
             CollectorRun run = begin(job, trigger);
             finish(job, run);
+            runDependents(job, run);
         } catch (ConflictException exception) {
             log.warn("Collector job '{}' skipped: {}", jobName, exception.getMessage());
         }
+    }
+
+    private void runDependents(CollectorJob parent, CollectorRun parentRun) {
+        if (parentRun.getTrigger() == CollectorTrigger.PATCH || parentRun.getRowsSaved() == 0
+                || parentRun.getStatus() == CollectorRunStatus.FAILED) {
+            return;
+        }
+        for (CollectorJob dependent : properties.jobs()) {
+            if (!dependent.enabled() || !parent.name().equals(dependent.after())) {
+                continue;
+            }
+            if (!intervalElapsed(dependent)) {
+                log.info("Collector job '{}' skipped: it ran less than {} ago", dependent.name(),
+                        dependent.minInterval());
+                continue;
+            }
+            log.info("Collector job '{}' starts because '{}' saved {} rows", dependent.name(), parent.name(),
+                    parentRun.getRowsSaved());
+            try {
+                runBlocking(dependent.name(), CollectorTrigger.CHAINED);
+            } catch (RuntimeException exception) {
+                log.error("Collector job '{}' failed after '{}'", dependent.name(), parent.name(), exception);
+            }
+        }
+    }
+
+    private boolean intervalElapsed(CollectorJob job) {
+        if (job.minInterval() == null) {
+            return true;
+        }
+        return runRepository.findFirstByJobNameAndStatusOrderByFinishedAtDesc(job.name(), CollectorRunStatus.SUCCESS)
+                .map(CollectorRun::getFinishedAt)
+                .map(finishedAt -> !finishedAt.plus(job.minInterval()).isAfter(Instant.now()))
+                .orElse(true);
     }
 
     private CollectorJob findJob(String jobName) {
