@@ -5,9 +5,16 @@ interface ThumbnailProps {
   width: number;
   height: number;
   className?: string;
+  eager?: boolean;
 }
 
-export function Thumbnail({ url, width, height, className }: ThumbnailProps) {
+export function Thumbnail({
+  url,
+  width,
+  height,
+  className,
+  eager = false,
+}: ThumbnailProps) {
   const [failed, setFailed] = useState(false);
 
   if (!url || failed) {
@@ -20,7 +27,7 @@ export function Thumbnail({ url, width, height, className }: ThumbnailProps) {
       alt=""
       width={width}
       height={height}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
       decoding="async"
       onError={() => setFailed(true)}
     />

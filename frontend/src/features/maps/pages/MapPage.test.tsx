@@ -64,12 +64,10 @@ describe("MapPage", () => {
 
   it("loads the map again when another rank is chosen", async () => {
     renderPage();
-    await screen.findByRole("combobox", { name: "Rank" });
-
-    await userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Rank" }),
-      "DIAMOND",
+    await userEvent.click(
+      await screen.findByRole("combobox", { name: "Rank" }),
     );
+    await userEvent.click(screen.getByRole("option", { name: "Diamond" }));
 
     await waitFor(() =>
       expect(fetchStatsMock).toHaveBeenLastCalledWith(

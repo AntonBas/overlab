@@ -37,22 +37,44 @@ describe("StatsFilters", () => {
   it("disables the rank filter for Quick Play", () => {
     renderFilters({ ...DEFAULT_FILTERS, queue: "QUICK_PLAY" });
 
-    expect(screen.getByLabelText("Rank")).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
   });
 
   it("keeps the rank filter enabled for Competitive", () => {
     renderFilters();
 
-    expect(screen.getByLabelText("Rank")).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeEnabled();
+  });
+
+  it("reports the chosen rank from the list", async () => {
+    const onChange = renderFilters();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Rank" }));
+    await userEvent.click(screen.getByRole("option", { name: "Emerald" }));
+
+    expect(onChange).toHaveBeenCalledWith({ tier: "EMERALD" });
   });
 
   it("offers every map and reports the chosen one", async () => {
     const onChange = renderFilters();
 
-    await userEvent.selectOptions(screen.getByLabelText("Map"), "rialto");
+    await userEvent.click(screen.getByRole("combobox", { name: "Map" }));
 
     expect(screen.getByRole("option", { name: "Busan" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("option", { name: "Rialto" }));
     expect(onChange).toHaveBeenCalledWith({ map: "rialto" });
+  });
+
+  it("reports the chosen platform and region", async () => {
+    const onChange = renderFilters();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Platform" }));
+    await userEvent.click(screen.getByRole("option", { name: "Console" }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Region" }));
+    await userEvent.click(screen.getByRole("option", { name: /Asia/ }));
+
+    expect(onChange).toHaveBeenCalledWith({ platform: "CONSOLE" });
+    expect(onChange).toHaveBeenCalledWith({ region: "ASIA" });
   });
 
   it("filters by role and can clear the role again", async () => {
