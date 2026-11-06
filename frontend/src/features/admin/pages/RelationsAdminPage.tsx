@@ -15,6 +15,8 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
 import { SelectField, TextAreaField } from "../components/Fields";
+import { HeroLabel } from "../components/HeroLabel";
+import { HeroSelect } from "../components/HeroSelect";
 import { StatusMessage } from "../components/StatusMessage";
 import { useHeroOptions } from "../components/useHeroOptions";
 import { useSave } from "../components/useSave";
@@ -82,12 +84,6 @@ function RelationForm({
     }
   }
 
-  const options = heroes.map((hero) => (
-    <option key={hero.slug} value={hero.slug}>
-      {hero.name}
-    </option>
-  ));
-
   return (
     <form className="form admin__form" onSubmit={submit}>
       <h2>{relation ? "Edit relation" : "New relation"}</h2>
@@ -102,28 +98,22 @@ function RelationForm({
         </option>
         <option value="SYNERGY">Synergy</option>
       </SelectField>
-      <SelectField
+      <HeroSelect
         label="Hero"
-        name="heroSlug"
-        required
         value={heroSlug}
+        heroes={heroes}
+        placeholder="Choose a hero"
         error={save.fieldErrors.heroSlug}
-        onChange={(event) => setHeroSlug(event.target.value)}
-      >
-        <option value="">Choose a hero</option>
-        {options}
-      </SelectField>
-      <SelectField
+        onChange={setHeroSlug}
+      />
+      <HeroSelect
         label="Related hero"
-        name="relatedHeroSlug"
-        required
         value={relatedHeroSlug}
+        heroes={heroes}
+        placeholder="Choose a hero"
         error={save.fieldErrors.relatedHeroSlug}
-        onChange={(event) => setRelatedHeroSlug(event.target.value)}
-      >
-        <option value="">Choose a hero</option>
-        {options}
-      </SelectField>
+        onChange={setRelatedHeroSlug}
+      />
       <SelectField
         label="Strength"
         name="strength"
@@ -215,19 +205,15 @@ export function RelationsAdminPage() {
           </button>
         }
       />
-      <SelectField
-        label="Filter by hero"
-        name="filter"
-        value={filter}
-        onChange={(event) => setFilter(event.target.value)}
-      >
-        <option value="">All heroes</option>
-        {heroes.data?.map((hero) => (
-          <option key={hero.slug} value={hero.slug}>
-            {hero.name}
-          </option>
-        ))}
-      </SelectField>
+      {heroes.data && (
+        <HeroSelect
+          label="Filter by hero"
+          value={filter}
+          heroes={heroes.data}
+          allLabel="All heroes"
+          onChange={setFilter}
+        />
+      )}
       <StatusMessage error={removal.error} success={removal.success} />
       {relations.loading && <Spinner />}
       {relations.error && (
@@ -240,10 +226,26 @@ export function RelationsAdminPage() {
           emptyMessage="No relations yet."
           columns={[
             { header: "Type", render: (relation) => humanize(relation.type) },
-            { header: "Hero", render: (relation) => label(relation.heroSlug) },
+            {
+              header: "Hero",
+              render: (relation) =>
+                heroes.data ? (
+                  <HeroLabel slug={relation.heroSlug} heroes={heroes.data} />
+                ) : (
+                  relation.heroSlug
+                ),
+            },
             {
               header: "Related hero",
-              render: (relation) => label(relation.relatedHeroSlug),
+              render: (relation) =>
+                heroes.data ? (
+                  <HeroLabel
+                    slug={relation.relatedHeroSlug}
+                    heroes={heroes.data}
+                  />
+                ) : (
+                  relation.relatedHeroSlug
+                ),
             },
             { header: "Strength", render: (relation) => relation.strength },
             {

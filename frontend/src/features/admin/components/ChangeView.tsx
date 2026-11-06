@@ -1,14 +1,5 @@
-import { humanize } from "../../../utils/format";
 import type { AuditAction } from "../types";
-
-const ENUM_VALUE = /^[A-Z][A-Z_]+$/;
-
-function show(value: unknown): string {
-  if (typeof value === "string" && ENUM_VALUE.test(value)) {
-    return JSON.stringify(humanize(value));
-  }
-  return value === undefined ? "" : JSON.stringify(value);
-}
+import { formatAuditValue, splitWords } from "../utils/audit";
 
 function isTransition(value: unknown): value is { from: unknown; to: unknown } {
   return (
@@ -32,13 +23,14 @@ export function ChangeView({ action, changes }: ChangeViewProps) {
     <ul className="changes">
       {Object.entries(changes).map(([field, value]) => (
         <li key={field}>
-          <strong>{field}</strong>:{" "}
+          <strong>{splitWords(field)}</strong>:{" "}
           {action === "UPDATE" && isTransition(value) ? (
             <>
-              <del>{show(value.from)}</del> &rarr; <ins>{show(value.to)}</ins>
+              <del>{formatAuditValue(value.from)}</del> &rarr;{" "}
+              <ins>{formatAuditValue(value.to)}</ins>
             </>
           ) : (
-            <span>{show(value)}</span>
+            <span>{formatAuditValue(value)}</span>
           )}
         </li>
       ))}

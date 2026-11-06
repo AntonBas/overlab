@@ -18,6 +18,7 @@ import {
 } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
 import { SelectField } from "../components/Fields";
+import { HeroSelect } from "../components/HeroSelect";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import type { AdminAbility } from "../types";
@@ -130,19 +131,17 @@ export function AbilitiesAdminPage() {
       )}
       {heroes.data && (
         <>
-          <SelectField
+          <HeroSelect
             label="Hero"
-            name="hero"
-            hint="Choose the slot each ability uses; the key in brackets is the PC default. The site shows the matching button on PC, Xbox, PlayStation and Switch."
             value={selected}
-            onChange={(event) => setHeroSlug(event.target.value)}
-          >
-            {heroes.data.map((hero) => (
-              <option key={hero.slug} value={hero.slug}>
-                {hero.name}
-              </option>
-            ))}
-          </SelectField>
+            heroes={heroes.data}
+            onChange={setHeroSlug}
+          />
+          <p className="muted">
+            Choose the slot each ability uses; the key in brackets is the PC
+            default. The site shows the matching button on PC, Xbox, PlayStation
+            and Switch.
+          </p>
           {selected && <AbilityRows key={selected} heroSlug={selected} />}
         </>
       )}

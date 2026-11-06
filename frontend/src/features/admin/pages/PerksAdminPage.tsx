@@ -3,7 +3,6 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { humanize } from "../../../utils/format";
@@ -26,6 +25,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
 import { SelectField, TextAreaField } from "../components/Fields";
+import { HeroSelect } from "../components/HeroSelect";
 import { ImageUploadField } from "../components/ImageUploadField";
 import { StatusMessage } from "../components/StatusMessage";
 import { useHeroOptions } from "../components/useHeroOptions";
@@ -184,7 +184,6 @@ export function PerksAdminPage() {
   usePageTitle("Admin: perks");
   const heroes = useHeroOptions();
   const [heroSlug, setHeroSlug] = useState("");
-  const selectedHero = heroes.data?.find((hero) => hero.slug === heroSlug);
   const perks = useFetch(
     () => (heroSlug ? fetchPerks(heroSlug) : Promise.resolve([] as Perk[])),
     [heroSlug],
@@ -243,32 +242,19 @@ export function PerksAdminPage() {
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}
-      <div className="admin__picker">
-        <SelectField
+      {heroes.data && (
+        <HeroSelect
           label="Hero"
-          name="hero"
           value={heroSlug}
-          onChange={(event) => {
-            setHeroSlug(event.target.value);
+          heroes={heroes.data}
+          placeholder="Choose a hero"
+          onChange={(slug) => {
+            setHeroSlug(slug);
             setEditing(null);
             removal.reset();
           }}
-        >
-          <option value="">Choose a hero</option>
-          {heroes.data?.map((hero) => (
-            <option key={hero.slug} value={hero.slug}>
-              {hero.name}
-            </option>
-          ))}
-        </SelectField>
-        {selectedHero && (
-          <HeroPortrait
-            name={selectedHero.name}
-            url={selectedHero.portraitUrl}
-            size={44}
-          />
-        )}
-      </div>
+        />
+      )}
       <StatusMessage error={removal.error} success={removal.success} />
       {heroSlug && perks.loading && <Spinner />}
       {perks.error && (

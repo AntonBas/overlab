@@ -10,14 +10,14 @@ describe("ChangeView", () => {
         changes={{ active: { from: true, to: false } }}
       />,
     );
-    expect(screen.getByText("active")).toBeInTheDocument();
-    expect(screen.getByText("true").tagName).toBe("DEL");
-    expect(screen.getByText("false").tagName).toBe("INS");
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.getByText("yes").tagName).toBe("DEL");
+    expect(screen.getByText("no").tagName).toBe("INS");
   });
 
   it("lists the snapshot of a created entity", () => {
     render(<ChangeView action="CREATE" changes={{ name: "Ana" }} />);
-    expect(screen.getByText('"Ana"')).toBeInTheDocument();
+    expect(screen.getByText("Ana")).toBeInTheDocument();
   });
 
   it("shows enum values as readable text", () => {
@@ -27,8 +27,8 @@ describe("ChangeView", () => {
         changes={{ recommendation: { from: "OPTIONAL", to: "RECOMMENDED" } }}
       />,
     );
-    expect(screen.getByText('"Optional"').tagName).toBe("DEL");
-    expect(screen.getByText('"Recommended"').tagName).toBe("INS");
+    expect(screen.getByText("Optional").tagName).toBe("DEL");
+    expect(screen.getByText("Recommended").tagName).toBe("INS");
   });
 
   it("renders nothing without changes", () => {

@@ -18,6 +18,7 @@ import {
   slugify,
 } from "../utils/youtube";
 import { CheckboxField, SelectField, TextAreaField } from "./Fields";
+import { HeroSelect } from "./HeroSelect";
 import { StatusMessage } from "./StatusMessage";
 import { useSave } from "./useSave";
 import { useUnsavedChanges } from "./unsavedChanges";
@@ -143,20 +144,14 @@ export function GuideForm({
   return (
     <form className="form admin__form" onSubmit={submit} noValidate>
       <h2>{guide ? `Edit ${guide.title}` : "New spot or setup"}</h2>
-      <SelectField
+      <HeroSelect
         label="Hero"
-        name="heroSlug"
         value={values.heroSlug}
+        heroes={heroes}
+        placeholder="Choose a hero"
         error={errors.heroSlug}
-        onChange={(event) => change("heroSlug", event.target.value)}
-      >
-        <option value="">Choose a hero</option>
-        {heroes.map((hero) => (
-          <option key={hero.slug} value={hero.slug}>
-            {hero.name}
-          </option>
-        ))}
-      </SelectField>
+        onChange={(slug) => change("heroSlug", slug)}
+      />
       <SelectField
         label="Map (optional)"
         name="mapSlug"
