@@ -16,6 +16,7 @@ import {
   periodRange,
   type HistoryPeriodId,
 } from "../utils/chart";
+import { buildPatchMarkers } from "../utils/patchMarkers";
 import { LineChart } from "./LineChart";
 
 type Metric = "win" | "pick" | "ban";
@@ -31,14 +32,6 @@ const METRICS: MetricDefinition[] = [
   { id: "pick", label: "Pick rate", tone: "pick" },
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
-
-const MARKER_LABEL_LENGTH = 24;
-
-function shorten(text: string): string {
-  return text.length > MARKER_LABEL_LENGTH
-    ? `${text.slice(0, MARKER_LABEL_LENGTH - 1).trimEnd()}…`
-    : text;
-}
 
 export interface CurrentStats {
   winRate: number;
@@ -102,11 +95,7 @@ export function HeroHistorySection({
       ? []
       : [{ time: Date.parse(point.capturedAt), value }];
   });
-  const markers = (patches.data ?? []).map((patch) => ({
-    time: Date.parse(patch.releasedAt),
-    label: shorten(patch.title ?? `Patch ${patch.version}`),
-    detail: patch.title ? `${patch.title} (${patch.version})` : null,
-  }));
+  const markers = buildPatchMarkers(patches.data ?? []);
   const enough = series.length >= 2;
 
   return (
@@ -181,7 +170,7 @@ export function HeroHistorySection({
             Checked <CollectedAt value={current.capturedAt} />.
           </>
         )}{" "}
-        Dashed lines mark patch releases.{" "}
+        Dashed lines mark patch releases, hollow dots mark hotfixes.{" "}
         {!mapSlug && (
           <>
             <DataFreshness

@@ -14,6 +14,20 @@ const threePoints = [
   { time: Date.parse("2026-10-08T04:00:00Z"), value: 49.3 },
 ];
 
+function mockPlotBox() {
+  vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+    left: 0,
+    top: 0,
+    width: 600,
+    height: 180,
+    right: 600,
+    bottom: 180,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  });
+}
+
 function hoverAt(clientX: number) {
   const svg = screen.getByRole("img");
   fireEvent(
@@ -61,8 +75,57 @@ describe("LineChart", () => {
       />,
     );
     expect(container.querySelectorAll(".chart__marker")).toHaveLength(1);
-    expect(container.querySelector(".chart__marker-label")).toHaveTextContent(
-      "Patch inside",
+    expect(container.querySelectorAll(".chart__marker-dot")).toHaveLength(1);
+    expect(container).not.toHaveTextContent("Patch inside");
+  });
+
+  it("names a patch only when the pointer is on its line", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+            detail: "Version 2026-10-05",
+          },
+        ]}
+      />,
+    );
+    expect(container.querySelector(".chart__tooltip")).toBeNull();
+
+    hoverAt(342);
+
+    const tooltip = container.querySelector(".chart__tooltip");
+    expect(tooltip).toHaveTextContent("5 Oct 2026");
+    expect(tooltip).toHaveTextContent("Hotfix Update");
+    expect(tooltip).toHaveTextContent("Version 2026-10-05");
+    expect(container.querySelector(".chart__marker--active")).not.toBeNull();
+  });
+
+  it("mentions a patch released since the previous point in the point tooltip", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+          },
+        ]}
+      />,
+    );
+
+    hoverAt(585);
+
+    expect(container.querySelector(".chart__tooltip-patch")).toHaveTextContent(
+      "Patch: Hotfix Update",
     );
   });
 
