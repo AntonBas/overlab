@@ -1288,9 +1288,26 @@ select:disabled {
   stroke-dasharray: 4 4;
 }
 
-.chart__marker-label {
-  fill: var(--muted);
-  font-size: 0.7rem;
+.chart__marker--active {
+  stroke: var(--accent);
+  stroke-dasharray: none;
+}
+
+.chart__marker--hotfix {
+  stroke-dasharray: 2 5;
+  opacity: 0.7;
+}
+
+.chart__marker-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.chart__marker-dot--hotfix {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 2;
 }
 
 .chart__label {
@@ -1982,6 +1999,22 @@ input[type="range"] {
 
 .chart__tooltip .delta {
   margin-left: 0;
+}
+
+.chart__tooltip-patch {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chart__tooltip-parent {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
 }
 
 .chart__tooltip-change {
