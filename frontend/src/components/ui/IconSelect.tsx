@@ -13,34 +13,25 @@ export interface IconSelectOption<T extends string> {
   icon?: ReactNode;
 }
 
-const DEFAULT_ICON_WIDTH = 24;
-
 interface IconSelectProps<T extends string> {
   label: string;
   value: T;
   options: readonly IconSelectOption<T>[];
-  disabled?: boolean;
-  disabledHint?: string;
-  iconWidth?: number;
   wide?: boolean;
   onChange: (value: T) => void;
 }
 
 function OptionContent<T extends string>({
   option,
-  iconWidth,
   reserveIconSpace,
 }: {
   option: IconSelectOption<T>;
-  iconWidth: number;
   reserveIconSpace: boolean;
 }) {
   return (
     <span className="icon-select__content">
       {(option.icon || reserveIconSpace) && (
-        <span className="icon-select__icon" style={{ width: iconWidth }}>
-          {option.icon}
-        </span>
+        <span className="icon-select__icon">{option.icon}</span>
       )}
       <span className="icon-select__label">{option.label}</span>
     </span>
@@ -51,9 +42,6 @@ export function IconSelect<T extends string>({
   label,
   value,
   options,
-  disabled = false,
-  disabledHint,
-  iconWidth = DEFAULT_ICON_WIDTH,
   wide = false,
   onChange,
 }: IconSelectProps<T>) {
@@ -140,16 +128,11 @@ export function IconSelect<T extends string>({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={open ? optionId(highlighted) : undefined}
-        disabled={disabled}
-        title={disabled ? disabledHint : selected.label}
+        title={selected.label}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
       >
-        <OptionContent
-          option={selected}
-          iconWidth={iconWidth}
-          reserveIconSpace={false}
-        />
+        <OptionContent option={selected} reserveIconSpace={false} />
       </button>
       {open && (
         <ul
@@ -171,11 +154,7 @@ export function IconSelect<T extends string>({
               onMouseEnter={() => setHighlighted(index)}
               onClick={() => choose(option)}
             >
-              <OptionContent
-                option={option}
-                iconWidth={iconWidth}
-                reserveIconSpace
-              />
+              <OptionContent option={option} reserveIconSpace />
             </li>
           ))}
         </ul>

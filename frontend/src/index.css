@@ -3083,7 +3083,7 @@ input[type="range"] {
 }
 
 .icon-select--wide {
-  --icon-select-width: 264px;
+  --icon-select-width: 240px;
 }
 
 .icon-select__trigger {
@@ -3172,6 +3172,7 @@ input[type="range"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
   height: 24px;
   color: var(--muted);
 }

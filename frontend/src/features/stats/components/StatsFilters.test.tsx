@@ -34,16 +34,16 @@ describe("StatsFilters", () => {
     expect(onChange).toHaveBeenCalledWith({ queue: "QUICK_PLAY" });
   });
 
-  it("disables the rank filter for Quick Play", () => {
+  it("hides the rank filter for Quick Play", () => {
     renderFilters({ ...DEFAULT_FILTERS, queue: "QUICK_PLAY" });
 
-    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
+    expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
   });
 
-  it("keeps the rank filter enabled for Competitive", () => {
+  it("shows the rank filter for Competitive", () => {
     renderFilters();
 
-    expect(screen.getByRole("combobox", { name: "Rank" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeInTheDocument();
   });
 
   it("reports the chosen rank from the list", async () => {

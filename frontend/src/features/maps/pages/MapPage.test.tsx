@@ -185,11 +185,10 @@ describe("MapPage", () => {
     expect(chip).toHaveAccessibleDescription(/payload/);
   });
 
-  it("disables the rank in Quick Play", async () => {
+  it("hides the rank in Quick Play", async () => {
     renderPage("/maps/rialto?queue=quick_play");
 
-    expect(
-      await screen.findByRole("combobox", { name: "Rank" }),
-    ).toBeDisabled();
+    await screen.findByRole("button", { name: "Quick Play" });
+    expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
   });
 });

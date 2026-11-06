@@ -6,7 +6,6 @@ import { IconSelect, type IconSelectOption } from "./IconSelect";
 
 interface RankFilterProps {
   value: RankTier;
-  disabled?: boolean;
   onChange: (tier: RankTier) => void;
 }
 
@@ -29,18 +28,12 @@ const RANK_OPTIONS: readonly IconSelectOption<RankTier>[] = TIERS.map(
   }),
 );
 
-export function RankFilter({
-  value,
-  disabled = false,
-  onChange,
-}: RankFilterProps) {
+export function RankFilter({ value, onChange }: RankFilterProps) {
   return (
     <IconSelect
       label="Rank"
       value={value}
       options={RANK_OPTIONS}
-      disabled={disabled}
-      disabledHint="Quick Play has no ranks"
       onChange={onChange}
     />
   );
