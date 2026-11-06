@@ -50,6 +50,7 @@ export function AdminLayout() {
                   clsx("admin__link", { "admin__link--active": isActive })
                 }
               >
+                <section.icon size={16} aria-hidden="true" />
                 {section.label}
               </NavLink>
             </li>
