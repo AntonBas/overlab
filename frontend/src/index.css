@@ -3076,3 +3076,117 @@ input[type="range"] {
 #hero-spots {
   scroll-margin-top: 56px;
 }
+
+.icon-select {
+  --icon-select-width: 200px;
+  position: relative;
+}
+
+.icon-select--wide {
+  --icon-select-width: 264px;
+}
+
+.icon-select__trigger {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: var(--icon-select-width);
+  height: 40px;
+  padding: 0 32px 0 10px;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 11px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.icon-select__trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-select__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  max-width: calc(100vw - 32px);
+  max-height: 360px;
+  margin: 4px 0 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.icon-select__option {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.icon-select__option--highlighted {
+  background: var(--surface-2);
+}
+
+.icon-select__option--selected {
+  font-weight: 600;
+}
+
+.icon-select__content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.icon-select__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-select__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  color: var(--muted);
+}
+
+.icon-select__icon .thumbnail,
+.icon-select__icon .rank-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.icon-select__icon .rank-icon {
+  object-fit: contain;
+}
+
+.icon-select__icon .thumbnail {
+  object-fit: cover;
+}

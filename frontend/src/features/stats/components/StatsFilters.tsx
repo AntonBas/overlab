@@ -1,12 +1,19 @@
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
+import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
+import {
+  IconSelect,
+  type IconSelectOption,
+} from "../../../components/ui/IconSelect";
+import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
-import type { GameMap, HeroRole } from "../../../types/api";
+import { Gamepad2, Globe, Monitor } from "lucide-react";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
+import type { GameMap, HeroRole, Platform, Region } from "../../../types/api";
 import {
   PLATFORM_LABELS,
   QUEUE_LABELS,
   REGION_LABELS,
-  TIER_LABELS,
 } from "../../../utils/format";
 import {
   ALL_MAPS,
@@ -14,10 +21,32 @@ import {
   QUEUES,
   REGIONS,
   ROLES,
-  TIERS,
   isQuickPlay,
   type StatsFilters as Filters,
 } from "../filters";
+
+const MAP_ICON_WIDTH = 40;
+
+const PLATFORM_OPTIONS: readonly IconSelectOption<Platform>[] = PLATFORMS.map(
+  (platform) => ({
+    value: platform,
+    label: PLATFORM_LABELS[platform],
+    icon:
+      platform === "PC" ? (
+        <Monitor aria-hidden="true" size={18} />
+      ) : (
+        <Gamepad2 aria-hidden="true" size={18} />
+      ),
+  }),
+);
+
+const REGION_OPTIONS: readonly IconSelectOption<Region>[] = REGIONS.map(
+  (region) => ({
+    value: region,
+    label: REGION_LABELS[region],
+    icon: <Globe aria-hidden="true" size={18} />,
+  }),
+);
 
 interface StatsFiltersProps {
   filters: Filters;
@@ -35,6 +64,21 @@ export function StatsFilters({
   onSearchChange,
 }: StatsFiltersProps) {
   const quickPlay = isQuickPlay(filters);
+  const mapOptions: IconSelectOption<string>[] = [
+    { value: ALL_MAPS, label: "All maps", icon: <AllItemsIcon /> },
+    ...maps.map((map) => ({
+      value: map.slug,
+      label: map.name,
+      icon: (
+        <Thumbnail
+          url={map.imageUrl}
+          width={MAP_ICON_WIDTH}
+          height={24}
+          eager
+        />
+      ),
+    })),
+  ];
   return (
     <form
       className="filters"
@@ -57,70 +101,34 @@ export function StatsFilters({
         ))}
       </div>
 
-      <label className="field">
-        <span className="field__label">Rank</span>
-        <select
-          value={filters.tier}
-          disabled={quickPlay}
-          title={quickPlay ? "Quick Play has no ranks" : undefined}
-          onChange={(event) =>
-            onChange({ tier: event.target.value as Filters["tier"] })
-          }
-        >
-          {TIERS.map((tier) => (
-            <option key={tier} value={tier}>
-              {TIER_LABELS[tier]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <RankFilter
+        value={filters.tier}
+        disabled={quickPlay}
+        onChange={(tier) => onChange({ tier })}
+      />
 
-      <label className="field">
-        <span className="field__label">Map</span>
-        <select
-          value={filters.map}
-          onChange={(event) => onChange({ map: event.target.value })}
-        >
-          <option value={ALL_MAPS}>All maps</option>
-          {maps.map((map) => (
-            <option key={map.slug} value={map.slug}>
-              {map.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <IconSelect
+        label="Map"
+        value={filters.map}
+        options={mapOptions}
+        iconWidth={MAP_ICON_WIDTH}
+        wide
+        onChange={(map) => onChange({ map })}
+      />
 
-      <label className="field">
-        <span className="field__label">Platform</span>
-        <select
-          value={filters.platform}
-          onChange={(event) =>
-            onChange({ platform: event.target.value as Filters["platform"] })
-          }
-        >
-          {PLATFORMS.map((platform) => (
-            <option key={platform} value={platform}>
-              {PLATFORM_LABELS[platform]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <IconSelect
+        label="Platform"
+        value={filters.platform}
+        options={PLATFORM_OPTIONS}
+        onChange={(platform) => onChange({ platform })}
+      />
 
-      <label className="field">
-        <span className="field__label">Region</span>
-        <select
-          value={filters.region}
-          onChange={(event) =>
-            onChange({ region: event.target.value as Filters["region"] })
-          }
-        >
-          {REGIONS.map((region) => (
-            <option key={region} value={region}>
-              {REGION_LABELS[region]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <IconSelect
+        label="Region"
+        value={filters.region}
+        options={REGION_OPTIONS}
+        onChange={(region) => onChange({ region })}
+      />
 
       <label className="field">
         <span className="field__label">Hero</span>

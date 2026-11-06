@@ -1,4 +1,5 @@
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
+import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
 import { useState } from "react";
@@ -22,12 +23,7 @@ import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { SpotsSection } from "../../guides/components/SpotsSection";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
-import {
-  ROLES,
-  TIERS,
-  isQuickPlay,
-  type StatsFilters,
-} from "../../stats/filters";
+import { ROLES, isQuickPlay } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
@@ -100,23 +96,11 @@ export function MapPage() {
       </div>
       {stats.data && <MapBestPicks heroes={heroes} linkSuffix={linkSuffix} />}
       <div className="filters">
-        <label className="field">
-          <span className="field__label">Rank</span>
-          <select
-            value={filters.tier}
-            disabled={isQuickPlay(filters)}
-            title={isQuickPlay(filters) ? "Quick Play has no ranks" : undefined}
-            onChange={(event) =>
-              update({ tier: event.target.value as StatsFilters["tier"] })
-            }
-          >
-            {TIERS.map((tier) => (
-              <option key={tier} value={tier}>
-                {TIER_LABELS[tier]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <RankFilter
+          value={filters.tier}
+          disabled={isQuickPlay(filters)}
+          onChange={(tier) => update({ tier })}
+        />
         <label className="field">
           <span className="field__label">Hero</span>
           <input
