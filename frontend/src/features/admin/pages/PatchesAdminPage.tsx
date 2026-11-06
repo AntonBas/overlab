@@ -193,7 +193,12 @@ export function PatchesAdminPage() {
           rowKey={(patch) => patch.id}
           emptyMessage="No patches yet."
           columns={[
-            { header: "Version", render: (patch) => patch.version },
+            {
+              header: "Version",
+              render: (patch) => (
+                <span className="nowrap">{patch.version}</span>
+              ),
+            },
             { header: "Title", render: (patch) => patch.title ?? "" },
             {
               header: "Released",

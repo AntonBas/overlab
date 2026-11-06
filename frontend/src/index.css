@@ -104,6 +104,10 @@ ul {
   white-space: nowrap;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .muted {
   color: var(--muted);
 }
@@ -370,7 +374,8 @@ ul {
 }
 
 select,
-input {
+input,
+textarea {
   font: inherit;
   color: var(--text);
   background: var(--surface-2);
@@ -427,6 +432,7 @@ select:disabled {
 }
 
 .table-wrap {
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -898,6 +904,16 @@ select:disabled {
   margin-bottom: 24px;
 }
 
+.admin .table td:has(> .form__actions) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin .table .form__actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
 .admin .table tbody th {
   font-weight: 600;
 }
@@ -926,6 +942,19 @@ select:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.form-field--checkbox input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-field .muted {
+  font-size: 0.85rem;
 }
 
 .notice--success {
@@ -987,7 +1016,7 @@ select:disabled {
 
 @media (max-width: 800px) {
   .admin {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .admin__menu {
