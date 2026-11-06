@@ -50,7 +50,7 @@ public class HeroCategoryService {
                 .map(this::toDto).toList();
         List<CategoryMatchupDto> matchups = relationRepository.findAllByOrderByIdAsc().stream()
                 .map(relation -> new CategoryMatchupDto(relation.getHero().getSlug(), relation.getCategory().getSlug(),
-                        relation.getType(), relation.getStrength(), relation.getNote()))
+                        relation.getType(), relation.getNote()))
                 .toList();
         return new HeroCategoriesDto(categories, matchups);
     }
@@ -152,7 +152,6 @@ public class HeroCategoryService {
         relation.setHero(hero);
         relation.setCategory(category);
         relation.setType(request.type());
-        relation.setStrength(request.strength().shortValue());
         relation.setNote(request.note());
     }
 
@@ -174,7 +173,7 @@ public class HeroCategoryService {
 
     private CategoryMatchupAdminDto toAdminDto(HeroCategoryRelation relation) {
         return new CategoryMatchupAdminDto(relation.getId(), relation.getHero().getSlug(),
-                relation.getCategory().getSlug(), relation.getType(), relation.getStrength(), relation.getNote());
+                relation.getCategory().getSlug(), relation.getType(), relation.getNote());
     }
 
     private HeroCategory requireCategory(Long id) {

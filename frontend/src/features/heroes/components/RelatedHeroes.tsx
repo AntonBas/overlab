@@ -4,26 +4,6 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { AbilityText } from "./AbilityText";
 import type { RelatedHero } from "../../../types/api";
 
-export function Strength({ value }: { value: number }) {
-  return (
-    <span
-      className="strength"
-      role="img"
-      aria-label={`Strength ${value} of 3`}
-      title={`Strength ${value} of 3`}
-    >
-      {[1, 2, 3].map((pip) => (
-        <span
-          key={pip}
-          className={
-            pip <= value ? "strength__pip strength__pip--on" : "strength__pip"
-          }
-        />
-      ))}
-    </span>
-  );
-}
-
 export function RelatedHeroes({ heroes }: { heroes: RelatedHero[] }) {
   return (
     <ul className="card-list">
@@ -45,7 +25,6 @@ export function RelatedHeroes({ heroes }: { heroes: RelatedHero[] }) {
               </span>
             )}
           </span>
-          <Strength value={hero.strength} />
         </li>
       ))}
     </ul>

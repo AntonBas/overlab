@@ -6,7 +6,6 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { useFloatingTip } from "../../../hooks/useFloatingTip";
 import type { CategoryMatchup, HeroCategory } from "../../../types/api";
 import { AbilityText } from "./AbilityText";
-import { Strength } from "./RelatedHeroes";
 
 interface CategoryChipProps {
   category: HeroCategory;
@@ -45,7 +44,6 @@ export function CategoryChip({ category, matchup }: CategoryChipProps) {
               <span className="perk-tip__title">
                 <strong>{category.name}</strong>
               </span>
-              <Strength value={matchup.strength} />
             </span>
             {(matchup.note ?? category.description) && (
               <span className="perk-tip__text">

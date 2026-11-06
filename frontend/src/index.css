@@ -688,24 +688,6 @@ select:disabled {
   color: var(--bad);
 }
 
-.strength {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.strength__pip {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-}
-
-.strength__pip--on {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
 .video-frame {
   position: relative;
   aspect-ratio: 16 / 9;

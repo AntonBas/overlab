@@ -28,7 +28,6 @@ export interface HeroRelation {
   heroSlug: string;
   relatedHeroSlug: string;
   type: RelationType;
-  strength: number;
   note: string | null;
 }
 
@@ -36,7 +35,6 @@ export interface RelationPayload {
   heroSlug: string;
   relatedHeroSlug: string;
   type: RelationType;
-  strength: number;
   note: string | null;
 }
 
@@ -63,7 +61,6 @@ export interface AdminCategoryMatchup {
   heroSlug: string;
   categorySlug: string;
   type: CategoryMatchupType;
-  strength: number;
   note: string | null;
 }
 
@@ -71,7 +68,6 @@ export interface CategoryMatchupPayload {
   heroSlug: string;
   categorySlug: string;
   type: CategoryMatchupType;
-  strength: number;
   note: string | null;
 }
 

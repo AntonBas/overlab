@@ -32,8 +32,8 @@ public class HeroRelationService {
 
     private static final String AUDIT_TYPE = "HeroRelation";
 
-    private static final Comparator<RelatedHeroDto> BY_STRENGTH_THEN_NAME =
-            Comparator.comparingInt(RelatedHeroDto::strength).reversed().thenComparing(RelatedHeroDto::name);
+    private static final Comparator<RelatedHeroDto> BY_NAME =
+            Comparator.comparing(RelatedHeroDto::name);
 
     private final HeroRelationRepository relationRepository;
     private final HeroRepository heroRepository;
@@ -45,10 +45,10 @@ public class HeroRelationService {
     public HeroCountersDto getCounters(String heroSlug) {
         requireHero(heroSlug);
         List<RelatedHeroDto> counters = relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getRelatedHero(), relation)).sorted(BY_STRENGTH_THEN_NAME).toList();
+                .stream().map(relation -> related(relation.getRelatedHero(), relation)).sorted(BY_NAME).toList();
         List<RelatedHeroDto> counteredBy = relationRepository
                 .findAllByRelatedHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_STRENGTH_THEN_NAME).toList();
+                .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_NAME).toList();
         return new HeroCountersDto(counters, counteredBy);
     }
 
@@ -58,10 +58,10 @@ public class HeroRelationService {
         requireHero(heroSlug);
         Map<String, RelatedHeroDto> bySlug = new LinkedHashMap<>();
         relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.SYNERGY)
-                .forEach(relation -> keepStronger(bySlug, related(relation.getRelatedHero(), relation)));
+                .forEach(relation -> keepFirst(bySlug, related(relation.getRelatedHero(), relation)));
         relationRepository.findAllByRelatedHeroSlugAndType(heroSlug, RelationType.SYNERGY)
-                .forEach(relation -> keepStronger(bySlug, related(relation.getHero(), relation)));
-        return bySlug.values().stream().sorted(BY_STRENGTH_THEN_NAME).toList();
+                .forEach(relation -> keepFirst(bySlug, related(relation.getHero(), relation)));
+        return bySlug.values().stream().sorted(BY_NAME).toList();
     }
 
     @Cacheable(value = CacheNames.CONTENT, key = "'relations:all'")
@@ -78,9 +78,9 @@ public class HeroRelationService {
                 counteredBy.computeIfAbsent(relatedHero.getSlug(), slug -> new ArrayList<>())
                         .add(related(hero, relation));
             } else {
-                keepStronger(synergies.computeIfAbsent(hero.getSlug(), slug -> new LinkedHashMap<>()),
+                keepFirst(synergies.computeIfAbsent(hero.getSlug(), slug -> new LinkedHashMap<>()),
                         related(relatedHero, relation));
-                keepStronger(synergies.computeIfAbsent(relatedHero.getSlug(), slug -> new LinkedHashMap<>()),
+                keepFirst(synergies.computeIfAbsent(relatedHero.getSlug(), slug -> new LinkedHashMap<>()),
                         related(hero, relation));
             }
         }
@@ -93,7 +93,7 @@ public class HeroRelationService {
     }
 
     private List<RelatedHeroDto> sorted(Collection<RelatedHeroDto> heroes) {
-        return heroes.stream().sorted(BY_STRENGTH_THEN_NAME).toList();
+        return heroes.stream().sorted(BY_NAME).toList();
     }
 
     @Transactional(readOnly = true)
@@ -152,23 +152,21 @@ public class HeroRelationService {
         relation.setHero(hero);
         relation.setRelatedHero(relatedHero);
         relation.setType(request.type());
-        relation.setStrength(request.strength().shortValue());
         relation.setNote(request.note());
     }
 
-    private void keepStronger(Map<String, RelatedHeroDto> bySlug, RelatedHeroDto candidate) {
-        bySlug.merge(candidate.slug(), candidate,
-                (existing, other) -> other.strength() > existing.strength() ? other : existing);
+    private void keepFirst(Map<String, RelatedHeroDto> bySlug, RelatedHeroDto candidate) {
+        bySlug.putIfAbsent(candidate.slug(), candidate);
     }
 
     private RelatedHeroDto related(Hero hero, HeroRelation relation) {
-        return new RelatedHeroDto(hero.getSlug(), hero.getName(), hero.getRole(), relation.getStrength(),
+        return new RelatedHeroDto(hero.getSlug(), hero.getName(), hero.getRole(),
                 relation.getNote(), mediaUrlResolver.resolve(hero.getPortraitUrl()));
     }
 
     private RelationDto toDto(HeroRelation relation) {
         return new RelationDto(relation.getId(), relation.getHero().getSlug(), relation.getRelatedHero().getSlug(),
-                relation.getType(), relation.getStrength(), relation.getNote());
+                relation.getType(), relation.getNote());
     }
 
     private Hero requireHero(String slug) {

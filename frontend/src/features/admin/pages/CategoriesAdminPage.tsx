@@ -184,7 +184,6 @@ function MatchupForm({
   const [type, setType] = useState<CategoryMatchupType>(
     matchup?.type ?? "STRONG_AGAINST",
   );
-  const [strength, setStrength] = useState(matchup?.strength ?? 2);
   const [note, setNote] = useState(matchup?.note ?? "");
   const save = useSave();
   const duplicate = existing.some(
@@ -197,7 +196,6 @@ function MatchupForm({
     heroSlug !== (matchup?.heroSlug ?? "") ||
     categorySlug !== (matchup?.categorySlug ?? "") ||
     type !== (matchup?.type ?? "STRONG_AGAINST") ||
-    strength !== (matchup?.strength ?? 2) ||
     note !== (matchup?.note ?? "");
   useUnsavedChanges(dirty);
 
@@ -207,7 +205,6 @@ function MatchupForm({
       heroSlug,
       categorySlug,
       type,
-      strength,
       note: note.trim() === "" ? null : note,
     };
     const saved = await save.run(
@@ -265,17 +262,6 @@ function MatchupForm({
             {category.name}
           </option>
         ))}
-      </SelectField>
-      <SelectField
-        label="Strength"
-        name="strength"
-        value={strength}
-        error={save.fieldErrors.strength}
-        onChange={(event) => setStrength(Number(event.target.value))}
-      >
-        <option value={1}>1 (slight)</option>
-        <option value={2}>2 (clear)</option>
-        <option value={3}>3 (strong)</option>
       </SelectField>
       <TextAreaField
         label="Note"
@@ -454,7 +440,6 @@ export function CategoriesAdminPage() {
                 header: "Category",
                 render: (matchup) => categoryLabel(matchup.categorySlug),
               },
-              { header: "Strength", render: (matchup) => matchup.strength },
               {
                 header: "",
                 render: (matchup) => (

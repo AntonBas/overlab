@@ -14,8 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,11 +40,6 @@ public class HeroCategoryRelation extends TimestampedEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private CategoryMatchupType type;
-
-    @Min(1)
-    @Max(3)
-    @Column(nullable = false)
-    private short strength = 1;
 
     @Column(columnDefinition = "text")
     private String note;

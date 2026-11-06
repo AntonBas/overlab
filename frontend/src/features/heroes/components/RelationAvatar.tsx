@@ -7,7 +7,6 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { useFloatingTip } from "../../../hooks/useFloatingTip";
 import type { RelatedHero } from "../../../types/api";
 import { AbilityText } from "./AbilityText";
-import { Strength } from "./RelatedHeroes";
 
 export function RelationAvatar({ hero }: { hero: RelatedHero }) {
   const tipId = useId();
@@ -46,7 +45,6 @@ export function RelationAvatar({ hero }: { hero: RelatedHero }) {
                 <strong>{hero.name}</strong>
                 <RoleBadge role={hero.role} compact />
               </span>
-              <Strength value={hero.strength} />
             </span>
             <span className="perk-tip__text">
               {hero.note ? <AbilityText text={hero.note} /> : "No note yet."}

@@ -46,7 +46,6 @@ function RelationForm({
     relation?.relatedHeroSlug ?? "",
   );
   const [type, setType] = useState<RelationType>(relation?.type ?? "COUNTER");
-  const [strength, setStrength] = useState(relation?.strength ?? 2);
   const [note, setNote] = useState(relation?.note ?? "");
   const save = useSave();
   const conflict = describeRelationConflict(
@@ -58,7 +57,6 @@ function RelationForm({
     heroSlug !== (relation?.heroSlug ?? defaultHero) ||
     relatedHeroSlug !== (relation?.relatedHeroSlug ?? "") ||
     type !== (relation?.type ?? "COUNTER") ||
-    strength !== (relation?.strength ?? 2) ||
     note !== (relation?.note ?? "");
   useUnsavedChanges(dirty);
 
@@ -68,7 +66,6 @@ function RelationForm({
       heroSlug,
       relatedHeroSlug,
       type,
-      strength,
       note: note.trim() === "" ? null : note,
     };
     const saved = await save.run(
@@ -114,17 +111,6 @@ function RelationForm({
         error={save.fieldErrors.relatedHeroSlug}
         onChange={setRelatedHeroSlug}
       />
-      <SelectField
-        label="Strength"
-        name="strength"
-        value={strength}
-        error={save.fieldErrors.strength}
-        onChange={(event) => setStrength(Number(event.target.value))}
-      >
-        <option value={1}>1 (slight)</option>
-        <option value={2}>2 (clear)</option>
-        <option value={3}>3 (strong)</option>
-      </SelectField>
       <TextAreaField
         label="Note"
         name="note"
@@ -247,7 +233,6 @@ export function RelationsAdminPage() {
                   relation.relatedHeroSlug
                 ),
             },
-            { header: "Strength", render: (relation) => relation.strength },
             {
               header: "",
               render: (relation) => (

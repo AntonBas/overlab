@@ -48,7 +48,6 @@ vi.mock("../api/adminApi", () => ({
         heroSlug: "pharah",
         categorySlug: "beam",
         type: "WEAK_AGAINST",
-        strength: 2,
         note: null,
       },
     ]),

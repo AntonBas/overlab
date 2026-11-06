@@ -40,7 +40,6 @@ vi.mock("../api/heroesApi", () => ({
           slug: "reaper",
           name: "Reaper",
           role: "DAMAGE",
-          strength: 3,
           note: "Sleep dart stops him",
           portraitUrl: null,
         },
@@ -56,7 +55,6 @@ vi.mock("../api/heroesApi", () => ({
           slug: "ana",
           name: "Ana",
           role: "SUPPORT",
-          strength: 3,
           note: "Sleep dart stops him",
           portraitUrl: null,
         },
@@ -82,7 +80,6 @@ vi.mock("../api/heroesApi", () => ({
         heroSlug: "ana",
         categorySlug: "dive",
         type: "WEAK_AGAINST",
-        strength: 2,
         note: "Hard to peel for",
       },
     ],
@@ -141,7 +138,7 @@ describe("CountersPage", () => {
     expect(rows()[0].querySelector("strong")?.textContent).toBe("Reaper");
   });
 
-  it("shows the strength and note in a tooltip on hover", async () => {
+  it("shows the note in a tooltip on hover", async () => {
     renderPage();
     await screen.findAllByText("Strong against");
     expect(screen.queryByRole("tooltip")).toBeNull();

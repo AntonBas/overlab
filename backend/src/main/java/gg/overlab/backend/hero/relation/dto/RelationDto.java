@@ -7,6 +7,5 @@ public record RelationDto(
         String heroSlug,
         String relatedHeroSlug,
         RelationType type,
-        int strength,
         String note) {
 }

@@ -8,7 +8,6 @@ const existing: HeroRelation[] = [
     heroSlug: "ana",
     relatedHeroSlug: "genji",
     type: "COUNTER",
-    strength: 2,
     note: null,
   },
 ];
