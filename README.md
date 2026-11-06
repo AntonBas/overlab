@@ -28,6 +28,9 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
 | `/me` | Favorites, notes and default filters |
 | `/me/settings` | Change name, password and email, download or delete your data |
+| `/privacy`, `/terms`, `/cookies` | Legal pages linked from the footer; `/cookies` also holds the consent choices |
+
+A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages comes from the `VITE_CONTACT_EMAIL` build variable.
 
 The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
 

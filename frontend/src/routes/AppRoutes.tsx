@@ -13,6 +13,9 @@ import { ChangesPage } from "../features/history/pages/ChangesPage";
 import { MapPage } from "../features/maps/pages/MapPage";
 import { MapsPage } from "../features/maps/pages/MapsPage";
 import { StatsPage } from "../features/stats/pages/StatsPage";
+import { CookiesPage } from "../features/legal/pages/CookiesPage";
+import { PrivacyPage } from "../features/legal/pages/PrivacyPage";
+import { TermsPage } from "../features/legal/pages/TermsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 const ForgotPasswordPage = lazy(() =>
@@ -142,6 +145,9 @@ export function AppRoutes() {
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
+        <Route path="cookies" element={<CookiesPage />} />
         <Route path="me" element={<MyLibraryPage />} />
         <Route path="me/settings" element={<SettingsPage />} />
         <Route path="login" element={<LoginPage />} />
