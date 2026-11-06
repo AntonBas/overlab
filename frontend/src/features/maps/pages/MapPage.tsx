@@ -96,11 +96,12 @@ export function MapPage() {
       </div>
       {stats.data && <MapBestPicks heroes={heroes} linkSuffix={linkSuffix} />}
       <div className="filters">
-        <RankFilter
-          value={filters.tier}
-          disabled={isQuickPlay(filters)}
-          onChange={(tier) => update({ tier })}
-        />
+        {!isQuickPlay(filters) && (
+          <RankFilter
+            value={filters.tier}
+            onChange={(tier) => update({ tier })}
+          />
+        )}
         <label className="field">
           <span className="field__label">Hero</span>
           <input

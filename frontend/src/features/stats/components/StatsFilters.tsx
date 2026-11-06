@@ -25,7 +25,7 @@ import {
   type StatsFilters as Filters,
 } from "../filters";
 
-const MAP_ICON_WIDTH = 40;
+const MAP_ICON_SIZE = 24;
 
 const PLATFORM_OPTIONS: readonly IconSelectOption<Platform>[] = PLATFORMS.map(
   (platform) => ({
@@ -72,8 +72,8 @@ export function StatsFilters({
       icon: (
         <Thumbnail
           url={map.imageUrl}
-          width={MAP_ICON_WIDTH}
-          height={24}
+          width={MAP_ICON_SIZE}
+          height={MAP_ICON_SIZE}
           eager
         />
       ),
@@ -101,17 +101,17 @@ export function StatsFilters({
         ))}
       </div>
 
-      <RankFilter
-        value={filters.tier}
-        disabled={quickPlay}
-        onChange={(tier) => onChange({ tier })}
-      />
+      {!quickPlay && (
+        <RankFilter
+          value={filters.tier}
+          onChange={(tier) => onChange({ tier })}
+        />
+      )}
 
       <IconSelect
         label="Map"
         value={filters.map}
         options={mapOptions}
-        iconWidth={MAP_ICON_WIDTH}
         wide
         onChange={(map) => onChange({ map })}
       />
