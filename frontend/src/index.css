@@ -2950,47 +2950,27 @@ input[type="range"] {
 }
 
 .matchups {
-  margin: 0 0 16px;
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  margin: 0 0 24px;
 }
 
 .matchups__rows {
+  display: grid;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.matchups__head,
 .matchup {
   display: grid;
-  grid-template-columns: minmax(180px, 230px) repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  align-items: start;
-  padding: 12px 16px;
-  border-left: 4px solid var(--role-color, transparent);
-}
-
-.matchups__head {
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.matchups__head span,
-.matchup__cell::before {
-  display: block;
-  padding-bottom: 2px;
-  border-bottom: 2px solid var(--column-color);
-}
-
-.matchup + .matchup {
-  border-top: 1px solid var(--border);
+  grid-template-columns: minmax(180px, 220px) repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--role-color, var(--border));
+  border-radius: 14px;
 }
 
 .matchup--tank {
@@ -3034,6 +3014,10 @@ input[type="range"] {
 .matchup__cell {
   --column-color: var(--link);
   min-width: 0;
+  padding: 12px;
+  background: color-mix(in srgb, var(--column-color) 6%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--column-color) 18%, transparent);
+  border-radius: var(--radius);
 }
 
 .matchup__cell--counters {
@@ -3044,14 +3028,20 @@ input[type="range"] {
   --column-color: var(--bad);
 }
 
-.matchup__cell::before {
-  display: none;
+.matchup__label {
+  display: block;
   margin-bottom: 8px;
-  content: attr(data-label);
-  color: var(--muted);
+  color: var(--column-color);
   font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.matchup__empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .matchup__list {
@@ -3113,17 +3103,8 @@ input[type="range"] {
 }
 
 @media (max-width: 900px) {
-  .matchups__head {
-    display: none;
-  }
-
   .matchup {
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
-
-  .matchup__cell::before {
-    display: block;
   }
 }
 
