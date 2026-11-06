@@ -14,8 +14,12 @@ export function AdminHomePage() {
       <ul className="admin__cards">
         {ADMIN_SECTIONS.map((section) => (
           <li key={section.to}>
-            <Link className="button button--ghost" to={section.to}>
-              {section.label}
+            <Link className="admin__card" to={section.to}>
+              <span className="admin__card-icon">
+                <section.icon size={20} aria-hidden="true" />
+              </span>
+              <span className="admin__card-title">{section.label}</span>
+              <span className="admin__card-text">{section.description}</span>
             </Link>
           </li>
         ))}
