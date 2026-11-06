@@ -157,14 +157,6 @@ export function CountersPage() {
         </EmptyState>
       ) : (
         <div className="matchups">
-          <div className="matchups__head" aria-hidden="true">
-            <span>Hero</span>
-            {COLUMNS.map((column) => (
-              <span key={column.key} className={`matchup__cell--${column.key}`}>
-                {column.label}
-              </span>
-            ))}
-          </div>
           <ul className="matchups__rows">
             {visibleHeroes.map((hero) => {
               const entry = relationsByHero.get(hero.slug);
@@ -217,10 +209,12 @@ export function CountersPage() {
                       <div
                         key={column.key}
                         className={`matchup__cell matchup__cell--${column.key}`}
-                        data-label={column.label}
                       >
+                        <span className="matchup__label">{column.label}</span>
                         {related.length + categoryMatchups.length === 0 ? (
-                          <span className="muted">—</span>
+                          <span className="matchup__empty">
+                            No recommendations yet
+                          </span>
                         ) : (
                           <ul className="matchup__list">
                             {categoryMatchups.map((matchup) => {
