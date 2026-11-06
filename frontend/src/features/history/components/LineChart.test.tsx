@@ -79,7 +79,7 @@ describe("LineChart", () => {
     expect(container).not.toHaveTextContent("Patch inside");
   });
 
-  it("names a patch only when the pointer is on its line", () => {
+  it("shows no patch tooltip when the pointer is over a patch line", () => {
     mockPlotBox();
     const { container } = render(
       <LineChart
@@ -90,20 +90,43 @@ describe("LineChart", () => {
           {
             time: Date.parse("2026-10-05T00:00:00Z"),
             label: "Hotfix Update",
-            detail: "Version 2026-10-05",
           },
         ]}
       />,
     );
-    expect(container.querySelector(".chart__tooltip")).toBeNull();
 
     hoverAt(342);
 
-    const tooltip = container.querySelector(".chart__tooltip");
-    expect(tooltip).toHaveTextContent("5 Oct 2026");
-    expect(tooltip).toHaveTextContent("Hotfix Update");
-    expect(tooltip).toHaveTextContent("Version 2026-10-05");
-    expect(container.querySelector(".chart__marker--active")).not.toBeNull();
+    expect(container.querySelector(".chart__tooltip")).toHaveTextContent(
+      "48.0%",
+    );
+    expect(container.querySelector(".chart__tooltip")).not.toHaveTextContent(
+      "Hotfix",
+    );
+  });
+
+  it("keeps the tooltip of a point the same while the pointer stays near it", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+          },
+        ]}
+      />,
+    );
+
+    hoverAt(450);
+    const first = container.querySelector(".chart__tooltip")?.textContent;
+    hoverAt(520);
+    const second = container.querySelector(".chart__tooltip")?.textContent;
+
+    expect(first).toBe(second);
   });
 
   it("mentions a patch released since the previous point in the point tooltip", () => {
@@ -127,6 +150,7 @@ describe("LineChart", () => {
     expect(container.querySelector(".chart__tooltip-patch")).toHaveTextContent(
       "Patch: Hotfix Update",
     );
+    expect(container.querySelector(".chart__marker--active")).not.toBeNull();
   });
 
   it("renders nothing without points", () => {

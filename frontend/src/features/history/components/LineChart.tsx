@@ -30,9 +30,6 @@ const SIZE: ChartSize = {
   padding: { top: 12, right: 12, bottom: 24, left: 44 },
 };
 
-const MARKER_HIT_DISTANCE = 8;
-const DOT_ANCHOR_DISTANCE = 24;
-
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
@@ -67,9 +64,6 @@ export function LineChart({
 }: LineChartProps) {
   const [asTable, setAsTable] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [activeMarkerIndex, setActiveMarkerIndex] = useState<number | null>(
-    null,
-  );
   const svgRef = useRef<SVGSVGElement>(null);
   const geometry = buildChartGeometry(points, SIZE);
   if (!geometry) {
@@ -92,19 +86,13 @@ export function LineChart({
       ? geometry.dots[activeIndex - 1]
       : null;
   const activeShare = active ? (active.x / SIZE.width) * 100 : 0;
-  const activeMarker =
-    activeMarkerIndex !== null ? visibleMarkers[activeMarkerIndex] : null;
-  const activeMarkerShare = activeMarker
-    ? (geometry.xOf(activeMarker.time) / SIZE.width) * 100
-    : 0;
   const patchesAtActive = active
     ? visibleMarkers.filter(
         (marker) =>
-          marker === activeMarker ||
-          (marker.time <= active.time &&
-            (previous
-              ? marker.time > previous.time
-              : marker.time === active.time)),
+          marker.time <= active.time &&
+          (previous
+            ? marker.time > previous.time
+            : marker.time === active.time),
       )
     : [];
 
@@ -112,40 +100,20 @@ export function LineChart({
     const box = svgRef.current?.getBoundingClientRect();
     const scale = box && box.width > 0 ? SIZE.width / box.width : 1;
     const x = (event.clientX - (box?.left ?? 0)) * scale;
-    const dotIndex = nearestDotIndex(geometry!.dots, x);
-    const dotDistance =
-      dotIndex === null
-        ? Number.POSITIVE_INFINITY
-        : Math.abs(geometry!.dots[dotIndex].x - x);
-    let markerIndex = -1;
-    let markerDistance = MARKER_HIT_DISTANCE + 1;
-    visibleMarkers.forEach((marker, index) => {
-      const distance = Math.abs(geometry!.xOf(marker.time) - x);
-      if (distance < markerDistance) {
-        markerIndex = index;
-        markerDistance = distance;
-      }
-    });
-    setActiveMarkerIndex(markerIndex >= 0 ? markerIndex : null);
-    setActiveIndex(
-      markerIndex >= 0 && dotDistance > DOT_ANCHOR_DISTANCE ? null : dotIndex,
-    );
+    setActiveIndex(nearestDotIndex(geometry!.dots, x));
   }
 
   function clearSelection() {
     setActiveIndex(null);
-    setActiveMarkerIndex(null);
   }
 
   function moveWithKeys(event: KeyboardEvent<SVGSVGElement>) {
     const last = geometry!.dots.length - 1;
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      setActiveMarkerIndex(null);
       setActiveIndex((index) => Math.max(0, (index ?? last + 1) - 1));
     } else if (event.key === "ArrowRight") {
       event.preventDefault();
-      setActiveMarkerIndex(null);
       setActiveIndex((index) => Math.min(last, (index ?? -1) + 1));
     } else if (event.key === "Escape") {
       clearSelection();
@@ -238,9 +206,9 @@ export function LineChart({
             >
               {formatDate(geometry.maxTime)}
             </text>
-            {visibleMarkers.map((marker, index) => {
+            {visibleMarkers.map((marker) => {
               const x = geometry.xOf(marker.time);
-              const isActive = index === activeMarkerIndex;
+              const isActive = patchesAtActive.includes(marker);
               return (
                 <g key={`${marker.time}-${marker.label}`}>
                   <line
@@ -330,30 +298,10 @@ export function LineChart({
               ))}
             </div>
           )}
-          {activeMarker && !active && (
-            <div
-              className={tooltipClass(activeMarkerShare)}
-              style={{
-                left: `${activeMarkerShare}%`,
-                top: `${(SIZE.padding.top / SIZE.height) * 100}%`,
-              }}
-              aria-hidden="true"
-            >
-              <span className="chart__tooltip-date">
-                {fullDateFormat.format(new Date(activeMarker.time))}
-              </span>
-              <strong>{activeMarker.label}</strong>
-              {activeMarker.detail && (
-                <span className="muted">{activeMarker.detail}</span>
-              )}
-            </div>
-          )}
           <span className="visually-hidden" role="status">
             {active
               ? `${fullDateFormat.format(new Date(active.time))}: ${formatPercent(active.value)}${patchesAtActive.map((marker) => `, patch ${marker.label}`).join("")}`
-              : activeMarker
-                ? `${fullDateFormat.format(new Date(activeMarker.time))}: patch ${activeMarker.label}`
-                : ""}
+              : ""}
           </span>
         </div>
       )}
