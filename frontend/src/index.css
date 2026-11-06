@@ -787,7 +787,7 @@ select:disabled {
 
 .admin__menu {
   position: sticky;
-  top: 80px;
+  top: 16px;
   padding: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -900,6 +900,24 @@ select:disabled {
   font-size: 0.85rem;
 }
 
+.admin__content > .hero-select {
+  margin-bottom: 16px;
+}
+
+.admin__form .hero-select .icon-select {
+  --icon-select-width: 100%;
+  max-width: none;
+}
+
+.hero-select .icon-select {
+  max-width: 320px;
+}
+
+.admin .table th,
+.admin .table td {
+  padding: 12px;
+}
+
 .admin .table-wrap {
   margin-bottom: 24px;
 }
@@ -996,6 +1014,55 @@ select:disabled {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.table__error {
+  display: block;
+  width: 240px;
+  overflow-wrap: anywhere;
+  color: var(--bad);
+  font-size: 0.85rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge--good {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+}
+
+.status-badge--bad {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+}
+
+.status-badge--warning {
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.status-badge--info {
+  color: var(--link);
+  border-color: color-mix(in srgb, var(--link) 40%, transparent);
+  background: color-mix(in srgb, var(--link) 12%, transparent);
+}
+
+.changes strong {
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .changes {

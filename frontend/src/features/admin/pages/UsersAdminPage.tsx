@@ -12,6 +12,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Pagination } from "../components/Pagination";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
+import { StatusBadge } from "../components/StatusBadge";
 import type { AdminUser } from "../types";
 
 export function UsersAdminPage() {
@@ -100,7 +101,12 @@ export function UsersAdminPage() {
                       ? new Date(entry.lastLoginAt).toLocaleString()
                       : "never"}
                   </td>
-                  <td>{entry.enabled ? "Active" : "Blocked"}</td>
+                  <td>
+                    <StatusBadge
+                      value={entry.enabled ? "Active" : "Blocked"}
+                      tone={entry.enabled ? "good" : "bad"}
+                    />
+                  </td>
                   <td>
                     {entry.id !== currentUser?.id && (
                       <button

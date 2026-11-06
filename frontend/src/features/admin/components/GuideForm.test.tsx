@@ -47,7 +47,8 @@ describe("GuideForm", () => {
     const user = userEvent.setup();
     const { onSaved } = renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Hero"), "ana");
+    await user.click(screen.getByRole("combobox", { name: "Hero" }));
+    await user.click(screen.getByRole("option", { name: "Ana" }));
     await user.type(screen.getByLabelText("Title"), "Nade timing");
     await user.type(
       screen.getByLabelText("YouTube link"),
@@ -75,7 +76,8 @@ describe("GuideForm", () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Hero"), "ana");
+    await user.click(screen.getByRole("combobox", { name: "Hero" }));
+    await user.click(screen.getByRole("option", { name: "Ana" }));
     await user.type(screen.getByLabelText("Title"), "Nade timing");
     await user.type(screen.getByLabelText("YouTube link"), "not a link");
     await user.type(screen.getByLabelText("Start time"), "1:99");
@@ -106,7 +108,8 @@ describe("GuideForm", () => {
     );
     renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Hero"), "ana");
+    await user.click(screen.getByRole("combobox", { name: "Hero" }));
+    await user.click(screen.getByRole("option", { name: "Ana" }));
     await user.type(screen.getByLabelText("Title"), "Nade timing");
     await user.type(screen.getByLabelText("YouTube link"), "dQw4w9WgXcQ");
     await user.click(screen.getByRole("button", { name: "Save" }));

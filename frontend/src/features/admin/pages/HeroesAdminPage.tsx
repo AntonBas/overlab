@@ -13,6 +13,7 @@ import { CheckboxField, TextAreaField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import { useUnsavedChanges } from "../components/unsavedChanges";
+import { StatusBadge } from "../components/StatusBadge";
 import type { AdminHero } from "../types";
 
 function HeroForm({
@@ -134,7 +135,12 @@ export function HeroesAdminPage() {
             { header: "Role", render: (hero) => ROLE_LABELS[hero.role] },
             {
               header: "Status",
-              render: (hero) => (hero.active ? "Active" : "Inactive"),
+              render: (hero) => (
+                <StatusBadge
+                  value={hero.active ? "Active" : "Inactive"}
+                  tone={hero.active ? "good" : "neutral"}
+                />
+              ),
             },
             {
               header: "",
