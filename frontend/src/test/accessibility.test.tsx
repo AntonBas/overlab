@@ -76,7 +76,6 @@ describe("accessibility", () => {
               slug: "mei",
               name: "Mei",
               role: "DAMAGE",
-              strength: 2,
               note: null,
               portraitUrl: null,
             },

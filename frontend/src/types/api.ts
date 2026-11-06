@@ -192,7 +192,6 @@ export interface RelatedHero {
   slug: string;
   name: string;
   role: HeroRole;
-  strength: number;
   note: string | null;
   portraitUrl: string | null;
 }
@@ -230,7 +229,6 @@ export interface CategoryMatchup {
   heroSlug: string;
   categorySlug: string;
   type: CategoryMatchupType;
-  strength: number;
   note: string | null;
 }
 

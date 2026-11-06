@@ -56,22 +56,6 @@ class AdminContentControllerTest {
     }
 
     @Test
-    void relationRejectsStrengthOutsideOneToThree() throws Exception {
-        mockMvc.perform(post("/api/admin/hero-relations").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"heroSlug\":\"ana\",\"relatedHeroSlug\":\"genji\",\"type\":\"COUNTER\",\"strength\":5}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.subErrors[?(@.field=='strength')]").exists());
-    }
-
-    @Test
-    void categoryMatchupRejectsStrengthOutsideOneToThree() throws Exception {
-        mockMvc.perform(post("/api/admin/hero-category-relations").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"heroSlug\":\"ana\",\"categorySlug\":\"beam\",\"type\":\"WEAK_AGAINST\",\"strength\":5}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.subErrors[?(@.field=='strength')]").exists());
-    }
-
-    @Test
     void categoryRequiresALowercaseSlug() throws Exception {
         mockMvc.perform(post("/api/admin/hero-categories").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"slug\":\"Not A Slug\",\"name\":\"Beam\",\"heroSlugs\":[]}"))

@@ -55,14 +55,13 @@ class HeroCategoryServiceTest {
     }
 
     @Test
-    void matchupsCarryTypeStrengthAndNote() {
+    void matchupsCarryTypeAndNote() {
         Hero pharah = hero("pharah", "Pharah", HeroRole.DAMAGE, true);
         HeroCategory hitscan = category("hitscan", "Hitscan");
         HeroCategoryRelation relation = new HeroCategoryRelation();
         relation.setHero(pharah);
         relation.setCategory(hitscan);
         relation.setType(CategoryMatchupType.WEAK_AGAINST);
-        relation.setStrength((short) 3);
         relation.setNote("Shot down without leading");
         when(categoryRepository.findAllByOrderByNameAsc()).thenReturn(List.of(hitscan));
         when(relationRepository.findAllByOrderByIdAsc()).thenReturn(List.of(relation));
@@ -73,7 +72,6 @@ class HeroCategoryServiceTest {
             assertThat(matchup.heroSlug()).isEqualTo("pharah");
             assertThat(matchup.categorySlug()).isEqualTo("hitscan");
             assertThat(matchup.type()).isEqualTo(CategoryMatchupType.WEAK_AGAINST);
-            assertThat(matchup.strength()).isEqualTo(3);
             assertThat(matchup.note()).isEqualTo("Shot down without leading");
         });
     }
@@ -118,12 +116,12 @@ class HeroCategoryServiceTest {
         when(relationRepository.existsByHeroIdAndCategoryIdAndIdNot(1L, 2L, -1L)).thenReturn(true);
 
         assertThatThrownBy(() -> service.createMatchup(
-                new CategoryMatchupRequest("pharah", "hitscan", CategoryMatchupType.WEAK_AGAINST, 3, null)))
+                new CategoryMatchupRequest("pharah", "hitscan", CategoryMatchupType.WEAK_AGAINST, null)))
                 .isInstanceOf(ConflictException.class);
     }
 
     @Test
-    void creatingAMatchupSavesTypeAndStrength() {
+    void creatingAMatchupSavesType() {
         Hero pharah = hero("pharah", "Pharah", HeroRole.DAMAGE, true);
         pharah.setId(1L);
         HeroCategory hitscan = category("hitscan", "Hitscan");
@@ -134,10 +132,9 @@ class HeroCategoryServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         CategoryMatchupAdminDto created = service.createMatchup(
-                new CategoryMatchupRequest("pharah", "hitscan", CategoryMatchupType.WEAK_AGAINST, 3, "note"));
+                new CategoryMatchupRequest("pharah", "hitscan", CategoryMatchupType.WEAK_AGAINST, "note"));
 
         assertThat(created.type()).isEqualTo(CategoryMatchupType.WEAK_AGAINST);
-        assertThat(created.strength()).isEqualTo(3);
     }
 
     private HeroCategory category(String slug, String name, Hero... members) {

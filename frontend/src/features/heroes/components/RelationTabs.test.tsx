@@ -10,7 +10,6 @@ function related(slug: string, name: string): RelatedHero {
     slug,
     name,
     role: "DAMAGE",
-    strength: 2,
     note: null,
     portraitUrl: null,
   };
@@ -109,7 +108,6 @@ describe("RelationTabs", () => {
           heroSlug: "dva",
           categorySlug: "flying",
           type: "WEAK_AGAINST",
-          strength: 2,
           note: null,
         },
       ],
@@ -135,7 +133,6 @@ describe("RelationTabs", () => {
           heroSlug: "dva",
           categorySlug: "beam",
           type: "WEAK_AGAINST",
-          strength: 3,
           note: null,
         },
       ],

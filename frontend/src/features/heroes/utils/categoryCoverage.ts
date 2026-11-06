@@ -9,17 +9,12 @@ export function withoutCoveredHeroes(
   matchups: CategoryMatchup[],
   categoriesBySlug: Map<string, HeroCategory>,
 ): RelatedHero[] {
-  const coveredStrength = new Map<string, number>();
+  const covered = new Set<string>();
   for (const matchup of matchups) {
     const category = categoriesBySlug.get(matchup.categorySlug);
     for (const member of category?.heroes ?? []) {
-      coveredStrength.set(
-        member.slug,
-        Math.max(coveredStrength.get(member.slug) ?? 0, matchup.strength),
-      );
+      covered.add(member.slug);
     }
   }
-  return related.filter(
-    (hero) => hero.strength > (coveredStrength.get(hero.slug) ?? 0),
-  );
+  return related.filter((hero) => !covered.has(hero.slug));
 }

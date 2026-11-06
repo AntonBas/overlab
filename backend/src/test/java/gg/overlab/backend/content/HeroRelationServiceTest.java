@@ -49,47 +49,45 @@ class HeroRelationServiceTest {
     }
 
     @Test
-    void countersListBothDirectionsSortedByStrength() {
+    void countersListBothDirectionsSortedByName() {
         when(relationRepository.findAllByHeroSlugAndType("ana", RelationType.COUNTER)).thenReturn(List.of(
-                relation(ana, genji, RelationType.COUNTER, 1), relation(ana, reinhardt, RelationType.COUNTER, 3)));
+                relation(ana, genji, RelationType.COUNTER), relation(ana, reinhardt, RelationType.COUNTER)));
         when(relationRepository.findAllByRelatedHeroSlugAndType("ana", RelationType.COUNTER))
-                .thenReturn(List.of(relation(genji, ana, RelationType.COUNTER, 2)));
+                .thenReturn(List.of(relation(genji, ana, RelationType.COUNTER)));
 
         HeroCountersDto result = service.getCounters("ana");
 
-        assertThat(result.counters()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
+        assertThat(result.counters()).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
         assertThat(result.counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("genji");
     }
 
     @Test
-    void synergiesMergeBothSidesKeepingTheStrongerEntry() {
+    void synergiesMergeBothSidesWithoutDuplicates() {
         when(relationRepository.findAllByHeroSlugAndType("ana", RelationType.SYNERGY))
-                .thenReturn(List.of(relation(ana, reinhardt, RelationType.SYNERGY, 1)));
+                .thenReturn(List.of(relation(ana, reinhardt, RelationType.SYNERGY)));
         when(relationRepository.findAllByRelatedHeroSlugAndType("ana", RelationType.SYNERGY)).thenReturn(List.of(
-                relation(reinhardt, ana, RelationType.SYNERGY, 3), relation(genji, ana, RelationType.SYNERGY, 2)));
+                relation(reinhardt, ana, RelationType.SYNERGY), relation(genji, ana, RelationType.SYNERGY)));
 
         List<RelatedHeroDto> result = service.getSynergies("ana");
 
-        assertThat(result).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
-        assertThat(result.get(0).strength()).isEqualTo(3);
+        assertThat(result).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
     }
 
     @Test
     void allRelationsGroupCountersAndSynergiesPerHero() {
         when(heroRepository.findAllByActiveTrueOrderByNameAsc()).thenReturn(List.of(ana, genji, reinhardt));
         when(relationRepository.findAllByOrderByIdAsc()).thenReturn(List.of(
-                relation(ana, genji, RelationType.COUNTER, 1), relation(ana, reinhardt, RelationType.COUNTER, 3),
-                relation(genji, ana, RelationType.COUNTER, 2), relation(ana, reinhardt, RelationType.SYNERGY, 2),
-                relation(reinhardt, ana, RelationType.SYNERGY, 3)));
+                relation(ana, genji, RelationType.COUNTER), relation(ana, reinhardt, RelationType.COUNTER),
+                relation(genji, ana, RelationType.COUNTER), relation(ana, reinhardt, RelationType.SYNERGY),
+                relation(reinhardt, ana, RelationType.SYNERGY)));
 
         List<HeroRelationsDto> result = service.findAllRelations();
 
         assertThat(result).extracting(HeroRelationsDto::heroSlug).containsExactly("ana", "genji", "reinhardt");
         HeroRelationsDto forAna = result.get(0);
-        assertThat(forAna.counters()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
+        assertThat(forAna.counters()).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
         assertThat(forAna.counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("genji");
         assertThat(forAna.synergies()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt");
-        assertThat(forAna.synergies().get(0).strength()).isEqualTo(3);
         assertThat(result.get(2).counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("ana");
         assertThat(result.get(2).synergies()).extracting(RelatedHeroDto::slug).containsExactly("ana");
     }
@@ -103,7 +101,7 @@ class HeroRelationServiceTest {
 
     @Test
     void rejectsRelationWithItself() {
-        assertThatThrownBy(() -> service.create(new RelationRequest("ana", "ana", RelationType.COUNTER, 2, null)))
+        assertThatThrownBy(() -> service.create(new RelationRequest("ana", "ana", RelationType.COUNTER, null)))
                 .isInstanceOf(BadRequestException.class);
         verify(relationRepository, never()).save(any());
     }
@@ -113,18 +111,17 @@ class HeroRelationServiceTest {
         when(relationRepository.existsByHeroIdAndRelatedHeroIdAndTypeAndIdNot(2L, 1L, RelationType.SYNERGY, -1L))
                 .thenReturn(true);
 
-        assertThatThrownBy(() -> service.create(new RelationRequest("ana", "genji", RelationType.SYNERGY, 2, null)))
+        assertThatThrownBy(() -> service.create(new RelationRequest("ana", "genji", RelationType.SYNERGY, null)))
                 .isInstanceOf(ConflictException.class);
         verify(relationRepository, never()).save(any());
     }
 
     @Test
     void createsRelationWhenNoDuplicateExists() {
-        var created = service.create(new RelationRequest("ana", "genji", RelationType.COUNTER, 3, "Sleep dart"));
+        var created = service.create(new RelationRequest("ana", "genji", RelationType.COUNTER, "Sleep dart"));
 
         assertThat(created.heroSlug()).isEqualTo("ana");
         assertThat(created.relatedHeroSlug()).isEqualTo("genji");
-        assertThat(created.strength()).isEqualTo(3);
         assertThat(created.note()).isEqualTo("Sleep dart");
     }
 
@@ -137,12 +134,11 @@ class HeroRelationServiceTest {
         return hero;
     }
 
-    private HeroRelation relation(Hero hero, Hero related, RelationType type, int strength) {
+    private HeroRelation relation(Hero hero, Hero related, RelationType type) {
         HeroRelation relation = new HeroRelation();
         relation.setHero(hero);
         relation.setRelatedHero(related);
         relation.setType(type);
-        relation.setStrength((short) strength);
         return relation;
     }
 }
