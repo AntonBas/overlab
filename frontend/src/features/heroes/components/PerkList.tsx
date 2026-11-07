@@ -74,25 +74,19 @@ function PerkCard({ perk }: { perk: Perk }) {
   );
 }
 
-function CompactPerkTile({
-  perk,
-  detailed,
-}: {
-  perk: Perk;
-  detailed: boolean;
-}) {
+function CompactPerkTile({ perk }: { perk: Perk }) {
   const position = positionOf(perk);
   const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps } = useFloatingTip();
-  const hasTip =
-    !detailed && Boolean(perk.description || perk.recommendationNote);
+  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
+    useFloatingTip();
+  const hasTip = Boolean(perk.description || perk.recommendationNote);
   return (
     <li
+      data-tip-anchor
       className={clsx(
         "perk-tile",
         `perk-card--${position.toLowerCase()}`,
         `perk-card--${perk.recommendation.toLowerCase()}`,
-        { "perk-tile--detailed": detailed },
       )}
     >
       <span
@@ -120,16 +114,6 @@ function CompactPerkTile({
               {RECOMMENDATION_LABELS[perk.recommendation]}
             </span>
           </span>
-          {detailed && perk.description && (
-            <span className="perk-tile__description muted">
-              {perk.description}
-            </span>
-          )}
-          {detailed && perk.recommendationNote && (
-            <span className="perk-tile__note">
-              <AbilityText text={perk.recommendationNote} />
-            </span>
-          )}
         </span>
       </span>
       {hasTip &&
@@ -141,9 +125,11 @@ function CompactPerkTile({
             ref={tipRef}
             className={clsx(
               "perk-tip",
+              "perk-tip--interactive",
               `perk-tip--${perk.recommendation.toLowerCase()}`,
             )}
             style={style}
+            {...tipProps}
           >
             <span className="perk-tip__header">
               <Thumbnail
@@ -183,11 +169,9 @@ function CompactPerkTile({
 export function PerkList({
   perks,
   compact = false,
-  detailed = false,
 }: {
   perks: Perk[];
   compact?: boolean;
-  detailed?: boolean;
 }) {
   return (
     <>
@@ -203,19 +187,10 @@ export function PerkList({
         return (
           <div key={slot} className="perk-group">
             <h3>{SLOT_LABELS[slot]}</h3>
-            <ul
-              className={clsx("perk-row", {
-                "perk-row--compact": compact,
-                "perk-row--detailed": compact && detailed,
-              })}
-            >
+            <ul className={clsx("perk-row", { "perk-row--compact": compact })}>
               {group.map((perk) =>
                 compact ? (
-                  <CompactPerkTile
-                    key={perk.id}
-                    perk={perk}
-                    detailed={detailed}
-                  />
+                  <CompactPerkTile key={perk.id} perk={perk} />
                 ) : (
                   <PerkCard key={perk.id} perk={perk} />
                 ),

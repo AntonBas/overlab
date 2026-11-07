@@ -1,15 +1,67 @@
 import type { CSSProperties } from "react";
 
-const HERO_BACKDROPS: Record<string, string> = {
-  dmon: "/images/backgrounds/dmon.avif",
-};
+const HEROES_WITH_BACKDROP: ReadonlySet<string> = new Set([
+  "ana",
+  "anran",
+  "ashe",
+  "baptiste",
+  "bastion",
+  "brigitte",
+  "cassidy",
+  "dmon",
+  "doctrine",
+  "domina",
+  "doomfist",
+  "dva",
+  "echo",
+  "emre",
+  "freja",
+  "genji",
+  "hanzo",
+  "hazard",
+  "illari",
+  "jetpack-cat",
+  "junker-queen",
+  "junkrat",
+  "juno",
+  "kiriko",
+  "lifeweaver",
+  "lucio",
+  "mauga",
+  "mei",
+  "mercy",
+  "mizuki",
+  "moira",
+  "orisa",
+  "pharah",
+  "ramattra",
+  "reaper",
+  "reinhardt",
+  "roadhog",
+  "shion",
+  "sierra",
+  "sigma",
+  "sojourn",
+  "soldier-76",
+  "sombra",
+  "symmetra",
+  "torbjorn",
+  "tracer",
+  "vendetta",
+  "venture",
+  "widowmaker",
+  "winston",
+  "wrecking-ball",
+  "wuyang",
+  "zarya",
+  "zenyatta",
+]);
 
 export function heroBackdropStyle(slug: string): CSSProperties | undefined {
-  const image = HERO_BACKDROPS[slug];
-  if (!image) {
+  if (!HEROES_WITH_BACKDROP.has(slug)) {
     return undefined;
   }
   return {
-    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.55), rgb(15 18 24 / 0.88)), url(${image})`,
+    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.55), rgb(15 18 24 / 0.88)), url(/images/backgrounds/${slug}.webp)`,
   };
 }
