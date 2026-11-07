@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
@@ -5,7 +6,12 @@ import { AbilityText } from "./AbilityText";
 import type { RelatedHero } from "../../../types/api";
 import type { RelationKind } from "../api/relationFeedbackApi";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
-import { RelationFeedbackActions } from "./RelationFeedbackActions";
+
+const RelationFeedbackActions = lazy(() =>
+  import("./RelationFeedbackActions").then((module) => ({
+    default: module.RelationFeedbackActions,
+  })),
+);
 
 interface RelatedHeroesProps {
   heroes: RelatedHero[];
@@ -34,12 +40,14 @@ export function RelatedHeroes({ heroes, type, feedback }: RelatedHeroesProps) {
               </span>
             )}
             {feedback && (
-              <RelationFeedbackActions
-                feedback={feedback}
-                relatedHeroSlug={hero.slug}
-                relatedHeroName={hero.name}
-                type={type}
-              />
+              <Suspense fallback={null}>
+                <RelationFeedbackActions
+                  feedback={feedback}
+                  relatedHeroSlug={hero.slug}
+                  relatedHeroName={hero.name}
+                  type={type}
+                />
+              </Suspense>
             )}
           </span>
         </li>
