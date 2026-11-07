@@ -52,13 +52,6 @@ export interface Favorites {
   maps: GameMap[];
 }
 
-export interface Note {
-  heroSlug: string;
-  heroName: string;
-  content: string;
-  updatedAt: string | null;
-}
-
 export interface Preferences {
   queue: GameQueue | null;
   platform: Platform | null;

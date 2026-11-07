@@ -1354,13 +1354,6 @@ select:disabled {
   gap: 8px;
 }
 
-.note-preview {
-  flex-basis: 100%;
-  margin: 0;
-  white-space: pre-wrap;
-  color: var(--muted);
-}
-
 .portrait {
   flex: none;
   display: inline-block;

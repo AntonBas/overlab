@@ -6,12 +6,11 @@ import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { useHeroPortraits } from "../../../hooks/useCatalog";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useAuth } from "../../auth/context/useAuth";
 import { SettingsSection } from "../../account/components/SettingsSection";
-import { fetchFavorites, fetchNotes } from "../api/personalApi";
+import { fetchFavorites } from "../api/personalApi";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { usePersonalData } from "../context/usePersonalData";
 
@@ -23,11 +22,6 @@ export function MyLibraryPage() {
     () => (user ? fetchFavorites() : Promise.resolve(null)),
     [user?.id, personal.favoriteHeroes, personal.favoriteMaps],
     { keepPrevious: true },
-  );
-  const heroPortraits = useHeroPortraits();
-  const notes = useFetch(
-    () => (user ? fetchNotes() : Promise.resolve([])),
-    [user?.id],
   );
 
   if (loading) {
@@ -99,34 +93,6 @@ export function MyLibraryPage() {
                 >
                   Remove {map.name}
                 </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </SettingsSection>
-      <SettingsSection
-        title="Notes"
-        description="Private notes you wrote on hero pages."
-      >
-        {notes.error && (
-          <ErrorMessage failure={notes.error} onRetry={notes.reload} />
-        )}
-        {notes.data && notes.data.length === 0 && (
-          <EmptyState>No notes yet.</EmptyState>
-        )}
-        {notes.data && notes.data.length > 0 && (
-          <ul className="link-list">
-            {notes.data.map((note) => (
-              <li key={note.heroSlug}>
-                <span className="place-icon">
-                  <HeroPortrait
-                    name={note.heroName}
-                    url={heroPortraits[note.heroSlug] ?? null}
-                    size={28}
-                  />
-                  <Link to={`/heroes/${note.heroSlug}`}>{note.heroName}</Link>
-                </span>
-                <p className="note-preview">{note.content}</p>
               </li>
             ))}
           </ul>

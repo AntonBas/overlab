@@ -96,8 +96,7 @@ public class AccountService {
         User user = load(userId);
         return new AccountExportDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(),
                 user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt(),
-                personalService.favorites(userId), personalService.notes(userId),
-                personalService.preferences(userId));
+                personalService.favorites(userId), personalService.preferences(userId));
     }
 
     private User load(Long userId) {

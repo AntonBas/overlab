@@ -18,7 +18,6 @@ import { HeroHistorySection } from "../../history/components/HeroHistorySection"
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { SpotsSection } from "../../guides/components/SpotsSection";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { HeroNote } from "../../personal/components/HeroNote";
 import { fetchHeroMapStats } from "../../stats/api/statsApi";
 import {
   fetchCounters,
@@ -241,8 +240,6 @@ export function HeroPage() {
           />
         </div>
       )}
-
-      <HeroNote key={slug} heroSlug={slug} />
     </>
   );
 }

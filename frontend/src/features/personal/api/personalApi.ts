@@ -1,5 +1,5 @@
 import { api } from "../../../services/api";
-import type { Favorites, Note, Preferences } from "../../../types/api";
+import type { Favorites, Preferences } from "../../../types/api";
 
 export async function fetchFavorites(): Promise<Favorites> {
   const { data } = await api.get<Favorites>("/me/favorites");
@@ -20,24 +20,6 @@ export async function addFavoriteMap(slug: string): Promise<void> {
 
 export async function removeFavoriteMap(slug: string): Promise<void> {
   await api.delete(`/me/favorites/maps/${slug}`);
-}
-
-export async function fetchNotes(): Promise<Note[]> {
-  const { data } = await api.get<Note[]>("/me/notes");
-  return data;
-}
-
-export async function fetchNote(heroSlug: string): Promise<Note | null> {
-  const { data } = await api.get<Note[]>("/me/notes");
-  return data.find((note) => note.heroSlug === heroSlug) ?? null;
-}
-
-export async function saveNote(
-  heroSlug: string,
-  content: string,
-): Promise<Note> {
-  const { data } = await api.put<Note>(`/me/notes/${heroSlug}`, { content });
-  return data;
 }
 
 export async function fetchPreferences(): Promise<Preferences> {
