@@ -58,7 +58,7 @@ class RatesCollectorServiceTest {
         metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
         metrics.registerLastSuccessGauges();
         service = new RatesCollectorService(properties, client, validator, recorder, mock(GameMapRepository.class),
-                mock(CacheManager.class), runRepository, metrics, deferredExecutor);
+                mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {

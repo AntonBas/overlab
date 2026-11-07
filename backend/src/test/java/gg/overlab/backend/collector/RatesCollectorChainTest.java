@@ -43,7 +43,7 @@ class RatesCollectorChainTest {
                 mock(SnapshotCheckRepository.class));
         metrics.registerLastSuccessGauges();
         service = new RatesCollectorService(properties, client, mock(RatesValidator.class), recorder,
-                mock(GameMapRepository.class), mock(CacheManager.class), runRepository, metrics, Runnable::run);
+                mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, Runnable::run);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(client.fetch(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag", false));

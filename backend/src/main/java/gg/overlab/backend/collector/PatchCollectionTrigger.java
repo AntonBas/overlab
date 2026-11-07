@@ -17,13 +17,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class PatchCollectionTrigger {
 
     private final RatesCollectorService collectorService;
+    private final PerkImportService perkImportService;
     private final TaskExecutor executor;
     private final Duration recentWindow;
 
-    public PatchCollectionTrigger(RatesCollectorService collectorService,
+    public PatchCollectionTrigger(RatesCollectorService collectorService, PerkImportService perkImportService,
                                   @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor,
                                   @Value("${collector.patch-import.recent-days:7}") int recentDays) {
         this.collectorService = collectorService;
+        this.perkImportService = perkImportService;
         this.executor = executor;
         this.recentWindow = Duration.ofDays(recentDays);
     }
@@ -50,6 +52,15 @@ public class PatchCollectionTrigger {
             } catch (RuntimeException exception) {
                 log.error("Collector job '{}' failed after a patch", job.name(), exception);
             }
+        }
+        refreshHeroContent();
+    }
+
+    private void refreshHeroContent() {
+        try {
+            perkImportService.startAsync();
+        } catch (RuntimeException exception) {
+            log.info("Hero perks and abilities were not refreshed after the patch: {}", exception.getMessage());
         }
     }
 }

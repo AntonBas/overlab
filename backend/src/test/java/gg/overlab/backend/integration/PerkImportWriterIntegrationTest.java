@@ -119,4 +119,86 @@ class PerkImportWriterIntegrationTest {
 
         assertThat(perkRepository.findById(existing.getId()).orElseThrow().getIconUrl()).isEqualTo("perks/own.png");
     }
+
+    private Perk importedPerk(String name, String description) {
+        Perk perk = new Perk();
+        perk.setHero(hero);
+        perk.setName(name);
+        perk.setSlot(PerkSlot.MINOR);
+        perk.setRecommendation(PerkRecommendation.RECOMMENDED);
+        perk.setDescription(description);
+        perk.setImported(true);
+        perk.setImportedDescription(description);
+        return perkRepository.saveAndFlush(perk);
+    }
+
+    private ParsedPerk parsed(PerkSlot slot, String name, String description) {
+        return new ParsedPerk(slot, PerkPosition.LEFT, name, description, null);
+    }
+
+    @Test
+    void updatesTheTextOfAnImportedPerkWhenBlizzardChangesIt() {
+        Perk existing = importedPerk("Quick Dart", "Old text");
+
+        PerkImportWriter.Counts counts = writer.write("import-test",
+                List.of(parsed(PerkSlot.MINOR, "Quick Dart", "New text")), url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 1));
+        Perk reloaded = perkRepository.findById(existing.getId()).orElseThrow();
+        assertThat(reloaded.getDescription()).isEqualTo("New text");
+        assertThat(reloaded.getImportedDescription()).isEqualTo("New text");
+        assertThat(reloaded.getRecommendation()).isEqualTo(PerkRecommendation.RECOMMENDED);
+    }
+
+    @Test
+    void keepsTheTextAnEditorWroteButRemembersWhatBlizzardSaid() {
+        Perk existing = importedPerk("Quick Dart", "Old text");
+        existing.setDescription("Edited by hand");
+        perkRepository.saveAndFlush(existing);
+
+        writer.write("import-test", List.of(parsed(PerkSlot.MINOR, "Quick Dart", "New text")),
+                url -> Optional.empty());
+
+        Perk reloaded = perkRepository.findById(existing.getId()).orElseThrow();
+        assertThat(reloaded.getDescription()).isEqualTo("Edited by hand");
+        assertThat(reloaded.getImportedDescription()).isEqualTo("New text");
+    }
+
+    @Test
+    void movesAnImportedPerkToTheNewSlot() {
+        Perk existing = importedPerk("Quick Dart", "Text");
+
+        writer.write("import-test", List.of(parsed(PerkSlot.MAJOR, "Quick Dart", "Text")), url -> Optional.empty());
+
+        assertThat(perkRepository.findById(existing.getId()).orElseThrow().getSlot()).isEqualTo(PerkSlot.MAJOR);
+    }
+
+    @Test
+    void removesImportedPerksThatBlizzardNoLongerListsButKeepsManualOnes() {
+        Perk gone = importedPerk("Old Perk", "Text");
+        importedPerk("Quick Dart", "Text");
+        Perk manual = new Perk();
+        manual.setHero(hero);
+        manual.setName("Manual Perk");
+        manual.setSlot(PerkSlot.MINOR);
+        manual.setRecommendation(PerkRecommendation.OPTIONAL);
+        perkRepository.saveAndFlush(manual);
+
+        PerkImportWriter.Counts counts = writer.write("import-test",
+                List.of(parsed(PerkSlot.MINOR, "Quick Dart", "Text")), url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 0, 1));
+        assertThat(perkRepository.findById(gone.getId())).isEmpty();
+        assertThat(perkRepository.findById(manual.getId())).isPresent();
+    }
+
+    @Test
+    void removesNothingWhenThePageYieldedNoPerks() {
+        Perk existing = importedPerk("Quick Dart", "Text");
+
+        PerkImportWriter.Counts counts = writer.write("import-test", List.of(), url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 0, 0));
+        assertThat(perkRepository.findById(existing.getId())).isPresent();
+    }
 }

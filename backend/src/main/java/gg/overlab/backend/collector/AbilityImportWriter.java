@@ -10,7 +10,9 @@ import gg.overlab.backend.media.MediaFolder;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,20 @@ public class AbilityImportWriter {
                 updated++;
             }
         }
-        return new PerkImportWriter.Counts(created, updated);
+        int removed = removeStale(heroSlug, parsedAbilities);
+        return new PerkImportWriter.Counts(created, updated, removed);
+    }
+
+    private int removeStale(String heroSlug, List<ParsedAbility> parsedAbilities) {
+        if (parsedAbilities.isEmpty()) {
+            return 0;
+        }
+        Set<String> currentSlugs = parsedAbilities.stream().map(ParsedAbility::slug).collect(Collectors.toSet());
+        List<HeroAbility> stale = abilityRepository.findAllByHeroSlugOrderBySortOrderAsc(heroSlug).stream()
+                .filter(ability -> !currentSlugs.contains(ability.getSlug()))
+                .toList();
+        stale.forEach(ability -> imageStore.remove(ability.getIconUrl()));
+        abilityRepository.deleteAll(stale);
+        return stale.size();
     }
 }

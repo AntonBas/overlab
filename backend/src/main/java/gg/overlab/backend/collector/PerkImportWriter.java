@@ -9,8 +9,11 @@ import gg.overlab.backend.hero.perk.PerkRepository;
 import gg.overlab.backend.media.ImageStore;
 import gg.overlab.backend.media.MediaFolder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +26,11 @@ public class PerkImportWriter {
     private final PerkRepository perkRepository;
     private final ImageStore imageStore;
 
-    public record Counts(int created, int updated) {
+    public record Counts(int created, int updated, int removed) {
+
+        public Counts(int created, int updated) {
+            this(created, updated, 0);
+        }
     }
 
     @Transactional
@@ -38,16 +45,10 @@ public class PerkImportWriter {
             boolean isNew = perk == null;
             boolean changed = false;
             if (isNew) {
-                perk = new Perk();
-                perk.setHero(hero);
-                perk.setName(parsed.name());
-                perk.setSlot(parsed.slot());
-                perk.setPosition(parsed.position());
-                perk.setRecommendation(PerkRecommendation.OPTIONAL);
-                perk.setDescription(parsed.description());
-                perk = perkRepository.save(perk);
-            } else if ((perk.getDescription() == null || perk.getDescription().isBlank())
-                    && parsed.description() != null) {
+                perk = newPerk(hero, parsed);
+            } else if (perk.isImported()) {
+                changed = refreshImported(perk, parsed);
+            } else if (isBlank(perk.getDescription()) && parsed.description() != null) {
                 perk.setDescription(parsed.description());
                 changed = true;
             }
@@ -66,6 +67,58 @@ public class PerkImportWriter {
                 updated++;
             }
         }
-        return new Counts(created, updated);
+        int removed = removeStaleImportedPerks(hero, parsedPerks);
+        return new Counts(created, updated, removed);
+    }
+
+    private Perk newPerk(Hero hero, ParsedPerk parsed) {
+        Perk perk = new Perk();
+        perk.setHero(hero);
+        perk.setName(parsed.name());
+        perk.setSlot(parsed.slot());
+        perk.setPosition(parsed.position());
+        perk.setRecommendation(PerkRecommendation.OPTIONAL);
+        perk.setDescription(parsed.description());
+        perk.setImported(true);
+        perk.setImportedDescription(parsed.description());
+        return perkRepository.save(perk);
+    }
+
+    private boolean refreshImported(Perk perk, ParsedPerk parsed) {
+        boolean changed = false;
+        if (perk.getSlot() != parsed.slot()) {
+            perk.setSlot(parsed.slot());
+            changed = true;
+        }
+        if (parsed.description() != null && !parsed.description().equals(perk.getImportedDescription())) {
+            boolean untouchedByEditors = isBlank(perk.getDescription())
+                    || perk.getDescription().equals(perk.getImportedDescription());
+            if (untouchedByEditors) {
+                perk.setDescription(parsed.description());
+            }
+            perk.setImportedDescription(parsed.description());
+            changed = true;
+        }
+        return changed;
+    }
+
+    private int removeStaleImportedPerks(Hero hero, List<ParsedPerk> parsedPerks) {
+        if (parsedPerks.isEmpty()) {
+            return 0;
+        }
+        Set<String> currentNames = parsedPerks.stream()
+                .map(parsed -> parsed.name().toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
+        List<Perk> stale = perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(hero.getSlug()).stream()
+                .filter(Perk::isImported)
+                .filter(perk -> !currentNames.contains(perk.getName().toLowerCase(Locale.ROOT)))
+                .toList();
+        stale.forEach(perk -> imageStore.remove(perk.getIconUrl()));
+        perkRepository.deleteAll(stale);
+        return stale.size();
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

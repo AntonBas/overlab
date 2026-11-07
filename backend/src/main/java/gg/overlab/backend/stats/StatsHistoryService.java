@@ -6,7 +6,9 @@ import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.patch.PatchService;
 import gg.overlab.backend.patch.dto.PatchDto;
+import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
+import gg.overlab.backend.stats.dto.HeroRoleChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
 import gg.overlab.backend.stats.dto.HistoryStartDto;
@@ -37,6 +39,7 @@ public class StatsHistoryService {
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final PatchService patchService;
+    private final HeroRoleChangeRepository roleChangeRepository;
     private final StatsMapper statsMapper;
 
     @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
@@ -80,9 +83,16 @@ public class StatsHistoryService {
         Map<Long, HeroStat> beforeByHero = new HashMap<>();
         loadSnapshot(filter, beforeCapturedAt).forEach(stat -> beforeByHero.put(stat.getHero().getId(), stat));
 
+        Map<Long, HeroRoleChangeDto> roleChanges = new HashMap<>();
+        roleChangeRepository.findAllByChangedAtGreaterThanAndChangedAtLessThanEqualOrderByChangedAtDesc(
+                        beforeCapturedAt, afterCapturedAt)
+                .forEach(change -> roleChanges.putIfAbsent(change.getHero().getId(),
+                        statsMapper.toRoleChangeDto(change)));
+
         List<HeroChangeDto> heroes = loadSnapshot(filter, afterCapturedAt).stream()
                 .filter(stat -> beforeByHero.containsKey(stat.getHero().getId()))
-                .map(stat -> statsMapper.toChangeDto(beforeByHero.get(stat.getHero().getId()), stat))
+                .map(stat -> statsMapper.toChangeDto(beforeByHero.get(stat.getHero().getId()), stat,
+                        roleChanges.get(stat.getHero().getId())))
                 .sorted(Comparator.comparing(HeroChangeDto::winRateChange).reversed())
                 .toList();
         return new StatsComparisonDto(beforeCapturedAt, afterCapturedAt, filter.queue(), filter.tier(),

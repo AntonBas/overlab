@@ -6,7 +6,7 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroChange } from "../../../types/api";
-import { formatPercent } from "../../../utils/format";
+import { ROLE_LABELS, formatDate, formatPercent } from "../../../utils/format";
 import { sortChanges, type ChangeSort } from "../utils/changes";
 
 interface ChangesTableProps {
@@ -136,6 +136,14 @@ export function ChangesTable({
                       {change.heroName}
                     </Link>
                     <RoleBadge role={change.role} compact />
+                    {change.roleChange && (
+                      <span
+                        className="table__flag"
+                        title={`Moved from ${ROLE_LABELS[change.roleChange.previousRole]} to ${ROLE_LABELS[change.roleChange.newRole]} on ${formatDate(change.roleChange.changedAt)}, so the numbers before and after are not directly comparable.`}
+                      >
+                        Role changed
+                      </span>
+                    )}
                   </span>
                 </th>
                 <td>

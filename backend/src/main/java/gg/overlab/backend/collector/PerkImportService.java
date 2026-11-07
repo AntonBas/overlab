@@ -70,6 +70,7 @@ public class PerkImportService {
     private void run(List<String> slugs) {
         int created = 0;
         int updated = 0;
+        int removed = 0;
         int failed = 0;
         try {
             for (String slug : slugs) {
@@ -77,6 +78,7 @@ public class PerkImportService {
                     PerkImportWriter.Counts counts = importHero(slug);
                     created += counts.created();
                     updated += counts.updated();
+                    removed += counts.removed();
                 } catch (RuntimeException exception) {
                     failed++;
                     log.warn("Perk import failed for {}: {}", slug, exception.getMessage());
@@ -84,8 +86,8 @@ public class PerkImportService {
                 sleep(properties.pause());
             }
             clearContentCache();
-            log.info("Perk and ability import finished: {} created, {} updated, {} of {} heroes failed", created, updated,
-                    failed, slugs.size());
+            log.info("Perk and ability import finished: {} created, {} updated, {} removed, {} of {} heroes failed",
+                    created, updated, removed, failed, slugs.size());
         } finally {
             running.set(false);
         }
@@ -101,7 +103,7 @@ public class PerkImportService {
         PerkImportWriter.Counts abilityCounts = abilityWriter.write(slug, abilityParser.parse(page.get()),
                 imageDownloader::downloadPng);
         return new PerkImportWriter.Counts(perkCounts.created() + abilityCounts.created(),
-                perkCounts.updated() + abilityCounts.updated());
+                perkCounts.updated() + abilityCounts.updated(), perkCounts.removed() + abilityCounts.removed());
     }
 
     private void clearContentCache() {

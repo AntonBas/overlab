@@ -56,4 +56,10 @@ public class Perk extends TimestampedEntity {
 
     @Column(name = "icon_url", length = 512)
     private String iconUrl;
+
+    @Column(nullable = false)
+    private boolean imported;
+
+    @Column(name = "imported_description", columnDefinition = "text")
+    private String importedDescription;
 }

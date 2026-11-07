@@ -20,7 +20,7 @@ class StatsMapperTest {
         hero.setRole(HeroRole.SUPPORT);
 
         HeroChangeDto change = mapper.toChangeDto(stat(hero, "47.10", "20.00", "10.00"),
-                stat(hero, "45.60", "24.50", "10.00"));
+                stat(hero, "45.60", "24.50", "10.00"), null);
 
         assertThat(change.winRateChange()).isEqualByComparingTo("-1.50");
         assertThat(change.pickRateChange()).isEqualByComparingTo("4.50");
@@ -39,7 +39,7 @@ class StatsMapperTest {
 
         assertThat(mapper.toDto(stat(hero, "47.10", "20.00", "10.00"), null).portraitUrl())
                 .isEqualTo("/media/heroes/ana.png");
-        assertThat(mapper.toChangeDto(stat(hero, "47.10", "20.00", "10.00"), stat(hero, "45.60", "24.50", "10.00"))
+        assertThat(mapper.toChangeDto(stat(hero, "47.10", "20.00", "10.00"), stat(hero, "45.60", "24.50", "10.00"), null)
                 .portraitUrl()).isEqualTo("/media/heroes/ana.png");
     }
 
@@ -51,7 +51,7 @@ class StatsMapperTest {
         hero.setRole(HeroRole.SUPPORT);
 
         HeroChangeDto change = mapper.toChangeDto(stat(hero, "47.10", "20.00", null),
-                stat(hero, "47.10", "20.00", "3.00"));
+                stat(hero, "47.10", "20.00", "3.00"), null);
 
         assertThat(change.banRateChange()).isNull();
     }

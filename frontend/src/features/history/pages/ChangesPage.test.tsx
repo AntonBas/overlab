@@ -277,6 +277,7 @@ describe("ChangesPage", () => {
           banRateBefore: 5,
           banRateAfter: 5,
           banRateChange: 0,
+          roleChange: null,
         },
       ],
     });
@@ -319,6 +320,7 @@ describe("ChangesPage", () => {
       banRateBefore: 5,
       banRateAfter: 5,
       banRateChange: 0,
+      roleChange: null,
     });
     vi.mocked(fetchComparison).mockResolvedValue({
       beforeCapturedAt: "2026-11-02T10:00:00Z",

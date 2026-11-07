@@ -44,6 +44,7 @@ public class RatesCollectorService {
     private final RatesValidator validator;
     private final SnapshotRecorder recorder;
     private final GameMapRepository gameMapRepository;
+    private final MapDiscoveryService mapDiscovery;
     private final CacheManager cacheManager;
     private final CollectorRunRepository runRepository;
     private final CollectorMetrics metrics;
@@ -53,7 +54,8 @@ public class RatesCollectorService {
 
     public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
                                  RatesValidator validator, SnapshotRecorder recorder,
-                                 GameMapRepository gameMapRepository, CacheManager cacheManager,
+                                 GameMapRepository gameMapRepository, MapDiscoveryService mapDiscovery,
+                                 CacheManager cacheManager,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
                                  @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
@@ -61,6 +63,7 @@ public class RatesCollectorService {
         this.validator = validator;
         this.recorder = recorder;
         this.gameMapRepository = gameMapRepository;
+        this.mapDiscovery = mapDiscovery;
         this.cacheManager = cacheManager;
         this.runRepository = runRepository;
         this.metrics = metrics;
@@ -251,12 +254,21 @@ public class RatesCollectorService {
         List<String> slugs = new ArrayList<>();
         for (String map : job.maps()) {
             if (EACH_MAP.equals(map)) {
+                discoverMaps();
                 gameMapRepository.findAll().forEach(gameMap -> slugs.add(gameMap.getSlug()));
             } else {
                 slugs.add(map);
             }
         }
         return slugs;
+    }
+
+    private void discoverMaps() {
+        try {
+            mapDiscovery.discover();
+        } catch (RuntimeException exception) {
+            log.warn("Map discovery failed: {}", exception.getMessage());
+        }
     }
 
     private void evictCaches() {
