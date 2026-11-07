@@ -26,14 +26,6 @@ function renderFilters(filters: Filters = DEFAULT_FILTERS) {
 }
 
 describe("StatsFilters", () => {
-  it("switches the game mode", async () => {
-    const onChange = renderFilters();
-
-    await userEvent.click(screen.getByRole("button", { name: "Quick Play" }));
-
-    expect(onChange).toHaveBeenCalledWith({ queue: "QUICK_PLAY" });
-  });
-
   it("hides the rank filter for Quick Play", () => {
     renderFilters({ ...DEFAULT_FILTERS, queue: "QUICK_PLAY" });
 

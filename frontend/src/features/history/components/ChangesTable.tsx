@@ -1,5 +1,3 @@
-import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
-import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -7,9 +5,8 @@ import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import type { HeroChange, HeroRole } from "../../../types/api";
+import type { HeroChange } from "../../../types/api";
 import { formatPercent } from "../../../utils/format";
-import { ROLES } from "../../stats/filters";
 import { sortChanges, type ChangeSort } from "../utils/changes";
 
 interface ChangesTableProps {
@@ -44,10 +41,9 @@ export function ChangesTable({
 }: ChangesTableProps) {
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
-  const [role, setRole] = useState<HeroRole | null>(null);
   const rows = useMemo(
-    () => sortChanges([...changes], sort, descending, role),
-    [changes, sort, descending, role],
+    () => sortChanges(changes, sort, descending),
+    [changes, sort, descending],
   );
 
   function toggle(next: ChangeSort) {
@@ -78,38 +74,11 @@ export function ChangesTable({
   }
 
   if (changes.length === 0) {
-    return <EmptyState>No heroes appear in both snapshots.</EmptyState>;
+    return <EmptyState>No heroes match these filters.</EmptyState>;
   }
 
   return (
     <>
-      <div className="table-toolbar">
-        <div className="segmented" role="group" aria-label="Role">
-          <button
-            type="button"
-            className={clsx("segmented__item", {
-              "segmented__item--active": role === null,
-            })}
-            aria-pressed={role === null}
-            onClick={() => setRole(null)}
-          >
-            <AllRolesBadge label="All roles" />
-          </button>
-          {ROLES.map((entry) => (
-            <button
-              key={entry}
-              type="button"
-              className={clsx("segmented__item", {
-                "segmented__item--active": role === entry,
-              })}
-              aria-pressed={role === entry}
-              onClick={() => setRole(entry)}
-            >
-              <RoleBadge role={entry} />
-            </button>
-          ))}
-        </div>
-      </div>
       <div className="table-wrap">
         <table className="table">
           <thead>
@@ -141,7 +110,17 @@ export function ChangesTable({
                   Pick rate {icon("PICK_CHANGE")}
                 </button>
               </th>
-              {showBan && <th scope="col">Ban rate</th>}
+              {showBan && (
+                <th scope="col" aria-sort={ariaSort("BAN_CHANGE")}>
+                  <button
+                    type="button"
+                    className="table__sort"
+                    onClick={() => toggle("BAN_CHANGE")}
+                  >
+                    Ban rate {icon("BAN_CHANGE")}
+                  </button>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>

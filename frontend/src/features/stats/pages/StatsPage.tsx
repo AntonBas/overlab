@@ -3,6 +3,7 @@ import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
+import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -47,6 +48,12 @@ export function StatsPage() {
           ) : (
             "Win, pick and ban rates collected from Blizzard's public statistics"
           )
+        }
+        actions={
+          <QueueToggle
+            value={filters.queue}
+            onChange={(queue) => update({ queue })}
+          />
         }
       />
       <StatsFilters

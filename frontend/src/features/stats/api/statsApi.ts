@@ -77,6 +77,7 @@ export async function fetchHeroHistory(
 }
 
 export interface ComparisonParams extends HeroStatsParams {
+  map?: string;
   patch?: string;
   from?: string;
   to?: string;
