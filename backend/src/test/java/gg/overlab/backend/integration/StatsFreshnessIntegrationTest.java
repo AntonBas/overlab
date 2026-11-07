@@ -17,6 +17,7 @@ import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.stats.SnapshotCheck;
 import gg.overlab.backend.stats.SnapshotCheckRepository;
 import gg.overlab.backend.stats.StatsFreshnessService;
+import gg.overlab.backend.stats.StatsHistoryService;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
@@ -38,6 +39,9 @@ class StatsFreshnessIntegrationTest {
 
     @Autowired
     private StatsFreshnessService freshnessService;
+
+    @Autowired
+    private StatsHistoryService historyService;
 
     @Autowired
     private HeroRepository heroRepository;
@@ -140,6 +144,19 @@ class StatsFreshnessIntegrationTest {
 
         assertThat(freshness.snapshotCount()).isEqualTo(1);
         assertThat(freshness.changeObserved()).isFalse();
+    }
+
+    @Test
+    void historyStartsWithTheFirstStoredSnapshot() {
+        snapshot(SECOND, "47.00", "52.00");
+        snapshot(FIRST, "47.00", "52.00");
+
+        assertThat(historyService.historyStart(filter()).firstCapturedAt()).isEqualTo(FIRST);
+    }
+
+    @Test
+    void historyStartIsEmptyWithoutSnapshots() {
+        assertThat(historyService.historyStart(filter()).firstCapturedAt()).isNull();
     }
 
     @Test

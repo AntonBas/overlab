@@ -9,6 +9,7 @@ import gg.overlab.backend.patch.dto.PatchDto;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
+import gg.overlab.backend.stats.dto.HistoryStartDto;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.time.Duration;
@@ -94,6 +95,13 @@ public class StatsHistoryService {
     public StatsComparisonDto compareAroundPatch(StatsFilter filter, String patchSlug) {
         PatchDto patch = patchService.getBySlug(patchSlug);
         return buildComparison(filter, patch.releasedAt(), patch.releasedAt().plus(PATCH_COMPARISON_WINDOW));
+    }
+
+    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = "'history-start:' + #filter.cacheKey()")
+    @Transactional(readOnly = true)
+    public HistoryStartDto historyStart(StatsFilter filter) {
+        return new HistoryStartDto(heroStatRepository.findFirstCaptureForAllMaps(filter.queue(), filter.platform(),
+                filter.region(), filter.tier()).orElse(null));
     }
 
     private Instant findCapture(StatsFilter filter, Instant at) {
