@@ -1638,6 +1638,21 @@ body.drawer-open {
   color: rgb(255 255 255 / 0.85);
 }
 
+.map-banner__mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.map-banner__mode .mode-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--accent);
+}
+
 .map-actions {
   display: flex;
   align-items: center;
@@ -1722,10 +1737,6 @@ body.drawer-open {
 
 .info-chip__tip--open {
   display: block;
-}
-
-.map-actions__start {
-  margin-right: auto;
 }
 
 .highlights {

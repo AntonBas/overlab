@@ -10,6 +10,7 @@ import { picksByRole } from "../utils/bestPicks";
 
 interface MapBestPicksProps {
   heroes: HeroStat[];
+  mapName: string;
   linkSuffix: string;
 }
 
@@ -65,7 +66,11 @@ const VIEW_LABELS: Record<PickView, string> = {
   worst: "Worst picks",
 };
 
-export function MapBestPicks({ heroes, linkSuffix }: MapBestPicksProps) {
+export function MapBestPicks({
+  heroes,
+  mapName,
+  linkSuffix,
+}: MapBestPicksProps) {
   const [view, setView] = useState<PickView>("best");
   const roles = picksByRole(heroes);
   if (roles.length === 0) {
@@ -74,7 +79,9 @@ export function MapBestPicks({ heroes, linkSuffix }: MapBestPicksProps) {
   return (
     <section className="section" aria-labelledby="best-picks-heading">
       <div className="section__heading">
-        <h2 id="best-picks-heading">{VIEW_LABELS[view]} on this map</h2>
+        <h2 id="best-picks-heading">
+          {VIEW_LABELS[view]} on {mapName}
+        </h2>
         <div className="segmented" role="group" aria-label="Picks to show">
           {(Object.keys(VIEW_LABELS) as PickView[]).map((value) => (
             <button

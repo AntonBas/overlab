@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
-import { InfoChip } from "../../../components/ui/InfoChip";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
@@ -15,7 +15,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { MAP_PLACEHOLDER_URL, MODE_DESCRIPTIONS } from "../../../utils/modes";
+import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
@@ -36,10 +36,21 @@ export function MapPage() {
   const stats = useFetch(() => fetchStats(filters), [key, slug], {
     keepPrevious: true,
   });
+  const picksKey = `${filters.queue}|${filters.tier}|${filters.platform}|${filters.region}|${slug}`;
+  const allRolesStats = useFetch(
+    () =>
+      filters.role === null
+        ? Promise.resolve(null)
+        : fetchStats({ ...filters, role: null }),
+    [picksKey, filters.role === null],
+    { keepPrevious: true },
+  );
   const guides = useFetch(() => fetchGuides({ map: slug }), [slug]);
   const maps = useFetch(fetchMaps, []);
   const [search, setSearch] = useState("");
   const heroes = stats.data?.heroes ?? [];
+  const pickHeroes =
+    filters.role === null ? heroes : (allRolesStats.data?.heroes ?? []);
   const visibleHeroes = heroes.filter((hero) =>
     matchesName(hero.heroName, search),
   );
@@ -71,30 +82,30 @@ export function MapPage() {
         />
         <div className="map-banner__content">
           <h1>{map.data.name}</h1>
-          <p>
-            {map.data.mode
-              ? `${MAP_MODE_LABELS[map.data.mode]} map. Small numbers show the difference from the all-maps value.`
-              : "Small numbers show the difference from the all-maps value."}
-          </p>
+          {map.data.mode && (
+            <>
+              <p className="map-banner__mode">
+                <ModeIcon mode={map.data.mode} />
+                <strong>{MAP_MODE_LABELS[map.data.mode]}</strong>
+              </p>
+            </>
+          )}
         </div>
       </section>
       <div className="map-actions">
-        <div className="map-actions__start">
-          {map.data.mode && (
-            <InfoChip description={MODE_DESCRIPTIONS[map.data.mode]}>
-              <span className="role-badge">
-                {MAP_MODE_LABELS[map.data.mode]}
-              </span>
-            </InfoChip>
-          )}
-        </div>
         <FavoriteButton kind="map" slug={slug} name={map.data.name} />
         <QueueToggle
           value={filters.queue}
           onChange={(queue) => update({ queue })}
         />
       </div>
-      {stats.data && <MapBestPicks heroes={heroes} linkSuffix={linkSuffix} />}
+      {stats.data && (
+        <MapBestPicks
+          heroes={pickHeroes}
+          mapName={map.data.name}
+          linkSuffix={linkSuffix}
+        />
+      )}
       <div className="filters">
         {!isQuickPlay(filters) && (
           <RankFilter
@@ -158,7 +169,8 @@ export function MapPage() {
           </p>
           <p className="muted footnote">
             Checked <CollectedAt value={stats.data.capturedAt} />,{" "}
-            {TIER_LABELS[filters.tier].toLowerCase()}.
+            {TIER_LABELS[filters.tier].toLowerCase()}. Small numbers show the
+            difference from the all-maps value.
           </p>
           {visibleHeroes.length === 0 ? (
             <EmptyState>No heroes match these filters.</EmptyState>

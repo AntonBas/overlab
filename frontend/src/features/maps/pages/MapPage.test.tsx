@@ -127,8 +127,41 @@ describe("MapPage", () => {
     expect(within(tank).getAllByText("Reinhardt")).toHaveLength(2);
     expect(within(support).getAllByText("Ana")).toHaveLength(2);
     expect(
-      screen.getByRole("heading", { name: "Best picks on this map" }),
+      screen.getByRole("heading", { name: "Best picks on Rialto" }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps the best picks of every role when the table is filtered by role", async () => {
+    const rein = heroStat({
+      heroSlug: "rein",
+      heroName: "Reinhardt",
+      role: "TANK",
+      winRate: 53,
+      winRateDelta: 2,
+      pickRate: 20,
+    });
+    const genji = heroStat({
+      heroSlug: "genji",
+      heroName: "Genji",
+      role: "DAMAGE",
+      winRate: 51,
+      winRateDelta: 1,
+      pickRate: 20,
+    });
+    fetchStatsMock.mockImplementation((filters) =>
+      Promise.resolve(
+        snapshot({
+          heroes: filters.role === "DAMAGE" ? [genji] : [rein, genji],
+        }),
+      ),
+    );
+    renderPage("/maps/rialto?role=damage");
+
+    expect(
+      await screen.findByRole("region", { name: "tank picks" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "damage picks" })).toBeVisible();
+    expect(screen.getByRole("table")).not.toHaveTextContent("Reinhardt");
   });
 
   it("switches to the worst picks of the map", async () => {
@@ -153,7 +186,7 @@ describe("MapPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Worst picks" }));
 
     expect(
-      screen.getByRole("heading", { name: "Worst picks on this map" }),
+      screen.getByRole("heading", { name: "Worst picks on Rialto" }),
     ).toBeInTheDocument();
     expect(within(tank).getByText("Biggest drop here")).toBeInTheDocument();
     expect(within(tank).getByText("Lowest win rate here")).toBeInTheDocument();
@@ -177,12 +210,16 @@ describe("MapPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("describes the game mode in a tooltip", async () => {
+  it("shows the game mode in the banner", async () => {
     renderPage();
 
-    const chip = await screen.findByRole("button", { name: "Escort" });
-
-    expect(chip).toHaveAccessibleDescription(/payload/);
+    expect(
+      await screen.findByRole("heading", { name: "Rialto" }),
+    ).toBeInTheDocument();
+    const banner = screen.getByRole("heading", {
+      name: "Rialto",
+    }).parentElement;
+    expect(banner).toHaveTextContent("Escort");
   });
 
   it("hides the rank in Quick Play", async () => {
