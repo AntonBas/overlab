@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.ability;
 
+import gg.overlab.backend.common.NewBadge;
 import gg.overlab.backend.hero.ability.dto.AbilityAdminDto;
 import gg.overlab.backend.hero.ability.dto.AbilityDto;
 import gg.overlab.backend.media.MediaUrlResolver;
@@ -19,7 +20,8 @@ public class AbilityMapper {
                 ability.getName(),
                 ability.getDescription(),
                 mediaUrlResolver.resolve(ability.getIconUrl()),
-                ability.getControl());
+                ability.getControl(),
+                NewBadge.isRecent(ability.getIntroducedAt()));
     }
 
     public AbilityAdminDto toAdminDto(HeroAbility ability) {

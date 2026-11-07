@@ -1,3 +1,4 @@
+import { NewBadge } from "../../../components/ui/NewBadge";
 import clsx from "clsx";
 import { useId } from "react";
 import { createPortal } from "react-dom";
@@ -60,6 +61,7 @@ function PerkCard({ perk }: { perk: Perk }) {
         />
         <span className="card__body">
           <strong>{perk.name}</strong>
+          {perk.recentlyAdded && <NewBadge />}
           {perk.description && (
             <span className="muted">{perk.description}</span>
           )}
@@ -105,6 +107,7 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
         <span className="perk-tile__body">
           <span className="perk-tile__heading">
             <strong>{perk.name}</strong>
+            {perk.recentlyAdded && <NewBadge />}
             <span
               className={clsx(
                 "tag",
@@ -140,6 +143,7 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
               />
               <span className="perk-tip__title">
                 <strong>{perk.name}</strong>
+                {perk.recentlyAdded && <NewBadge />}
                 <span
                   className={clsx(
                     "tag",

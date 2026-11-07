@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero;
 
+import gg.overlab.backend.common.NewBadge;
 import gg.overlab.backend.hero.dto.HeroAdminDto;
 import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.media.MediaUrlResolver;
@@ -21,7 +22,8 @@ public class HeroMapper {
                 hero.getDescription(),
                 hero.getStrengths(),
                 hero.getWeaknesses(),
-                mediaUrlResolver.resolve(hero.getPortraitUrl()));
+                mediaUrlResolver.resolve(hero.getPortraitUrl()),
+                NewBadge.isRecent(hero.getIntroducedAt()));
     }
 
     public HeroAdminDto toAdminDto(Hero hero) {

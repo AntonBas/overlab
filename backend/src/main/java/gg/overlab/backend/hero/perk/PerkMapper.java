@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.perk;
 
+import gg.overlab.backend.common.NewBadge;
 import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.perk.dto.PerkRequest;
 import gg.overlab.backend.media.MediaUrlResolver;
@@ -22,7 +23,8 @@ public class PerkMapper {
                 perk.getPosition(),
                 perk.getRecommendation(),
                 perk.getRecommendationNote(),
-                mediaUrlResolver.resolve(perk.getIconUrl()));
+                mediaUrlResolver.resolve(perk.getIconUrl()),
+                NewBadge.isRecent(perk.getIntroducedAt()));
     }
 
     public void apply(PerkRequest request, Perk perk) {

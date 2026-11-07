@@ -2,6 +2,7 @@ package gg.overlab.backend.collector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,6 +57,36 @@ class RatesSnapshotWriterTest {
 
         verify(metrics, never()).recordRoleChange();
         verify(roleChangeRepository, never()).save(any(HeroRoleChange.class));
+    }
+
+    @Test
+    void marksAHeroFoundAfterTheFirstCollectionAsIntroduced() {
+        Hero known = new Hero();
+        known.setSlug("ana");
+        known.setName("Ana");
+        known.setRole(HeroRole.SUPPORT);
+        when(heroRepository.findAll()).thenReturn(List.of(known));
+        when(heroRepository.save(any(Hero.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        save("support");
+
+        ArgumentCaptor<Hero> saved = ArgumentCaptor.forClass(Hero.class);
+        verify(heroRepository, atLeastOnce()).save(saved.capture());
+        Hero sombra = saved.getAllValues().stream().filter(hero -> "sombra".equals(hero.getSlug())).findFirst()
+                .orElseThrow();
+        assertThat(sombra.getIntroducedAt()).isEqualTo(Instant.parse("2026-11-07T10:00:00Z"));
+    }
+
+    @Test
+    void doesNotMarkHeroesOfTheVeryFirstCollectionAsNew() {
+        when(heroRepository.findAll()).thenReturn(List.of());
+        when(heroRepository.save(any(Hero.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        save("support");
+
+        ArgumentCaptor<Hero> saved = ArgumentCaptor.forClass(Hero.class);
+        verify(heroRepository).save(saved.capture());
+        assertThat(saved.getValue().getIntroducedAt()).isNull();
     }
 
     @Test

@@ -56,6 +56,17 @@ class AbilityImportWriterIntegrationTest {
     }
 
     @Test
+    void marksOnlyAbilitiesAddedAfterTheFirstImportAsIntroduced() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0), parsed("new-gun", "New Gun", 1)),
+                url -> Optional.empty());
+
+        List<HeroAbility> abilities = abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test");
+        assertThat(abilities.get(0).getIntroducedAt()).isNull();
+        assertThat(abilities.get(1).getIntroducedAt()).isNotNull();
+    }
+
+    @Test
     void removesNothingWhenThePageYieldedNoAbilities() {
         writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
 

@@ -11,5 +11,6 @@ public record HeroDto(
         String description,
         String strengths,
         String weaknesses,
-        String portraitUrl) implements Serializable {
+        String portraitUrl,
+        boolean recentlyAdded) implements Serializable {
 }

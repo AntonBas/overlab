@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { NewBadge } from "../../../components/ui/NewBadge";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
@@ -40,6 +41,7 @@ export function HeroesPage() {
                     <Link className="chip" to={`/heroes/${hero.slug}`}>
                       <HeroPortrait name={hero.name} url={hero.portraitUrl} />
                       {hero.name}
+                      {hero.recentlyAdded && <NewBadge />}
                     </Link>
                   </li>
                 ))}

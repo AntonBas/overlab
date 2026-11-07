@@ -8,6 +8,7 @@ import gg.overlab.backend.hero.perk.PerkRecommendation;
 import gg.overlab.backend.hero.perk.PerkRepository;
 import gg.overlab.backend.media.ImageStore;
 import gg.overlab.backend.media.MediaFolder;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class PerkImportWriter {
                         Function<String, Optional<byte[]>> iconLoader) {
         Hero hero = heroRepository.findBySlug(heroSlug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        boolean heroHadPerks = perkRepository.existsByHeroId(hero.getId());
         int created = 0;
         int updated = 0;
         for (ParsedPerk parsed : parsedPerks) {
@@ -45,7 +47,7 @@ public class PerkImportWriter {
             boolean isNew = perk == null;
             boolean changed = false;
             if (isNew) {
-                perk = newPerk(hero, parsed);
+                perk = newPerk(hero, parsed, heroHadPerks);
             } else if (perk.isImported()) {
                 changed = refreshImported(perk, parsed);
             } else if (isBlank(perk.getDescription()) && parsed.description() != null) {
@@ -71,7 +73,7 @@ public class PerkImportWriter {
         return new Counts(created, updated, removed);
     }
 
-    private Perk newPerk(Hero hero, ParsedPerk parsed) {
+    private Perk newPerk(Hero hero, ParsedPerk parsed, boolean heroHadPerks) {
         Perk perk = new Perk();
         perk.setHero(hero);
         perk.setName(parsed.name());
@@ -81,6 +83,9 @@ public class PerkImportWriter {
         perk.setDescription(parsed.description());
         perk.setImported(true);
         perk.setImportedDescription(parsed.description());
+        if (heroHadPerks) {
+            perk.setIntroducedAt(Instant.now());
+        }
         return perkRepository.save(perk);
     }
 

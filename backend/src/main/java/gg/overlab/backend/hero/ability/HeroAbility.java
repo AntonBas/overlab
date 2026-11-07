@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -51,4 +52,7 @@ public class HeroAbility extends TimestampedEntity {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    @Column(name = "introduced_at")
+    private Instant introducedAt;
 }

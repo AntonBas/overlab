@@ -81,4 +81,17 @@ describe("PerkList", () => {
 
     expect(screen.queryByText("Minor perks")).not.toBeInTheDocument();
   });
+
+  it("tags a perk that was added recently as new", () => {
+    render(
+      <PerkList
+        perks={[
+          perk({ id: 1, name: "Fresh perk", recentlyAdded: true }),
+          perk({ id: 2, name: "Old perk" }),
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("New")).toHaveLength(1);
+  });
 });

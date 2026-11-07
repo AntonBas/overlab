@@ -5,6 +5,7 @@ interface PageHeaderProps {
   subtitle?: ReactNode;
   actions?: ReactNode;
   image?: ReactNode;
+  badge?: ReactNode;
 }
 
 export function PageHeader({
@@ -12,13 +13,17 @@ export function PageHeader({
   subtitle,
   actions,
   image,
+  badge,
 }: PageHeaderProps) {
   return (
     <header className="page-header">
       <div className="page-header__title">
         {image}
         <div>
-          <h1>{title}</h1>
+          <h1>
+            {title}
+            {badge}
+          </h1>
           {subtitle && <p className="muted">{subtitle}</p>}
         </div>
       </div>

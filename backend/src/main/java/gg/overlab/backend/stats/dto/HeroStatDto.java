@@ -16,5 +16,6 @@ public record HeroStatDto(
         @Schema(description = "Win rate minus the all-maps win rate, in percentage points. Null when the all-maps view is requested") BigDecimal winRateDelta,
         @Schema(description = "Pick rate minus the all-maps pick rate, in percentage points. Null when the all-maps view is requested") BigDecimal pickRateDelta,
         @Schema(description = "Ban rate minus the all-maps ban rate, in percentage points. Null when the all-maps view is requested") BigDecimal banRateDelta,
-        @Schema(description = "Hero portrait URL, null when there is no image") String portraitUrl) implements Serializable {
+        @Schema(description = "Hero portrait URL, null when there is no image") String portraitUrl,
+        @Schema(description = "True for about two weeks after the hero first appeared") boolean recentlyAdded) implements Serializable {
 }
