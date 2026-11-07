@@ -9,6 +9,22 @@ import {
   type RelationVoteValue,
 } from "../api/relationFeedbackApi";
 
+export interface RelationVotes {
+  signedIn: boolean;
+  failure: string | null;
+  voteOf: (
+    heroSlug: string,
+    relatedHeroSlug: string,
+    type: RelationKind,
+  ) => RelationVoteValue | null;
+  vote: (
+    heroSlug: string,
+    relatedHeroSlug: string,
+    type: RelationKind,
+    value: RelationVoteValue,
+  ) => Promise<void>;
+}
+
 export interface RelationFeedback {
   heroSlug: string;
   signedIn: boolean;
@@ -35,7 +51,22 @@ function pairKey(first: string, second: string, type: RelationKind): string {
   return `${type}:${[first, second].sort().join("|")}`;
 }
 
-export function useRelationFeedback(heroSlug: string): RelationFeedback {
+export function bindRelationFeedback(
+  votes: RelationVotes,
+  heroSlug: string,
+): RelationFeedback {
+  return {
+    heroSlug,
+    signedIn: votes.signedIn,
+    failure: votes.failure,
+    voteOf: (relatedHeroSlug, type) =>
+      votes.voteOf(heroSlug, relatedHeroSlug, type),
+    vote: (relatedHeroSlug, type, value) =>
+      votes.vote(heroSlug, relatedHeroSlug, type, value),
+  };
+}
+
+export function useRelationVotes(): RelationVotes {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [stored, setStored] = useState<StoredVotes>(NO_VOTES);
@@ -68,13 +99,14 @@ export function useRelationFeedback(heroSlug: string): RelationFeedback {
   }, [userId]);
 
   const voteOf = useCallback(
-    (relatedHeroSlug: string, type: RelationKind) =>
+    (heroSlug: string, relatedHeroSlug: string, type: RelationKind) =>
       votes.get(pairKey(heroSlug, relatedHeroSlug, type)) ?? null,
-    [heroSlug, votes],
+    [votes],
   );
 
   const vote = useCallback(
     async (
+      heroSlug: string,
       relatedHeroSlug: string,
       type: RelationKind,
       value: RelationVoteValue,
@@ -112,17 +144,19 @@ export function useRelationFeedback(heroSlug: string): RelationFeedback {
         setFailure(toFailure(error).message);
       }
     },
-    [heroSlug, userId, votes],
+    [userId, votes],
   );
 
   return useMemo(
-    () => ({
-      heroSlug,
-      signedIn: userId !== null,
-      failure,
-      voteOf,
-      vote,
-    }),
-    [heroSlug, userId, failure, voteOf, vote],
+    () => ({ signedIn: userId !== null, failure, voteOf, vote }),
+    [userId, failure, voteOf, vote],
+  );
+}
+
+export function useRelationFeedback(heroSlug: string): RelationFeedback {
+  const votes = useRelationVotes();
+  return useMemo(
+    () => bindRelationFeedback(votes, heroSlug),
+    [votes, heroSlug],
   );
 }

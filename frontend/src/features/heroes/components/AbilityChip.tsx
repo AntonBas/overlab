@@ -8,7 +8,8 @@ import { AbilityKey } from "./AbilityKey";
 
 export function AbilityChip({ ability }: { ability: Ability }) {
   const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps } = useFloatingTip();
+  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
+    useFloatingTip(0);
 
   return (
     <span className="ability-chip" ref={triggerRef} {...triggerProps}>
@@ -34,6 +35,7 @@ export function AbilityChip({ ability }: { ability: Ability }) {
             "ability-chip__tip--open": open,
           })}
           style={style}
+          {...tipProps}
         >
           <strong>{ability.name}</strong>
           <AbilityKey control={ability.control} showLabel />

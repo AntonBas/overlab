@@ -8,10 +8,10 @@ import {
 } from "react";
 
 const VIEWPORT_MARGIN = 8;
-const TRIGGER_GAP = 8;
+const DEFAULT_TRIGGER_GAP = 8;
 const HIDE_DELAY_MS = 150;
 
-export function useFloatingTip() {
+export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tipRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
@@ -47,11 +47,11 @@ export function useFloatingTip() {
       ? Math.max(tipBox.width, anchor.width)
       : tipBox.width;
     const fitsBelow =
-      anchor.bottom + TRIGGER_GAP + tipBox.height <=
+      anchor.bottom + triggerGap + tipBox.height <=
       window.innerHeight - VIEWPORT_MARGIN;
     const top = fitsBelow
-      ? anchor.bottom + TRIGGER_GAP
-      : Math.max(VIEWPORT_MARGIN, anchor.top - TRIGGER_GAP - tipBox.height);
+      ? anchor.bottom + triggerGap
+      : Math.max(VIEWPORT_MARGIN, anchor.top - triggerGap - tipBox.height);
     const left = Math.min(
       Math.max(VIEWPORT_MARGIN, anchor.left),
       window.innerWidth - tipWidth - VIEWPORT_MARGIN,
@@ -61,7 +61,7 @@ export function useFloatingTip() {
       left: Math.max(VIEWPORT_MARGIN, left),
       minWidth: alignTarget ? anchor.width : undefined,
     });
-  }, [open]);
+  }, [open, triggerGap]);
 
   useEffect(() => {
     if (!open) {

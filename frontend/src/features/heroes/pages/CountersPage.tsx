@@ -25,6 +25,10 @@ import {
 } from "../api/heroesApi";
 import { CategoryChip } from "../components/CategoryChip";
 import { RelationAvatar } from "../components/RelationAvatar";
+import {
+  bindRelationFeedback,
+  useRelationVotes,
+} from "../hooks/useRelationFeedback";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
 
 const COLUMNS = [
@@ -32,16 +36,19 @@ const COLUMNS = [
     key: "counters",
     label: "Strong against",
     matchupType: "STRONG_AGAINST",
+    relationKind: "COUNTER",
   },
   {
     key: "counteredBy",
     label: "Struggles against",
     matchupType: "WEAK_AGAINST",
+    relationKind: "COUNTER",
   },
   {
     key: "synergies",
     label: "Works well with",
     matchupType: "WORKS_WITH",
+    relationKind: "SYNERGY",
   },
 ] as const;
 
@@ -54,6 +61,7 @@ export function CountersPage() {
   const [query, setQuery] = useState("");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const { favoriteHeroes } = usePersonalData();
+  const relationVotes = useRelationVotes();
 
   if (heroes.loading || relations.loading || categories.loading) {
     return <Spinner />;
@@ -233,6 +241,11 @@ export function CountersPage() {
                               <RelationAvatar
                                 key={relatedHero.slug}
                                 hero={relatedHero}
+                                type={column.relationKind}
+                                feedback={bindRelationFeedback(
+                                  relationVotes,
+                                  hero.slug,
+                                )}
                               />
                             ))}
                           </ul>

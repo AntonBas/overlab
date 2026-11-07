@@ -2513,7 +2513,7 @@ input[type="range"] {
 
 .ability-chip__tip {
   position: fixed;
-  z-index: 100;
+  z-index: 110;
   display: none;
   flex-direction: column;
   gap: 4px;
@@ -3066,6 +3066,10 @@ input[type="range"] {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.perk-tip__actions {
+  margin-left: auto;
 }
 
 .perk-tip__title {
