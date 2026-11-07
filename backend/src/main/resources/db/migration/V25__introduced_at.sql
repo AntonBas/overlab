@@ -1,0 +1,3 @@
+ALTER TABLE heroes ADD COLUMN introduced_at TIMESTAMPTZ;
+ALTER TABLE perks ADD COLUMN introduced_at TIMESTAMPTZ;
+ALTER TABLE hero_abilities ADD COLUMN introduced_at TIMESTAMPTZ;

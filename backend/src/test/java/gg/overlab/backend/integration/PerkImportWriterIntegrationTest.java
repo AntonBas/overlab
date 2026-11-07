@@ -137,6 +137,28 @@ class PerkImportWriterIntegrationTest {
     }
 
     @Test
+    void marksAPerkAddedToAHeroThatAlreadyHadPerksAsIntroduced() {
+        importedPerk("Quick Dart", "Text");
+
+        writer.write("import-test", List.of(parsed(PerkSlot.MINOR, "Quick Dart", "Text"),
+                parsed(PerkSlot.MAJOR, "Brand New", "Fresh")), url -> Optional.empty());
+
+        assertThat(perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "Brand New").orElseThrow()
+                .getIntroducedAt()).isNotNull();
+        assertThat(perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "Quick Dart").orElseThrow()
+                .getIntroducedAt()).isNull();
+    }
+
+    @Test
+    void doesNotMarkTheFirstImportOfAHeroAsNew() {
+        writer.write("import-test", List.of(parsed(PerkSlot.MINOR, "Quick Dart", "Text")),
+                url -> Optional.empty());
+
+        assertThat(perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "Quick Dart").orElseThrow()
+                .getIntroducedAt()).isNull();
+    }
+
+    @Test
     void updatesTheTextOfAnImportedPerkWhenBlizzardChangesIt() {
         Perk existing = importedPerk("Quick Dart", "Old text");
 

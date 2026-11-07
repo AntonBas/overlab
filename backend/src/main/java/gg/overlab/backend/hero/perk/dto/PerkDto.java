@@ -14,5 +14,6 @@ public record PerkDto(
         PerkPosition position,
         PerkRecommendation recommendation,
         String recommendationNote,
-        String iconUrl) implements Serializable {
+        String iconUrl,
+        boolean recentlyAdded) implements Serializable {
 }

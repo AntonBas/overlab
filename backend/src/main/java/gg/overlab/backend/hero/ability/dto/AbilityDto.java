@@ -9,5 +9,6 @@ public record AbilityDto(
         String name,
         String description,
         String iconUrl,
-        AbilityControl control) implements Serializable {
+        AbilityControl control,
+        boolean recentlyAdded) implements Serializable {
 }

@@ -13,6 +13,8 @@ public interface PerkRepository extends JpaRepository<Perk, Long> {
     @EntityGraph(attributePaths = "hero")
     List<Perk> findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(String heroSlug);
 
+    boolean existsByHeroId(Long heroId);
+
     Optional<Perk> findByHeroIdAndNameIgnoreCase(Long heroId, String name);
 
     boolean existsByHeroIdAndSlotAndPosition(Long heroId, PerkSlot slot, PerkPosition position);

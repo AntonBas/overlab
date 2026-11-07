@@ -7,6 +7,7 @@ import gg.overlab.backend.hero.ability.HeroAbility;
 import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import gg.overlab.backend.media.ImageStore;
 import gg.overlab.backend.media.MediaFolder;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class AbilityImportWriter {
                                          Function<String, Optional<byte[]>> iconLoader) {
         Hero hero = heroRepository.findBySlug(heroSlug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        boolean heroHadAbilities = abilityRepository.existsByHeroId(hero.getId());
         int created = 0;
         int updated = 0;
         for (ParsedAbility parsed : parsedAbilities) {
@@ -39,6 +41,9 @@ public class AbilityImportWriter {
                 ability = new HeroAbility();
                 ability.setHero(hero);
                 ability.setSlug(parsed.slug());
+                if (heroHadAbilities) {
+                    ability.setIntroducedAt(Instant.now());
+                }
             }
             boolean changed = isNew || !Objects.equals(ability.getName(), parsed.name())
                     || !Objects.equals(ability.getDescription(), parsed.description())

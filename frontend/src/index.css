@@ -483,6 +483,24 @@ select:disabled {
   cursor: pointer;
 }
 
+.new-badge {
+  flex: none;
+  padding: 1px 7px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--accent-contrast);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.page-header h1 .new-badge {
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
 .table__flag {
   padding: 2px 8px;
   font-size: 0.7rem;

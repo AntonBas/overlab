@@ -46,12 +46,14 @@ public class RatesSnapshotWriter {
                     RankTier tier, String mapSlug, List<BlizzardRatesResponse.HeroRate> rates) {
         Map<String, Hero> heroesBySlug = new HashMap<>();
         heroRepository.findAll().forEach(hero -> heroesBySlug.put(hero.getSlug(), hero));
+        boolean heroesKnownBefore = !heroesBySlug.isEmpty();
         GameMap map = resolveMap(mapSlug);
         qualityChecker.inspect(capturedAt, queue, gameFormat, platform, region, tier, mapSlug, rates);
 
         List<HeroStat> stats = new ArrayList<>();
         for (BlizzardRatesResponse.HeroRate rate : rates) {
-            Hero hero = heroesBySlug.computeIfAbsent(rate.id(), this::newHero);
+            Hero hero = heroesBySlug.computeIfAbsent(rate.id(),
+                    slug -> newHero(slug, heroesKnownBefore ? capturedAt : null));
             applyHeroDetails(hero, rate, capturedAt);
             hero = heroRepository.save(hero);
             heroesBySlug.put(rate.id(), hero);
@@ -61,10 +63,12 @@ public class RatesSnapshotWriter {
         return stats.size();
     }
 
-    private Hero newHero(String slug) {
+    private Hero newHero(String slug, Instant introducedAt) {
         log.warn("New hero discovered: {}", slug);
         metrics.recordNewHero(slug);
-        return new Hero();
+        Hero hero = new Hero();
+        hero.setIntroducedAt(introducedAt);
+        return hero;
     }
 
     private void applyHeroDetails(Hero hero, BlizzardRatesResponse.HeroRate rate, Instant capturedAt) {

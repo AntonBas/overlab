@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.common.NewBadge;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRoleChange;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
@@ -31,7 +32,8 @@ public class StatsMapper {
                 delta(stat.getWinRate(), baseline == null ? null : baseline.getWinRate()),
                 delta(stat.getPickRate(), baseline == null ? null : baseline.getPickRate()),
                 delta(stat.getBanRate(), baseline == null ? null : baseline.getBanRate()),
-                mediaUrlResolver.resolve(hero.getPortraitUrl()));
+                mediaUrlResolver.resolve(hero.getPortraitUrl()),
+                NewBadge.isRecent(hero.getIntroducedAt()));
     }
 
     public HeroMapStatDto toMapDto(HeroStat stat, HeroStat baseline) {

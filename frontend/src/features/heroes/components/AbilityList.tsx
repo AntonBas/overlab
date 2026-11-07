@@ -1,3 +1,4 @@
+import { NewBadge } from "../../../components/ui/NewBadge";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { Ability } from "../../../types/api";
 import { AbilityKey } from "./AbilityKey";
@@ -16,6 +17,7 @@ export function AbilityList({ abilities }: { abilities: Ability[] }) {
           <span className="card__body">
             <span className="ability-list__title">
               <strong>{ability.name}</strong>
+              {ability.recentlyAdded && <NewBadge />}
               <AbilityKey control={ability.control} showLabel />
             </span>
             {ability.description && (

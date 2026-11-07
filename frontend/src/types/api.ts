@@ -26,6 +26,7 @@ export interface Hero {
   strengths: string | null;
   weaknesses: string | null;
   portraitUrl: string | null;
+  recentlyAdded?: boolean;
 }
 
 export type AbilityControl =
@@ -45,6 +46,7 @@ export interface Ability {
   description: string | null;
   iconUrl: string | null;
   control: AbilityControl | null;
+  recentlyAdded?: boolean;
 }
 
 export interface Favorites {
@@ -78,6 +80,7 @@ export interface HeroStat {
   pickRateDelta: number | null;
   banRateDelta: number | null;
   portraitUrl: string | null;
+  recentlyAdded?: boolean;
 }
 
 export interface HistoryStart {
@@ -190,6 +193,7 @@ export interface Perk {
   recommendation: PerkRecommendation;
   recommendationNote: string | null;
   iconUrl: string | null;
+  recentlyAdded?: boolean;
 }
 
 export interface RelatedHero {

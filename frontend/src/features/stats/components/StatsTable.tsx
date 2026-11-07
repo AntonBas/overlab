@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { RateBar } from "../../../components/ui/RateBar";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { NewBadge } from "../../../components/ui/NewBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroStat, SortDirection, StatsSort } from "../../../types/api";
 
@@ -98,6 +99,7 @@ export function StatsTable({
                   <Link to={`/heroes/${hero.heroSlug}${heroLinkSuffix}`}>
                     {hero.heroName}
                   </Link>
+                  {hero.recentlyAdded && <NewBadge />}
                 </span>
               </th>
               <td>

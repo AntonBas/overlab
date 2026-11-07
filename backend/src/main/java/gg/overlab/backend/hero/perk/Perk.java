@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -62,4 +63,7 @@ public class Perk extends TimestampedEntity {
 
     @Column(name = "imported_description", columnDefinition = "text")
     private String importedDescription;
+
+    @Column(name = "introduced_at")
+    private Instant introducedAt;
 }

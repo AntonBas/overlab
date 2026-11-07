@@ -87,4 +87,12 @@ describe("StatsTable", () => {
       screen.getByRole("columnheader", { name: /pick rate/i }),
     ).toHaveAttribute("aria-sort", "none");
   });
+
+  it("tags a hero that appeared in the last two weeks as new", () => {
+    renderTable({
+      heroes: [heroStat({ recentlyAdded: true }), heroes[1]],
+    });
+
+    expect(screen.getAllByText("New")).toHaveLength(1);
+  });
 });

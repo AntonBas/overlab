@@ -64,6 +64,6 @@ class StatsServiceTest {
 
     private HeroStatDto row(String name, HeroRole role, String winRate, String pickRate) {
         return new HeroStatDto(name.toLowerCase(), name, role, null, new BigDecimal(winRate), new BigDecimal(pickRate),
-                null, null, null, null, null);
+                null, null, null, null, null, false);
     }
 }

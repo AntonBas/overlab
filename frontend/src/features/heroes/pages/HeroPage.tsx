@@ -2,6 +2,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { NewBadge } from "../../../components/ui/NewBadge";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RoleTags } from "../../../components/ui/RoleTags";
@@ -128,6 +129,7 @@ export function HeroPage() {
       >
         <PageHeader
           title={hero.data.name}
+          badge={hero.data.recentlyAdded ? <NewBadge /> : null}
           image={
             <HeroPortrait
               name={hero.data.name}
