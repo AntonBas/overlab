@@ -19,6 +19,7 @@ function change(overrides: Partial<HeroChange>): HeroChange {
     banRateBefore: 5,
     banRateAfter: 5,
     banRateChange: 0,
+    roleChange: null,
     ...overrides,
   };
 }
@@ -86,5 +87,26 @@ describe("ChangesTable", () => {
     expect(
       screen.getByText("No heroes match these filters."),
     ).toBeInTheDocument();
+  });
+
+  it("flags a hero whose role changed between the snapshots", () => {
+    const moved = change({
+      heroSlug: "sombra",
+      heroName: "Sombra",
+      role: "SUPPORT",
+      roleChange: {
+        changedAt: "2026-11-03T10:00:00Z",
+        previousRole: "DAMAGE",
+        newRole: "SUPPORT",
+      },
+    });
+    renderWithRouter(<ChangesTable changes={[moved, ...changes]} showBan />);
+
+    const flag = screen.getByText("Role changed");
+    expect(flag).toHaveAttribute(
+      "title",
+      expect.stringContaining("Moved from Damage to Support on 3 Nov 2026"),
+    );
+    expect(screen.getAllByText("Role changed")).toHaveLength(1);
   });
 });

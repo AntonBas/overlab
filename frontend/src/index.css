@@ -483,6 +483,18 @@ select:disabled {
   cursor: pointer;
 }
 
+.table__flag {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  cursor: help;
+}
+
 .table__hero {
   display: flex;
   align-items: center;

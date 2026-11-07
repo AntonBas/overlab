@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Test;
 class PatchCollectionTriggerTest {
 
     private final RatesCollectorService collectorService = mock(RatesCollectorService.class);
-    private final PatchCollectionTrigger trigger = new PatchCollectionTrigger(collectorService, Runnable::run, 7);
+    private final PerkImportService perkImportService = mock(PerkImportService.class);
+    private final PatchCollectionTrigger trigger =
+            new PatchCollectionTrigger(collectorService, perkImportService, Runnable::run, 7);
 
     private CollectorJob job(String name, boolean runOnPatch) {
         return new CollectorJob(name, "0 0 4 * * *", false, List.of(GameQueue.COMPETITIVE), List.of(Platform.PC),
@@ -35,6 +37,17 @@ class PatchCollectionTriggerTest {
         verify(collectorService).runBlocking("overview", CollectorTrigger.PATCH);
         verify(collectorService).runBlocking("console", CollectorTrigger.PATCH);
         verify(collectorService, never()).runBlocking("manual-only", CollectorTrigger.PATCH);
+        verify(perkImportService).startAsync();
+    }
+
+    @Test
+    void keepsGoingWhenTheHeroContentImportCannotStart() {
+        when(collectorService.jobs()).thenReturn(List.of(job("overview", true)));
+        when(perkImportService.startAsync()).thenThrow(new IllegalStateException("disabled"));
+
+        trigger.onPatchesImported(new PatchesImportedEvent(List.of(Instant.now().minus(1, ChronoUnit.DAYS))));
+
+        verify(collectorService).runBlocking("overview", CollectorTrigger.PATCH);
     }
 
     @Test
@@ -44,5 +57,6 @@ class PatchCollectionTriggerTest {
         trigger.onPatchesImported(new PatchesImportedEvent(List.of(Instant.now().minus(60, ChronoUnit.DAYS))));
 
         verify(collectorService, never()).runBlocking("overview", CollectorTrigger.PATCH);
+        verify(perkImportService, never()).startAsync();
     }
 }

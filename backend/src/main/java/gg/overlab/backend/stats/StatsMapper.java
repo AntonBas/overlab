@@ -1,7 +1,9 @@
 package gg.overlab.backend.stats;
 
 import gg.overlab.backend.hero.Hero;
+import gg.overlab.backend.hero.HeroRoleChange;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
+import gg.overlab.backend.stats.dto.HeroRoleChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
 import gg.overlab.backend.stats.dto.HeroMapStatDto;
 import gg.overlab.backend.stats.dto.HeroStatDto;
@@ -51,7 +53,7 @@ public class StatsMapper {
                 stat.getBanRate());
     }
 
-    public HeroChangeDto toChangeDto(HeroStat before, HeroStat after) {
+    public HeroChangeDto toChangeDto(HeroStat before, HeroStat after, HeroRoleChangeDto roleChange) {
         Hero hero = after.getHero();
         return new HeroChangeDto(
                 hero.getSlug(),
@@ -66,7 +68,12 @@ public class StatsMapper {
                 before.getBanRate(),
                 after.getBanRate(),
                 delta(after.getBanRate(), before.getBanRate()),
-                mediaUrlResolver.resolve(hero.getPortraitUrl()));
+                mediaUrlResolver.resolve(hero.getPortraitUrl()),
+                roleChange);
+    }
+
+    public HeroRoleChangeDto toRoleChangeDto(HeroRoleChange change) {
+        return new HeroRoleChangeDto(change.getChangedAt(), change.getPreviousRole(), change.getNewRole());
     }
 
     private BigDecimal delta(BigDecimal value, BigDecimal baseline) {

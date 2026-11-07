@@ -18,5 +18,7 @@ public record HeroChangeDto(
         @Schema(description = "Ban rate before. Percent, 0-100") BigDecimal banRateBefore,
         @Schema(description = "Ban rate after. Percent, 0-100") BigDecimal banRateAfter,
         @Schema(description = "Ban rate after minus before, in percentage points") BigDecimal banRateChange,
-        String portraitUrl) implements Serializable {
+        String portraitUrl,
+        @Schema(description = "Role change that happened between the two snapshots, null if none")
+        HeroRoleChangeDto roleChange) implements Serializable {
 }

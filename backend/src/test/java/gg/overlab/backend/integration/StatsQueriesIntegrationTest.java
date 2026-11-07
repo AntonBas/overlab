@@ -10,6 +10,8 @@ import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.hero.HeroRoleChange;
+import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.HeroStat;
@@ -24,6 +26,7 @@ import gg.overlab.backend.patch.PatchRepository;
 import gg.overlab.backend.stats.StatsHistoryService;
 import gg.overlab.backend.stats.StatsService;
 import gg.overlab.backend.stats.StatsSort;
+import gg.overlab.backend.stats.dto.HeroChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroMapStatsDto;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
@@ -63,6 +66,9 @@ class StatsQueriesIntegrationTest {
 
     @Autowired
     private PatchRepository patchRepository;
+
+    @Autowired
+    private HeroRoleChangeRepository roleChangeRepository;
 
     @Autowired
     private SnapshotCheckRepository snapshotCheckRepository;
@@ -290,6 +296,32 @@ class StatsQueriesIntegrationTest {
         StatsComparisonDto comparison = historyService.compareAroundPatch(allMaps(), "first-patch");
 
         assertThat(comparison.afterCapturedAt()).isEqualTo(OLD);
+    }
+
+    @Test
+    void marksAHeroWhoseRoleChangedBetweenTheTwoSnapshots() {
+        saveRoleChange(ana, OLD.plus(Duration.ofDays(3)));
+        saveRoleChange(genji, OLD.minus(Duration.ofDays(1)));
+
+        StatsComparisonDto comparison = historyService.compare(allMaps(), OLD, NEW);
+
+        HeroChangeDto anaChange = comparison.heroes().stream()
+                .filter(change -> change.heroSlug().equals("ana-test")).findFirst().orElseThrow();
+        HeroChangeDto genjiChange = comparison.heroes().stream()
+                .filter(change -> change.heroSlug().equals("genji-test")).findFirst().orElseThrow();
+        assertThat(anaChange.roleChange()).isNotNull();
+        assertThat(anaChange.roleChange().previousRole()).isEqualTo(HeroRole.DAMAGE);
+        assertThat(anaChange.roleChange().newRole()).isEqualTo(HeroRole.SUPPORT);
+        assertThat(genjiChange.roleChange()).isNull();
+    }
+
+    private void saveRoleChange(Hero hero, Instant changedAt) {
+        HeroRoleChange change = new HeroRoleChange();
+        change.setHero(hero);
+        change.setChangedAt(changedAt);
+        change.setPreviousRole(HeroRole.DAMAGE);
+        change.setNewRole(HeroRole.SUPPORT);
+        roleChangeRepository.saveAndFlush(change);
     }
 
     private StatsFilter allMaps() {

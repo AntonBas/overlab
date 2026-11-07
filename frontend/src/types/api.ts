@@ -143,6 +143,12 @@ export interface HeroHistory {
   points: HeroHistoryPoint[];
 }
 
+export interface HeroRoleChange {
+  changedAt: string;
+  previousRole: HeroRole;
+  newRole: HeroRole;
+}
+
 export interface HeroChange {
   heroSlug: string;
   heroName: string;
@@ -156,6 +162,7 @@ export interface HeroChange {
   banRateBefore: number | null;
   banRateAfter: number | null;
   banRateChange: number | null;
+  roleChange: HeroRoleChange | null;
 }
 
 export interface StatsComparison {

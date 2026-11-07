@@ -1,5 +1,6 @@
 package gg.overlab.backend.collector;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -10,6 +11,8 @@ import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.hero.HeroRoleChange;
+import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.HeroStatRepository;
@@ -20,13 +23,15 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class RatesSnapshotWriterTest {
 
     private final HeroRepository heroRepository = mock(HeroRepository.class);
+    private final HeroRoleChangeRepository roleChangeRepository = mock(HeroRoleChangeRepository.class);
     private final CollectorMetrics metrics = mock(CollectorMetrics.class);
     private final RatesSnapshotWriter writer = new RatesSnapshotWriter(heroRepository,
-            mock(GameMapRepository.class), mock(HeroStatRepository.class), mock(SnapshotQualityChecker.class),
+            roleChangeRepository, mock(GameMapRepository.class), mock(HeroStatRepository.class), mock(SnapshotQualityChecker.class),
             metrics, mock(HeroPortraitDownloader.class), mock(RoleIconDownloader.class));
 
     @Test
@@ -36,6 +41,11 @@ class RatesSnapshotWriterTest {
         save("support");
 
         verify(metrics).recordRoleChange();
+        ArgumentCaptor<HeroRoleChange> saved = ArgumentCaptor.forClass(HeroRoleChange.class);
+        verify(roleChangeRepository).save(saved.capture());
+        assertThat(saved.getValue().getPreviousRole()).isEqualTo(HeroRole.DAMAGE);
+        assertThat(saved.getValue().getNewRole()).isEqualTo(HeroRole.SUPPORT);
+        assertThat(saved.getValue().getChangedAt()).isEqualTo(Instant.parse("2026-11-07T10:00:00Z"));
     }
 
     @Test
@@ -45,6 +55,7 @@ class RatesSnapshotWriterTest {
         save("support");
 
         verify(metrics, never()).recordRoleChange();
+        verify(roleChangeRepository, never()).save(any(HeroRoleChange.class));
     }
 
     @Test

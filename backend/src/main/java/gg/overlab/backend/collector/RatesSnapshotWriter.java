@@ -5,6 +5,8 @@ import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.hero.HeroRoleChange;
+import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.HeroStat;
@@ -31,6 +33,7 @@ public class RatesSnapshotWriter {
     public static final String ALL_MAPS = "all-maps";
 
     private final HeroRepository heroRepository;
+    private final HeroRoleChangeRepository roleChangeRepository;
     private final GameMapRepository gameMapRepository;
     private final HeroStatRepository heroStatRepository;
     private final SnapshotQualityChecker qualityChecker;
@@ -49,7 +52,7 @@ public class RatesSnapshotWriter {
         List<HeroStat> stats = new ArrayList<>();
         for (BlizzardRatesResponse.HeroRate rate : rates) {
             Hero hero = heroesBySlug.computeIfAbsent(rate.id(), this::newHero);
-            applyHeroDetails(hero, rate);
+            applyHeroDetails(hero, rate, capturedAt);
             hero = heroRepository.save(hero);
             heroesBySlug.put(rate.id(), hero);
             stats.add(toStat(hero, map, queue, gameFormat, platform, region, tier, capturedAt, rate));
@@ -64,18 +67,28 @@ public class RatesSnapshotWriter {
         return new Hero();
     }
 
-    private void applyHeroDetails(Hero hero, BlizzardRatesResponse.HeroRate rate) {
+    private void applyHeroDetails(Hero hero, BlizzardRatesResponse.HeroRate rate, Instant capturedAt) {
         hero.setSlug(rate.id());
         hero.setName(rate.hero().name());
         HeroRole role = HeroRole.valueOf(rate.hero().role().toUpperCase(Locale.ROOT));
         if (hero.getRole() != null && hero.getRole() != role) {
             log.warn("Hero {} changed role from {} to {}", hero.getSlug(), hero.getRole(), role);
             metrics.recordRoleChange();
+            recordRoleChange(hero, role, capturedAt);
         }
         hero.setRole(role);
         hero.setSubrole(rate.hero().subrole());
         portraitDownloader.ensurePortrait(hero, rate.hero().portrait());
         roleIconDownloader.ensureRoleIcon(rate.hero().role(), rate.hero().roleIcon());
+    }
+
+    private void recordRoleChange(Hero hero, HeroRole newRole, Instant capturedAt) {
+        HeroRoleChange change = new HeroRoleChange();
+        change.setHero(hero);
+        change.setChangedAt(capturedAt);
+        change.setPreviousRole(hero.getRole());
+        change.setNewRole(newRole);
+        roleChangeRepository.save(change);
     }
 
     private HeroStat toStat(Hero hero, GameMap map, GameQueue queue, GameFormat gameFormat, Platform platform,
