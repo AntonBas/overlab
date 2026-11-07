@@ -20,6 +20,7 @@ import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
 import gg.overlab.backend.user.account.dto.UpdateProfileRequest;
 import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.hero.relation.feedback.RelationFeedbackService;
 import gg.overlab.backend.user.personal.PersonalService;
 import gg.overlab.backend.user.token.UserTokenService;
@@ -46,6 +47,7 @@ public class AccountService {
     private final AuditLogRepository auditLogRepository;
     private final PersonalService personalService;
     private final RelationFeedbackService relationFeedbackService;
+    private final FeedbackService feedbackService;
 
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
@@ -98,7 +100,8 @@ public class AccountService {
         User user = load(userId);
         return new AccountExportDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(),
                 user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt(),
-                personalService.favorites(userId), relationFeedbackService.export(userId),
+                personalService.favorites(userId), relationFeedbackService.votes(userId),
+                feedbackService.export(userId),
                 personalService.preferences(userId));
     }
 

@@ -21,7 +21,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/auth/login",
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
-            "/api/auth/resend-verification");
+            "/api/auth/resend-verification",
+            "/api/feedback");
     private static final String STATS_PREFIX = "/api/stats";
     private static final Duration WINDOW = Duration.ofMinutes(1);
 

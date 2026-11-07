@@ -3448,39 +3448,34 @@ input[type="range"] {
   cursor: not-allowed;
 }
 
-.relation-feedback {
+.vote-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.relation-feedback__actions {
-  display: flex;
-  flex-wrap: wrap;
+  flex: none;
   align-items: center;
-  gap: 8px;
+  align-self: flex-start;
+  gap: 4px;
 }
 
-.relation-feedback__button {
-  padding: 2px 8px;
-  font-size: 0.8rem;
+.vote-buttons__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   color: var(--muted);
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-.relation-feedback__button:hover,
-.relation-feedback__button[aria-pressed="true"],
-.relation-feedback__button[aria-expanded="true"] {
+.vote-buttons__button:hover {
   color: var(--text);
-  border-color: var(--text);
+  background: var(--surface-2);
 }
 
-.relation-feedback__form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.vote-buttons__button[aria-pressed="true"] {
+  color: var(--accent-text);
+  border-color: var(--accent);
 }

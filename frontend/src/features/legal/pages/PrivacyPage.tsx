@@ -34,10 +34,15 @@ export function PrivacyPage() {
               the heroes, maps and guides you save to your personal library;
             </li>
             <li>
-              your votes and written reports about counters and synergies, which
-              only administrators can see.
+              your votes on counters and synergies, which only administrators
+              can see.
             </li>
           </ul>
+          <p>
+            If you send us a feedback message we store its text and the page you
+            sent it from. When you are signed in the message is linked to your
+            account; it is kept, without the link, if you delete the account.
+          </p>
           <p>
             Our security log records account events (sign-in, password change,
             account deletion) together with the IP address of the request. These

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -17,7 +17,7 @@ vi.mock("../../auth/context/useAuth", () => ({
   }),
 }));
 
-import { RelationFeedbackActions } from "./RelationFeedbackActions";
+import { RelationVoteButtons } from "./RelationVoteButtons";
 
 function feedbackStub(
   overrides: Partial<RelationFeedback> = {},
@@ -28,18 +28,17 @@ function feedbackStub(
     failure: null,
     voteOf: () => null,
     vote: vi.fn().mockResolvedValue(undefined),
-    report: vi.fn().mockResolvedValue(null),
     ...overrides,
   };
 }
 
-function renderActions(feedback: RelationFeedback) {
+function renderButtons(feedback: RelationFeedback) {
   renderWithRouter(
     <Routes>
       <Route
         path="/"
         element={
-          <RelationFeedbackActions
+          <RelationVoteButtons
             feedback={feedback}
             relatedHeroSlug="zarya"
             relatedHeroName="Zarya"
@@ -52,11 +51,11 @@ function renderActions(feedback: RelationFeedback) {
   );
 }
 
-describe("RelationFeedbackActions", () => {
+describe("RelationVoteButtons", () => {
   it("sends a vote for signed in users", async () => {
     const feedback = feedbackStub();
     currentUser = { id: 7 } as User;
-    renderActions(feedback);
+    renderButtons(feedback);
 
     await userEvent.click(
       screen.getByRole("button", { name: "Disagree with Zarya" }),
@@ -67,17 +66,20 @@ describe("RelationFeedbackActions", () => {
 
   it("marks the current vote as pressed", () => {
     currentUser = { id: 7 } as User;
-    renderActions(feedbackStub({ voteOf: () => "UP" }));
+    renderButtons(feedbackStub({ voteOf: () => "UP" }));
 
     expect(
       screen.getByRole("button", { name: "Agree with Zarya" }),
     ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Disagree with Zarya" }),
+    ).toHaveAttribute("aria-pressed", "false");
   });
 
   it("sends guests to the login page", async () => {
     currentUser = null;
     const feedback = feedbackStub({ signedIn: false });
-    renderActions(feedback);
+    renderButtons(feedback);
 
     await userEvent.click(
       screen.getByRole("button", { name: "Agree with Zarya" }),
@@ -87,52 +89,10 @@ describe("RelationFeedbackActions", () => {
     expect(feedback.vote).not.toHaveBeenCalled();
   });
 
-  it("needs a meaningful message before a report can be sent", async () => {
+  it("shows why a vote could not be saved", () => {
     currentUser = { id: 7 } as User;
-    const feedback = feedbackStub();
-    renderActions(feedback);
+    renderButtons(feedbackStub({ failure: "Too many votes" }));
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Report a mistake about Zarya" }),
-    );
-    const send = screen.getByRole("button", { name: "Send" });
-    expect(send).toBeDisabled();
-
-    await userEvent.type(
-      screen.getByLabelText("What is wrong about Zarya?"),
-      "  This counter is outdated  ",
-    );
-    await userEvent.click(send);
-
-    await waitFor(() =>
-      expect(feedback.report).toHaveBeenCalledWith(
-        "zarya",
-        "COUNTER",
-        "This counter is outdated",
-      ),
-    );
-    expect(await screen.findByText("Thanks, we will review it.")).toBeVisible();
-  });
-
-  it("keeps the form open and shows the reason when the report is rejected", async () => {
-    currentUser = { id: 7 } as User;
-    renderActions(
-      feedbackStub({
-        report: vi.fn().mockResolvedValue("You already have an open report"),
-      }),
-    );
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Report a mistake about Zarya" }),
-    );
-    await userEvent.type(
-      screen.getByLabelText("What is wrong about Zarya?"),
-      "This counter is outdated",
-    );
-    await userEvent.click(screen.getByRole("button", { name: "Send" }));
-
-    expect(
-      await screen.findByText("You already have an open report"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Too many votes");
   });
 });

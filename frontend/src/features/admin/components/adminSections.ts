@@ -49,7 +49,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     to: "/admin/feedback",
     label: "Feedback",
-    description: "Reports and votes on counters and synergies",
+    description: "Messages from visitors and votes on counters",
     icon: MessageSquare,
   },
   {

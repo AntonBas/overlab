@@ -28,12 +28,3 @@ export async function removeRelationVote(
     params: { heroSlug, relatedHeroSlug, type },
   });
 }
-
-export async function sendRelationReport(report: {
-  heroSlug: string;
-  relatedHeroSlug: string;
-  type: RelationKind;
-  message: string;
-}): Promise<void> {
-  await api.post("/me/relation-reports", report);
-}
