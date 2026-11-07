@@ -163,6 +163,16 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
                                                       @Param("at") Instant at);
 
     @Query("""
+            select min(s.capturedAt) from HeroStat s
+            where s.map is null
+              and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+            """)
+    Optional<Instant> findFirstCaptureForAllMaps(@Param("queue") GameQueue queue,
+                                                 @Param("platform") Platform platform,
+                                                 @Param("region") Region region,
+                                                 @Param("tier") RankTier tier);
+
+    @Query("""
             select max(s.capturedAt) from HeroStat s join s.map m
             where m.slug = :mapSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier

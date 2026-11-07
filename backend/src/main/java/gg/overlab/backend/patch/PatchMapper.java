@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class PatchMapper {
 
-    public PatchDto toDto(Patch patch) {
-        return new PatchDto(patch.getId(), patch.getVersion(), patch.getSlug(), patch.getTitle(),
+    public PatchDto toDto(Patch patch, Integer season) {
+        return new PatchDto(patch.getId(), patch.getVersion(), patch.getSlug(), patch.getTitle(), season,
                 patch.getReleasedAt(), patch.getNotes());
     }
 

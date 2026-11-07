@@ -5,6 +5,7 @@ import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroMapStatsDto;
+import gg.overlab.backend.stats.dto.HistoryStartDto;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
@@ -79,6 +80,16 @@ public class StatsController {
             @RequestParam(defaultValue = "PC") Platform platform,
             @RequestParam(defaultValue = "EUROPE") Region region) {
         return freshnessService.freshness(StatsFilter.of(queue, tier, StatsFilter.ALL_MAPS, platform, region));
+    }
+
+    @Operation(summary = "When statistics collection started for the given filters")
+    @GetMapping("/history-start")
+    public HistoryStartDto historyStart(
+            @RequestParam(defaultValue = "COMPETITIVE") GameQueue queue,
+            @RequestParam(defaultValue = "ALL") RankTier tier,
+            @RequestParam(defaultValue = "PC") Platform platform,
+            @RequestParam(defaultValue = "EUROPE") Region region) {
+        return historyService.historyStart(StatsFilter.of(queue, tier, StatsFilter.ALL_MAPS, platform, region));
     }
 
     @Operation(summary = "Compare statistics between two periods or around a patch")
