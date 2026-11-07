@@ -7,11 +7,13 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import type { GameQueue, Patch } from "../../../types/api";
-import { formatDate, formatDateTime } from "../../../utils/format";
+import { RankFilter } from "../../../components/ui/RankFilter";
+import type { GameQueue, Patch, RankTier } from "../../../types/api";
+import { TIER_LABELS, formatDate, formatDateTime } from "../../../utils/format";
 import { fetchHeroes } from "../../heroes/api/heroesApi";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchComparison, fetchHistoryStart } from "../../stats/api/statsApi";
+import { TIERS } from "../../stats/filters";
 import { ChangesTable } from "../components/ChangesTable";
 import { periodRange } from "../utils/chart";
 
@@ -21,6 +23,7 @@ const PERIODS: Record<string, { label: string; days: number }> = {
 };
 
 const PATCH_PREFIX = "patch:";
+const DEFAULT_VIEW = "7d";
 
 interface PatchGroup {
   label: string;
@@ -49,11 +52,16 @@ function patchLabel(patch: Patch): string {
 export function ChangesPage() {
   usePageTitle("What changed");
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") ?? "7d";
+  const view = searchParams.get("view") ?? DEFAULT_VIEW;
   const queue: GameQueue =
     searchParams.get("queue")?.toUpperCase() === "QUICK_PLAY"
       ? "QUICK_PLAY"
       : "COMPETITIVE";
+  const requestedTier = searchParams.get("tier")?.toUpperCase();
+  const tier: RankTier =
+    queue === "COMPETITIVE"
+      ? (TIERS.find((candidate) => candidate === requestedTier) ?? "ALL")
+      : "ALL";
   const patches = useFetch(fetchPatches, []);
 
   const range = useMemo(
@@ -64,19 +72,19 @@ export function ChangesPage() {
     () =>
       fetchComparison({
         queue,
-        tier: "ALL",
+        tier,
         platform: "PC",
         region: "EUROPE",
         ...(view.startsWith(PATCH_PREFIX)
           ? { patch: view.slice(PATCH_PREFIX.length) }
           : (range ?? {})),
       }),
-    [queue, view, range],
+    [queue, tier, view, range],
     { keepPrevious: true },
   );
   const historyStart = useFetch(
-    () => fetchHistoryStart(queue, "ALL", "PC", "EUROPE"),
-    [queue],
+    () => fetchHistoryStart(queue, tier, "PC", "EUROPE"),
+    [queue, tier],
   );
   const heroes = useFetch(fetchHeroes, []);
   const portraits = Object.fromEntries(
@@ -96,17 +104,28 @@ export function ChangesPage() {
       new Date(patch.releasedAt) >= new Date(firstCapturedAt),
   );
 
+  const availablePeriods = Object.entries(PERIODS).filter(
+    ([id, period]) =>
+      id === DEFAULT_VIEW ||
+      id === view ||
+      firstCapturedAt === null ||
+      new Date(firstCapturedAt) <= new Date(periodRange(period.days).from),
+  );
+
   const patchGroups = groupBySeason(comparablePatches);
 
-  function update(next: { view?: string; queue?: GameQueue }) {
+  function update(next: { view?: string; queue?: GameQueue; tier?: RankTier }) {
     const params = new URLSearchParams();
     const nextView = next.view ?? view;
     const nextQueue = next.queue ?? queue;
-    if (nextView !== "7d") {
+    const nextTier = next.tier ?? tier;
+    if (nextView !== DEFAULT_VIEW) {
       params.set("view", nextView);
     }
     if (nextQueue === "QUICK_PLAY") {
       params.set("queue", "quick_play");
+    } else if (nextTier !== "ALL") {
+      params.set("tier", nextTier.toLowerCase());
     }
     setSearchParams(params);
   }
@@ -124,6 +143,12 @@ export function ChangesPage() {
         }
       />
       <div className="filters">
+        {queue === "COMPETITIVE" && (
+          <RankFilter
+            value={tier}
+            onChange={(next) => update({ tier: next })}
+          />
+        )}
         <label className="field">
           <span className="field__label">Period</span>
           <select
@@ -131,7 +156,7 @@ export function ChangesPage() {
             onChange={(event) => update({ view: event.target.value })}
           >
             <optgroup label="Recent">
-              {Object.entries(PERIODS).map(([id, period]) => (
+              {availablePeriods.map(([id, period]) => (
                 <option key={id} value={id}>
                   {period.label}
                 </option>
@@ -188,7 +213,7 @@ export function ChangesPage() {
                 <span title={formatDateTime(comparison.data.afterCapturedAt)}>
                   {formatDate(comparison.data.afterCapturedAt)}
                 </span>
-                . All ranks, PC, Europe.
+                . {TIER_LABELS[tier]}, PC, Europe.
               </>
             )}
           </p>

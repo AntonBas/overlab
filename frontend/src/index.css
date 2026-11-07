@@ -1877,15 +1877,63 @@ body.drawer-open {
   white-space: nowrap;
 }
 
-.map-grid--compact {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+.map-carousel {
+  position: relative;
 }
 
-.map-pager {
+.map-carousel__button {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  padding: 0 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  line-height: 1;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.map-carousel__button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.map-carousel__button--back {
+  left: 8px;
+}
+
+.map-carousel__button--forward {
+  right: 8px;
+}
+
+.map-carousel__track {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 32px;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.map-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.map-carousel__item {
+  flex: 0 0 calc((100% - 72px) / 4);
+  min-width: 220px;
+  scroll-snap-align: start;
 }
 
 input[type="range"] {
