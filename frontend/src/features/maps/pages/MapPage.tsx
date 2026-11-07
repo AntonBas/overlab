@@ -83,22 +83,20 @@ export function MapPage() {
         <div className="map-banner__content">
           <h1>{map.data.name}</h1>
           {map.data.mode && (
-            <>
-              <p className="map-banner__mode">
-                <ModeIcon mode={map.data.mode} />
-                <strong>{MAP_MODE_LABELS[map.data.mode]}</strong>
-              </p>
-            </>
+            <p className="map-banner__mode">
+              <ModeIcon mode={map.data.mode} />
+              <strong>{MAP_MODE_LABELS[map.data.mode]}</strong>
+            </p>
           )}
         </div>
+        <div className="map-actions">
+          <FavoriteButton kind="map" slug={slug} name={map.data.name} />
+          <QueueToggle
+            value={filters.queue}
+            onChange={(queue) => update({ queue })}
+          />
+        </div>
       </section>
-      <div className="map-actions">
-        <FavoriteButton kind="map" slug={slug} name={map.data.name} />
-        <QueueToggle
-          value={filters.queue}
-          onChange={(queue) => update({ queue })}
-        />
-      </div>
       {stats.data && (
         <MapBestPicks
           heroes={pickHeroes}

@@ -1654,12 +1654,47 @@ body.drawer-open {
 }
 
 .map-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
+  max-width: calc(100% - 24px);
+}
+
+.map-actions .button--ghost,
+.map-actions .segmented {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.map-actions .button--ghost:hover {
+  background: var(--surface-2);
+}
+
+@media (max-width: 599px) {
+  .map-banner {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+  }
+
+  .map-actions {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 1;
+    order: -1;
+    align-self: flex-end;
+    margin: 12px 12px 0;
+  }
+
+  .map-banner__content {
+    padding-top: 24px;
+  }
 }
 
 @media (min-width: 900px) {
