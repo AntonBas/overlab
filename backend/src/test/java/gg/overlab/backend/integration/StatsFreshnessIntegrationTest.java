@@ -22,6 +22,7 @@ import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ class StatsFreshnessIntegrationTest {
     private static final Instant SECOND = Instant.parse("2026-10-02T04:00:00Z");
     private static final Instant THIRD = Instant.parse("2026-10-03T04:00:00Z");
     private static final Instant FOURTH = Instant.parse("2026-10-04T04:00:00Z");
+    private static final AtomicInteger SCOPE_SEQUENCE = new AtomicInteger();
 
     @Autowired
     private StatsFreshnessService freshnessService;
@@ -57,17 +59,21 @@ class StatsFreshnessIntegrationTest {
 
     private Hero ana;
     private Hero genji;
+    private Platform platform;
+    private Region region;
 
     @BeforeEach
     void setUp() {
         cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+        int sequence = SCOPE_SEQUENCE.getAndIncrement();
+        platform = Platform.values()[sequence % Platform.values().length];
+        region = Region.values()[sequence / Platform.values().length % Region.values().length];
         ana = hero("fresh-ana", "Ana");
         genji = hero("fresh-genji", "Genji");
     }
 
     private StatsFilter filter() {
-        return StatsFilter.of(GameQueue.QUICK_PLAY, RankTier.ALL, StatsFilter.ALL_MAPS, Platform.CONSOLE,
-                Region.ASIA);
+        return StatsFilter.of(GameQueue.QUICK_PLAY, RankTier.ALL, StatsFilter.ALL_MAPS, platform, region);
     }
 
     @Test
@@ -121,8 +127,8 @@ class StatsFreshnessIntegrationTest {
         snapshot(FIRST, "47.00", "52.00");
         SnapshotCheck check = new SnapshotCheck();
         check.setQueue(GameQueue.QUICK_PLAY);
-        check.setPlatform(Platform.CONSOLE);
-        check.setRegion(Region.ASIA);
+        check.setPlatform(platform);
+        check.setRegion(region);
         check.setTier(RankTier.ALL);
         check.setMapKey("all-maps");
         check.setSignature("test");
@@ -177,8 +183,8 @@ class StatsFreshnessIntegrationTest {
         stat.setHero(hero);
         stat.setQueue(GameQueue.QUICK_PLAY);
         stat.setGameFormat(GameFormat.FIVE_VS_FIVE);
-        stat.setPlatform(Platform.CONSOLE);
-        stat.setRegion(Region.ASIA);
+        stat.setPlatform(platform);
+        stat.setRegion(region);
         stat.setTier(RankTier.ALL);
         stat.setWinRate(new BigDecimal(winRate));
         stat.setPickRate(new BigDecimal("10.00"));
