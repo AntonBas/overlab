@@ -25,6 +25,9 @@ import type {
   PatchPayload,
   PerkPayload,
   RelationPayload,
+  RelationReport,
+  RelationReportStatus,
+  RelationVoteSummary,
 } from "../types";
 
 export async function fetchAdminHeroes(): Promise<AdminHero[]> {
@@ -345,5 +348,30 @@ export async function setUserEnabled(
   const { data } = await api.put<AdminUser>(`/admin/users/${id}/enabled`, {
     enabled,
   });
+  return data;
+}
+
+export async function fetchRelationReports(
+  status: RelationReportStatus,
+): Promise<RelationReport[]> {
+  const { data } = await api.get<RelationReport[]>("/admin/relation-reports", {
+    params: { status },
+  });
+  return data;
+}
+
+export async function changeRelationReportStatus(
+  id: number,
+  status: RelationReportStatus,
+): Promise<void> {
+  await api.put(`/admin/relation-reports/${id}/status`, { status });
+}
+
+export async function fetchRelationVoteSummary(): Promise<
+  RelationVoteSummary[]
+> {
+  const { data } = await api.get<RelationVoteSummary[]>(
+    "/admin/relation-votes/summary",
+  );
   return data;
 }

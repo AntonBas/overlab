@@ -4,6 +4,7 @@ import {
   Database,
   Hammer,
   Map,
+  MessageSquare,
   ScrollText,
   Sparkles,
   Swords,
@@ -44,6 +45,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     label: "Counters and synergies",
     description: "Curated counter-picks and synergies",
     icon: ArrowLeftRight,
+  },
+  {
+    to: "/admin/feedback",
+    label: "Feedback",
+    description: "Reports and votes on counters and synergies",
+    icon: MessageSquare,
   },
   {
     to: "/admin/categories",

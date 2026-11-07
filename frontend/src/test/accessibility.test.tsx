@@ -71,6 +71,7 @@ describe("accessibility", () => {
           ]}
         />
         <RelatedHeroes
+          type="COUNTER"
           heroes={[
             {
               slug: "mei",

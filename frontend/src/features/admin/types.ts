@@ -23,6 +23,31 @@ export interface AdminAbility {
 
 export type RelationType = "COUNTER" | "SYNERGY";
 
+export type RelationReportStatus = "NEW" | "ACCEPTED" | "REJECTED";
+
+export interface RelationReport {
+  id: number;
+  relationId: number;
+  heroSlug: string;
+  relatedHeroSlug: string;
+  type: RelationType;
+  relationNote: string | null;
+  message: string;
+  reporterName: string;
+  status: RelationReportStatus;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface RelationVoteSummary {
+  relationId: number;
+  heroSlug: string;
+  relatedHeroSlug: string;
+  type: RelationType;
+  up: number;
+  down: number;
+}
+
 export interface HeroRelation {
   id: number;
   heroSlug: string;

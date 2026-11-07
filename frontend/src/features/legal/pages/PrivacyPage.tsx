@@ -31,7 +31,11 @@ export function PrivacyPage() {
             </li>
             <li>whether your email is verified and when you last signed in;</li>
             <li>
-              the heroes, maps and guides you save to your personal library.
+              the heroes, maps and guides you save to your personal library;
+            </li>
+            <li>
+              your votes and written reports about counters and synergies, which
+              only administrators can see.
             </li>
           </ul>
           <p>

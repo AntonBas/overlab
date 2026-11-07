@@ -36,9 +36,11 @@ import { HeroTraits } from "../components/HeroTraits";
 import { PerkList } from "../components/PerkList";
 import { RelationTabs } from "../components/RelationTabs";
 
+import { useRelationFeedback } from "../hooks/useRelationFeedback";
 export function HeroPage() {
   const { slug = "" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const relationFeedback = useRelationFeedback(slug);
   const queue: GameQueue =
     searchParams.get("queue")?.toUpperCase() === "QUICK_PLAY"
       ? "QUICK_PLAY"
@@ -204,6 +206,7 @@ export function HeroPage() {
       )}
 
       {abilities.data && abilities.data.length > 0 && (
+            feedback={relationFeedback}
         <section className="section" id="hero-abilities">
           <div className="section__heading">
             <h2>Abilities</h2>

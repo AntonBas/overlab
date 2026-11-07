@@ -1,5 +1,6 @@
 package gg.overlab.backend.user.account.dto;
 
+import gg.overlab.backend.hero.relation.feedback.dto.RelationFeedbackExportDto;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.personal.dto.FavoritesDto;
@@ -16,5 +17,6 @@ public record AccountExportDto(
         Instant createdAt,
         Instant lastLoginAt,
         FavoritesDto favorites,
+        RelationFeedbackExportDto relationFeedback,
         PreferencesDto preferences) {
 }
