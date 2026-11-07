@@ -13,6 +13,8 @@ public interface PatchRepository extends JpaRepository<Patch, Long> {
 
     Optional<Patch> findFirstByReleasedAtLessThanEqualOrderByReleasedAtDesc(Instant moment);
 
+    Optional<Patch> findFirstByReleasedAtGreaterThanOrderByReleasedAtAsc(Instant moment);
+
     boolean existsByVersionIgnoreCase(String version);
 
     boolean existsByVersionIgnoreCaseAndIdNot(String version, Long id);

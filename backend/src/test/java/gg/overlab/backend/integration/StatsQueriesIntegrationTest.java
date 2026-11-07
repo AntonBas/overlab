@@ -274,6 +274,24 @@ class StatsQueriesIntegrationTest {
         assertThat(comparison.heroes()).hasSize(2);
     }
 
+    @Test
+    void patchComparisonStopsAtTheNextPatch() {
+        Patch patch = new Patch();
+        patch.setVersion("first-patch");
+        patch.setSlug("first-patch");
+        patch.setReleasedAt(OLD.plus(Duration.ofDays(1)));
+        patchRepository.save(patch);
+        Patch next = new Patch();
+        next.setVersion("second-patch");
+        next.setSlug("second-patch");
+        next.setReleasedAt(OLD.plus(Duration.ofDays(3)));
+        patchRepository.save(next);
+
+        StatsComparisonDto comparison = historyService.compareAroundPatch(allMaps(), "first-patch");
+
+        assertThat(comparison.afterCapturedAt()).isEqualTo(OLD);
+    }
+
     private StatsFilter allMaps() {
         return StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, StatsFilter.ALL_MAPS, Platform.PC, Region.EUROPE);
     }

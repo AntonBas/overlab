@@ -11,6 +11,7 @@ import gg.overlab.backend.patch.dto.PatchRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,11 @@ public class PatchService {
         return patchRepository.findFirstByReleasedAtLessThanEqualOrderByReleasedAtDesc(moment)
                 .map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Patch active at", moment));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PatchDto> findNextAfter(Instant moment) {
+        return patchRepository.findFirstByReleasedAtGreaterThanOrderByReleasedAtAsc(moment).map(this::toDto);
     }
 
     @EvictContentCaches
