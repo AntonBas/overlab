@@ -2,13 +2,9 @@ package gg.overlab.backend.user.personal;
 
 import gg.overlab.backend.config.security.AuthenticatedUser;
 import gg.overlab.backend.user.personal.dto.FavoritesDto;
-import gg.overlab.backend.user.personal.dto.NoteDto;
-import gg.overlab.backend.user.personal.dto.NoteRequest;
 import gg.overlab.backend.user.personal.dto.PreferencesDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,32 +57,6 @@ public class PersonalController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeMapFavorite(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String slug) {
         personalService.removeMapFavorite(user.id(), slug);
-    }
-
-    @Operation(summary = "List personal hero notes")
-    @GetMapping("/notes")
-    public List<NoteDto> notes(@AuthenticationPrincipal AuthenticatedUser user) {
-        return personalService.notes(user.id());
-    }
-
-    @Operation(summary = "Get the personal note for a hero")
-    @GetMapping("/notes/{heroSlug}")
-    public NoteDto note(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug) {
-        return personalService.note(user.id(), heroSlug);
-    }
-
-    @Operation(summary = "Create or replace the personal note for a hero")
-    @PutMapping("/notes/{heroSlug}")
-    public NoteDto saveNote(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug,
-                            @Valid @RequestBody NoteRequest request) {
-        return personalService.saveNote(user.id(), heroSlug, request.content());
-    }
-
-    @Operation(summary = "Delete the personal note for a hero")
-    @DeleteMapping("/notes/{heroSlug}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNote(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String heroSlug) {
-        personalService.deleteNote(user.id(), heroSlug);
     }
 
     @Operation(summary = "Get default statistics filters")
