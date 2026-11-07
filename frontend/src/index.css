@@ -2080,6 +2080,14 @@ input[type="range"] {
   margin-left: 0;
 }
 
+.chart__tooltip-effect {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .chart__tooltip-patch {
   margin-top: 4px;
   padding-top: 4px;

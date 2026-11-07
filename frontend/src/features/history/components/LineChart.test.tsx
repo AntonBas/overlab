@@ -209,6 +209,65 @@ describe("LineChart", () => {
     expect(container.querySelector(".chart__tooltip-season")).toBeNull();
   });
 
+  it("names the patch in effect when no patch was released since the previous point", () => {
+    mockPlotBox();
+    const markers = [
+      {
+        time: Date.parse("2026-09-20T00:00:00Z"),
+        label: "Season 5",
+        kind: "patch" as const,
+      },
+      {
+        time: Date.parse("2026-09-28T00:00:00Z"),
+        label: "Hotfix Update",
+        kind: "hotfix" as const,
+      },
+    ];
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={markers}
+      />,
+    );
+
+    hoverAt(585);
+
+    expect(container.querySelector(".chart__tooltip-effect")).toHaveTextContent(
+      "In effect: Hotfix Update · 28 Sept",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "in effect: Hotfix Update",
+    );
+  });
+
+  it("leaves out the patch in effect when a patch was released since the previous point", () => {
+    mockPlotBox();
+    const markers = [
+      {
+        time: Date.parse("2026-10-05T00:00:00Z"),
+        label: "Season 6",
+        kind: "patch" as const,
+      },
+    ];
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={markers}
+      />,
+    );
+
+    hoverAt(585);
+
+    expect(container.querySelector(".chart__tooltip-effect")).toBeNull();
+    expect(container.querySelector(".chart__tooltip-patch")).toHaveTextContent(
+      "Season 6",
+    );
+  });
+
   it("shows the change since the previous point", () => {
     vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
       left: 0,

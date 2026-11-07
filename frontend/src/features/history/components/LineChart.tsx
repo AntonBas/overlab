@@ -99,6 +99,17 @@ export function LineChart({
       )
     : [];
 
+  const patchInEffect =
+    active && patchesAtActive.length === 0
+      ? markers
+          .filter((marker) => marker.time <= active.time)
+          .reduce<ChartMarker | null>(
+            (latest, marker) =>
+              latest === null || marker.time > latest.time ? marker : latest,
+            null,
+          )
+      : null;
+
   function selectAt(event: PointerEvent<SVGSVGElement>) {
     const box = svgRef.current?.getBoundingClientRect();
     const scale = box && box.width > 0 ? SIZE.width / box.width : 1;
@@ -292,6 +303,12 @@ export function LineChart({
                   )}
                 </span>
               )}
+              {patchInEffect && (
+                <span className="chart__tooltip-effect">
+                  In effect: {patchInEffect.label} ·{" "}
+                  {formatDate(patchInEffect.time)}
+                </span>
+              )}
               {patchesAtActive.map((marker) => (
                 <span key={marker.time} className="chart__tooltip-patch">
                   {marker.kind === "hotfix"
@@ -308,7 +325,7 @@ export function LineChart({
           )}
           <span className="visually-hidden" role="status">
             {active
-              ? `${fullDateFormat.format(new Date(active.time))}${activeSeason === null ? "" : `, season ${activeSeason}`}: ${formatPercent(active.value)}${patchesAtActive.map((marker) => `, patch ${marker.label}`).join("")}`
+              ? `${fullDateFormat.format(new Date(active.time))}${activeSeason === null ? "" : `, season ${activeSeason}`}: ${formatPercent(active.value)}${patchesAtActive.map((marker) => `, patch ${marker.label}`).join("")}${patchInEffect ? `, in effect: ${patchInEffect.label}` : ""}`
               : ""}
           </span>
         </div>
