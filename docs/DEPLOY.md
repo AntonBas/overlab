@@ -37,6 +37,15 @@ Flyway applies new migrations on startup.
 
 Grafana listens on `127.0.0.1:3000` only. Reach it through an SSH tunnel: `ssh -L 3000:localhost:3000 user@server`. The backend metrics endpoint is served on an internal management port (9091) that is not published.
 
+## Alert notifications
+
+The alert rules in `docker/grafana/provisioning/alerting/collector-rules.yml` are provisioned automatically: the collector has stopped, Blizzard responses were rejected, a new hero or map appeared, a hero changed role. Grafana only shows them in its UI until a notification channel exists. Create one Telegram channel once after the first start (the token and chat id stay in Grafana's database, not in git):
+
+1. In Telegram, open `@BotFather`, send `/newbot` and copy the bot token.
+2. Send any message to your new bot, then open `https://api.telegram.org/bot<token>/getUpdates` and copy `chat.id` from the response.
+3. In Grafana (SSH tunnel, see Monitoring), go to Alerting, Contact points, create a Telegram contact point with the token and chat id, and press Test.
+4. Go to Alerting, Notification policies and set that contact point as the default one.
+
 ## Backups
 
 The `backup` service writes a compressed `pg_dump` to `BACKUP_PATH` every `BACKUP_INTERVAL_SECONDS` (default daily) and removes files older than `BACKUP_KEEP_DAYS` (default 14). These files live on the same server, so the service can also copy every new backup off the machine with `rclone`: put an `rclone.conf` with your remote (S3, Backblaze B2, SFTP and others, see `rclone config`) into `docker/backup/rclone/` (git-ignored, or point `RCLONE_CONFIG_DIR` elsewhere) and set `BACKUP_REMOTE` to `remote:bucket/path`. Remote copies older than `BACKUP_REMOTE_KEEP_DAYS` (default 30) are deleted. A failed copy is logged and does not stop the local backups.
