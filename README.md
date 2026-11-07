@@ -114,7 +114,7 @@ This starts the whole stack in one go: site on http://localhost:5173 (React buil
 cd backend && ./gradlew bootRun
 ```
 
-3. Frontend (Vite proxies `/api` and `/oauth2` to the backend on port 8080):
+3. Frontend (Vite proxies `/api` and `/oauth2` to the backend on port 8080). It needs Node 22.22.2 or newer (`nvm use` reads `.nvmrc`; older 22.x versions fail on `jsdom` 30):
 
 ```bash
 cd frontend && npm ci && npm run dev
