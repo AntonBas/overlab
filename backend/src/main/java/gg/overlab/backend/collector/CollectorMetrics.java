@@ -26,8 +26,8 @@ public class CollectorMetrics {
 
     @PostConstruct
     void registerLastSuccessGauges() {
-        for (String counter : List.of("collector.new.heroes", "collector.new.maps", "collector.outliers",
-                "collector.rejected.snapshots", "collector.unchanged.snapshots")) {
+        for (String counter : List.of("collector.new.heroes", "collector.new.maps", "collector.role.changes",
+                "collector.outliers", "collector.rejected.snapshots", "collector.unchanged.snapshots")) {
             registry.counter(counter);
         }
         registry.counter("collector.suspicious.snapshots", "reason", "pick_rate_sum");
@@ -64,6 +64,10 @@ public class CollectorMetrics {
 
     public void recordNewMap(String slug) {
         registry.counter("collector.new.maps").increment();
+    }
+
+    public void recordRoleChange() {
+        registry.counter("collector.role.changes").increment();
     }
 
     public void recordOutliers(int count) {

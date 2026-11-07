@@ -67,7 +67,12 @@ public class RatesSnapshotWriter {
     private void applyHeroDetails(Hero hero, BlizzardRatesResponse.HeroRate rate) {
         hero.setSlug(rate.id());
         hero.setName(rate.hero().name());
-        hero.setRole(HeroRole.valueOf(rate.hero().role().toUpperCase(Locale.ROOT)));
+        HeroRole role = HeroRole.valueOf(rate.hero().role().toUpperCase(Locale.ROOT));
+        if (hero.getRole() != null && hero.getRole() != role) {
+            log.warn("Hero {} changed role from {} to {}", hero.getSlug(), hero.getRole(), role);
+            metrics.recordRoleChange();
+        }
+        hero.setRole(role);
         hero.setSubrole(rate.hero().subrole());
         portraitDownloader.ensurePortrait(hero, rate.hero().portrait());
         roleIconDownloader.ensureRoleIcon(rate.hero().role(), rate.hero().roleIcon());
