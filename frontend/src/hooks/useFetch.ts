@@ -34,22 +34,20 @@ export function useFetch<T>(
   });
 
   useEffect(() => {
-    let cancelled = false;
+    const abort = new AbortController();
     fetcherRef
       .current()
       .then((data) => {
-        if (!cancelled) {
+        if (!abort.signal.aborted) {
           setSettled({ key, data, error: null });
         }
       })
       .catch((failure: unknown) => {
-        if (!cancelled) {
+        if (!abort.signal.aborted) {
           setSettled({ key, data: null, error: toFailure(failure) });
         }
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => abort.abort();
   }, [key]);
 
   const reload = useCallback(() => setVersion((current) => current + 1), []);
