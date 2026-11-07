@@ -4,6 +4,7 @@ import type {
   GameQueue,
   HeroHistory,
   HeroMapStats,
+  HistoryStart,
   Platform,
   RankTier,
   Region,
@@ -86,6 +87,18 @@ export async function fetchComparison(
 ): Promise<StatsComparison> {
   const { data } = await api.get<StatsComparison>("/stats/compare", {
     params,
+  });
+  return data;
+}
+
+export async function fetchHistoryStart(
+  queue: GameQueue,
+  tier: RankTier,
+  platform: Platform,
+  region: Region,
+): Promise<HistoryStart> {
+  const { data } = await api.get<HistoryStart>("/stats/history-start", {
+    params: { queue, tier, platform, region },
   });
   return data;
 }

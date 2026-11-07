@@ -1,7 +1,7 @@
 import type { Patch } from "../../../types/api";
 import type { ChartMarker } from "../components/LineChart";
 
-const HOTFIX_TITLE = /hotfix/i;
+const HOTFIX_TITLE = /hotfix|bug fix/i;
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -44,4 +44,26 @@ export function buildPatchMarkers(patches: Patch[]): ChartMarker[] {
       parentLabel: parent ? patchName(parent) : null,
     };
   });
+}
+
+export function buildSeasonLookup(
+  patches: Patch[],
+): (time: number) => number | null {
+  const starts = patches
+    .filter((patch) => patch.season !== null)
+    .map((patch) => ({
+      time: Date.parse(patch.releasedAt),
+      season: patch.season as number,
+    }))
+    .sort((first, second) => first.time - second.time);
+  return (time) => {
+    let season: number | null = null;
+    for (const start of starts) {
+      if (start.time > time) {
+        break;
+      }
+      season = start.season;
+    }
+    return season;
+  };
 }

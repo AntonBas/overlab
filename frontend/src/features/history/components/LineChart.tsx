@@ -21,6 +21,7 @@ interface LineChartProps {
   title: string;
   points: ChartPoint[];
   markers?: ChartMarker[];
+  seasonAt?: (time: number) => number | null;
   tone: "win" | "pick" | "ban";
 }
 
@@ -60,6 +61,7 @@ export function LineChart({
   title,
   points,
   markers = [],
+  seasonAt,
   tone,
 }: LineChartProps) {
   const [asTable, setAsTable] = useState(false);
@@ -86,6 +88,7 @@ export function LineChart({
       ? geometry.dots[activeIndex - 1]
       : null;
   const activeShare = active ? (active.x / SIZE.width) * 100 : 0;
+  const activeSeason = active && seasonAt ? seasonAt(active.time) : null;
   const patchesAtActive = active
     ? visibleMarkers.filter(
         (marker) =>
@@ -268,6 +271,11 @@ export function LineChart({
               <span className="chart__tooltip-date">
                 {fullDateFormat.format(new Date(active.time))}
               </span>
+              {activeSeason !== null && (
+                <span className="chart__tooltip-season">
+                  Season {activeSeason}
+                </span>
+              )}
               <strong>{formatPercent(active.value)}</strong>
               {previous && (
                 <span className="chart__tooltip-change">
@@ -300,7 +308,7 @@ export function LineChart({
           )}
           <span className="visually-hidden" role="status">
             {active
-              ? `${fullDateFormat.format(new Date(active.time))}: ${formatPercent(active.value)}${patchesAtActive.map((marker) => `, patch ${marker.label}`).join("")}`
+              ? `${fullDateFormat.format(new Date(active.time))}${activeSeason === null ? "" : `, season ${activeSeason}`}: ${formatPercent(active.value)}${patchesAtActive.map((marker) => `, patch ${marker.label}`).join("")}`
               : ""}
           </span>
         </div>

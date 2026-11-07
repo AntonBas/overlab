@@ -537,6 +537,40 @@ select:disabled {
   background: var(--bar-ban);
 }
 
+.table-toolbar {
+  margin-bottom: 12px;
+}
+
+.change {
+  display: inline-grid;
+  grid-template-columns: 6ch 1.5ch 6ch 5ch;
+  column-gap: 4px;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.change__value {
+  text-align: right;
+}
+
+@media (max-width: 599px) {
+  .change {
+    grid-template-columns: 5.5ch 1ch 5.5ch 4.5ch;
+    column-gap: 2px;
+    font-size: 0.9rem;
+  }
+}
+
+.change__arrow {
+  text-align: center;
+  color: var(--muted);
+}
+
+.change .delta {
+  margin-left: 0;
+  text-align: right;
+}
+
 .delta {
   margin-left: 8px;
   font-size: 0.8rem;
@@ -2034,6 +2068,12 @@ input[type="range"] {
 .chart__tooltip-date {
   color: var(--muted);
   font-size: 0.75rem;
+}
+
+.chart__tooltip-season {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-text);
 }
 
 .chart__tooltip .delta {

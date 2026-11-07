@@ -16,7 +16,7 @@ import {
   periodRange,
   type HistoryPeriodId,
 } from "../utils/chart";
-import { buildPatchMarkers } from "../utils/patchMarkers";
+import { buildPatchMarkers, buildSeasonLookup } from "../utils/patchMarkers";
 import { LineChart } from "./LineChart";
 
 type Metric = "win" | "pick" | "ban";
@@ -96,6 +96,7 @@ export function HeroHistorySection({
       : [{ time: Date.parse(point.capturedAt), value }];
   });
   const markers = buildPatchMarkers(patches.data ?? []);
+  const seasonAt = buildSeasonLookup(patches.data ?? []);
   const enough = series.length >= 2;
 
   return (
@@ -159,6 +160,7 @@ export function HeroHistorySection({
             tone={metric.tone}
             points={series}
             markers={markers}
+            seasonAt={seasonAt}
           />
         </div>
       )}
