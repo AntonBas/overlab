@@ -198,6 +198,7 @@ export function HeroPage() {
             synergies={synergies.data}
             categories={categories.data?.categories}
             categoryMatchups={heroCategoryMatchups}
+            feedback={relationFeedback}
           />
           <p className="muted footnote">
             Counters and synergies are curated recommendations, not statistics.
@@ -206,7 +207,6 @@ export function HeroPage() {
       )}
 
       {abilities.data && abilities.data.length > 0 && (
-            feedback={relationFeedback}
         <section className="section" id="hero-abilities">
           <div className="section__heading">
             <h2>Abilities</h2>
