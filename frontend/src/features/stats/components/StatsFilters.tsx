@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
 import {
@@ -10,15 +11,10 @@ import clsx from "clsx";
 import { Gamepad2, Globe, Monitor } from "lucide-react";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { GameMap, HeroRole, Platform, Region } from "../../../types/api";
-import {
-  PLATFORM_LABELS,
-  QUEUE_LABELS,
-  REGION_LABELS,
-} from "../../../utils/format";
+import { PLATFORM_LABELS, REGION_LABELS } from "../../../utils/format";
 import {
   ALL_MAPS,
   PLATFORMS,
-  QUEUES,
   REGIONS,
   ROLES,
   hasDetailedCoverage,
@@ -51,24 +47,26 @@ const REGION_OPTIONS: readonly IconSelectOption<Region>[] = REGIONS.map(
 
 interface StatsFiltersProps {
   filters: Filters;
-  maps: GameMap[];
   onChange: (patch: Partial<Filters>) => void;
-  search: string;
-  onSearchChange: (value: string) => void;
+  maps?: GameMap[];
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  children?: ReactNode;
 }
 
 export function StatsFilters({
   filters,
-  maps,
   onChange,
+  maps,
   search,
   onSearchChange,
+  children,
 }: StatsFiltersProps) {
   const quickPlay = isQuickPlay(filters);
   const detailed = hasDetailedCoverage(filters);
   const mapOptions: IconSelectOption<string>[] = [
     { value: ALL_MAPS, label: "All maps", icon: <AllItemsIcon /> },
-    ...maps.map((map) => ({
+    ...(maps ?? []).map((map) => ({
       value: map.slug,
       label: map.name,
       icon: (
@@ -87,22 +85,6 @@ export function StatsFilters({
       aria-label="Statistics filters"
       onSubmit={(event) => event.preventDefault()}
     >
-      <div className="segmented" role="group" aria-label="Game mode">
-        {QUEUES.map((queue) => (
-          <button
-            key={queue}
-            type="button"
-            className={clsx("segmented__item", {
-              "segmented__item--active": filters.queue === queue,
-            })}
-            aria-pressed={filters.queue === queue}
-            onClick={() => onChange({ queue })}
-          >
-            {QUEUE_LABELS[queue]}
-          </button>
-        ))}
-      </div>
-
       {!quickPlay && (
         <RankFilter
           value={filters.tier}
@@ -111,14 +93,18 @@ export function StatsFilters({
         />
       )}
 
-      <IconSelect
-        label="Map"
-        value={filters.map}
-        options={mapOptions}
-        wide
-        disabled={!detailed}
-        onChange={(map) => onChange({ map })}
-      />
+      {maps && (
+        <IconSelect
+          label="Map"
+          value={filters.map}
+          options={mapOptions}
+          wide
+          disabled={!detailed}
+          onChange={(map) => onChange({ map })}
+        />
+      )}
+
+      {children}
 
       <IconSelect
         label="Platform"
@@ -134,15 +120,17 @@ export function StatsFilters({
         onChange={(region) => onChange({ region })}
       />
 
-      <label className="field">
-        <span className="field__label">Hero</span>
-        <input
-          type="search"
-          value={search}
-          placeholder="Search by name"
-          onChange={(event) => onSearchChange(event.target.value)}
-        />
-      </label>
+      {onSearchChange && (
+        <label className="field">
+          <span className="field__label">Hero</span>
+          <input
+            type="search"
+            value={search ?? ""}
+            placeholder="Search by name"
+            onChange={(event) => onSearchChange(event.target.value)}
+          />
+        </label>
+      )}
 
       <div className="segmented" role="group" aria-label="Role">
         <button
@@ -171,8 +159,8 @@ export function StatsFilters({
       </div>
       {!detailed && (
         <p className="filters__note muted">
-          Ranks and maps are available for PC in Europe only. Other platforms
-          and regions show overall statistics.
+          {maps ? "Ranks and maps are" : "Ranks are"} available for PC in Europe
+          only. Other platforms and regions show overall statistics.
         </p>
       )}
     </form>

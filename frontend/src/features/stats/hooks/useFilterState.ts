@@ -11,7 +11,23 @@ import {
 
 const FILTER_PARAMS = ["queue", "tier", "platform", "region"];
 
-export function useFilterState(fixedMap?: string) {
+function keepPreserved(
+  target: URLSearchParams,
+  source: URLSearchParams,
+  names: readonly string[],
+) {
+  for (const name of names) {
+    const value = source.get(name);
+    if (value !== null) {
+      target.set(name, value);
+    }
+  }
+}
+
+export function useFilterState(
+  fixedMap?: string,
+  preservedParams: readonly string[] = [],
+) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { preferences } = usePersonalData();
   const preferencesApplied = useRef(false);
@@ -43,10 +59,11 @@ export function useFilterState(fixedMap?: string) {
     if (fixedMap) {
       params.delete("map");
     }
+    keepPreserved(params, searchParams, preservedParams);
     if (params.toString() !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
     }
-  }, [preferences, searchParams, fixedMap, setSearchParams]);
+  }, [preferences, searchParams, fixedMap, preservedParams, setSearchParams]);
 
   const update = useCallback(
     (patch: Partial<StatsFilters>) => {
@@ -58,9 +75,10 @@ export function useFilterState(fixedMap?: string) {
       if (fixedMap) {
         params.delete("map");
       }
+      keepPreserved(params, searchParams, preservedParams);
       setSearchParams(params);
     },
-    [filters, fixedMap, setSearchParams],
+    [filters, fixedMap, preservedParams, searchParams, setSearchParams],
   );
 
   const changeSort = useCallback(

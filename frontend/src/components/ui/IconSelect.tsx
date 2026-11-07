@@ -4,6 +4,7 @@ import {
   useId,
   useRef,
   useState,
+  Fragment,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -11,6 +12,7 @@ export interface IconSelectOption<T extends string> {
   value: T;
   label: string;
   icon?: ReactNode;
+  group?: string;
 }
 
 interface IconSelectProps<T extends string> {
@@ -145,20 +147,26 @@ export function IconSelect<T extends string>({
           aria-labelledby={labelId}
         >
           {options.map((option, index) => (
-            <li
-              key={option.value}
-              id={optionId(index)}
-              role="option"
-              aria-selected={option.value === value}
-              className={clsx("icon-select__option", {
-                "icon-select__option--highlighted": index === highlighted,
-                "icon-select__option--selected": option.value === value,
-              })}
-              onMouseEnter={() => setHighlighted(index)}
-              onClick={() => choose(option)}
-            >
-              <OptionContent option={option} reserveIconSpace />
-            </li>
+            <Fragment key={option.value}>
+              {option.group && option.group !== options[index - 1]?.group && (
+                <li role="presentation" className="icon-select__group">
+                  {option.group}
+                </li>
+              )}
+              <li
+                id={optionId(index)}
+                role="option"
+                aria-selected={option.value === value}
+                className={clsx("icon-select__option", {
+                  "icon-select__option--highlighted": index === highlighted,
+                  "icon-select__option--selected": option.value === value,
+                })}
+                onMouseEnter={() => setHighlighted(index)}
+                onClick={() => choose(option)}
+              >
+                <OptionContent option={option} reserveIconSpace />
+              </li>
+            </Fragment>
           ))}
         </ul>
       )}

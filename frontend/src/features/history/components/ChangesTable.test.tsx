@@ -60,13 +60,17 @@ describe("ChangesTable", () => {
     expect(heroNames()).toEqual(["Ana", "Genji"]);
   });
 
-  it("filters by role", async () => {
+  it("sorts by ban rate change", async () => {
     const user = userEvent.setup();
-    renderWithRouter(<ChangesTable changes={changes} showBan />);
+    const banChanges = [
+      change({ banRateChange: -2 }),
+      change({ heroSlug: "genji", heroName: "Genji", banRateChange: 3 }),
+    ];
+    renderWithRouter(<ChangesTable changes={banChanges} showBan />);
 
-    await user.click(screen.getByRole("button", { name: "Damage" }));
+    await user.click(screen.getByRole("button", { name: /Ban rate/ }));
 
-    expect(heroNames()).toEqual(["Genji"]);
+    expect(heroNames()).toEqual(["Genji", "Ana"]);
   });
 
   it("hides the ban column when not needed and handles an empty comparison", () => {
@@ -80,7 +84,7 @@ describe("ChangesTable", () => {
 
     renderWithRouter(<ChangesTable changes={[]} showBan />);
     expect(
-      screen.getByText("No heroes appear in both snapshots."),
+      screen.getByText("No heroes match these filters."),
     ).toBeInTheDocument();
   });
 });

@@ -39,30 +39,42 @@ const changes = [
 describe("sortChanges", () => {
   it("puts the biggest win rate gains first when descending", () => {
     expect(
-      sortChanges(changes, "WIN_CHANGE", true, null).map(
-        (item) => item.heroName,
-      ),
+      sortChanges(changes, "WIN_CHANGE", true).map((item) => item.heroName),
     ).toEqual(["Genji", "Mei", "Ana"]);
   });
 
   it("puts the biggest losses first when ascending", () => {
-    expect(sortChanges(changes, "WIN_CHANGE", false, null)[0].heroName).toBe(
-      "Ana",
-    );
+    expect(sortChanges(changes, "WIN_CHANGE", false)[0].heroName).toBe("Ana");
   });
 
   it("sorts by pick rate change and by name", () => {
-    expect(sortChanges(changes, "PICK_CHANGE", true, null)[0].heroName).toBe(
-      "Ana",
-    );
+    expect(sortChanges(changes, "PICK_CHANGE", true)[0].heroName).toBe("Ana");
     expect(
-      sortChanges(changes, "NAME", false, null).map((item) => item.heroName),
+      sortChanges(changes, "NAME", false).map((item) => item.heroName),
     ).toEqual(["Ana", "Genji", "Mei"]);
   });
 
-  it("filters by role without changing the input", () => {
-    const damage = sortChanges(changes, "NAME", false, "DAMAGE");
-    expect(damage.map((item) => item.heroName)).toEqual(["Genji", "Mei"]);
-    expect(changes).toHaveLength(3);
+  it("sorts by ban rate change and keeps heroes without ban data last", () => {
+    const banned = [
+      change({ heroName: "Ana", banRateChange: null }),
+      change({ heroName: "Genji", banRateChange: 2 }),
+      change({ heroName: "Mei", banRateChange: -3 }),
+    ];
+
+    expect(
+      sortChanges(banned, "BAN_CHANGE", true).map((item) => item.heroName),
+    ).toEqual(["Genji", "Mei", "Ana"]);
+    expect(
+      sortChanges(banned, "BAN_CHANGE", false).map((item) => item.heroName),
+    ).toEqual(["Mei", "Genji", "Ana"]);
+  });
+
+  it("does not change the input", () => {
+    sortChanges(changes, "NAME", false);
+    expect(changes.map((item) => item.heroName)).toEqual([
+      "Ana",
+      "Genji",
+      "Mei",
+    ]);
   });
 });
