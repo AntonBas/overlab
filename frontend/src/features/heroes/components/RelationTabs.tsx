@@ -7,6 +7,7 @@ import type {
   HeroCategory,
   RelatedHero,
 } from "../../../types/api";
+import type { RelationFeedback } from "../hooks/useRelationFeedback";
 import { CategoryChip } from "./CategoryChip";
 import { RelatedHeroes } from "./RelatedHeroes";
 
@@ -25,6 +26,7 @@ interface RelationTabsProps {
   synergies: RelatedHero[];
   categoryMatchups?: CategoryMatchup[];
   categories?: HeroCategory[];
+  feedback?: RelationFeedback;
 }
 
 const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
@@ -41,6 +43,7 @@ export function RelationTabs({
   synergies,
   categoryMatchups = [],
   categories = [],
+  feedback,
 }: RelationTabsProps) {
   const baseId = useId();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -168,7 +171,13 @@ export function RelationTabs({
             })}
           </ul>
         )}
-        {active.heroes.length > 0 && <RelatedHeroes heroes={active.heroes} />}
+        {active.heroes.length > 0 && (
+          <RelatedHeroes
+            heroes={active.heroes}
+            type={active.id === "synergies" ? "SYNERGY" : "COUNTER"}
+            feedback={feedback}
+          />
+        )}
       </div>
     </section>
   );

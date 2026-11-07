@@ -3447,6 +3447,43 @@ input[type="range"] {
   margin-bottom: 12px;
 }
 
+
+.relation-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.relation-feedback__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.relation-feedback__button {
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.relation-feedback__button:hover,
+.relation-feedback__button[aria-pressed="true"],
+.relation-feedback__button[aria-expanded="true"] {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.relation-feedback__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .hero-banner--backdrop .prose:last-child {
   margin-bottom: 0;
 }

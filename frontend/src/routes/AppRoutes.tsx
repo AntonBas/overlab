@@ -88,6 +88,11 @@ const CategoriesAdminPage = lazy(() =>
     default: module.CategoriesAdminPage,
   })),
 );
+const FeedbackAdminPage = lazy(() =>
+  import("../features/admin/pages/FeedbackAdminPage").then((module) => ({
+    default: module.FeedbackAdminPage,
+  })),
+);
 const RelationsAdminPage = lazy(() =>
   import("../features/admin/pages/RelationsAdminPage").then((module) => ({
     default: module.RelationsAdminPage,
@@ -168,6 +173,7 @@ export function AppRoutes() {
           <Route path="abilities" element={<AbilitiesAdminPage />} />
           <Route path="perks" element={<PerksAdminPage />} />
           <Route path="relations" element={<RelationsAdminPage />} />
+          <Route path="feedback" element={<FeedbackAdminPage />} />
           <Route path="categories" element={<CategoriesAdminPage />} />
           <Route path="guides" element={<GuidesAdminPage />} />
           <Route path="patches" element={<PatchesAdminPage />} />
