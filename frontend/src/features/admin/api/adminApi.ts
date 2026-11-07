@@ -25,8 +25,8 @@ import type {
   PatchPayload,
   PerkPayload,
   RelationPayload,
-  RelationReport,
-  RelationReportStatus,
+  FeedbackMessage,
+  FeedbackStatus,
   RelationVoteSummary,
 } from "../types";
 
@@ -351,20 +351,20 @@ export async function setUserEnabled(
   return data;
 }
 
-export async function fetchRelationReports(
-  status: RelationReportStatus,
-): Promise<RelationReport[]> {
-  const { data } = await api.get<RelationReport[]>("/admin/relation-reports", {
+export async function fetchFeedback(
+  status: FeedbackStatus,
+): Promise<FeedbackMessage[]> {
+  const { data } = await api.get<FeedbackMessage[]>("/admin/feedback", {
     params: { status },
   });
   return data;
 }
 
-export async function changeRelationReportStatus(
+export async function changeFeedbackStatus(
   id: number,
-  status: RelationReportStatus,
+  status: FeedbackStatus,
 ): Promise<void> {
-  await api.put(`/admin/relation-reports/${id}/status`, { status });
+  await api.put(`/admin/feedback/${id}/status`, { status });
 }
 
 export async function fetchRelationVoteSummary(): Promise<

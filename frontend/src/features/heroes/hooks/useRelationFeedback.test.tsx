@@ -6,7 +6,6 @@ vi.mock("../api/relationFeedbackApi", () => ({
   fetchRelationVotes: vi.fn(),
   saveRelationVote: vi.fn(),
   removeRelationVote: vi.fn(),
-  sendRelationReport: vi.fn(),
 }));
 
 let currentUser: User | null = null;
@@ -24,7 +23,6 @@ import {
   fetchRelationVotes,
   removeRelationVote,
   saveRelationVote,
-  sendRelationReport,
 } from "../api/relationFeedbackApi";
 import { useRelationFeedback } from "./useRelationFeedback";
 
@@ -51,7 +49,6 @@ describe("useRelationFeedback", () => {
     ]);
     vi.mocked(saveRelationVote).mockResolvedValue();
     vi.mocked(removeRelationVote).mockResolvedValue();
-    vi.mocked(sendRelationReport).mockResolvedValue();
   });
 
   it("matches stored votes in either direction", async () => {
@@ -103,26 +100,5 @@ describe("useRelationFeedback", () => {
 
     expect(result.current.voteOf("mei", "COUNTER")).toBeNull();
     expect(result.current.failure).toBe("Too many votes");
-  });
-
-  it("returns the failure message of a rejected report", async () => {
-    vi.mocked(sendRelationReport).mockRejectedValue(
-      Object.assign(new Error("boom"), {
-        isAxiosError: true,
-        response: { status: 409, data: { message: "Already reported" } },
-      }),
-    );
-    const { result } = renderHook(() => useRelationFeedback("ana"));
-
-    let message: string | null = null;
-    await act(async () => {
-      message = await result.current.report(
-        "mei",
-        "COUNTER",
-        "It is wrong now",
-      );
-    });
-
-    expect(message).toBe("Already reported");
   });
 });

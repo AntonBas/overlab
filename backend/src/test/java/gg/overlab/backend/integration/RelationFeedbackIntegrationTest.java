@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,8 +15,7 @@ import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.hero.relation.HeroRelation;
 import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import gg.overlab.backend.hero.relation.RelationType;
-import gg.overlab.backend.hero.relation.feedback.RelationFeedbackService;
-import gg.overlab.backend.hero.relation.feedback.RelationReportRepository;
+import gg.overlab.backend.hero.relation.feedback.RelationVoteRepository;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
@@ -52,7 +50,7 @@ class RelationFeedbackIntegrationTest {
     private HeroRelationRepository relationRepository;
 
     @Autowired
-    private RelationReportRepository reportRepository;
+    private RelationVoteRepository voteRepository;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -129,99 +127,35 @@ class RelationFeedbackIntegrationTest {
     }
 
     @Test
-    void reportsNeedAMeaningfulMessageAndOneOpenReportPerRelation() throws Exception {
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "short")).cookie(ownerCookie))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "This counter is outdated"))
-                        .cookie(ownerCookie))
-                .andExpect(status().isCreated());
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(1, 0, "Another thing to say here"))
-                        .cookie(ownerCookie))
-                .andExpect(status().isConflict());
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "Seen the same problem too"))
-                        .cookie(otherCookie))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    void openReportsPerUserAreCapped() throws Exception {
-        for (int index = 0; index < RelationFeedbackService.MAX_OPEN_REPORTS_PER_USER; index++) {
-            Hero extra = saveHero(10 + index);
-            heroes.add(extra);
-            HeroRelation relation = new HeroRelation();
-            relation.setHero(heroes.get(0));
-            relation.setRelatedHero(extra);
-            relation.setType(RelationType.SYNERGY);
-            relationRepository.saveAndFlush(relation);
-            mockMvc.perform(json(post("/api/me/relation-reports"),
-                            reportBody(0, heroes.size() - 1, "Synergy does not work, " + index)
-                                    .replace("COUNTER", "SYNERGY")).cookie(ownerCookie))
-                    .andExpect(status().isCreated());
-        }
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "One report too many here"))
-                        .cookie(ownerCookie))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void adminSeesReportsAndVoteSummaryAndResolvesReports() throws Exception {
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "This counter is outdated"))
-                        .cookie(ownerCookie))
-                .andExpect(status().isCreated());
+    void adminSeesTheVoteSummary() throws Exception {
         mockMvc.perform(json(put("/api/me/relation-votes"), voteBody(0, 1, "DOWN")).cookie(ownerCookie));
         mockMvc.perform(json(put("/api/me/relation-votes"), voteBody(0, 1, "DOWN")).cookie(otherCookie));
 
-        mockMvc.perform(get("/api/admin/relation-reports").cookie(adminCookie))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.heroSlug=='" + heroes.get(0).getSlug() + "')].message")
-                        .value("This counter is outdated"))
-                .andExpect(jsonPath("$[?(@.heroSlug=='" + heroes.get(0).getSlug() + "')].reporterName")
-                        .value("Feedback owner"));
         mockMvc.perform(get("/api/admin/relation-votes/summary").cookie(adminCookie))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.heroSlug=='" + heroes.get(0).getSlug() + "')].down").value(2));
-
-        Long ownerId = userRepository.findByEmailIgnoreCase(PREFIX + "owner@overlab.test").orElseThrow().getId();
-        Long reportId = reportRepository.findAllByUserIdOrderByIdAsc(ownerId).get(0).getId();
-        mockMvc.perform(json(put("/api/admin/relation-reports/" + reportId + "/status"),
-                        "{\"status\":\"ACCEPTED\"}").cookie(adminCookie))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(get("/api/admin/relation-reports").cookie(adminCookie))
-                .andExpect(jsonPath("$[?(@.id==" + reportId + ")]").isEmpty());
-        mockMvc.perform(get("/api/admin/relation-reports").param("status", "ACCEPTED").cookie(adminCookie))
-                .andExpect(jsonPath("$[?(@.id==" + reportId + ")].resolvedAt").isNotEmpty());
     }
 
     @Test
-    void feedbackEndpointsAreClosedToUsersAndGuests() throws Exception {
-        mockMvc.perform(get("/api/admin/relation-reports").cookie(ownerCookie)).andExpect(status().isForbidden());
+    void theVoteSummaryIsClosedToUsers() throws Exception {
         mockMvc.perform(get("/api/admin/relation-votes/summary").cookie(ownerCookie))
                 .andExpect(status().isForbidden());
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "Anonymous complaint here")))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void deletingTheAccountRemovesItsFeedback() throws Exception {
+    void deletingTheAccountRemovesItsVotes() throws Exception {
         mockMvc.perform(json(put("/api/me/relation-votes"), voteBody(0, 1, "UP")).cookie(ownerCookie));
-        mockMvc.perform(json(post("/api/me/relation-reports"), reportBody(0, 1, "This counter is outdated"))
-                .cookie(ownerCookie));
         User owner = userRepository.findByEmailIgnoreCase(PREFIX + "owner@overlab.test").orElseThrow();
 
         userRepository.delete(owner);
         userRepository.flush();
 
-        assertThat(reportRepository.findAllByUserIdOrderByIdAsc(owner.getId())).isEmpty();
+        assertThat(voteRepository.findAllByUserIdOrderByIdAsc(owner.getId())).isEmpty();
     }
 
     private String voteBody(int hero, int related, String value) {
         return "{\"heroSlug\":\"" + heroes.get(hero).getSlug() + "\",\"relatedHeroSlug\":\""
                 + heroes.get(related).getSlug() + "\",\"type\":\"COUNTER\",\"value\":\"" + value + "\"}";
-    }
-
-    private String reportBody(int hero, int related, String message) {
-        return "{\"heroSlug\":\"" + heroes.get(hero).getSlug() + "\",\"relatedHeroSlug\":\""
-                + heroes.get(related).getSlug() + "\",\"type\":\"COUNTER\",\"message\":\"" + message + "\"}";
     }
 
     private User saveUser(String name, UserRole role) {

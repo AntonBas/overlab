@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function Footer() {
+  const { pathname } = useLocation();
+  const feedbackPath = pathname.startsWith("/feedback")
+    ? "/feedback"
+    : `/feedback?from=${encodeURIComponent(pathname)}`;
   return (
     <footer className="site-footer">
       <div className="container">
@@ -17,6 +21,7 @@ export function Footer() {
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
           <Link to="/cookies">Cookies</Link>
+          <Link to={feedbackPath}>Send feedback</Link>
         </nav>
       </div>
     </footer>

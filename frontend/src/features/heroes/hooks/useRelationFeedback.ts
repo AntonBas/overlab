@@ -5,7 +5,6 @@ import {
   fetchRelationVotes,
   removeRelationVote,
   saveRelationVote,
-  sendRelationReport,
   type RelationKind,
   type RelationVoteValue,
 } from "../api/relationFeedbackApi";
@@ -23,11 +22,6 @@ export interface RelationFeedback {
     type: RelationKind,
     value: RelationVoteValue,
   ) => Promise<void>;
-  report: (
-    relatedHeroSlug: string,
-    type: RelationKind,
-    message: string,
-  ) => Promise<string | null>;
 }
 
 interface StoredVotes {
@@ -121,18 +115,6 @@ export function useRelationFeedback(heroSlug: string): RelationFeedback {
     [heroSlug, userId, votes],
   );
 
-  const report = useCallback(
-    async (relatedHeroSlug: string, type: RelationKind, message: string) => {
-      try {
-        await sendRelationReport({ heroSlug, relatedHeroSlug, type, message });
-        return null;
-      } catch (error) {
-        return toFailure(error).message;
-      }
-    },
-    [heroSlug],
-  );
-
   return useMemo(
     () => ({
       heroSlug,
@@ -140,8 +122,7 @@ export function useRelationFeedback(heroSlug: string): RelationFeedback {
       failure,
       voteOf,
       vote,
-      report,
     }),
-    [heroSlug, userId, failure, voteOf, vote, report],
+    [heroSlug, userId, failure, voteOf, vote],
   );
 }

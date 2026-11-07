@@ -23,18 +23,17 @@ export interface AdminAbility {
 
 export type RelationType = "COUNTER" | "SYNERGY";
 
-export type RelationReportStatus = "NEW" | "ACCEPTED" | "REJECTED";
+export type FeedbackType = "INACCURACY" | "BUG" | "TYPO" | "OTHER";
 
-export interface RelationReport {
+export type FeedbackStatus = "NEW" | "RESOLVED" | "DISMISSED";
+
+export interface FeedbackMessage {
   id: number;
-  relationId: number;
-  heroSlug: string;
-  relatedHeroSlug: string;
-  type: RelationType;
-  relationNote: string | null;
+  type: FeedbackType;
   message: string;
-  reporterName: string;
-  status: RelationReportStatus;
+  pagePath: string | null;
+  authorName: string | null;
+  status: FeedbackStatus;
   createdAt: string;
   resolvedAt: string | null;
 }

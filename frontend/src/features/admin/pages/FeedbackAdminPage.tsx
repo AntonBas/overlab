@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
@@ -7,45 +8,45 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { SettingsSection } from "../../account/components/SettingsSection";
 import {
-  changeRelationReportStatus,
-  fetchRelationReports,
+  changeFeedbackStatus,
+  fetchFeedback,
   fetchRelationVoteSummary,
 } from "../api/adminApi";
 import { DataTable } from "../components/DataTable";
 import { StatusMessage } from "../components/StatusMessage";
 import type {
-  RelationReport,
-  RelationReportStatus,
+  FeedbackMessage,
+  FeedbackStatus,
+  FeedbackType,
   RelationType,
 } from "../types";
 
-const STATUSES: RelationReportStatus[] = ["NEW", "ACCEPTED", "REJECTED"];
+const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 
-const TYPE_LABELS: Record<RelationType, string> = {
+const TYPE_LABELS: Record<FeedbackType, string> = {
+  INACCURACY: "Inaccuracy",
+  BUG: "Bug",
+  TYPO: "Typo",
+  OTHER: "Other",
+};
+
+const RELATION_LABELS: Record<RelationType, string> = {
   COUNTER: "counter",
   SYNERGY: "synergy",
 };
 
-function pairLabel(
-  heroSlug: string,
-  relatedHeroSlug: string,
-  type: RelationType,
-): string {
-  return `${heroSlug} / ${relatedHeroSlug} (${TYPE_LABELS[type]})`;
-}
-
 export function FeedbackAdminPage() {
   usePageTitle("Feedback");
-  const [status, setStatus] = useState<RelationReportStatus>("NEW");
+  const [status, setStatus] = useState<FeedbackStatus>("NEW");
   const [failure, setFailure] = useState<string | null>(null);
-  const reports = useFetch(() => fetchRelationReports(status), [status]);
+  const messages = useFetch(() => fetchFeedback(status), [status]);
   const summary = useFetch(() => fetchRelationVoteSummary(), []);
 
-  async function resolve(report: RelationReport, next: RelationReportStatus) {
+  async function change(message: FeedbackMessage, next: FeedbackStatus) {
     setFailure(null);
     try {
-      await changeRelationReportStatus(report.id, next);
-      reports.reload();
+      await changeFeedbackStatus(message.id, next);
+      messages.reload();
     } catch (error) {
       setFailure(toFailure(error).message);
     }
@@ -55,17 +56,17 @@ export function FeedbackAdminPage() {
     <>
       <PageHeader
         title="Feedback"
-        subtitle="What users report and vote on counters and synergies"
+        subtitle="What visitors write and how they vote on counters and synergies"
       />
       <StatusMessage error={failure} />
-      <SettingsSection title="Reports">
+      <SettingsSection title="Messages">
         <div className="form-field">
-          <label htmlFor="report-status">Status</label>
+          <label htmlFor="feedback-status">Status</label>
           <select
-            id="report-status"
+            id="feedback-status"
             value={status}
             onChange={(event) =>
-              setStatus(event.target.value as RelationReportStatus)
+              setStatus(event.target.value as FeedbackStatus)
             }
           >
             {STATUSES.map((option) => (
@@ -75,69 +76,62 @@ export function FeedbackAdminPage() {
             ))}
           </select>
         </div>
-        {reports.error && (
-          <ErrorMessage failure={reports.error} onRetry={reports.reload} />
+        {messages.error && (
+          <ErrorMessage failure={messages.error} onRetry={messages.reload} />
         )}
-        {reports.loading && <Spinner />}
-        {reports.data && (
+        {messages.loading && <Spinner />}
+        {messages.data && (
           <DataTable
-            rows={reports.data}
-            rowKey={(report) => report.id}
-            emptyMessage="No reports with this status."
+            rows={messages.data}
+            rowKey={(message) => message.id}
+            emptyMessage="No messages with this status."
             columns={[
+              { header: "Type", render: (row) => TYPE_LABELS[row.type] },
+              { header: "Message", render: (row) => <p>{row.message}</p> },
               {
-                header: "Recommendation",
-                render: (report) => (
-                  <>
-                    <span className="nowrap">
-                      {pairLabel(
-                        report.heroSlug,
-                        report.relatedHeroSlug,
-                        report.type,
-                      )}
-                    </span>
-                    {report.relationNote && (
-                      <p className="muted">{report.relationNote}</p>
-                    )}
-                  </>
-                ),
+                header: "Page",
+                render: (row) =>
+                  row.pagePath ? (
+                    <Link to={row.pagePath}>{row.pagePath}</Link>
+                  ) : (
+                    ""
+                  ),
               },
               {
-                header: "Report",
-                render: (report) => <p>{report.message}</p>,
+                header: "From",
+                render: (row) => row.authorName ?? "Guest",
               },
-              { header: "From", render: (report) => report.reporterName },
               {
                 header: "Sent",
-                render: (report) => new Date(report.createdAt).toLocaleString(),
+                render: (row) => new Date(row.createdAt).toLocaleString(),
               },
               {
                 header: "",
-                render: (report) => (
+                render: (row) => (
                   <div className="form__actions">
-                    {report.status !== "ACCEPTED" && (
+                    {row.status !== "RESOLVED" && (
                       <button
                         type="button"
                         className="button button--ghost"
-                        onClick={() => void resolve(report, "ACCEPTED")}
+                        onClick={() => void change(row, "RESOLVED")}
                       >
-                        Accept
+                        Resolve
                       </button>
                     )}
-                    {report.status !== "REJECTED" && (
+                    {row.status !== "DISMISSED" && (
                       <button
                         type="button"
                         className="button button--ghost"
-                        onClick={() => void resolve(report, "REJECTED")}
+                        onClick={() => void change(row, "DISMISSED")}
                       >
-                        Reject
+                        Dismiss
                       </button>
                     )}
-                    {report.status !== "NEW" && (
+                    {row.status !== "NEW" && (
                       <button
                         type="button"
                         className="button button--ghost"
-                        onClick={() => void resolve(report, "NEW")}
+                        onClick={() => void change(row, "NEW")}
                       >
                         Reopen
                       </button>
@@ -166,7 +160,7 @@ export function FeedbackAdminPage() {
               {
                 header: "Recommendation",
                 render: (row) =>
-                  pairLabel(row.heroSlug, row.relatedHeroSlug, row.type),
+                  `${row.heroSlug} / ${row.relatedHeroSlug} (${RELATION_LABELS[row.type]})`,
               },
               { header: "Agree", render: (row) => row.up },
               { header: "Disagree", render: (row) => row.down },
