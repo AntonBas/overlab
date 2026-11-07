@@ -96,7 +96,7 @@ services:
       - overlab-net
 
   mailpit:
-    image: axllent/mailpit:v1.32
+    image: axllent/mailpit:v1.33
     container_name: overlab-mailpit
     restart: unless-stopped
     ports:
