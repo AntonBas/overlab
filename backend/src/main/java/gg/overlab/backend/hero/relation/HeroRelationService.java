@@ -32,8 +32,8 @@ public class HeroRelationService {
 
     private static final String AUDIT_TYPE = "HeroRelation";
 
-    private static final Comparator<RelatedHeroDto> BY_NAME =
-            Comparator.comparing(RelatedHeroDto::name);
+    private static final Comparator<RelatedHeroDto> BY_ROLE_THEN_NAME =
+            Comparator.comparing(RelatedHeroDto::role).thenComparing(RelatedHeroDto::name);
 
     private final HeroRelationRepository relationRepository;
     private final HeroRepository heroRepository;
@@ -45,10 +45,10 @@ public class HeroRelationService {
     public HeroCountersDto getCounters(String heroSlug) {
         requireHero(heroSlug);
         List<RelatedHeroDto> counters = relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getRelatedHero(), relation)).sorted(BY_NAME).toList();
+                .stream().map(relation -> related(relation.getRelatedHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();
         List<RelatedHeroDto> counteredBy = relationRepository
                 .findAllByRelatedHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_NAME).toList();
+                .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();
         return new HeroCountersDto(counters, counteredBy);
     }
 
@@ -61,7 +61,7 @@ public class HeroRelationService {
                 .forEach(relation -> keepFirst(bySlug, related(relation.getRelatedHero(), relation)));
         relationRepository.findAllByRelatedHeroSlugAndType(heroSlug, RelationType.SYNERGY)
                 .forEach(relation -> keepFirst(bySlug, related(relation.getHero(), relation)));
-        return bySlug.values().stream().sorted(BY_NAME).toList();
+        return bySlug.values().stream().sorted(BY_ROLE_THEN_NAME).toList();
     }
 
     @Cacheable(value = CacheNames.CONTENT, key = "'relations:all'")
@@ -93,7 +93,7 @@ public class HeroRelationService {
     }
 
     private List<RelatedHeroDto> sorted(Collection<RelatedHeroDto> heroes) {
-        return heroes.stream().sorted(BY_NAME).toList();
+        return heroes.stream().sorted(BY_ROLE_THEN_NAME).toList();
     }
 
     @Transactional(readOnly = true)

@@ -49,7 +49,7 @@ class HeroRelationServiceTest {
     }
 
     @Test
-    void countersListBothDirectionsSortedByName() {
+    void countersListBothDirectionsSortedByRoleThenName() {
         when(relationRepository.findAllByHeroSlugAndType("ana", RelationType.COUNTER)).thenReturn(List.of(
                 relation(ana, genji, RelationType.COUNTER), relation(ana, reinhardt, RelationType.COUNTER)));
         when(relationRepository.findAllByRelatedHeroSlugAndType("ana", RelationType.COUNTER))
@@ -57,7 +57,7 @@ class HeroRelationServiceTest {
 
         HeroCountersDto result = service.getCounters("ana");
 
-        assertThat(result.counters()).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
+        assertThat(result.counters()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
         assertThat(result.counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("genji");
     }
 
@@ -70,7 +70,24 @@ class HeroRelationServiceTest {
 
         List<RelatedHeroDto> result = service.getSynergies("ana");
 
-        assertThat(result).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
+        assertThat(result).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
+    }
+
+    @Test
+    void sortsByRoleTankDamageSupportAndThenByName() {
+        Hero mei = hero(4, "mei", "Mei", HeroRole.DAMAGE);
+        Hero lucio = hero(5, "lucio", "Lucio", HeroRole.SUPPORT);
+        Hero roadhog = hero(6, "roadhog", "Roadhog", HeroRole.TANK);
+        when(relationRepository.findAllByHeroSlugAndType("ana", RelationType.SYNERGY)).thenReturn(List.of(
+                relation(ana, lucio, RelationType.SYNERGY), relation(ana, mei, RelationType.SYNERGY),
+                relation(ana, roadhog, RelationType.SYNERGY), relation(ana, genji, RelationType.SYNERGY),
+                relation(ana, reinhardt, RelationType.SYNERGY)));
+        when(relationRepository.findAllByRelatedHeroSlugAndType("ana", RelationType.SYNERGY)).thenReturn(List.of());
+
+        List<RelatedHeroDto> result = service.getSynergies("ana");
+
+        assertThat(result).extracting(RelatedHeroDto::slug)
+                .containsExactly("reinhardt", "roadhog", "genji", "mei", "lucio");
     }
 
     @Test
@@ -85,7 +102,7 @@ class HeroRelationServiceTest {
 
         assertThat(result).extracting(HeroRelationsDto::heroSlug).containsExactly("ana", "genji", "reinhardt");
         HeroRelationsDto forAna = result.get(0);
-        assertThat(forAna.counters()).extracting(RelatedHeroDto::slug).containsExactly("genji", "reinhardt");
+        assertThat(forAna.counters()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt", "genji");
         assertThat(forAna.counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("genji");
         assertThat(forAna.synergies()).extracting(RelatedHeroDto::slug).containsExactly("reinhardt");
         assertThat(result.get(2).counteredBy()).extracting(RelatedHeroDto::slug).containsExactly("ana");
