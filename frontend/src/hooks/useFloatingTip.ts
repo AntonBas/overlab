@@ -40,8 +40,12 @@ export function useFloatingTip() {
     if (!open || !trigger || !tip) {
       return;
     }
-    const anchor = trigger.getBoundingClientRect();
+    const alignTarget = trigger.closest<HTMLElement>("[data-tip-anchor]");
+    const anchor = (alignTarget ?? trigger).getBoundingClientRect();
     const tipBox = tip.getBoundingClientRect();
+    const tipWidth = alignTarget
+      ? Math.max(tipBox.width, anchor.width)
+      : tipBox.width;
     const fitsBelow =
       anchor.bottom + TRIGGER_GAP + tipBox.height <=
       window.innerHeight - VIEWPORT_MARGIN;
@@ -50,9 +54,13 @@ export function useFloatingTip() {
       : Math.max(VIEWPORT_MARGIN, anchor.top - TRIGGER_GAP - tipBox.height);
     const left = Math.min(
       Math.max(VIEWPORT_MARGIN, anchor.left),
-      window.innerWidth - tipBox.width - VIEWPORT_MARGIN,
+      window.innerWidth - tipWidth - VIEWPORT_MARGIN,
     );
-    setStyle({ top, left: Math.max(VIEWPORT_MARGIN, left) });
+    setStyle({
+      top,
+      left: Math.max(VIEWPORT_MARGIN, left),
+      minWidth: alignTarget ? anchor.width : undefined,
+    });
   }, [open]);
 
   useEffect(() => {

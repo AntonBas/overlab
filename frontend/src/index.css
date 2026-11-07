@@ -2460,37 +2460,6 @@ input[type="range"] {
   gap: 2px;
 }
 
-.perk-row.perk-row--detailed {
-  grid-template-columns: 1fr;
-}
-
-.perk-row.perk-row--detailed .perk-tile {
-  grid-column: 1;
-  align-items: flex-start;
-}
-
-.perk-row--detailed .perk-tile__heading {
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.perk-tile__description,
-.perk-tile__note {
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-.perk-tile__note {
-  padding-left: 8px;
-  border-left: 2px solid var(--accent);
-}
-
-.hero-perks-grid--detailed {
-  grid-template-columns: repeat(auto-fill, minmax(min(440px, 100%), 1fr));
-}
-
 .hero-perks-grid {
   row-gap: 0;
 }
@@ -2894,6 +2863,23 @@ input[type="range"] {
 
 .perk-tip--interactive {
   pointer-events: auto;
+}
+
+.perk-tip--interactive::before,
+.perk-tip--interactive::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 12px;
+}
+
+.perk-tip--interactive::before {
+  bottom: 100%;
+}
+
+.perk-tip--interactive::after {
+  top: 100%;
 }
 
 .perk-tip--recommended {
@@ -3429,7 +3415,7 @@ input[type="range"] {
 }
 
 .hero-perks--backdrop {
-  background-position: center;
+  background-position: 90% 40%;
   background-size: cover;
   border-color: color-mix(in srgb, var(--role-color) 55%, var(--border));
 }
@@ -3437,7 +3423,7 @@ input[type="range"] {
 .hero-banner--backdrop {
   margin-bottom: 24px;
   padding: 20px;
-  background-position: center 25%;
+  background-position: 90% 18%;
   background-size: cover;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -3445,6 +3431,21 @@ input[type="range"] {
 
 .hero-banner--backdrop .page-header {
   margin-bottom: 12px;
+}
+
+.hero-banner--backdrop .prose:last-child {
+  margin-bottom: 0;
+}
+
+.filters__note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.icon-select__trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .relation-feedback {
@@ -3482,18 +3483,4 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-.hero-banner--backdrop .prose:last-child {
-  margin-bottom: 0;
-}
-
-.filters__note {
-  flex-basis: 100%;
-  margin: 0;
-  font-size: 0.85rem;
-}
-
-.icon-select__trigger:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }

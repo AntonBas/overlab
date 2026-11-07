@@ -33,14 +33,15 @@ import { AbilityText } from "../components/AbilityText";
 import { ControlSchemeToggle } from "../components/ControlSchemeToggle";
 import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
+import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/PerkList";
 import { RelationTabs } from "../components/RelationTabs";
-
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
+
 export function HeroPage() {
   const { slug = "" } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
   const relationFeedback = useRelationFeedback(slug);
+  const [searchParams, setSearchParams] = useSearchParams();
   const queue: GameQueue =
     searchParams.get("queue")?.toUpperCase() === "QUICK_PLAY"
       ? "QUICK_PLAY"
@@ -117,53 +118,60 @@ export function HeroPage() {
     },
   ].filter((section) => section.visible);
 
+  const backdrop = heroBackdropStyle(slug);
+
   return (
     <>
-      <PageHeader
-        title={hero.data.name}
-        image={
-          <HeroPortrait
-            name={hero.data.name}
-            url={hero.data.portraitUrl}
-            size={72}
-          />
-        }
-        subtitle={
-          <span className="hero-tags">
-            <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
-            {focus && (
-              <StatChips
-                winRate={focus.winRate}
-                pickRate={focus.pickRate}
-                banRate={focus.banRate}
-                showBan={queue === "COMPETITIVE"}
-              />
-            )}
-          </span>
-        }
-        actions={
-          <>
-            <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
-            <QueueToggle
-              value={queue}
-              onChange={(next) => {
-                const params = new URLSearchParams(searchParams);
-                if (next === "COMPETITIVE") {
-                  params.delete("queue");
-                } else {
-                  params.set("queue", "quick_play");
-                }
-                setSearchParams(params);
-              }}
+      <div
+        className={backdrop ? "hero-banner hero-banner--backdrop" : undefined}
+        style={backdrop}
+      >
+        <PageHeader
+          title={hero.data.name}
+          image={
+            <HeroPortrait
+              name={hero.data.name}
+              url={hero.data.portraitUrl}
+              size={72}
             />
-          </>
-        }
-      />
-      {hero.data.description && (
-        <p className="prose">
-          <AbilityText text={hero.data.description} />
-        </p>
-      )}
+          }
+          subtitle={
+            <span className="hero-tags">
+              <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+              {focus && (
+                <StatChips
+                  winRate={focus.winRate}
+                  pickRate={focus.pickRate}
+                  banRate={focus.banRate}
+                  showBan={queue === "COMPETITIVE"}
+                />
+              )}
+            </span>
+          }
+          actions={
+            <>
+              <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
+              <QueueToggle
+                value={queue}
+                onChange={(next) => {
+                  const params = new URLSearchParams(searchParams);
+                  if (next === "COMPETITIVE") {
+                    params.delete("queue");
+                  } else {
+                    params.set("queue", "quick_play");
+                  }
+                  setSearchParams(params);
+                }}
+              />
+            </>
+          }
+        />
+        {hero.data.description && (
+          <p className="prose">
+            <AbilityText text={hero.data.description} />
+          </p>
+        )}
+      </div>
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}

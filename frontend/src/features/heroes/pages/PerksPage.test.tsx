@@ -127,7 +127,7 @@ describe("PerksPage", () => {
     expect(screen.queryByText("Ana")).not.toBeInTheDocument();
   });
 
-  it("shows perk descriptions and notes in the detailed view", async () => {
+  it("shows perk descriptions in a tooltip and has no detailed view", async () => {
     render(
       <MemoryRouter>
         <PerksPage />
@@ -135,16 +135,15 @@ describe("PerksPage", () => {
     );
     await screen.findByText("Sharp Eye");
     expect(screen.queryByText("Better aim")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Detailed" })).toBeNull();
 
     fireEvent.mouseEnter(
       screen.getByText("Sharp Eye").closest(".perk-tile__trigger") as Element,
     );
+
     expect(screen.getByRole("tooltip")).toHaveTextContent("Better aim");
-
-    fireEvent.click(screen.getByRole("button", { name: "Detailed" }));
-
-    expect(screen.queryByRole("tooltip")).toBeNull();
-    expect(screen.getByText("Better aim")).toBeInTheDocument();
-    expect(screen.getByText("Take it on ranged maps")).toBeInTheDocument();
+    expect(screen.getByRole("tooltip")).toHaveTextContent(
+      "Take it on ranged maps",
+    );
   });
 });
