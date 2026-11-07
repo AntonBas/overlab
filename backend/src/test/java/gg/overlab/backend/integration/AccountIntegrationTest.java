@@ -173,6 +173,28 @@ class AccountIntegrationTest {
     }
 
     @Test
+    void adminCanChangeRolesButNotItsOwnAndRegularUsersCannot() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+
+        mockMvc.perform(json(put("/api/admin/users/" + user.getId() + "/role"), "{\"role\":\"ADMIN\"}")
+                        .cookie(userCookie))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(json(put("/api/admin/users/" + admin.getId() + "/role"), "{\"role\":\"USER\"}")
+                        .cookie(adminCookie))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(json(put("/api/admin/users/" + user.getId() + "/role"), "{\"role\":\"ADMIN\"}")
+                        .cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+        assertThat(userRepository.findById(user.getId()).orElseThrow().getRole()).isEqualTo(UserRole.ADMIN);
+        mockMvc.perform(json(put("/api/admin/users/" + user.getId() + "/role"), "{\"role\":\"USER\"}")
+                        .cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("USER"));
+    }
+
+    @Test
     void adminCanSearchUsers() throws Exception {
         User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
         Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));

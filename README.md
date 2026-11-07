@@ -50,7 +50,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/guides` | Spots and setups: paste a YouTube link (`youtu.be/...`, `watch?v=...`), hero, map, type (setup, position, ultimate spot, tip), side (attack, defense, both), optional ability, start and end time as `1:23`, video preview, publish and order. Shown on the map page grouped by hero and on the hero page grouped by map |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
 | `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
-| `/admin/users` | Search users, block and unblock |
+| `/admin/users` | Search users, block and unblock, grant or remove admin rights |
 | `/admin/audit` | Audit log with filters and "was → became" changes |
 
 Create and edit forms open in a side panel over the table (Esc, the close button or a click outside closes it; unsaved changes ask for confirmation). Forms warn about unsaved changes when you leave the page.
@@ -194,7 +194,7 @@ Email and password registration plus Google sign-in. Tokens are stored in `httpO
 | `POST /api/feedback` | Send a message about an inaccuracy, bug or typo (`type` `INACCURACY`/`BUG`/`TYPO`/`OTHER`, 10 to 2000 characters, optional site `pagePath`); login is optional, rate limited per IP, a signed in user can have 20 unreviewed messages at most |
 | `GET`/`PUT /api/me/preferences` | Default mode, rank, platform and region for the statistics filters |
 | `GET /api/admin/feedback?status=NEW`, `PUT /api/admin/feedback/{id}/status`, `GET /api/admin/relation-votes/summary` | Admin: review messages (`NEW`, `RESOLVED`, `DISMISSED`) and see votes per recommendation. Votes are never shown publicly and never change the curated data on their own |
-| `GET /api/admin/users`, `PUT /api/admin/users/{id}/enabled` | Admin: search users, block or unblock (blocked users are signed out and cannot sign in; an admin cannot block themselves) |
+| `GET /api/admin/users`, `PUT /api/admin/users/{id}/enabled`, `PUT /api/admin/users/{id}/role` | Admin: search users, block or unblock (blocked users are signed out and cannot sign in), change role between `USER` and `ADMIN` (removing admin signs the user out; an admin cannot block or change their own account) |
 
 Signing in with Google using an email that already has a password account links the two, so both ways work. If that account's email was not verified yet, its password is removed (use "Forgot your password?" to set a new one).
 

@@ -1381,8 +1381,25 @@ select:disabled {
 
 .settings {
   display: grid;
-  gap: 24px;
-  max-width: 640px;
+  gap: 20px;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.settings .form:not(.preferences-form) {
+  max-width: 440px;
+}
+
+.settings-section--danger .form {
+  max-width: none;
+}
+
+.settings-section .button {
+  justify-self: start;
+}
+
+.settings .form > .button {
+  align-self: flex-start;
 }
 
 .settings-section {
@@ -1396,6 +1413,174 @@ select:disabled {
 
 .settings-section h2 {
   margin: 0;
+  font-size: 1.05rem;
+}
+
+.account-header {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.account-header__body {
+  padding: 20px 24px 16px;
+}
+
+.account-header__identity {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.account-header__identity h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.account-header__identity p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-header__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.account-badge--admin {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-text);
+}
+
+.account-badge--good {
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  color: var(--good);
+}
+
+.account-badge--warn {
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  color: var(--bad);
+}
+
+.account-header__tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+}
+
+.account-tab {
+  margin-bottom: -1px;
+  padding: 12px 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.account-tab:hover {
+  color: var(--text);
+}
+
+.account-tab--active {
+  border-bottom-color: var(--accent);
+  color: var(--text);
+}
+
+.favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.favorite-grid li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.favorite-grid .place-icon {
+  min-width: 0;
+  gap: 10px;
+}
+
+.favorite-grid .place-icon a {
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-grid .place-icon a:hover {
+  color: var(--accent);
+}
+
+.favorite-grid__remove {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.favorite-grid__remove:hover,
+.favorite-grid__remove:focus-visible {
+  background: color-mix(in srgb, var(--bad) 18%, transparent);
+  color: var(--bad);
+}
+
+.preferences-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.preferences-form__footer {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
 }
 
 .favorite-button {

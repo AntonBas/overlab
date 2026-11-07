@@ -4,6 +4,7 @@ import gg.overlab.backend.common.PageResponse;
 import gg.overlab.backend.config.security.AuthenticatedUser;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
 import gg.overlab.backend.user.account.dto.SetEnabledRequest;
+import gg.overlab.backend.user.account.dto.SetRoleRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,5 +39,12 @@ public class AdminUserController {
     public AdminUserDto setEnabled(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser actor,
                                    @Valid @RequestBody SetEnabledRequest request) {
         return adminUserService.setEnabled(id, actor.id(), request.enabled());
+    }
+
+    @Operation(summary = "Change a user's role")
+    @PutMapping("/{id}/role")
+    public AdminUserDto setRole(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser actor,
+                                @Valid @RequestBody SetRoleRequest request) {
+        return adminUserService.setRole(id, actor.id(), request.role());
     }
 }

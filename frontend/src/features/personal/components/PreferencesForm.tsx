@@ -38,7 +38,7 @@ export function PreferencesForm() {
   }
 
   return (
-    <form onSubmit={submit} className="form">
+    <form onSubmit={submit} className="form preferences-form">
       <SelectField
         label="Mode"
         name="preferredQueue"
@@ -102,10 +102,12 @@ export function PreferencesForm() {
           </option>
         ))}
       </SelectField>
-      <StatusMessage error={save.error} success={save.success} />
-      <button type="submit" className="button" disabled={save.saving}>
-        Save defaults
-      </button>
+      <div className="preferences-form__footer">
+        <button type="submit" className="button" disabled={save.saving}>
+          Save defaults
+        </button>
+        <StatusMessage error={save.error} success={save.success} />
+      </div>
     </form>
   );
 }
