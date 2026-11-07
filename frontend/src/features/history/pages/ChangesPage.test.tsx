@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 import type { Patch } from "../../../types/api";
 
@@ -52,6 +52,8 @@ function optionLabels(): string[] {
 
 describe("ChangesPage", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-07T12:00:00Z"));
     vi.resetAllMocks();
     vi.mocked(fetchPatches).mockResolvedValue([NEW_PATCH, OLD_PATCH]);
     vi.mocked(fetchHistoryStart).mockResolvedValue({
@@ -69,6 +71,10 @@ describe("ChangesPage", () => {
     });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("lists only patches that were released after statistics collection started", async () => {
     renderPage();
 
@@ -77,9 +83,38 @@ describe("ChangesPage", () => {
     ).toBeInTheDocument();
     expect(optionLabels()).toEqual([
       "Last 7 days",
-      "Last 30 days",
       "Taking Reign · 3 Nov 2026",
     ]);
+  });
+
+  it("offers the 30 day period once the history is long enough", async () => {
+    vi.mocked(fetchHistoryStart).mockResolvedValue({
+      firstCapturedAt: "2026-09-20T17:00:00Z",
+    });
+    renderPage();
+
+    await screen.findByText("Taking Reign · 3 Nov 2026");
+    expect(optionLabels().slice(0, 2)).toEqual(["Last 7 days", "Last 30 days"]);
+  });
+
+  it("offers a rank filter in Competitive and requests the chosen rank", async () => {
+    renderPage("/changes?tier=gold");
+
+    await screen.findByText("Taking Reign · 3 Nov 2026");
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeInTheDocument();
+    expect(fetchComparison).toHaveBeenLastCalledWith(
+      expect.objectContaining({ queue: "COMPETITIVE", tier: "GOLD" }),
+    );
+  });
+
+  it("ignores the rank in Quick Play", async () => {
+    renderPage("/changes?queue=quick_play&tier=gold");
+
+    await screen.findByText("Taking Reign · 3 Nov 2026");
+    expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
+    expect(fetchComparison).toHaveBeenLastCalledWith(
+      expect.objectContaining({ queue: "QUICK_PLAY", tier: "ALL" }),
+    );
   });
 
   it("groups patches by season", async () => {

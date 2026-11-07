@@ -193,21 +193,17 @@ describe("MapPage", () => {
     expect(within(tank).getAllByText("Reinhardt")).toHaveLength(2);
   });
 
-  it("links to the neighbouring maps and to other maps of the same mode", async () => {
+  it("lists the other maps of the same mode without the neighbour pager", async () => {
     renderPage();
 
-    const pager = await screen.findByRole("navigation", { name: "Other maps" });
-
-    expect(within(pager).getByRole("link", { name: /Havana/ })).toHaveAttribute(
-      "href",
-      "/maps/havana",
-    );
-    expect(
-      within(pager).getByRole("link", { name: /Route 66/ }),
-    ).toHaveAttribute("href", "/maps/route-66");
     expect(
       await screen.findByRole("heading", { name: "More Escort maps" }),
     ).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Other maps" })).toBeNull();
+    expect(screen.getByRole("link", { name: /Route 66/ })).toHaveAttribute(
+      "href",
+      "/maps/route-66",
+    );
   });
 
   it("shows the game mode in the banner", async () => {
