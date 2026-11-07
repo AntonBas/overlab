@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Patch } from "../../../types/api";
-import { buildPatchMarkers } from "./patchMarkers";
+import { buildPatchMarkers, buildSeasonLookup } from "./patchMarkers";
 
 function patch(version: string, title: string | null): Patch {
   return {
@@ -9,6 +9,7 @@ function patch(version: string, title: string | null): Patch {
     slug: version,
     title,
     releasedAt: `${version}T18:00:00Z`,
+    season: null,
     notes: null,
   };
 }
@@ -52,5 +53,47 @@ describe("buildPatchMarkers", () => {
 
     expect(marker.label).toBe("Patch 2026-10-06");
     expect(marker.kind).toBe("patch");
+  });
+});
+
+describe("bug fix updates", () => {
+  it("are drawn as hotfixes of the latest main patch", () => {
+    const markers = buildPatchMarkers([
+      patch("2026-10-06", "Reign of Talon - Season 5"),
+      patch("2026-10-20", "Bug Fix Update"),
+    ]);
+
+    expect(markers[1].kind).toBe("hotfix");
+    expect(markers[1].detail).toBe(
+      "Hotfix for Reign of Talon - Season 5 (6 Oct)",
+    );
+  });
+});
+
+describe("buildSeasonLookup", () => {
+  const seasonPatch = (version: string, season: number | null): Patch => ({
+    ...patch(version, null),
+    season,
+  });
+
+  it("returns the season of the latest patch released before a moment", () => {
+    const seasonAt = buildSeasonLookup([
+      seasonPatch("2026-12-10", 6),
+      seasonPatch("2026-10-06", 5),
+      seasonPatch("2026-11-05", 5),
+    ]);
+
+    expect(seasonAt(Date.parse("2026-10-20T00:00:00Z"))).toBe(5);
+    expect(seasonAt(Date.parse("2026-12-10T18:00:00Z"))).toBe(6);
+    expect(seasonAt(Date.parse("2027-01-01T00:00:00Z"))).toBe(6);
+  });
+
+  it("knows nothing before the first season patch", () => {
+    const seasonAt = buildSeasonLookup([
+      seasonPatch("2026-10-06", 5),
+      seasonPatch("2026-09-01", null),
+    ]);
+
+    expect(seasonAt(Date.parse("2026-09-15T00:00:00Z"))).toBeNull();
   });
 });

@@ -20,6 +20,23 @@ interface ChangesTableProps {
 
 const DELTA_TITLE = "Change between the two snapshots";
 
+interface ChangeCellProps {
+  before: number;
+  after: number;
+  change: number | null;
+}
+
+function ChangeCell({ before, after, change }: ChangeCellProps) {
+  return (
+    <span className="change">
+      <span className="change__value">{formatPercent(before)}</span>
+      <span className="change__arrow">→</span>
+      <span className="change__value">{formatPercent(after)}</span>
+      <DeltaValue value={change} title={DELTA_TITLE} />
+    </span>
+  );
+}
+
 export function ChangesTable({
   changes,
   showBan,
@@ -66,30 +83,32 @@ export function ChangesTable({
 
   return (
     <>
-      <div className="segmented" role="group" aria-label="Role">
-        <button
-          type="button"
-          className={clsx("segmented__item", {
-            "segmented__item--active": role === null,
-          })}
-          aria-pressed={role === null}
-          onClick={() => setRole(null)}
-        >
-          <AllRolesBadge label="All roles" />
-        </button>
-        {ROLES.map((entry) => (
+      <div className="table-toolbar">
+        <div className="segmented" role="group" aria-label="Role">
           <button
-            key={entry}
             type="button"
             className={clsx("segmented__item", {
-              "segmented__item--active": role === entry,
+              "segmented__item--active": role === null,
             })}
-            aria-pressed={role === entry}
-            onClick={() => setRole(entry)}
+            aria-pressed={role === null}
+            onClick={() => setRole(null)}
           >
-            <RoleBadge role={entry} />
+            <AllRolesBadge label="All roles" />
           </button>
-        ))}
+          {ROLES.map((entry) => (
+            <button
+              key={entry}
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": role === entry,
+              })}
+              aria-pressed={role === entry}
+              onClick={() => setRole(entry)}
+            >
+              <RoleBadge role={entry} />
+            </button>
+          ))}
+        </div>
       </div>
       <div className="table-wrap">
         <table className="table">
@@ -141,19 +160,17 @@ export function ChangesTable({
                   </span>
                 </th>
                 <td>
-                  {formatPercent(change.winRateBefore)} →{" "}
-                  {formatPercent(change.winRateAfter)}{" "}
-                  <DeltaValue
-                    value={change.winRateChange}
-                    title={DELTA_TITLE}
+                  <ChangeCell
+                    before={change.winRateBefore}
+                    after={change.winRateAfter}
+                    change={change.winRateChange}
                   />
                 </td>
                 <td>
-                  {formatPercent(change.pickRateBefore)} →{" "}
-                  {formatPercent(change.pickRateAfter)}{" "}
-                  <DeltaValue
-                    value={change.pickRateChange}
-                    title={DELTA_TITLE}
+                  <ChangeCell
+                    before={change.pickRateBefore}
+                    after={change.pickRateAfter}
+                    change={change.pickRateChange}
                   />
                 </td>
                 {showBan && (
@@ -162,14 +179,11 @@ export function ChangesTable({
                     change.banRateAfter === null ? (
                       "-"
                     ) : (
-                      <>
-                        {formatPercent(change.banRateBefore)} →{" "}
-                        {formatPercent(change.banRateAfter)}{" "}
-                        <DeltaValue
-                          value={change.banRateChange}
-                          title={DELTA_TITLE}
-                        />
-                      </>
+                      <ChangeCell
+                        before={change.banRateBefore}
+                        after={change.banRateAfter}
+                        change={change.banRateChange}
+                      />
                     )}
                   </td>
                 )}

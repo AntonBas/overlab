@@ -80,6 +80,10 @@ export interface HeroStat {
   portraitUrl: string | null;
 }
 
+export interface HistoryStart {
+  firstCapturedAt: string | null;
+}
+
 export interface DataFreshness {
   capturedAt: string;
   lastCheckedAt: string;
@@ -259,6 +263,7 @@ export interface Patch {
   version: string;
   slug: string;
   title: string | null;
+  season: number | null;
   releasedAt: string;
   notes: string | null;
 }

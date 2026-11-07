@@ -22,6 +22,12 @@ export function formatDelta(value: number | null | undefined): string {
   return `${rounded > 0 ? "+" : "−"}${Math.abs(rounded).toFixed(1)}`;
 }
 
+export function formatDate(value: string): string {
+  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
+    new Date(value),
+  );
+}
+
 export function formatDateTime(value: string, withZone = false): string {
   const options: Intl.DateTimeFormatOptions = withZone
     ? {

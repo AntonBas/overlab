@@ -47,7 +47,8 @@ describe("ChangesTable", () => {
     renderWithRouter(<ChangesTable changes={changes} showBan />);
 
     expect(heroNames()).toEqual(["Genji", "Ana"]);
-    expect(screen.getByText(/50.0% → 53.0%/)).toBeInTheDocument();
+    const genji = screen.getByRole("row", { name: /Genji/ });
+    expect(genji).toHaveTextContent("50.0%→53.0%");
   });
 
   it("reverses the order when the same column is chosen again", async () => {

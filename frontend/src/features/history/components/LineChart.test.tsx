@@ -186,6 +186,29 @@ describe("LineChart", () => {
     expect(container.querySelector(".chart__guide")).not.toBeNull();
   });
 
+  it("names the season of the hovered date", () => {
+    mockPlotBox();
+    const seasonAt = (time: number) =>
+      time >= Date.parse("2026-10-05T00:00:00Z") ? 5 : null;
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        seasonAt={seasonAt}
+      />,
+    );
+
+    hoverAt(585);
+    expect(container.querySelector(".chart__tooltip")).toHaveTextContent(
+      "Season 5",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("season 5");
+
+    hoverAt(45);
+    expect(container.querySelector(".chart__tooltip-season")).toBeNull();
+  });
+
   it("shows the change since the previous point", () => {
     vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
       left: 0,
