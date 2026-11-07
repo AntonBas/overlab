@@ -6,9 +6,18 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { useFloatingTip } from "../../../hooks/useFloatingTip";
 import type { RelatedHero } from "../../../types/api";
+import type { RelationKind } from "../api/relationFeedbackApi";
+import type { RelationFeedback } from "../hooks/useRelationFeedback";
 import { AbilityText } from "./AbilityText";
+import { RelationVoteButtons } from "./RelationVoteButtons";
 
-export function RelationAvatar({ hero }: { hero: RelatedHero }) {
+interface RelationAvatarProps {
+  hero: RelatedHero;
+  type: RelationKind;
+  feedback: RelationFeedback;
+}
+
+export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
   const tipId = useId();
   const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
     useFloatingTip();
@@ -44,6 +53,14 @@ export function RelationAvatar({ hero }: { hero: RelatedHero }) {
               <span className="perk-tip__title">
                 <strong>{hero.name}</strong>
                 <RoleBadge role={hero.role} compact />
+              </span>
+              <span className="perk-tip__actions">
+                <RelationVoteButtons
+                  feedback={feedback}
+                  relatedHeroSlug={hero.slug}
+                  relatedHeroName={hero.name}
+                  type={type}
+                />
               </span>
             </span>
             <span className="perk-tip__text">
