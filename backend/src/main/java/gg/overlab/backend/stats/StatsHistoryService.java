@@ -94,7 +94,12 @@ public class StatsHistoryService {
     @Transactional(readOnly = true)
     public StatsComparisonDto compareAroundPatch(StatsFilter filter, String patchSlug) {
         PatchDto patch = patchService.getBySlug(patchSlug);
-        return buildComparison(filter, patch.releasedAt(), patch.releasedAt().plus(PATCH_COMPARISON_WINDOW));
+        Instant windowEnd = patch.releasedAt().plus(PATCH_COMPARISON_WINDOW);
+        Instant comparisonEnd = patchService.findNextAfter(patch.releasedAt())
+                .map(PatchDto::releasedAt)
+                .filter(nextRelease -> nextRelease.isBefore(windowEnd))
+                .orElse(windowEnd);
+        return buildComparison(filter, patch.releasedAt(), comparisonEnd);
     }
 
     @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = "'history-start:' + #filter.cacheKey()")
