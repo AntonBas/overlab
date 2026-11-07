@@ -7,7 +7,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { humanize } from "../../../utils/format";
 import { useAuth } from "../../auth/context/useAuth";
-import { fetchAdminUsers, setUserEnabled } from "../api/adminApi";
+import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Pagination } from "../components/Pagination";
 import { StatusMessage } from "../components/StatusMessage";
@@ -22,6 +22,7 @@ export function UsersAdminPage() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const [pending, setPending] = useState<AdminUser | null>(null);
+  const [pendingRole, setPendingRole] = useState<AdminUser | null>(null);
   const users = useFetch(() => fetchAdminUsers(query, page), [query, page]);
   const save = useSave();
 
@@ -37,6 +38,24 @@ export function UsersAdminPage() {
         : `${target.email} is unblocked.`,
     );
     setPending(null);
+    if (changed) {
+      users.reload();
+    }
+  }
+
+  async function confirmRoleChange() {
+    if (!pendingRole) {
+      return;
+    }
+    const target = pendingRole;
+    const promote = target.role !== "ADMIN";
+    const changed = await save.run(
+      () => setUserRole(target.id, promote ? "ADMIN" : "USER"),
+      promote
+        ? `${target.email} is now an admin.`
+        : `${target.email} is no longer an admin.`,
+    );
+    setPendingRole(null);
     if (changed) {
       users.reload();
     }
@@ -109,13 +128,24 @@ export function UsersAdminPage() {
                   </td>
                   <td>
                     {entry.id !== currentUser?.id && (
-                      <button
-                        type="button"
-                        className="button button--ghost"
-                        onClick={() => setPending(entry)}
-                      >
-                        {entry.enabled ? "Block" : "Unblock"}
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          className="button button--ghost"
+                          onClick={() => setPendingRole(entry)}
+                        >
+                          {entry.role === "ADMIN"
+                            ? "Remove admin"
+                            : "Make admin"}
+                        </button>
+                        <button
+                          type="button"
+                          className="button button--ghost"
+                          onClick={() => setPending(entry)}
+                        >
+                          {entry.enabled ? "Block" : "Unblock"}
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
@@ -143,6 +173,26 @@ export function UsersAdminPage() {
           busy={save.saving}
           onConfirm={() => void confirmToggle()}
           onCancel={() => setPending(null)}
+        />
+      )}
+      {pendingRole && (
+        <ConfirmDialog
+          title={
+            pendingRole.role === "ADMIN"
+              ? "Remove admin rights?"
+              : "Make this user an admin?"
+          }
+          message={
+            pendingRole.role === "ADMIN"
+              ? `${pendingRole.email} will lose access to the admin panel and will be signed out.`
+              : `${pendingRole.email} will get full access to the admin panel.`
+          }
+          confirmLabel={
+            pendingRole.role === "ADMIN" ? "Remove admin" : "Make admin"
+          }
+          busy={save.saving}
+          onConfirm={() => void confirmRoleChange()}
+          onCancel={() => setPendingRole(null)}
         />
       )}
     </>

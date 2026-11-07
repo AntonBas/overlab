@@ -6,6 +6,7 @@ import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
+import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
@@ -49,6 +50,24 @@ public class AdminUserService {
             tokenService.revokeAll(user, UserTokenType.REFRESH);
         }
         auditService.logUpdate("User", user.getId(), before, new UserStatusSnapshot(enabled));
+        return toDto(user);
+    }
+
+    @Transactional
+    public AdminUserDto setRole(Long id, Long actorId, UserRole role) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User", id));
+        if (user.getId().equals(actorId)) {
+            throw new BadRequestException("You cannot change your own role");
+        }
+        if (user.getRole() == role) {
+            return toDto(user);
+        }
+        UserRoleSnapshot before = new UserRoleSnapshot(user.getRole());
+        user.setRole(role);
+        if (role != UserRole.ADMIN) {
+            tokenService.revokeAll(user, UserTokenType.REFRESH);
+        }
+        auditService.logUpdate("User", user.getId(), before, new UserRoleSnapshot(role));
         return toDto(user);
     }
 

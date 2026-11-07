@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useAuth } from "../../auth/context/useAuth";
+import { AccountHeader } from "../components/AccountHeader";
 import { DeleteAccount } from "../components/DeleteAccount";
 import { EmailForm } from "../components/EmailForm";
 import { ExportAccount } from "../components/ExportAccount";
@@ -23,7 +23,7 @@ export function SettingsPage() {
 
   return (
     <div className="settings">
-      <PageHeader title="Account settings" subtitle={user.email} />
+      <AccountHeader user={user} />
       <SettingsSection title="Profile">
         <ProfileForm />
       </SettingsSection>
@@ -46,11 +46,17 @@ export function SettingsPage() {
       )}
       <SettingsSection
         title="Your data"
+
         description="Download everything we store about your account as a JSON file."
       >
         <ExportAccount />
       </SettingsSection>
-      <SettingsSection title="Delete account">
+      <SettingsSection
+        title="Delete account"
+
+        description="Permanently removes your account, favorites and votes. This cannot be undone."
+        danger
+      >
         <DeleteAccount />
       </SettingsSection>
     </div>

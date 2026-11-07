@@ -1,14 +1,15 @@
+import { X } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
-import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useAuth } from "../../auth/context/useAuth";
+import { AccountHeader } from "../../account/components/AccountHeader";
 import { SettingsSection } from "../../account/components/SettingsSection";
 import { fetchFavorites } from "../api/personalApi";
 import { PreferencesForm } from "../components/PreferencesForm";
@@ -33,15 +34,7 @@ export function MyLibraryPage() {
 
   return (
     <div className="settings">
-      <PageHeader
-        title="My Overlab"
-        subtitle={user.displayName}
-        actions={
-          <Link className="button button--ghost" to="/me/settings">
-            Account settings
-          </Link>
-        }
-      />
+      <AccountHeader user={user} />
       <SettingsSection title="Favorite heroes">
         {favorites.error && (
           <ErrorMessage failure={favorites.error} onRetry={favorites.reload} />
@@ -50,7 +43,7 @@ export function MyLibraryPage() {
           <EmptyState>Use the star on a hero page to keep it here.</EmptyState>
         )}
         {favorites.data && favorites.data.heroes.length > 0 && (
-          <ul className="link-list">
+          <ul className="favorite-grid">
             {favorites.data.heroes.map((hero) => (
               <li key={hero.slug}>
                 <span className="place-icon">
@@ -63,10 +56,12 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="button button--ghost"
+                  className="favorite-grid__remove"
+                  aria-label={`Remove ${hero.name}`}
+                  title="Remove from favorites"
                   onClick={() => void personal.toggleHeroFavorite(hero.slug)}
                 >
-                  Remove {hero.name}
+                  <X size={14} aria-hidden="true" />
                 </button>
               </li>
             ))}
@@ -78,7 +73,7 @@ export function MyLibraryPage() {
           <EmptyState>Use the star on a map page to keep it here.</EmptyState>
         )}
         {favorites.data && favorites.data.maps.length > 0 && (
-          <ul className="link-list">
+          <ul className="favorite-grid">
             {favorites.data.maps.map((map) => (
               <li key={map.slug}>
                 <span className="place-icon">
@@ -88,10 +83,12 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="button button--ghost"
+                  className="favorite-grid__remove"
+                  aria-label={`Remove ${map.name}`}
+                  title="Remove from favorites"
                   onClick={() => void personal.toggleMapFavorite(map.slug)}
                 >
-                  Remove {map.name}
+                  <X size={14} aria-hidden="true" />
                 </button>
               </li>
             ))}
@@ -100,6 +97,7 @@ export function MyLibraryPage() {
       </SettingsSection>
       <SettingsSection
         title="Default filters"
+
         description="Applied when you open statistics without choosing filters."
       >
         {personal.preferencesLoaded ? <PreferencesForm /> : <Spinner />}

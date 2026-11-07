@@ -351,6 +351,16 @@ export async function setUserEnabled(
   return data;
 }
 
+export async function setUserRole(
+  id: number,
+  role: AdminUser["role"],
+): Promise<AdminUser> {
+  const { data } = await api.put<AdminUser>(`/admin/users/${id}/role`, {
+    role,
+  });
+  return data;
+}
+
 export async function fetchFeedback(
   status: FeedbackStatus,
 ): Promise<FeedbackMessage[]> {

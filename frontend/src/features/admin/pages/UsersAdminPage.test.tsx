@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
@@ -7,6 +7,7 @@ import type { AdminUser } from "../types";
 vi.mock("../api/adminApi", () => ({
   fetchAdminUsers: vi.fn(),
   setUserEnabled: vi.fn(),
+  setUserRole: vi.fn(),
 }));
 vi.mock("../../auth/context/useAuth", () => ({
   useAuth: () => ({
@@ -18,7 +19,7 @@ vi.mock("../../auth/context/useAuth", () => ({
   }),
 }));
 
-import { fetchAdminUsers, setUserEnabled } from "../api/adminApi";
+import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
 import { UsersAdminPage } from "./UsersAdminPage";
 
 function user(overrides: Partial<AdminUser>): AdminUser {
@@ -40,6 +41,7 @@ describe("UsersAdminPage", () => {
   beforeEach(() => {
     vi.mocked(fetchAdminUsers).mockReset();
     vi.mocked(setUserEnabled).mockReset();
+    vi.mocked(setUserRole).mockReset();
     vi.mocked(fetchAdminUsers).mockResolvedValue({
       content: [user({ id: 1, email: "admin@overlab.gg" }), user({})],
       page: 0,
@@ -66,5 +68,21 @@ describe("UsersAdminPage", () => {
     );
 
     expect(setUserEnabled).toHaveBeenCalledWith(2, false);
+  });
+
+  it("makes a user an admin after confirmation", async () => {
+    vi.mocked(setUserRole).mockResolvedValue(user({ role: "ADMIN" }));
+    renderWithRouter(<UsersAdminPage />, "/admin/users");
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Make admin" }),
+    );
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Make admin",
+      }),
+    );
+
+    expect(setUserRole).toHaveBeenCalledWith(2, "ADMIN");
   });
 });
