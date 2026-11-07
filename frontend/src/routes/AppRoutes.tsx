@@ -4,16 +4,18 @@ import { Layout } from "../components/layout/Layout";
 import { GuidePage } from "../features/guides/pages/GuidePage";
 import { HeroPage } from "../features/heroes/pages/HeroPage";
 import { HeroesPage } from "../features/heroes/pages/HeroesPage";
-import { HeroCountersPage } from "../features/heroes/pages/HeroCountersPage";
-import { HeroOnMapPage } from "../features/heroes/pages/HeroOnMapPage";
+import { CountersPage } from "../features/heroes/pages/CountersPage";
+import { HeroCountersRedirect } from "../features/heroes/pages/HeroCountersRedirect";
+import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
 import { PerksPage } from "../features/heroes/pages/PerksPage";
-import { HeroPerksPage } from "../features/heroes/pages/HeroPerksPage";
+import { HeroPerksRedirect } from "../features/heroes/pages/HeroPerksRedirect";
 import { ChangesPage } from "../features/history/pages/ChangesPage";
-import { PatchPage } from "../features/patches/pages/PatchPage";
-import { PatchesPage } from "../features/patches/pages/PatchesPage";
 import { MapPage } from "../features/maps/pages/MapPage";
 import { MapsPage } from "../features/maps/pages/MapsPage";
 import { StatsPage } from "../features/stats/pages/StatsPage";
+import { CookiesPage } from "../features/legal/pages/CookiesPage";
+import { PrivacyPage } from "../features/legal/pages/PrivacyPage";
+import { TermsPage } from "../features/legal/pages/TermsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 const ForgotPasswordPage = lazy(() =>
@@ -56,6 +58,11 @@ const GuidesAdminPage = lazy(() =>
     default: module.GuidesAdminPage,
   })),
 );
+const AbilitiesAdminPage = lazy(() =>
+  import("../features/admin/pages/AbilitiesAdminPage").then((module) => ({
+    default: module.AbilitiesAdminPage,
+  })),
+);
 const HeroesAdminPage = lazy(() =>
   import("../features/admin/pages/HeroesAdminPage").then((module) => ({
     default: module.HeroesAdminPage,
@@ -74,6 +81,16 @@ const PatchesAdminPage = lazy(() =>
 const PerksAdminPage = lazy(() =>
   import("../features/admin/pages/PerksAdminPage").then((module) => ({
     default: module.PerksAdminPage,
+  })),
+);
+const CategoriesAdminPage = lazy(() =>
+  import("../features/admin/pages/CategoriesAdminPage").then((module) => ({
+    default: module.CategoriesAdminPage,
+  })),
+);
+const FeedbackAdminPage = lazy(() =>
+  import("../features/admin/pages/FeedbackAdminPage").then((module) => ({
+    default: module.FeedbackAdminPage,
   })),
 );
 const RelationsAdminPage = lazy(() =>
@@ -120,16 +137,22 @@ export function AppRoutes() {
         <Route path="stats" element={<StatsPage />} />
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
-        <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
+        <Route path="counters" element={<CountersPage />} />
+        <Route
+          path="heroes/:slug/counters"
+          element={<HeroCountersRedirect />}
+        />
         <Route path="perks" element={<PerksPage />} />
-        <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />
-        <Route path="maps/:map/:hero" element={<HeroOnMapPage />} />
+        <Route path="heroes/:slug/perks" element={<HeroPerksRedirect />} />
+        <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
         <Route path="changes" element={<ChangesPage />} />
-        <Route path="patches" element={<PatchesPage />} />
-        <Route path="patches/:slug" element={<PatchPage />} />
+        <Route path="patches/*" element={<Navigate to="/changes" replace />} />
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
+        <Route path="cookies" element={<CookiesPage />} />
         <Route path="me" element={<MyLibraryPage />} />
         <Route path="me/settings" element={<SettingsPage />} />
         <Route path="login" element={<LoginPage />} />
@@ -147,8 +170,11 @@ export function AppRoutes() {
         >
           <Route index element={<AdminHomePage />} />
           <Route path="heroes" element={<HeroesAdminPage />} />
+          <Route path="abilities" element={<AbilitiesAdminPage />} />
           <Route path="perks" element={<PerksAdminPage />} />
           <Route path="relations" element={<RelationsAdminPage />} />
+          <Route path="feedback" element={<FeedbackAdminPage />} />
+          <Route path="categories" element={<CategoriesAdminPage />} />
           <Route path="guides" element={<GuidesAdminPage />} />
           <Route path="patches" element={<PatchesAdminPage />} />
           <Route path="maps" element={<MapsAdminPage />} />

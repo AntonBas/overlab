@@ -1,4 +1,5 @@
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
+import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
 import { useState } from "react";
@@ -12,21 +13,17 @@ import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { MAP_PLACEHOLDER_URL, MODE_DESCRIPTIONS } from "../../../utils/modes";
 import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { GuideList } from "../../guides/components/GuideList";
+import { SpotsSection } from "../../guides/components/SpotsSection";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
-import {
-  ROLES,
-  TIERS,
-  isQuickPlay,
-  type StatsFilters,
-} from "../../stats/filters";
+import { ROLES, isQuickPlay } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
@@ -48,6 +45,11 @@ export function MapPage() {
   );
   const linkSuffix = isQuickPlay(filters) ? "?queue=quick_play" : "";
   usePageTitle(map.data?.name);
+  usePageDescription(
+    map.data
+      ? `${map.data.name}: win, pick and ban rates of every Overwatch 2 hero on this map.`
+      : null,
+  );
 
   if (map.loading) {
     return <Spinner />;
@@ -92,27 +94,14 @@ export function MapPage() {
           onChange={(queue) => update({ queue })}
         />
       </div>
-      {stats.data && (
-        <MapBestPicks mapSlug={slug} heroes={heroes} linkSuffix={linkSuffix} />
-      )}
+      {stats.data && <MapBestPicks heroes={heroes} linkSuffix={linkSuffix} />}
       <div className="filters">
-        <label className="field">
-          <span className="field__label">Rank</span>
-          <select
+        {!isQuickPlay(filters) && (
+          <RankFilter
             value={filters.tier}
-            disabled={isQuickPlay(filters)}
-            title={isQuickPlay(filters) ? "Quick Play has no ranks" : undefined}
-            onChange={(event) =>
-              update({ tier: event.target.value as StatsFilters["tier"] })
-            }
-          >
-            {TIERS.map((tier) => (
-              <option key={tier} value={tier}>
-                {TIER_LABELS[tier]}
-              </option>
-            ))}
-          </select>
-        </label>
+            onChange={(tier) => update({ tier })}
+          />
+        )}
         <label className="field">
           <span className="field__label">Hero</span>
           <input
@@ -182,20 +171,17 @@ export function MapPage() {
               direction={filters.direction}
               onSort={changeSort}
               heroLinkSuffix={linkSuffix}
-              mapSlug={slug}
             />
           )}
         </div>
       )}
       {guides.data && (
-        <section className="section">
-          <h2>Video guides on this map</h2>
-          {guides.data.length > 0 ? (
-            <GuideList guides={guides.data} />
-          ) : (
-            <EmptyState>No guides for this map yet.</EmptyState>
-          )}
-        </section>
+        <SpotsSection
+          title="Spots & setups"
+          guides={guides.data}
+          groupBy="hero"
+          emptyMessage="No spots or setups for this map yet."
+        />
       )}
       {map.data && maps.data && (
         <MapNavigation current={map.data} maps={maps.data} />

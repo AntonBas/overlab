@@ -14,6 +14,20 @@ const threePoints = [
   { time: Date.parse("2026-10-08T04:00:00Z"), value: 49.3 },
 ];
 
+function mockPlotBox() {
+  vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+    left: 0,
+    top: 0,
+    width: 600,
+    height: 180,
+    right: 600,
+    bottom: 180,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  });
+}
+
 function hoverAt(clientX: number) {
   const svg = screen.getByRole("img");
   fireEvent(
@@ -61,6 +75,82 @@ describe("LineChart", () => {
       />,
     );
     expect(container.querySelectorAll(".chart__marker")).toHaveLength(1);
+    expect(container.querySelectorAll(".chart__marker-dot")).toHaveLength(1);
+    expect(container).not.toHaveTextContent("Patch inside");
+  });
+
+  it("shows no patch tooltip when the pointer is over a patch line", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+          },
+        ]}
+      />,
+    );
+
+    hoverAt(342);
+
+    expect(container.querySelector(".chart__tooltip")).toHaveTextContent(
+      "48.0%",
+    );
+    expect(container.querySelector(".chart__tooltip")).not.toHaveTextContent(
+      "Hotfix",
+    );
+  });
+
+  it("keeps the tooltip of a point the same while the pointer stays near it", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+          },
+        ]}
+      />,
+    );
+
+    hoverAt(450);
+    const first = container.querySelector(".chart__tooltip")?.textContent;
+    hoverAt(520);
+    const second = container.querySelector(".chart__tooltip")?.textContent;
+
+    expect(first).toBe(second);
+  });
+
+  it("mentions a patch released since the previous point in the point tooltip", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        tone="win"
+        points={threePoints}
+        markers={[
+          {
+            time: Date.parse("2026-10-05T00:00:00Z"),
+            label: "Hotfix Update",
+          },
+        ]}
+      />,
+    );
+
+    hoverAt(585);
+
+    expect(container.querySelector(".chart__tooltip-patch")).toHaveTextContent(
+      "Patch: Hotfix Update",
+    );
+    expect(container.querySelector(".chart__marker--active")).not.toBeNull();
   });
 
   it("renders nothing without points", () => {

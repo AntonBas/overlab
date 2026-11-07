@@ -1,5 +1,7 @@
 package gg.overlab.backend.guide.dto;
 
+import gg.overlab.backend.guide.GuideKind;
+import gg.overlab.backend.guide.GuideSide;
 import java.io.Serializable;
 
 public record GuideDto(
@@ -13,6 +15,10 @@ public record GuideDto(
         String title,
         String youtubeId,
         int startSeconds,
+        Integer endSeconds,
+        GuideKind kind,
+        GuideSide side,
+        String abilitySlug,
         String embedUrl,
         String description,
         int sortOrder,

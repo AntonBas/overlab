@@ -15,6 +15,9 @@ collector:
   startup-job: ${COLLECTOR_STARTUP_JOB:}
   download-portraits: ${COLLECTOR_DOWNLOAD_PORTRAITS:false}
   import-perks: ${COLLECTOR_IMPORT_PERKS:false}
+  patch-import:
+    enabled: true
+    cron: "0 45 3 * * *"
   jobs:
     - name: daily-overview
       cron: "0 0 4 * * *"
@@ -23,26 +26,33 @@ collector:
       regions: [EUROPE]
       tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
       maps: [all-maps]
-    - name: weekly-maps
-      cron: "0 30 4 * * MON"
+    - name: daily-maps
+      after: daily-overview
+      min-interval: 2d
       queues: [QUICK_PLAY, COMPETITIVE]
       platforms: [PC]
       regions: [EUROPE]
-      tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
-      maps: [EACH]
-    - name: weekly-console
-      cron: "0 15 5 * * MON"
-      enabled: false
-      queues: [QUICK_PLAY, COMPETITIVE]
-      platforms: [CONSOLE]
-      regions: [EUROPE]
       tiers: [ALL]
-      maps: [all-maps]
-    - name: weekly-other-regions
-      cron: "0 45 5 * * MON"
-      enabled: false
+      maps: [EACH]
+    - name: weekly-maps
+      after: daily-overview
+      min-interval: 7d
+      queues: [COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [EACH]
+    - name: daily-other-regions
+      cron: "0 10 4 * * *"
       queues: [QUICK_PLAY, COMPETITIVE]
       platforms: [PC]
       regions: [AMERICAS, ASIA]
+      tiers: [ALL]
+      maps: [all-maps]
+    - name: daily-console
+      cron: "0 20 4 * * *"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [CONSOLE]
+      regions: [EUROPE, AMERICAS, ASIA]
       tiers: [ALL]
       maps: [all-maps]

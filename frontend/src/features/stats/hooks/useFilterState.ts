@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { StatsSort } from "../../../types/api";
 import { usePersonalData } from "../../personal/context/usePersonalData";
-import { parseFilters, toSearchParams, type StatsFilters } from "../filters";
+import {
+  applyCoverage,
+  parseFilters,
+  toSearchParams,
+  type StatsFilters,
+} from "../filters";
 
 const FILTER_PARAMS = ["queue", "tier", "platform", "region"];
 
@@ -24,13 +29,13 @@ export function useFilterState(fixedMap?: string) {
       return;
     }
     const withPreferences = parseFilters(searchParams);
-    const next: StatsFilters = {
+    const next: StatsFilters = applyCoverage({
       ...withPreferences,
       queue: preferences.queue ?? withPreferences.queue,
       tier: preferences.tier ?? withPreferences.tier,
       platform: preferences.platform ?? withPreferences.platform,
       region: preferences.region ?? withPreferences.region,
-    };
+    });
     if (next.queue === "QUICK_PLAY") {
       next.tier = "ALL";
     }
@@ -45,7 +50,7 @@ export function useFilterState(fixedMap?: string) {
 
   const update = useCallback(
     (patch: Partial<StatsFilters>) => {
-      const next = { ...filters, ...patch };
+      const next = applyCoverage({ ...filters, ...patch });
       if (next.queue === "QUICK_PLAY") {
         next.tier = "ALL";
       }

@@ -4,7 +4,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { humanize } from "../../../utils/format";
+import { formatDateTime, humanize } from "../../../utils/format";
 import {
   fetchCollectorJobs,
   fetchCollectorRuns,
@@ -12,11 +12,40 @@ import {
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
+import { StatusBadge } from "../components/StatusBadge";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
-import type { CollectorJob } from "../types";
+import type { CollectorJob, CollectorRunStatus } from "../types";
+import { describeCron, describeInterval } from "../utils/cron";
+import { splitWords } from "../utils/audit";
 
 const POLL_INTERVAL_MS = 3000;
+
+const STATUS_TONES: Record<
+  CollectorRunStatus,
+  "good" | "bad" | "warning" | "info"
+> = {
+  SUCCESS: "good",
+  FAILED: "bad",
+  PARTIAL: "warning",
+  RUNNING: "info",
+};
+
+function formatDuration(startedAt: string, finishedAt: string | null): string {
+  if (!finishedAt) {
+    return "running";
+  }
+  const seconds = Math.max(
+    0,
+    Math.round(
+      (new Date(finishedAt).getTime() - new Date(startedAt).getTime()) / 1000,
+    ),
+  );
+  if (seconds < 60) {
+    return `${seconds} s`;
+  }
+  return `${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+}
 
 export function CollectorAdminPage() {
   usePageTitle("Admin: collector");
@@ -66,11 +95,45 @@ export function CollectorAdminPage() {
           rows={jobs.data}
           rowKey={(job) => job.name}
           columns={[
-            { header: "Job", render: (job) => job.name },
-            { header: "Schedule", render: (job) => <code>{job.cron}</code> },
+            { header: "Job", render: (job) => splitWords(job.name) },
+            {
+              header: "Schedule",
+              render: (job) => {
+                if (!job.cron) {
+                  return (
+                    <>
+                      After {splitWords(job.after ?? "")} finds changes
+                      {job.minInterval && (
+                        <>
+                          <br />
+                          <span className="muted">
+                            at most once per {describeInterval(job.minInterval)}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  );
+                }
+                const description = describeCron(job.cron);
+                return description ? (
+                  <>
+                    {description}
+                    <br />
+                    <code className="muted">{job.cron}</code>
+                  </>
+                ) : (
+                  <code>{job.cron}</code>
+                );
+              },
+            },
             {
               header: "Enabled",
-              render: (job) => (job.enabled ? "Yes" : "No"),
+              render: (job) => (
+                <StatusBadge
+                  value={job.enabled ? "Enabled" : "Disabled"}
+                  tone={job.enabled ? "good" : "neutral"}
+                />
+              ),
             },
             {
               header: "",
@@ -99,20 +162,50 @@ export function CollectorAdminPage() {
           rowKey={(run) => run.id}
           emptyMessage="No runs yet."
           columns={[
-            { header: "Job", render: (run) => run.jobName },
-            { header: "Trigger", render: (run) => humanize(run.trigger) },
-            { header: "Status", render: (run) => humanize(run.status) },
+            {
+              header: "Job",
+              render: (run) => (
+                <>
+                  {splitWords(run.jobName)}
+                  <br />
+                  <span className="muted">{humanize(run.trigger)}</span>
+                </>
+              ),
+            },
+            {
+              header: "Status",
+              render: (run) => (
+                <StatusBadge
+                  value={run.status}
+                  tone={STATUS_TONES[run.status]}
+                />
+              ),
+            },
             {
               header: "Started",
-              render: (run) => new Date(run.startedAt).toLocaleString(),
+              render: (run) => (
+                <span className="nowrap">
+                  {formatDateTime(run.startedAt)}
+                  <br />
+                  <span className="muted">
+                    {formatDuration(run.startedAt, run.finishedAt)}
+                  </span>
+                </span>
+              ),
             },
             {
               header: "Requests",
               render: (run) =>
                 `${run.requestsTotal - run.requestsFailed}/${run.requestsTotal}`,
             },
-            { header: "Rows", render: (run) => run.rowsSaved },
-            { header: "Error", render: (run) => run.errorSummary ?? "" },
+            { header: "Rows saved", render: (run) => run.rowsSaved },
+            {
+              header: "Error",
+              render: (run) =>
+                run.errorSummary && (
+                  <span className="table__error">{run.errorSummary}</span>
+                ),
+            },
           ]}
         />
       )}

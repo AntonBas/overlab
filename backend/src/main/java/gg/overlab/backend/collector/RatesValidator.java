@@ -1,6 +1,7 @@
 package gg.overlab.backend.collector;
 
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.stats.GameQueue;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class RatesValidator {
 
     private static final BigDecimal MAX_PERCENT = new BigDecimal("100");
+    private static final BigDecimal NO_DATA_MARKER = BigDecimal.valueOf(-1);
 
     private final CollectorProperties properties;
 
@@ -28,10 +30,33 @@ public class RatesValidator {
             if (!seen.add(rate.id())) {
                 throw new InvalidSnapshotException("Duplicate hero in response: " + rate.id());
             }
+            if (hasNoData(rate)) {
+                continue;
+            }
             validatePercent(rate.id(), "winrate", rate.cells().winrate(), false);
             validatePercent(rate.id(), "pickrate", rate.cells().pickrate(), false);
             validatePercent(rate.id(), "banrate", rate.cells().banrate(), true);
         }
+    }
+
+    public List<BlizzardRatesResponse.HeroRate> withoutEmptyEntries(List<BlizzardRatesResponse.HeroRate> rates) {
+        return rates.stream().filter(rate -> !hasNoData(rate)).toList();
+    }
+
+    public void validateBanRates(GameQueue queue, List<BlizzardRatesResponse.HeroRate> rates) {
+        if (queue != GameQueue.COMPETITIVE) {
+            return;
+        }
+        for (BlizzardRatesResponse.HeroRate rate : rates) {
+            if (rate.cells().banrate() == null) {
+                throw new InvalidSnapshotException("banrate is missing for " + rate.id());
+            }
+        }
+    }
+
+    private boolean hasNoData(BlizzardRatesResponse.HeroRate rate) {
+        BigDecimal winRate = rate.cells().winrate();
+        return winRate != null && winRate.compareTo(NO_DATA_MARKER) == 0;
     }
 
     private void validateHero(BlizzardRatesResponse.HeroRate rate) {

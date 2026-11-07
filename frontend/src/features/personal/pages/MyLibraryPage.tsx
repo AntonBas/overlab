@@ -1,13 +1,16 @@
 import { Link, Navigate } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
+import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useAuth } from "../../auth/context/useAuth";
 import { SettingsSection } from "../../account/components/SettingsSection";
-import { fetchFavorites, fetchNotes } from "../api/personalApi";
+import { fetchFavorites } from "../api/personalApi";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { usePersonalData } from "../context/usePersonalData";
 
@@ -19,10 +22,6 @@ export function MyLibraryPage() {
     () => (user ? fetchFavorites() : Promise.resolve(null)),
     [user?.id, personal.favoriteHeroes, personal.favoriteMaps],
     { keepPrevious: true },
-  );
-  const notes = useFetch(
-    () => (user ? fetchNotes() : Promise.resolve([])),
-    [user?.id],
   );
 
   if (loading) {
@@ -54,7 +53,14 @@ export function MyLibraryPage() {
           <ul className="link-list">
             {favorites.data.heroes.map((hero) => (
               <li key={hero.slug}>
-                <Link to={`/heroes/${hero.slug}`}>{hero.name}</Link>
+                <span className="place-icon">
+                  <HeroPortrait
+                    name={hero.name}
+                    url={hero.portraitUrl}
+                    size={28}
+                  />
+                  <Link to={`/heroes/${hero.slug}`}>{hero.name}</Link>
+                </span>
                 <button
                   type="button"
                   className="button button--ghost"
@@ -75,7 +81,11 @@ export function MyLibraryPage() {
           <ul className="link-list">
             {favorites.data.maps.map((map) => (
               <li key={map.slug}>
-                <Link to={`/maps/${map.slug}`}>{map.name}</Link>
+                <span className="place-icon">
+                  <Thumbnail url={map.imageUrl} width={48} height={27} />
+                  {map.mode && <ModeIcon mode={map.mode} />}
+                  <Link to={`/maps/${map.slug}`}>{map.name}</Link>
+                </span>
                 <button
                   type="button"
                   className="button button--ghost"
@@ -83,27 +93,6 @@ export function MyLibraryPage() {
                 >
                   Remove {map.name}
                 </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </SettingsSection>
-      <SettingsSection
-        title="Notes"
-        description="Private notes you wrote on hero pages."
-      >
-        {notes.error && (
-          <ErrorMessage failure={notes.error} onRetry={notes.reload} />
-        )}
-        {notes.data && notes.data.length === 0 && (
-          <EmptyState>No notes yet.</EmptyState>
-        )}
-        {notes.data && notes.data.length > 0 && (
-          <ul className="link-list">
-            {notes.data.map((note) => (
-              <li key={note.heroSlug}>
-                <Link to={`/heroes/${note.heroSlug}`}>{note.heroName}</Link>
-                <p className="note-preview">{note.content}</p>
               </li>
             ))}
           </ul>

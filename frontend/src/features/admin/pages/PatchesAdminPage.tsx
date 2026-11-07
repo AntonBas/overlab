@@ -10,6 +10,7 @@ import {
   createPatch,
   deletePatch,
   fetchPatches,
+  importPatches,
   updatePatch,
 } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -133,6 +134,7 @@ export function PatchesAdminPage() {
   const [editing, setEditing] = useState<Patch | "new" | null>(null);
   const [deleting, setDeleting] = useState<Patch | null>(null);
   const removal = useSave();
+  const importing = useSave();
 
   async function confirmDelete() {
     if (!deleting) {
@@ -148,20 +150,38 @@ export function PatchesAdminPage() {
     setDeleting(null);
   }
 
+  async function importFromBlizzard() {
+    const imported = await importing.run(importPatches, "Patches imported.");
+    if (imported) {
+      patches.reload();
+    }
+  }
+
   return (
     <>
       <PageHeader
         title="Patches"
         actions={
-          <button
-            type="button"
-            className="button"
-            onClick={() => setEditing("new")}
-          >
-            New patch
-          </button>
+          <>
+            <button
+              type="button"
+              className="button button--ghost"
+              disabled={importing.saving}
+              onClick={() => void importFromBlizzard()}
+            >
+              Import from Blizzard
+            </button>
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              New patch
+            </button>
+          </>
         }
       />
+      <StatusMessage error={importing.error} success={importing.success} />
       <StatusMessage error={removal.error} success={removal.success} />
       {patches.loading && <Spinner />}
       {patches.error && (
@@ -173,7 +193,12 @@ export function PatchesAdminPage() {
           rowKey={(patch) => patch.id}
           emptyMessage="No patches yet."
           columns={[
-            { header: "Version", render: (patch) => patch.version },
+            {
+              header: "Version",
+              render: (patch) => (
+                <span className="nowrap">{patch.version}</span>
+              ),
+            },
             { header: "Title", render: (patch) => patch.title ?? "" },
             {
               header: "Released",

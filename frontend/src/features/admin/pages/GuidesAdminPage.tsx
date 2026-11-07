@@ -10,7 +10,8 @@ import { deleteGuide, fetchAdminGuides, fetchAdminMaps } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { DataTable } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
-import { SelectField } from "../components/Fields";
+import { HeroLabel } from "../components/HeroLabel";
+import { HeroSelect } from "../components/HeroSelect";
 import { GuideForm } from "../components/GuideForm";
 import { StatusMessage } from "../components/StatusMessage";
 import { useHeroOptions } from "../components/useHeroOptions";
@@ -57,19 +58,15 @@ export function GuidesAdminPage() {
           </button>
         }
       />
-      <SelectField
-        label="Filter by hero"
-        name="filter"
-        value={filter}
-        onChange={(event) => setFilter(event.target.value)}
-      >
-        <option value="">All heroes</option>
-        {heroes.data?.map((hero) => (
-          <option key={hero.slug} value={hero.slug}>
-            {hero.name}
-          </option>
-        ))}
-      </SelectField>
+      {heroes.data && (
+        <HeroSelect
+          label="Filter by hero"
+          value={filter}
+          heroes={heroes.data}
+          allLabel="All heroes"
+          onChange={setFilter}
+        />
+      )}
       <StatusMessage error={removal.error} success={removal.success} />
       {guides.loading && <Spinner />}
       {guides.error && (
@@ -82,7 +79,15 @@ export function GuidesAdminPage() {
           emptyMessage="No guides yet."
           columns={[
             { header: "Title", render: (guide) => guide.title },
-            { header: "Hero", render: (guide) => guide.heroName },
+            {
+              header: "Hero",
+              render: (guide) =>
+                heroes.data ? (
+                  <HeroLabel slug={guide.heroSlug} heroes={heroes.data} />
+                ) : (
+                  guide.heroName
+                ),
+            },
             { header: "Map", render: (guide) => guide.mapName ?? "Any" },
             { header: "Order", render: (guide) => guide.sortOrder },
             {

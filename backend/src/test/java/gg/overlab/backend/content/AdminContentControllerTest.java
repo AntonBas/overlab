@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gg.overlab.backend.exception.api.ApiErrorHandler;
 import gg.overlab.backend.guide.GuideController;
 import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.hero.category.HeroCategoryController;
+import gg.overlab.backend.hero.category.HeroCategoryService;
 import gg.overlab.backend.hero.perk.PerkController;
 import gg.overlab.backend.hero.perk.PerkService;
 import gg.overlab.backend.hero.relation.HeroRelationController;
@@ -30,6 +32,7 @@ class AdminContentControllerTest {
                         new GuideController(mock(GuideService.class)),
                         new PerkController(mock(PerkService.class)),
                         new HeroRelationController(mock(HeroRelationService.class)),
+                        new HeroCategoryController(mock(HeroCategoryService.class)),
                         new PatchController(mock(PatchService.class)))
                 .setControllerAdvice(new ApiErrorHandler())
                 .build();
@@ -53,11 +56,11 @@ class AdminContentControllerTest {
     }
 
     @Test
-    void relationRejectsStrengthOutsideOneToThree() throws Exception {
-        mockMvc.perform(post("/api/admin/hero-relations").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"heroSlug\":\"ana\",\"relatedHeroSlug\":\"genji\",\"type\":\"COUNTER\",\"strength\":5}"))
+    void categoryRequiresALowercaseSlug() throws Exception {
+        mockMvc.perform(post("/api/admin/hero-categories").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"slug\":\"Not A Slug\",\"name\":\"Beam\",\"heroSlugs\":[]}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.subErrors[?(@.field=='strength')]").exists());
+                .andExpect(jsonPath("$.subErrors[?(@.field=='slug')]").exists());
     }
 
     @Test

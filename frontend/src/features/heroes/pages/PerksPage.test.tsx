@@ -50,11 +50,11 @@ vi.mock("../api/heroesApi", () => ({
       id: 1,
       heroSlug: "ana",
       name: "Sharp Eye",
-      description: null,
+      description: "Better aim",
       slot: "MINOR",
       position: "LEFT",
       recommendation: "RECOMMENDED",
-      recommendationNote: null,
+      recommendationNote: "Take it on ranged maps",
       iconUrl: null,
     },
   ],
@@ -125,5 +125,26 @@ describe("PerksPage", () => {
 
     expect(screen.getByText("Reaper")).toBeInTheDocument();
     expect(screen.queryByText("Ana")).not.toBeInTheDocument();
+  });
+
+  it("shows perk descriptions and notes in the detailed view", async () => {
+    render(
+      <MemoryRouter>
+        <PerksPage />
+      </MemoryRouter>,
+    );
+    await screen.findByText("Sharp Eye");
+    expect(screen.queryByText("Better aim")).not.toBeInTheDocument();
+
+    fireEvent.mouseEnter(
+      screen.getByText("Sharp Eye").closest(".perk-tile__trigger") as Element,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Better aim");
+
+    fireEvent.click(screen.getByRole("button", { name: "Detailed" }));
+
+    expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(screen.getByText("Better aim")).toBeInTheDocument();
+    expect(screen.getByText("Take it on ranged maps")).toBeInTheDocument();
   });
 });

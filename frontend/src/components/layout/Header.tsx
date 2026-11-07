@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { BarChart3, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
@@ -9,9 +9,9 @@ const LINKS = [
   { to: "/stats", label: "Statistics" },
   { to: "/heroes", label: "Heroes" },
   { to: "/perks", label: "Perks" },
+  { to: "/counters", label: "Counters" },
   { to: "/maps", label: "Maps" },
   { to: "/changes", label: "Changes" },
-  { to: "/patches", label: "Patches" },
 ];
 
 export function Header() {
@@ -22,7 +22,13 @@ export function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <Link to="/" className="brand">
-          <BarChart3 aria-hidden="true" size={22} />
+          <img
+            src="/favicon.svg"
+            alt=""
+            width={28}
+            height={28}
+            className="brand__logo"
+          />
           Overlab
         </Link>
         <button

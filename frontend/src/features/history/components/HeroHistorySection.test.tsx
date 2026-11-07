@@ -72,42 +72,22 @@ describe("HeroHistorySection", () => {
     ).toBeInTheDocument();
     const switcher = screen.getByRole("group", { name: "Statistic" });
     expect(
-      within(switcher).getByRole("button", { name: "Win rate" }),
+      within(switcher).getByRole("button", { name: /^Win rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(
-      within(switcher).getByRole("button", { name: "Pick rate" }),
+      within(switcher).getByRole("button", { name: /^Pick rate/ }),
     );
     expect(
-      within(switcher).getByRole("button", { name: "Pick rate" }),
+      within(switcher).getByRole("button", { name: /^Pick rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(
-      within(switcher).getByRole("button", { name: "Ban rate" }),
+      within(switcher).getByRole("button", { name: /^Ban rate/ }),
     );
     expect(
-      within(switcher).getByRole("button", { name: "Ban rate" }),
+      within(switcher).getByRole("button", { name: /^Ban rate/ }),
     ).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("does not repeat the current values, the page header shows them", async () => {
-    renderWithRouter(
-      <HeroHistorySection
-        slug="ana"
-        queue="COMPETITIVE"
-        current={{
-          winRate: 51.2,
-          pickRate: 12.3,
-          banRate: 7.5,
-          capturedAt: "2026-10-29T10:00:00Z",
-        }}
-      />,
-    );
-    await screen.findByRole("group", { name: "Statistic" });
-
-    expect(screen.queryByText(/now$/)).toBeNull();
-    expect(screen.queryByText("51.2%")).toBeNull();
-    expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
 
   it("has no ban rate in Quick Play", async () => {
@@ -116,7 +96,7 @@ describe("HeroHistorySection", () => {
     const switcher = await screen.findByRole("group", { name: "Statistic" });
 
     expect(
-      within(switcher).queryByRole("button", { name: "Ban rate" }),
+      within(switcher).queryByRole("button", { name: /^Ban rate/ }),
     ).toBeNull();
     expect(within(switcher).getAllByRole("button")).toHaveLength(2);
   });

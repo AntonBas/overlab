@@ -16,6 +16,7 @@ import {
   periodRange,
   type HistoryPeriodId,
 } from "../utils/chart";
+import { buildPatchMarkers } from "../utils/patchMarkers";
 import { LineChart } from "./LineChart";
 
 type Metric = "win" | "pick" | "ban";
@@ -45,6 +46,7 @@ interface HeroHistorySectionProps {
   queue: GameQueue;
   title?: string;
   current?: CurrentStats | null;
+  headerAction?: ReactNode;
   children?: ReactNode;
 }
 
@@ -54,6 +56,7 @@ export function HeroHistorySection({
   queue,
   title = "History",
   current = null,
+  headerAction,
   children,
 }: HeroHistorySectionProps) {
   const [periodId, setPeriodId] = useState<HistoryPeriodId>("30d");
@@ -92,15 +95,15 @@ export function HeroHistorySection({
       ? []
       : [{ time: Date.parse(point.capturedAt), value }];
   });
-  const markers = (patches.data ?? []).map((patch) => ({
-    time: Date.parse(patch.releasedAt),
-    label: `Patch ${patch.version}`,
-  }));
+  const markers = buildPatchMarkers(patches.data ?? []);
   const enough = series.length >= 2;
 
   return (
     <section className="section" aria-labelledby="history-heading">
-      <h2 id="history-heading">{title}</h2>
+      <div className="section__heading">
+        <h2 id="history-heading">{title}</h2>
+        {headerAction}
+      </div>
       {children}
       <div className="stat-switch">
         <div className="segmented" role="group" aria-label="Statistic">
@@ -167,7 +170,7 @@ export function HeroHistorySection({
             Checked <CollectedAt value={current.capturedAt} />.
           </>
         )}{" "}
-        Dashed lines mark patch releases.{" "}
+        Dashed lines mark patch releases, hollow dots mark hotfixes.{" "}
         {!mapSlug && (
           <>
             <DataFreshness

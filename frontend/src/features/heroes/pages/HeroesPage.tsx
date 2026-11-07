@@ -28,15 +28,17 @@ export function HeroesPage() {
       {data &&
         ROLES.map((role) => (
           <section key={role} className="section">
-            <h2>{ROLE_LABELS[role]}</h2>
-            <ul className="chip-list">
+            <h2 className="role-heading">
+              <RoleBadge role={role} compact />
+              {ROLE_LABELS[role]}
+            </h2>
+            <ul className="chip-list chip-list--centered">
               {data
                 .filter((hero) => hero.role === role)
                 .map((hero) => (
                   <li key={hero.slug}>
                     <Link className="chip" to={`/heroes/${hero.slug}`}>
                       <HeroPortrait name={hero.name} url={hero.portraitUrl} />
-                      <RoleBadge role={hero.role} compact />
                       {hero.name}
                     </Link>
                   </li>

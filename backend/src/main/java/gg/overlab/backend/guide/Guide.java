@@ -5,6 +5,8 @@ import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.hero.Hero;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,6 +48,20 @@ public class Guide extends TimestampedEntity {
 
     @Column(name = "start_seconds", nullable = false)
     private int startSeconds;
+
+    @Column(name = "end_seconds")
+    private Integer endSeconds;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private GuideKind kind = GuideKind.TIP;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private GuideSide side = GuideSide.BOTH;
+
+    @Column(name = "ability_slug", length = 100)
+    private String abilitySlug;
 
     @Column(columnDefinition = "text")
     private String description;

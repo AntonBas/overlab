@@ -9,6 +9,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
 import { formatDateTime } from "../../../utils/format";
+import { fetchHeroes } from "../../heroes/api/heroesApi";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchComparison } from "../../stats/api/statsApi";
 import { ChangesTable } from "../components/ChangesTable";
@@ -49,6 +50,15 @@ export function ChangesPage() {
     [queue, view, range],
     { keepPrevious: true },
   );
+  const heroes = useFetch(fetchHeroes, []);
+  const portraits = Object.fromEntries(
+    (heroes.data ?? []).map((hero) => [hero.slug, hero.portraitUrl]),
+  );
+  const activePatch = view.startsWith(PATCH_PREFIX)
+    ? (patches.data ?? []).find(
+        (patch) => patch.slug === view.slice(PATCH_PREFIX.length),
+      )
+    : undefined;
 
   function update(next: { view?: string; queue?: GameQueue }) {
     const params = new URLSearchParams();
@@ -93,6 +103,13 @@ export function ChangesPage() {
           ))}
         </select>
       </label>
+      {activePatch && (
+        <p className="muted footnote">
+          Patch {activePatch.version}
+          {activePatch.title ? `: ${activePatch.title}` : ""}, released{" "}
+          {formatDateTime(activePatch.releasedAt)}.
+        </p>
+      )}
       {comparison.loading && <TableSkeleton label="Loading comparison" />}
       {comparison.error &&
         (comparison.error.status === 404 ? (
@@ -120,6 +137,7 @@ export function ChangesPage() {
           <ChangesTable
             changes={comparison.data.heroes}
             showBan={queue === "COMPETITIVE"}
+            portraits={portraits}
           />
         </div>
       )}

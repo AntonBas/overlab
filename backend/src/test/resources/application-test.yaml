@@ -20,6 +20,10 @@ app:
     api-per-minute: 100000
     stats-per-minute: 100000
 
+collector:
+  patch-import:
+    enabled: false
+
 logging:
   level:
     root: WARN

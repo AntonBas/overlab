@@ -2,16 +2,17 @@ import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
+import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import type { HeroMapStat } from "../../../types/api";
-import { formatPercent } from "../../../utils/format";
+import { MAP_MODE_LABELS, formatPercent } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { fetchMaps } from "../../maps/api/mapsApi";
-import { mapPicks } from "../utils/mapPicks";
+import { mapPagePath } from "../utils/mapPagePath";
+import { mapPicks, mapsByGain } from "../utils/mapPicks";
 
 interface HeroMapPicksProps {
-  heroSlug: string;
   heroName: string;
   maps: HeroMapStat[];
   linkSuffix: string;
@@ -27,13 +28,11 @@ const VIEW_LABELS: Record<PickView, string> = {
 function MapList({
   title,
   entries,
-  heroSlug,
   linkSuffix,
   images,
 }: {
   title: string;
   entries: HeroMapStat[];
-  heroSlug: string;
   linkSuffix: string;
   images: Record<string, string | null>;
 }) {
@@ -48,7 +47,7 @@ function MapList({
           <li key={entry.mapSlug}>
             <Link
               className="highlight__hero highlight__hero--map"
-              to={`/maps/${entry.mapSlug}/${heroSlug}${linkSuffix}`}
+              to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
             >
               <span className="highlight__portrait">
                 <Thumbnail
@@ -57,7 +56,17 @@ function MapList({
                   height={36}
                 />
               </span>
-              <span className="highlight__name">{entry.mapName}</span>
+              <span className="highlight__name">
+                {entry.mode && (
+                  <span title={MAP_MODE_LABELS[entry.mode]}>
+                    <ModeIcon mode={entry.mode} />
+                    <span className="visually-hidden">
+                      {MAP_MODE_LABELS[entry.mode]}{" "}
+                    </span>
+                  </span>
+                )}
+                {entry.mapName}
+              </span>
               <span className="highlight__delta">
                 <DeltaValue value={entry.winRateDelta} />
               </span>
@@ -74,7 +83,6 @@ function MapList({
 }
 
 export function HeroMapPicks({
-  heroSlug,
   heroName,
   maps,
   linkSuffix,
@@ -84,8 +92,13 @@ export function HeroMapPicks({
   const images = Object.fromEntries(
     (allMaps.data ?? []).map((map) => [map.slug, map.imageUrl]),
   );
+  const [expanded, setExpanded] = useState(false);
   const picks = mapPicks(maps);
   const best = view === "best";
+  const ranked = mapsByGain(maps);
+  const fullList = best ? ranked : [...ranked].reverse();
+  const shortList = best ? picks.best : picks.worst;
+  const canExpand = fullList.length > shortList.length;
 
   if (maps.length === 0) {
     return null;
@@ -115,28 +128,32 @@ export function HeroMapPicks({
       <div className="highlights">
         <section className="highlight" aria-label="by gain">
           <MapList
-            title={best ? "Biggest gain on the map" : "Biggest drop on the map"}
-            entries={best ? picks.gainers : picks.droppers}
-            heroSlug={heroSlug}
-            linkSuffix={linkSuffix}
-            images={images}
-          />
-        </section>
-        <section className="highlight" aria-label="by win rate">
-          <MapList
-            title={best ? "Highest win rate" : "Lowest win rate"}
-            entries={best ? picks.strongest : picks.weakest}
-            heroSlug={heroSlug}
+            title={
+              best
+                ? "Best compared with the hero's average"
+                : "Weakest compared with the hero's average"
+            }
+            entries={expanded ? fullList : shortList}
             linkSuffix={linkSuffix}
             images={images}
           />
         </section>
       </div>
+      {canExpand && (
+        <button
+          type="button"
+          className="button button--ghost"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {expanded ? "Show fewer maps" : `Show all ${fullList.length} maps`}
+        </button>
+      )}
       <p className="muted footnote">
         Each map shows the win rate of {heroName} there, how often the hero is
         picked and, as the coloured number, how much the win rate on that map
-        differs from the all-maps win rate. Both lists are weighted by pick rate
-        so rare picks do not top them by chance.
+        differs from the all-maps win rate. The list is weighted by pick rate so
+        rare picks do not top it by chance.
       </p>
     </section>
   );

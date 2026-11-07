@@ -15,17 +15,22 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | Address | Page |
 |---|---|
 | `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |
-| `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies and guides |
+| `/heroes`, `/heroes/:slug` | Heroes; a hero page has map statistics, perks, counters, synergies (with category chips above the hero cards) and guides |
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
-| `/heroes/:slug/counters`, `/heroes/:slug/perks` | Full counters and synergies, full perks |
-| `/maps/:map/:hero` | A hero on a map: rates, differences from the hero's all-maps values, guides for the pair |
-| `/patches`, `/patches/:slug` | Patch list, notes and the change in statistics around the release |
+| `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
+| `/heroes/:slug/counters` | Redirects to the hero page |
+| `/heroes/:slug/perks` | Redirects to `/perks` |
+| `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps (expandable to every map, each links to its map page), abilities, perks, counters, spots; `/maps/:map/:hero` redirects here |
+| `/patches` | Redirects to `/changes`; patches are shown as dashed lines on the statistics chart and as views in `/changes` |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
-| `/guides/:id-:slug` | Video guide (YouTube embed) |
+| `/guides/:id-:slug` | A single spot or setup video (YouTube embed) |
 | `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password` | Accounts |
-| `/me` | Favorites, notes and default filters |
+| `/me` | Favorites and default filters |
 | `/me/settings` | Change name, password and email, download or delete your data |
+| `/privacy`, `/terms`, `/cookies` | Legal pages linked from the footer; `/cookies` also holds the consent choices |
+
+A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages comes from the `VITE_CONTACT_EMAIL` build variable.
 
 The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
 
@@ -36,9 +41,12 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | Address | Purpose |
 |---|---|
 | `/admin/heroes` | Edit hero description, hide or show a hero |
+| `/admin/abilities` | Abilities per hero: choose the control slot (primary or secondary fire, ability 1 or 2, ultimate, passive); saved at once and written to the audit log |
 | `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
-| `/admin/guides` | Guides: paste a YouTube link (`youtu.be/...`, `watch?v=...`), start time as `1:23`, video preview, publish and order |
+| `/admin/feedback` | Reports about counters and synergies (accept, reject, reopen) and the votes users gave them, most disagreed first |
+| `/admin/categories` | Hero categories (name, slug, member heroes) and matchups of a hero against a category (strong, weak or works well with, note) |
+| `/admin/guides` | Spots and setups: paste a YouTube link (`youtu.be/...`, `watch?v=...`), hero, map, type (setup, position, ultimate spot, tip), side (attack, defense, both), optional ability, start and end time as `1:23`, video preview, publish and order. Shown on the map page grouped by hero and on the hero page grouped by map |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
 | `/admin/collector` | Jobs, "Run now" (the run history refreshes while a run is in progress) |
 | `/admin/users` | Search users, block and unblock |
@@ -52,7 +60,8 @@ Images are files in the media directory (`MEDIA_DIRECTORY`, default `./media`, `
 
 - **Role icons:** with the same flag the collector saves the three role icons (SVG, checked for scripts and handlers) as `roles/tank.svg`, `roles/damage.svg` and `roles/support.svg`; the site uses them next to hero names and falls back to its own simple icons when the files are missing.
 - **Perk import:** with `COLLECTOR_IMPORT_PERKS=true` the button "Import from Blizzard" on `/admin/perks` reads the perk section of every hero page (`/en-us/heroes/<slug>/`, about 3 minutes with the collector pause) and creates the missing perks with their description, slot, left or right position and icon. New perks start as `OPTIONAL`; recommendations and notes stay yours, and an existing perk keeps its text, slot and icon (only a missing description or icon is filled). The page is HTML, so the parser (`HeroPerkParser`) may need an update when Blizzard changes the markup. Off by default for the same licence reason as portraits.
-- **Abilities:** the same import also reads the ability section of every hero page and fills `hero_abilities` (slug, name, description, icon); existing abilities get their name, description and order refreshed and a missing icon filled. Text fields (counter and synergy notes, strengths, weaknesses, hero description) can mention an ability as `[[hero-slug/ability-slug]]` (for example `[[dva/defense-matrix]]`); the site shows it as a chip with the icon and a tooltip with the description, and falls back to a plain readable name when the ability is unknown. Blizzard's page does not say which button an ability uses, so `hero_abilities.control_key` (`PRIMARY_FIRE`, `SECONDARY_FIRE`, `ABILITY_1`, `ABILITY_2`, `ULTIMATE`, `PASSIVE`; default PC keys LMB, RMB, Shift, E, Q; the hero page switch also shows the Xbox, PlayStation and Nintendo Switch defaults) is curated by hand, is never touched by the import, and stays empty when unknown.
+- **Patch import:** every day at 03:45, before the first collector job, and once on every backend start so a missed run is caught up (`collector.patch-import.cron`, disable with `collector.patch-import.enabled=false`) the collector reads the official patch notes page (`/en-us/news/patch-notes/`) and saves each patch that changes heroes or maps: version is the release date (`2026-10-13`), title is the season or the first section name, notes hold the link to the official notes. Bug-fix-only patches are skipped, existing patches are never changed, and the notes text is not copied. The button "Import from Blizzard" on `/admin/patches` runs it now. Patches show up on the statistics chart as dashed lines. The parser (`PatchNotesParser`) fails loudly when the page markup changes. A new patch released within the last 7 days (`collector.patch-import.recent-days`) also starts a full collection in the background: every collector job with `run-on-patch: true` (the default) runs one after another with trigger `PATCH`, including jobs whose schedule is disabled (console, other regions), so heroes, maps and every configured platform and region get fresh numbers for the new patch. Set `run-on-patch: false` on a job to keep it out of that run; patches imported on a fresh install that are older than the window start nothing.
+- **Abilities:** the same import also reads the ability section of every hero page and fills `hero_abilities` (slug, name, description, icon); existing abilities get their name, description and order refreshed and a missing icon filled. Text fields (counter and synergy notes, strengths, weaknesses, hero description) can mention an ability as `[[hero-slug/ability-slug]]` (for example `[[dva/defense-matrix]]`); the site shows it as a chip with the icon and a tooltip with the description, and falls back to a plain readable name when the ability is unknown. Blizzard's page does not say which button an ability uses, so `hero_abilities.control_key` (`PRIMARY_FIRE`, `SECONDARY_FIRE`, `ABILITY_1`, `ABILITY_2`, `ULTIMATE`, `JUMP`, `CROUCH`, `PASSIVE`; default PC keys LMB, RMB, Shift, E, Q, Space, Ctrl; the hero page switch also shows the Xbox, PlayStation and Nintendo Switch defaults) is curated by hand, is never touched by the import, and stays empty when unknown.
 - **Maps and perks:** upload in the admin panel (PNG, JPEG or WebP, up to 2 MB; SVG is refused). The file name contains a short hash, so a replaced image is never served stale, and the old file is deleted.
 - **Hero portraits:** the collector can download the portraits from the statistics response (256x256 PNG) into `heroes/`. This is off by default (`COLLECTOR_DOWNLOAD_PORTRAITS=false`) because the images are Blizzard's and the licence question is still open (see `.tasks/current/0008-images-and-storage.md`). Without it the site shows the first letter of the hero name.
 - The daily backup also archives the media volume (`overlab-media-<timestamp>.tar.gz`).
@@ -143,12 +152,15 @@ Curated content, also public `GET` requests:
 | `/api/heroes/{slug}/perks` | Perks with a recommendation (`RECOMMENDED`, `OPTIONAL`, `AVOID`) |
 | `/api/abilities` | Abilities of all heroes |
 | `/api/heroes/{slug}/abilities` | Abilities of a hero with description and icon |
+| `/api/hero-categories` | Hero categories (for example beam or dive) with their members, and curated hero-versus-category matchups (strong against, struggles against or works well with a category); shown as chips on `/counters`, where heroes covered by a chip are not repeated as separate avatars |
+| `/api/hero-relations` | Counters, counters against and synergies of all heroes in one response |
 | `/api/heroes/{slug}/counters` | Heroes this hero counters and heroes that counter it |
 | `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
-| `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published video guides (YouTube embeds) |
+| `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published spots and setups (YouTube embeds; `kind`, `side`, `abilitySlug`, `startSeconds`, `endSeconds`) |
 | `/api/patches`, `/api/patches/{slug}`, `/api/patches/at?date=` | Patches and the patch active at a date |
+| `/api/sitemap.xml` | Sitemap of the public pages (static pages, active heroes, maps); served as `/sitemap.xml` by the edge proxy, which also answers `/robots.txt` with the sitemap link |
 
-Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.
+Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/hero-categories`, `/api/admin/hero-category-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.
 
 ### Limits and caching
 
@@ -173,11 +185,13 @@ Email and password registration plus Google sign-in. Tokens are stored in `httpO
 | `PUT /api/me/profile` | Change the display name |
 | `POST /api/me/password` | Change the password (local accounts; needs the current password) |
 | `POST /api/me/email` | Request an email change; the address changes after the confirmation link sent to the new one is opened (`/verify-email`) |
-| `GET /api/me/export` | Download the account data (profile, favorites, notes, default filters) as JSON |
+| `GET /api/me/export` | Download the account data (profile, favorites, votes and reports on counters and synergies, default filters) as JSON |
 | `DELETE /api/me` | Delete the account (local accounts confirm with the password); audit entries about the user are anonymized, the last administrator cannot be deleted |
 | `GET /api/me/favorites`, `PUT`/`DELETE /api/me/favorites/heroes/{slug}`, `/maps/{slug}` | Favorite heroes and maps (200 of each at most) |
-| `GET /api/me/notes`, `PUT`/`DELETE /api/me/notes/{heroSlug}` | Private notes per hero (2000 characters, 50 notes; saving an empty note deletes it) |
+| `GET`/`PUT`/`DELETE /api/me/relation-votes` | Agree or disagree with a counter or synergy (`heroSlug`, `relatedHeroSlug`, `type`, `value` `UP`/`DOWN`; the pair works in either direction, one vote per user, 1000 at most) |
+| `POST /api/me/relation-reports` | Report a mistake in a counter or synergy (10 to 1000 characters; one open report per user and recommendation, 10 open reports at most) |
 | `GET`/`PUT /api/me/preferences` | Default mode, rank, platform and region for the statistics filters |
+| `GET /api/admin/relation-reports?status=NEW`, `PUT /api/admin/relation-reports/{id}/status`, `GET /api/admin/relation-votes/summary` | Admin: review reports (`NEW`, `ACCEPTED`, `REJECTED`) and see votes per recommendation. Votes and reports are never shown publicly and never change the curated data on their own |
 | `GET /api/admin/users`, `PUT /api/admin/users/{id}/enabled` | Admin: search users, block or unblock (blocked users are signed out and cannot sign in; an admin cannot block themselves) |
 
 Signing in with Google using an email that already has a password account links the two, so both ways work. If that account's email was not verified yet, its password is removed (use "Forgot your password?" to set a new one).
@@ -195,8 +209,13 @@ Every admin change (perks, counters, synergies, guides, patches, hero and map ed
 The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`:
 
 - `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
-- `weekly-maps`: every map, every rank for Competitive (about 310 requests, roughly 16 minutes with the 3 s pause), rank `ALL` for Quick Play
-- `weekly-console`, `weekly-other-regions`: disabled examples (`enabled: false`) for Console and other regions
+- `daily-maps`: every map, rank `ALL`, both queues (about 62 requests). It has no schedule: it starts right after `daily-overview` and only when that job saved new rows, and at most once per 2 days (`min-interval: 2d`)
+- `weekly-maps`: every map, every rank from Bronze to Grandmaster for Competitive (about 248 requests, roughly 12 minutes with the 3 s pause). Same rule: runs after `daily-overview` found changes, at most once per 7 days
+- A job with `after: <job name>` instead of `cron` is chained. It starts when the job it follows saved rows, skips itself if its last successful run is younger than `min-interval`, and is shown in the admin panel as "After ... finds changes". Runs started by a patch are not chained, because a patch already runs every job
+- `daily-other-regions`: PC in Americas and Asia, both queues, rank `ALL`, all maps combined
+- `daily-console`: Console in every region, both queues, rank `ALL`, all maps combined
+
+Ranks and maps are collected only for PC in Europe. For every other platform and region the statistics page disables the rank and map filters and shows overall numbers (`hasDetailedCoverage` in `frontend/src/features/stats/filters.ts`); change that rule together with the collector jobs.
 
 The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
 
@@ -208,6 +227,7 @@ Admin endpoints (`ADMIN` role):
 | `POST /api/admin/collector/jobs/{name}/run` | Start a job now (202, 409 if it is already running) |
 | `GET /api/admin/collector/runs` | Latest 50 runs |
 | `POST /api/admin/collector/perks/import` | Import perks from the Blizzard hero pages in the background (202; 400 while `COLLECTOR_IMPORT_PERKS` is off, 409 if already running) |
+| `POST /api/admin/collector/patches/import` | Import new balance patches from the Blizzard patch notes page now, returns `{created}` |
 
 To run one job when the backend starts:
 

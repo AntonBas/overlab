@@ -24,17 +24,24 @@ describe("AbilityKey", () => {
 
   it("shows console buttons on Xbox and PlayStation", () => {
     const { unmount } = renderKey("XBOX", "ULTIMATE");
-    expect(screen.getByText("LB + RB")).toBeInTheDocument();
+    expect(screen.getAllByText("Y").length).toBeGreaterThan(0);
     unmount();
 
     renderKey("PLAYSTATION", "ULTIMATE");
-    expect(screen.getByText("L1 + R1")).toBeInTheDocument();
+    expect(screen.getByText("Triangle")).toBeInTheDocument();
   });
 
   it("shows Nintendo Switch buttons", () => {
     renderKey("SWITCH", "ULTIMATE");
 
-    expect(screen.getByText("L + R")).toBeInTheDocument();
+    expect(screen.getAllByText("X").length).toBeGreaterThan(0);
+  });
+
+  it("draws the PlayStation symbol and keeps its name for screen readers", () => {
+    renderKey("PLAYSTATION", "ULTIMATE");
+
+    expect(document.querySelector("kbd svg.glyph--triangle")).not.toBeNull();
+    expect(screen.getByText("Triangle")).toHaveClass("visually-hidden");
   });
 
   it("labels a passive without a key", () => {

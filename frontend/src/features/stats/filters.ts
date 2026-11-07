@@ -55,6 +55,19 @@ export const SORTS: readonly StatsSort[] = [
 ];
 export const DIRECTIONS: readonly SortDirection[] = ["ASC", "DESC"];
 
+export function hasDetailedCoverage(
+  filters: Pick<StatsFilters, "platform" | "region">,
+): boolean {
+  return filters.platform === "PC" && filters.region === "EUROPE";
+}
+
+export function applyCoverage(filters: StatsFilters): StatsFilters {
+  if (hasDetailedCoverage(filters)) {
+    return filters;
+  }
+  return { ...filters, tier: "ALL", map: ALL_MAPS };
+}
+
 function pick<T extends string>(
   raw: string | null,
   allowed: readonly T[],
@@ -67,7 +80,7 @@ function pick<T extends string>(
 export function parseFilters(params: URLSearchParams): StatsFilters {
   const rawRole = params.get("role");
   const queue = pick(params.get("queue"), QUEUES, DEFAULT_FILTERS.queue);
-  return {
+  return applyCoverage({
     queue,
     tier:
       queue === "QUICK_PLAY"
@@ -83,7 +96,7 @@ export function parseFilters(params: URLSearchParams): StatsFilters {
       DIRECTIONS,
       DEFAULT_FILTERS.direction,
     ),
-  };
+  });
 }
 
 export function toSearchParams(filters: StatsFilters): URLSearchParams {

@@ -1,4 +1,7 @@
 import type {
+  GuideKind,
+  GuideSide,
+  AbilityControl,
   Hero,
   MapMode,
   PerkPosition,
@@ -10,14 +13,46 @@ export interface AdminHero extends Hero {
   active: boolean;
 }
 
+export interface AdminAbility {
+  id: number;
+  heroSlug: string;
+  name: string;
+  iconUrl: string | null;
+  control: AbilityControl | null;
+}
+
 export type RelationType = "COUNTER" | "SYNERGY";
+
+export type RelationReportStatus = "NEW" | "ACCEPTED" | "REJECTED";
+
+export interface RelationReport {
+  id: number;
+  relationId: number;
+  heroSlug: string;
+  relatedHeroSlug: string;
+  type: RelationType;
+  relationNote: string | null;
+  message: string;
+  reporterName: string;
+  status: RelationReportStatus;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface RelationVoteSummary {
+  relationId: number;
+  heroSlug: string;
+  relatedHeroSlug: string;
+  type: RelationType;
+  up: number;
+  down: number;
+}
 
 export interface HeroRelation {
   id: number;
   heroSlug: string;
   relatedHeroSlug: string;
   type: RelationType;
-  strength: number;
   note: string | null;
 }
 
@@ -25,7 +60,39 @@ export interface RelationPayload {
   heroSlug: string;
   relatedHeroSlug: string;
   type: RelationType;
-  strength: number;
+  note: string | null;
+}
+
+export type CategoryMatchupType =
+  "STRONG_AGAINST" | "WEAK_AGAINST" | "WORKS_WITH";
+
+export interface AdminCategory {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  heroSlugs: string[];
+}
+
+export interface CategoryPayload {
+  slug: string;
+  name: string;
+  description: string | null;
+  heroSlugs: string[];
+}
+
+export interface AdminCategoryMatchup {
+  id: number;
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
+  note: string | null;
+}
+
+export interface CategoryMatchupPayload {
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
   note: string | null;
 }
 
@@ -46,6 +113,10 @@ export interface GuidePayload {
   slug: string | null;
   youtubeId: string;
   startSeconds: number;
+  endSeconds: number | null;
+  kind: GuideKind;
+  side: GuideSide;
+  abilitySlug: string | null;
   description: string | null;
   sortOrder: number;
   published: boolean;
@@ -64,12 +135,15 @@ export interface MapPayload {
 }
 
 export type CollectorRunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";
-export type CollectorTrigger = "SCHEDULED" | "MANUAL" | "STARTUP";
+export type CollectorTrigger =
+  "SCHEDULED" | "MANUAL" | "STARTUP" | "PATCH" | "CHAINED";
 
 export interface CollectorJob {
   name: string;
-  cron: string;
+  cron: string | null;
   enabled: boolean;
+  after: string | null;
+  minInterval: string | null;
 }
 
 export interface CollectorRun {

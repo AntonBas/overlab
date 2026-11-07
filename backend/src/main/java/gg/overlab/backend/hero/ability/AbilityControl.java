@@ -6,5 +6,7 @@ public enum AbilityControl {
     ABILITY_1,
     ABILITY_2,
     ULTIMATE,
+    JUMP,
+    CROUCH,
     PASSIVE
 }

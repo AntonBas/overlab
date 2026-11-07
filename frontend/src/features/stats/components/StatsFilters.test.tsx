@@ -34,25 +34,72 @@ describe("StatsFilters", () => {
     expect(onChange).toHaveBeenCalledWith({ queue: "QUICK_PLAY" });
   });
 
-  it("disables the rank filter for Quick Play", () => {
+  it("hides the rank filter for Quick Play", () => {
     renderFilters({ ...DEFAULT_FILTERS, queue: "QUICK_PLAY" });
 
-    expect(screen.getByLabelText("Rank")).toBeDisabled();
+    expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
   });
 
-  it("keeps the rank filter enabled for Competitive", () => {
+  it("keeps rank and map enabled for PC in Europe", () => {
     renderFilters();
 
-    expect(screen.getByLabelText("Rank")).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeEnabled();
+    expect(screen.queryByText(/available for PC in Europe only/i)).toBeNull();
+  });
+
+  it("disables rank and map for other regions and explains why", () => {
+    renderFilters({ ...DEFAULT_FILTERS, region: "ASIA" });
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeDisabled();
+    expect(
+      screen.getByText(/available for PC in Europe only/i),
+    ).toBeInTheDocument();
+  });
+
+  it("disables rank and map for console", () => {
+    renderFilters({ ...DEFAULT_FILTERS, platform: "CONSOLE" });
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Map" })).toBeDisabled();
+  });
+
+  it("shows the rank filter for Competitive", () => {
+    renderFilters();
+
+    expect(screen.getByRole("combobox", { name: "Rank" })).toBeInTheDocument();
+  });
+
+  it("reports the chosen rank from the list", async () => {
+    const onChange = renderFilters();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Rank" }));
+    await userEvent.click(screen.getByRole("option", { name: "Emerald" }));
+
+    expect(onChange).toHaveBeenCalledWith({ tier: "EMERALD" });
   });
 
   it("offers every map and reports the chosen one", async () => {
     const onChange = renderFilters();
 
-    await userEvent.selectOptions(screen.getByLabelText("Map"), "rialto");
+    await userEvent.click(screen.getByRole("combobox", { name: "Map" }));
 
     expect(screen.getByRole("option", { name: "Busan" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("option", { name: "Rialto" }));
     expect(onChange).toHaveBeenCalledWith({ map: "rialto" });
+  });
+
+  it("reports the chosen platform and region", async () => {
+    const onChange = renderFilters();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Platform" }));
+    await userEvent.click(screen.getByRole("option", { name: "Console" }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Region" }));
+    await userEvent.click(screen.getByRole("option", { name: /Asia/ }));
+
+    expect(onChange).toHaveBeenCalledWith({ platform: "CONSOLE" });
+    expect(onChange).toHaveBeenCalledWith({ region: "ASIA" });
   });
 
   it("filters by role and can clear the role again", async () => {

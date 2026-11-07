@@ -5,12 +5,14 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { humanize } from "../../../utils/format";
+import { formatDateTime, humanize } from "../../../utils/format";
 import { fetchAuditLog } from "../api/adminApi";
 import { ChangeView } from "../components/ChangeView";
 import { SelectField } from "../components/Fields";
 import { Pagination } from "../components/Pagination";
+import { StatusBadge } from "../components/StatusBadge";
 import type { AuditAction, AuditFilters } from "../types";
+import { describeActor, describeEntity } from "../utils/audit";
 
 const ACTIONS: AuditAction[] = [
   "CREATE",
@@ -20,6 +22,15 @@ const ACTIONS: AuditAction[] = [
   "LOGOUT",
   "PASSWORD_CHANGE",
 ];
+
+const ACTION_TONES: Record<AuditAction, "good" | "bad" | "info" | "neutral"> = {
+  CREATE: "good",
+  UPDATE: "info",
+  DELETE: "bad",
+  LOGIN: "neutral",
+  LOGOUT: "neutral",
+  PASSWORD_CHANGE: "neutral",
+};
 
 const EMPTY: AuditFilters = { page: 0 };
 
@@ -118,20 +129,15 @@ export function AuditAdminPage() {
             <tbody>
               {log.data.content.map((entry) => (
                 <tr key={entry.id}>
-                  <td>{new Date(entry.occurredAt).toLocaleString()}</td>
+                  <td className="nowrap">{formatDateTime(entry.occurredAt)}</td>
+                  <td>{describeActor(entry.actorId, entry.actorRole)}</td>
                   <td>
-                    {entry.actorId ?? "system"}
-                    {entry.actorRole && (
-                      <span className="muted"> ({entry.actorRole})</span>
-                    )}
+                    <StatusBadge
+                      value={entry.action}
+                      tone={ACTION_TONES[entry.action]}
+                    />
                   </td>
-                  <td>{humanize(entry.action)}</td>
-                  <td>
-                    {entry.entityType}
-                    {entry.entityId && (
-                      <span className="muted"> {entry.entityId}</span>
-                    )}
-                  </td>
+                  <td>{describeEntity(entry.entityType, entry.entityId)}</td>
                   <td>
                     <ChangeView action={entry.action} changes={entry.changes} />
                   </td>

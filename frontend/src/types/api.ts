@@ -34,6 +34,8 @@ export type AbilityControl =
   | "ABILITY_1"
   | "ABILITY_2"
   | "ULTIMATE"
+  | "JUMP"
+  | "CROUCH"
   | "PASSIVE";
 
 export interface Ability {
@@ -48,13 +50,6 @@ export interface Ability {
 export interface Favorites {
   heroes: Hero[];
   maps: GameMap[];
-}
-
-export interface Note {
-  heroSlug: string;
-  heroName: string;
-  content: string;
-  updatedAt: string | null;
 }
 
 export interface Preferences {
@@ -190,14 +185,53 @@ export interface RelatedHero {
   slug: string;
   name: string;
   role: HeroRole;
-  strength: number;
   note: string | null;
+  portraitUrl: string | null;
 }
 
 export interface HeroCounters {
   counters: RelatedHero[];
   counteredBy: RelatedHero[];
 }
+
+export interface HeroRelations {
+  heroSlug: string;
+  counters: RelatedHero[];
+  counteredBy: RelatedHero[];
+  synergies: RelatedHero[];
+}
+
+export interface CategoryMember {
+  slug: string;
+  name: string;
+  role: HeroRole;
+  portraitUrl: string | null;
+}
+
+export interface HeroCategory {
+  slug: string;
+  name: string;
+  description: string | null;
+  heroes: CategoryMember[];
+}
+
+export type CategoryMatchupType =
+  "STRONG_AGAINST" | "WEAK_AGAINST" | "WORKS_WITH";
+
+export interface CategoryMatchup {
+  heroSlug: string;
+  categorySlug: string;
+  type: CategoryMatchupType;
+  note: string | null;
+}
+
+export interface HeroCategories {
+  categories: HeroCategory[];
+  matchups: CategoryMatchup[];
+}
+
+export type GuideKind = "SETUP" | "POSITION" | "ULTIMATE" | "TIP";
+export type GuideSide = "ATTACK" | "DEFENSE" | "BOTH";
 
 export interface Guide {
   id: number;
@@ -210,6 +244,10 @@ export interface Guide {
   title: string;
   youtubeId: string;
   startSeconds: number;
+  endSeconds: number | null;
+  kind: GuideKind;
+  side: GuideSide;
+  abilitySlug: string | null;
   embedUrl: string;
   description: string | null;
   sortOrder: number;

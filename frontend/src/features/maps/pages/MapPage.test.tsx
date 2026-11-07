@@ -64,12 +64,10 @@ describe("MapPage", () => {
 
   it("loads the map again when another rank is chosen", async () => {
     renderPage();
-    await screen.findByRole("combobox", { name: "Rank" });
-
-    await userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Rank" }),
-      "DIAMOND",
+    await userEvent.click(
+      await screen.findByRole("combobox", { name: "Rank" }),
     );
+    await userEvent.click(screen.getByRole("option", { name: "Diamond" }));
 
     await waitFor(() =>
       expect(fetchStatsMock).toHaveBeenLastCalledWith(
@@ -187,11 +185,10 @@ describe("MapPage", () => {
     expect(chip).toHaveAccessibleDescription(/payload/);
   });
 
-  it("disables the rank in Quick Play", async () => {
+  it("hides the rank in Quick Play", async () => {
     renderPage("/maps/rialto?queue=quick_play");
 
-    expect(
-      await screen.findByRole("combobox", { name: "Rank" }),
-    ).toBeDisabled();
+    await screen.findByRole("button", { name: "Quick Play" });
+    expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
   });
 });

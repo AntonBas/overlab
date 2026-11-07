@@ -16,7 +16,6 @@ import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.personal.PersonalService;
 import jakarta.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +61,7 @@ class PersonalDataIntegrationTest {
         cleanUp();
         ownerCookie = cookieFor(saveUser("owner"));
         otherCookie = cookieFor(saveUser("other"));
-        for (int index = 0; index <= PersonalService.MAX_NOTES_PER_USER; index++) {
-            heroes.add(saveHero(index));
-        }
+        heroes.add(saveHero(0));
         map = new GameMap();
         map.setSlug(PREFIX + "map");
         map.setName("Personal Test Map");
@@ -111,51 +108,6 @@ class PersonalDataIntegrationTest {
     }
 
     @Test
-    void notesBelongToTheirOwnerOnly() throws Exception {
-        String slug = heroes.get(0).getSlug();
-        mockMvc.perform(json(put("/api/me/notes/" + slug), "{\"content\":\"  push the high ground  \"}")
-                        .cookie(ownerCookie))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("push the high ground"));
-
-        mockMvc.perform(get("/api/me/notes/" + slug).cookie(ownerCookie)).andExpect(status().isOk());
-        mockMvc.perform(get("/api/me/notes/" + slug).cookie(otherCookie)).andExpect(status().isNotFound());
-        mockMvc.perform(get("/api/me/notes").cookie(otherCookie)).andExpect(jsonPath("$.length()").value(0));
-        mockMvc.perform(get("/api/me/notes")).andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void savingAnEmptyNoteRemovesIt() throws Exception {
-        String slug = heroes.get(0).getSlug();
-        mockMvc.perform(json(put("/api/me/notes/" + slug), "{\"content\":\"keep\"}").cookie(ownerCookie))
-                .andExpect(status().isOk());
-        mockMvc.perform(json(put("/api/me/notes/" + slug), "{\"content\":\"   \"}").cookie(ownerCookie))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/api/me/notes").cookie(ownerCookie)).andExpect(jsonPath("$.length()").value(0));
-    }
-
-    @Test
-    void noteLengthAndCountAreLimited() throws Exception {
-        String tooLong = "x".repeat(2001);
-        mockMvc.perform(json(put("/api/me/notes/" + heroes.get(0).getSlug()), "{\"content\":\"" + tooLong + "\"}")
-                        .cookie(ownerCookie))
-                .andExpect(status().isBadRequest());
-
-        for (int index = 0; index < PersonalService.MAX_NOTES_PER_USER; index++) {
-            mockMvc.perform(json(put("/api/me/notes/" + heroes.get(index).getSlug()), "{\"content\":\"note\"}")
-                            .cookie(ownerCookie))
-                    .andExpect(status().isOk());
-        }
-        mockMvc.perform(json(put("/api/me/notes/" + heroes.get(PersonalService.MAX_NOTES_PER_USER).getSlug()),
-                        "{\"content\":\"one too many\"}").cookie(ownerCookie))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(json(put("/api/me/notes/" + heroes.get(0).getSlug()), "{\"content\":\"edited\"}")
-                        .cookie(ownerCookie))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void preferencesRoundTripAndStayPrivate() throws Exception {
         mockMvc.perform(get("/api/me/preferences").cookie(ownerCookie))
                 .andExpect(jsonPath("$.queue").doesNotExist());
@@ -175,8 +127,6 @@ class PersonalDataIntegrationTest {
     void deletingTheAccountRemovesPersonalData() throws Exception {
         String slug = heroes.get(0).getSlug();
         mockMvc.perform(put("/api/me/favorites/heroes/" + slug).cookie(ownerCookie)).andExpect(status().isNoContent());
-        mockMvc.perform(json(put("/api/me/notes/" + slug), "{\"content\":\"gone soon\"}").cookie(ownerCookie))
-                .andExpect(status().isOk());
         User owner = userRepository.findByEmailIgnoreCase(PREFIX + "owner@overlab.test").orElseThrow();
 
         userRepository.delete(owner);

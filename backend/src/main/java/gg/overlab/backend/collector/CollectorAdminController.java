@@ -26,12 +26,14 @@ public class CollectorAdminController {
     private final CollectorRunRepository runRepository;
     private final AuditService auditService;
     private final PerkImportService perkImportService;
+    private final PatchImportService patchImportService;
 
     @Operation(summary = "List collector jobs with cron schedule and enabled flag")
     @GetMapping("/jobs")
     public List<CollectorJobDto> jobs() {
         return collectorService.jobs().stream()
-                .map(job -> new CollectorJobDto(job.name(), job.cron(), job.enabled()))
+                .map(job -> new CollectorJobDto(job.name(), job.cron(), job.enabled(), job.after(),
+                        job.minInterval() == null ? null : job.minInterval().toString()))
                 .toList();
     }
 
@@ -57,9 +59,18 @@ public class CollectorAdminController {
         return new PerkImportStartedDto(perkImportService.startAsync());
     }
 
+    @Operation(summary = "Import new balance patches from the Blizzard patch notes page")
+    @PostMapping("/patches/import")
+    public PatchImportResultDto importPatches() {
+        return new PatchImportResultDto(patchImportService.importNew());
+    }
+
+    public record PatchImportResultDto(int created) {
+    }
+
     public record PerkImportStartedDto(int heroes) {
     }
 
-    public record CollectorJobDto(String name, String cron, boolean enabled) {
+    public record CollectorJobDto(String name, String cron, boolean enabled, String after, String minInterval) {
     }
 }

@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.ability;
 
+import gg.overlab.backend.hero.ability.dto.AbilityAdminDto;
 import gg.overlab.backend.hero.ability.dto.AbilityDto;
 import gg.overlab.backend.media.MediaUrlResolver;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,15 @@ public class AbilityMapper {
                 ability.getSlug(),
                 ability.getName(),
                 ability.getDescription(),
+                mediaUrlResolver.resolve(ability.getIconUrl()),
+                ability.getControl());
+    }
+
+    public AbilityAdminDto toAdminDto(HeroAbility ability) {
+        return new AbilityAdminDto(
+                ability.getId(),
+                ability.getHero().getSlug(),
+                ability.getName(),
                 mediaUrlResolver.resolve(ability.getIconUrl()),
                 ability.getControl());
     }

@@ -1,10 +1,21 @@
 import { api } from "../../../services/api";
-import type { GameMap, Guide, Patch, Perk } from "../../../types/api";
 import type {
+  AbilityControl,
+  GameMap,
+  Guide,
+  Patch,
+  Perk,
+} from "../../../types/api";
+import type {
+  AdminAbility,
+  AdminCategory,
+  AdminCategoryMatchup,
   AdminHero,
   AdminUser,
   AuditEntry,
   AuditFilters,
+  CategoryMatchupPayload,
+  CategoryPayload,
   CollectorJob,
   CollectorRun,
   GuidePayload,
@@ -14,6 +25,9 @@ import type {
   PatchPayload,
   PerkPayload,
   RelationPayload,
+  RelationReport,
+  RelationReportStatus,
+  RelationVoteSummary,
 } from "../types";
 
 export async function fetchAdminHeroes(): Promise<AdminHero[]> {
@@ -31,6 +45,26 @@ export async function updateHero(
   },
 ): Promise<AdminHero> {
   const { data } = await api.put<AdminHero>(`/admin/heroes/${slug}`, payload);
+  return data;
+}
+
+export async function fetchAdminAbilities(
+  heroSlug: string,
+): Promise<AdminAbility[]> {
+  const { data } = await api.get<AdminAbility[]>("/admin/abilities", {
+    params: { hero: heroSlug },
+  });
+  return data;
+}
+
+export async function updateAbilityControl(
+  id: number,
+  control: AbilityControl | null,
+): Promise<AdminAbility> {
+  const { data } = await api.put<AdminAbility>(
+    `/admin/abilities/${id}/control`,
+    { control },
+  );
   return data;
 }
 
@@ -100,6 +134,68 @@ export async function deleteRelation(id: number): Promise<void> {
   await api.delete(`/admin/hero-relations/${id}`);
 }
 
+export async function fetchCategories(): Promise<AdminCategory[]> {
+  const { data } = await api.get<AdminCategory[]>("/admin/hero-categories");
+  return data;
+}
+
+export async function createCategory(
+  payload: CategoryPayload,
+): Promise<AdminCategory> {
+  const { data } = await api.post<AdminCategory>(
+    "/admin/hero-categories",
+    payload,
+  );
+  return data;
+}
+
+export async function updateCategory(
+  id: number,
+  payload: CategoryPayload,
+): Promise<AdminCategory> {
+  const { data } = await api.put<AdminCategory>(
+    `/admin/hero-categories/${id}`,
+    payload,
+  );
+  return data;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await api.delete(`/admin/hero-categories/${id}`);
+}
+
+export async function fetchCategoryMatchups(): Promise<AdminCategoryMatchup[]> {
+  const { data } = await api.get<AdminCategoryMatchup[]>(
+    "/admin/hero-category-relations",
+  );
+  return data;
+}
+
+export async function createCategoryMatchup(
+  payload: CategoryMatchupPayload,
+): Promise<AdminCategoryMatchup> {
+  const { data } = await api.post<AdminCategoryMatchup>(
+    "/admin/hero-category-relations",
+    payload,
+  );
+  return data;
+}
+
+export async function updateCategoryMatchup(
+  id: number,
+  payload: CategoryMatchupPayload,
+): Promise<AdminCategoryMatchup> {
+  const { data } = await api.put<AdminCategoryMatchup>(
+    `/admin/hero-category-relations/${id}`,
+    payload,
+  );
+  return data;
+}
+
+export async function deleteCategoryMatchup(id: number): Promise<void> {
+  await api.delete(`/admin/hero-category-relations/${id}`);
+}
+
 export async function fetchAdminGuides(): Promise<Guide[]> {
   const { data } = await api.get<Guide[]>("/admin/guides");
   return data;
@@ -142,6 +238,13 @@ export async function updatePatch(
 
 export async function deletePatch(id: number): Promise<void> {
   await api.delete(`/admin/patches/${id}`);
+}
+
+export async function importPatches(): Promise<{ created: number }> {
+  const { data } = await api.post<{ created: number }>(
+    "/admin/collector/patches/import",
+  );
+  return data;
 }
 
 export async function updateMap(
@@ -245,5 +348,30 @@ export async function setUserEnabled(
   const { data } = await api.put<AdminUser>(`/admin/users/${id}/enabled`, {
     enabled,
   });
+  return data;
+}
+
+export async function fetchRelationReports(
+  status: RelationReportStatus,
+): Promise<RelationReport[]> {
+  const { data } = await api.get<RelationReport[]>("/admin/relation-reports", {
+    params: { status },
+  });
+  return data;
+}
+
+export async function changeRelationReportStatus(
+  id: number,
+  status: RelationReportStatus,
+): Promise<void> {
+  await api.put(`/admin/relation-reports/${id}/status`, { status });
+}
+
+export async function fetchRelationVoteSummary(): Promise<
+  RelationVoteSummary[]
+> {
+  const { data } = await api.get<RelationVoteSummary[]>(
+    "/admin/relation-votes/summary",
+  );
   return data;
 }

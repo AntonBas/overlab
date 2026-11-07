@@ -8,14 +8,17 @@ import static org.mockito.Mockito.when;
 
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
+import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.guide.Guide;
+import gg.overlab.backend.guide.GuideKind;
 import gg.overlab.backend.guide.GuideMapper;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.guide.GuideSide;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;
@@ -87,11 +90,18 @@ class GuideServiceTest {
         when(heroRepository.findBySlug("nobody")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(new GuideRequest("nobody", null, "Title", null, "dQw4w9WgXcQ", 0,
-                null, 0, true))).isInstanceOf(EntityNotFoundException.class);
+                null, 0, true, null, null, null, null))).isInstanceOf(EntityNotFoundException.class);
 
         when(mapRepository.findBySlug("nowhere")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.create(new GuideRequest("illari", "nowhere", "Title", null, "dQw4w9WgXcQ", 0,
-                null, 0, true))).isInstanceOf(EntityNotFoundException.class);
+                null, 0, true, null, null, null, null))).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void rejectsAnEndTimeThatIsNotAfterTheStart() {
+        assertThatThrownBy(() -> service.create(new GuideRequest("illari", "rialto", "Title", null, "dQw4w9WgXcQ", 30,
+                null, 0, true, GuideKind.SETUP, GuideSide.ATTACK, "healing-pylon", 30)))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -118,7 +128,7 @@ class GuideServiceTest {
     }
 
     private GuideRequest request(String slug, String title, boolean published) {
-        return new GuideRequest("illari", "rialto", title, slug, "dQw4w9WgXcQ", 83, "Description", 1, published);
+        return new GuideRequest("illari", "rialto", title, slug, "dQw4w9WgXcQ", 83, "Description", 1, published, null, null, null, null);
     }
 
     private Guide guide(boolean published) {

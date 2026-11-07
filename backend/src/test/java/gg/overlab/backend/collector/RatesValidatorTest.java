@@ -1,8 +1,10 @@
 package gg.overlab.backend.collector;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import gg.overlab.backend.stats.GameQueue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,34 @@ class RatesValidatorTest {
         rates.set(0, CollectorFixtures.rate("hero-0", "DAMAGE", "50", "10", null));
 
         assertThatCode(() -> validator.validate(rates)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void treatsAMinusOneWinRateAsNoDataInsteadOfRejectingTheSnapshot() {
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>(CollectorFixtures.rates(3));
+        rates.set(0, CollectorFixtures.rate("hero-0", "TANK", "-1", "0", "0"));
+
+        assertThatCode(() -> validator.validate(rates)).doesNotThrowAnyException();
+        assertThat(validator.withoutEmptyEntries(rates)).extracting(BlizzardRatesResponse.HeroRate::id)
+                .containsExactly("hero-1", "hero-2");
+    }
+
+    @Test
+    void stillRejectsOtherNegativeWinRates() {
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>(CollectorFixtures.rates(3));
+        rates.set(0, CollectorFixtures.rate("hero-0", "TANK", "-5", "10", "0"));
+
+        assertThatThrownBy(() -> validator.validate(rates)).isInstanceOf(InvalidSnapshotException.class);
+    }
+
+    @Test
+    void rejectsMissingBanRateInCompetitiveOnly() {
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>(CollectorFixtures.rates(3));
+        rates.set(0, CollectorFixtures.rate("hero-0", "DAMAGE", "50", "10", null));
+
+        assertThatThrownBy(() -> validator.validateBanRates(GameQueue.COMPETITIVE, rates))
+                .isInstanceOf(InvalidSnapshotException.class).hasMessageContaining("banrate");
+        assertThatCode(() -> validator.validateBanRates(GameQueue.QUICK_PLAY, rates)).doesNotThrowAnyException();
     }
 
     @Test

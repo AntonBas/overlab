@@ -30,7 +30,7 @@ describe("useFilterState saved defaults", () => {
     renderWithRouter(<Probe />, "/stats");
 
     await waitFor(() =>
-      expect(screen.getByText("COMPETITIVE GOLD AMERICAS")).toBeInTheDocument(),
+      expect(screen.getByText("COMPETITIVE ALL AMERICAS")).toBeInTheDocument(),
     );
   });
 

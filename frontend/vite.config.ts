@@ -5,6 +5,18 @@ const backend = "http://localhost:8080";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes("node_modules/axios")) {
+            return "axios";
+          }
+          return undefined;
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": backend,

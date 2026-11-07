@@ -1,0 +1,49 @@
+import { useEffect } from "react";
+
+const MAX_LENGTH = 160;
+
+function metaContent(selector: string): string | null {
+  return document.head.querySelector(selector)?.getAttribute("content") ?? null;
+}
+
+function setMeta(selector: string, content: string | null) {
+  const element = document.head.querySelector(selector);
+  if (element && content !== null) {
+    element.setAttribute("content", content);
+  }
+}
+
+export function plainDescription(text: string | null | undefined): string {
+  const readable = (text ?? "")
+    .replace(/\[\[[^\]/]+\/([^\]]+)\]\]/g, (_, slug: string) =>
+      slug.replace(/-/g, " "),
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+  return readable.length > MAX_LENGTH
+    ? `${readable.slice(0, MAX_LENGTH - 1).trimEnd()}…`
+    : readable;
+}
+
+export function usePageDescription(description: string | null | undefined) {
+  useEffect(() => {
+    if (!description) {
+      return undefined;
+    }
+    const previous = metaContent('meta[name="description"]');
+    const previousOg = metaContent('meta[property="og:description"]');
+    setMeta('meta[name="description"]', description);
+    setMeta('meta[property="og:description"]', description);
+
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = `${window.location.origin}${window.location.pathname}`;
+    document.head.appendChild(canonical);
+
+    return () => {
+      setMeta('meta[name="description"]', previous);
+      setMeta('meta[property="og:description"]', previousOg);
+      canonical.remove();
+    };
+  }, [description]);
+}

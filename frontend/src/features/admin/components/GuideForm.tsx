@@ -1,6 +1,14 @@
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../components/ui/FormField";
-import type { GameMap, Guide } from "../../../types/api";
+import { useFetch } from "../../../hooks/useFetch";
+import type { GameMap, Guide, GuideKind, GuideSide } from "../../../types/api";
+import { fetchHeroAbilities } from "../../heroes/api/heroesApi";
+import {
+  GUIDE_KIND_LABELS,
+  GUIDE_KINDS,
+  GUIDE_SIDE_LABELS,
+  GUIDE_SIDES,
+} from "../../guides/labels";
 import { createGuide, updateGuide } from "../api/adminApi";
 import type { AdminHero } from "../types";
 import {
@@ -10,6 +18,7 @@ import {
   slugify,
 } from "../utils/youtube";
 import { CheckboxField, SelectField, TextAreaField } from "./Fields";
+import { HeroSelect } from "./HeroSelect";
 import { StatusMessage } from "./StatusMessage";
 import { useSave } from "./useSave";
 import { useUnsavedChanges } from "./unsavedChanges";
@@ -36,6 +45,11 @@ export function GuideForm({
     slug: guide?.slug ?? "",
     video: guide?.youtubeId ?? "",
     timestamp: guide ? formatTimestamp(guide.startSeconds) : "",
+    endTimestamp:
+      guide?.endSeconds != null ? formatTimestamp(guide.endSeconds) : "",
+    kind: (guide?.kind ?? "SETUP") as GuideKind,
+    side: (guide?.side ?? "BOTH") as GuideSide,
+    abilitySlug: guide?.abilitySlug ?? "",
     description: guide?.description ?? "",
     sortOrder: String(guide?.sortOrder ?? 0),
     published: guide?.published ?? false,
@@ -55,6 +69,17 @@ export function GuideForm({
 
   const youtubeId = parseYoutubeId(values.video);
   const startSeconds = parseTimestamp(values.timestamp);
+  const endSeconds =
+    values.endTimestamp.trim() === ""
+      ? null
+      : parseTimestamp(values.endTimestamp);
+  const abilities = useFetch(
+    () =>
+      values.heroSlug
+        ? fetchHeroAbilities(values.heroSlug)
+        : Promise.resolve([]),
+    [values.heroSlug],
+  );
   const sortOrder = Number(values.sortOrder);
   const localErrors: Record<string, string> = {};
   if (youtubeId === null) {
@@ -63,6 +88,13 @@ export function GuideForm({
   }
   if (startSeconds === null) {
     localErrors.startSeconds = "Use the format 1:23 or 1:02:03.";
+  }
+  if (values.endTimestamp.trim() !== "") {
+    if (endSeconds === null) {
+      localErrors.endSeconds = "Use the format 1:23 or 1:02:03.";
+    } else if (startSeconds !== null && endSeconds <= startSeconds) {
+      localErrors.endSeconds = "The end must be after the start.";
+    }
   }
   if (!Number.isInteger(sortOrder)) {
     localErrors.sortOrder = "Use a whole number.";
@@ -91,6 +123,10 @@ export function GuideForm({
       slug: values.slug.trim() === "" ? null : values.slug.trim(),
       youtubeId,
       startSeconds: startSeconds ?? 0,
+      endSeconds,
+      kind: values.kind,
+      side: values.side,
+      abilitySlug: values.abilitySlug === "" ? null : values.abilitySlug,
       description: values.description.trim() === "" ? null : values.description,
       sortOrder,
       published: values.published,
@@ -107,21 +143,15 @@ export function GuideForm({
 
   return (
     <form className="form admin__form" onSubmit={submit} noValidate>
-      <h2>{guide ? `Edit ${guide.title}` : "New guide"}</h2>
-      <SelectField
+      <h2>{guide ? `Edit ${guide.title}` : "New spot or setup"}</h2>
+      <HeroSelect
         label="Hero"
-        name="heroSlug"
         value={values.heroSlug}
+        heroes={heroes}
+        placeholder="Choose a hero"
         error={errors.heroSlug}
-        onChange={(event) => change("heroSlug", event.target.value)}
-      >
-        <option value="">Choose a hero</option>
-        {heroes.map((hero) => (
-          <option key={hero.slug} value={hero.slug}>
-            {hero.name}
-          </option>
-        ))}
-      </SelectField>
+        onChange={(slug) => change("heroSlug", slug)}
+      />
       <SelectField
         label="Map (optional)"
         name="mapSlug"
@@ -163,6 +193,44 @@ export function GuideForm({
         hint={youtubeId ? `Video id: ${youtubeId}` : undefined}
         onChange={(event) => change("video", event.target.value)}
       />
+      <SelectField
+        label="Type"
+        name="kind"
+        value={values.kind}
+        onChange={(event) => change("kind", event.target.value as GuideKind)}
+      >
+        {GUIDE_KINDS.map((kind) => (
+          <option key={kind} value={kind}>
+            {GUIDE_KIND_LABELS[kind]}
+          </option>
+        ))}
+      </SelectField>
+      <SelectField
+        label="Side"
+        name="side"
+        value={values.side}
+        onChange={(event) => change("side", event.target.value as GuideSide)}
+      >
+        {GUIDE_SIDES.map((side) => (
+          <option key={side} value={side}>
+            {GUIDE_SIDE_LABELS[side]}
+          </option>
+        ))}
+      </SelectField>
+      <SelectField
+        label="Ability (optional)"
+        name="abilitySlug"
+        value={values.abilitySlug}
+        error={errors.abilitySlug}
+        onChange={(event) => change("abilitySlug", event.target.value)}
+      >
+        <option value="">None</option>
+        {(abilities.data ?? []).map((ability) => (
+          <option key={ability.slug} value={ability.slug}>
+            {ability.name.trim()}
+          </option>
+        ))}
+      </SelectField>
       <FormField
         label="Start time"
         name="startSeconds"
@@ -171,10 +239,19 @@ export function GuideForm({
         error={errors.startSeconds}
         onChange={(event) => change("timestamp", event.target.value)}
       />
+      <FormField
+        label="End time (optional)"
+        name="endSeconds"
+        placeholder="1:45"
+        value={values.endTimestamp}
+        error={errors.endSeconds}
+        hint="The clip stops here."
+        onChange={(event) => change("endTimestamp", event.target.value)}
+      />
       {youtubeId && (
         <div className="video-frame">
           <iframe
-            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?start=${startSeconds ?? 0}`}
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?start=${startSeconds ?? 0}${endSeconds ? `&end=${endSeconds}` : ""}`}
             title="Video preview"
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"

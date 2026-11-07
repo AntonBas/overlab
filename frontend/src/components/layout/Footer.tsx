@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export function Footer() {
   return (
     <footer className="site-footer">
@@ -11,6 +13,11 @@ export function Footer() {
           Statistics come from Blizzard's public hero statistics page. Counters,
           synergies and perks are curated recommendations.
         </p>
+        <nav className="site-footer__links" aria-label="Legal">
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/cookies">Cookies</Link>
+        </nav>
       </div>
     </footer>
   );
