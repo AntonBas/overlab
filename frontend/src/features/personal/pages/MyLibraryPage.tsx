@@ -4,6 +4,7 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
+import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
@@ -12,6 +13,7 @@ import { useAuth } from "../../auth/context/useAuth";
 import { AccountHeader } from "../../account/components/AccountHeader";
 import { SettingsSection } from "../../account/components/SettingsSection";
 import { fetchFavorites } from "../api/personalApi";
+import { sortHeroesByRoleThenName } from "../../heroes/utils/sortHeroes";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { usePersonalData } from "../context/usePersonalData";
 
@@ -44,14 +46,18 @@ export function MyLibraryPage() {
         )}
         {favorites.data && favorites.data.heroes.length > 0 && (
           <ul className="favorite-grid">
-            {favorites.data.heroes.map((hero) => (
-              <li key={hero.slug}>
+            {sortHeroesByRoleThenName(favorites.data.heroes).map((hero) => (
+              <li
+                key={hero.slug}
+                className={`favorite-grid__item favorite-grid__item--${hero.role.toLowerCase()}`}
+              >
                 <span className="place-icon">
                   <HeroPortrait
                     name={hero.name}
                     url={hero.portraitUrl}
                     size={28}
                   />
+                  <RoleBadge role={hero.role} compact />
                   <Link to={`/heroes/${hero.slug}`}>{hero.name}</Link>
                 </span>
                 <button
