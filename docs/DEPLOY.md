@@ -33,6 +33,15 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
 Flyway applies new migrations on startup.
 
+### Automatic deploy from GitHub
+
+`.github/workflows/deploy.yml` runs the same update over SSH when a tag like `v1.0.0` is pushed, or by hand from the Actions tab (choose a tag or branch). Nothing runs until these are set in the repository settings (Settings, Secrets and variables, Actions), under the `production` environment:
+
+- Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH` (the project folder on the server), `DEPLOY_SSH_KEY` (a private key of a user that can run Docker; use a key made only for deploys) and `DEPLOY_KNOWN_HOSTS` (the output of `ssh-keyscan <host>`)
+- Variable: `DEPLOY_URL`, for example `https://overlabgg.com`; after the update the workflow waits until `/sitemap.xml` answers
+
+The server needs the repository cloned in `DEPLOY_PATH` and a filled `.env.prod`.
+
 ## Monitoring
 
 Grafana listens on `127.0.0.1:3000` only. Reach it through an SSH tunnel: `ssh -L 3000:localhost:3000 user@server`. The backend metrics endpoint is served on an internal management port (9091) that is not published.

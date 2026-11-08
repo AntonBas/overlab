@@ -21,7 +21,9 @@ import gg.overlab.backend.stats.StatsHistoryService;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
+import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,9 @@ class StatsFreshnessIntegrationTest {
     @Autowired
     private SnapshotCheckRepository snapshotCheckRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     private Hero ana;
     private Hero genji;
     private Platform platform;
@@ -68,8 +73,24 @@ class StatsFreshnessIntegrationTest {
         int sequence = SCOPE_SEQUENCE.getAndIncrement();
         platform = Platform.values()[sequence % Platform.values().length];
         region = Region.values()[sequence / Platform.values().length % Region.values().length];
+        clearScope();
         ana = hero("fresh-ana", "Ana");
         genji = hero("fresh-genji", "Genji");
+    }
+
+    private void clearScope() {
+        for (String entity : new String[] {"HeroStat", "SnapshotCheck"}) {
+            String alias = entity.substring(0, 1).toLowerCase(Locale.ROOT);
+            entityManager.createQuery("delete from " + entity + " " + alias + " where " + alias
+                            + ".queue = :queue and " + alias + ".platform = :platform and " + alias
+                            + ".region = :region and " + alias + ".tier = :tier")
+                    .setParameter("queue", GameQueue.QUICK_PLAY)
+                    .setParameter("platform", platform)
+                    .setParameter("region", region)
+                    .setParameter("tier", RankTier.ALL)
+                    .executeUpdate();
+        }
+        entityManager.clear();
     }
 
     private StatsFilter filter() {
