@@ -22,7 +22,7 @@ Fill in `.env.prod` (the names are the ones `docker-compose.prod.yml` reads; `.e
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 ```
 
-Caddy obtains and renews the HTTPS certificate automatically. The backend refuses to start without `JWT_SECRET`, the database settings and `FRONTEND_URL`.
+Caddy obtains and renews the HTTPS certificate automatically. Caddy also sends HSTS and a strict Content-Security-Policy (`docker/caddy/Caddyfile`): when you add analytics, ads or other third-party scripts, allow their hosts there. Redis is capped at 128 MB with LRU eviction, since it only holds cache. The backend refuses to start without `JWT_SECRET`, the database settings and `FRONTEND_URL`.
 
 ## Updating
 
@@ -48,7 +48,7 @@ The alert rules in `docker/grafana/provisioning/alerting/collector-rules.yml` ar
 
 ## Backups
 
-The `backup` service writes a compressed `pg_dump` to `BACKUP_PATH` every `BACKUP_INTERVAL_SECONDS` (default daily) and removes files older than `BACKUP_KEEP_DAYS` (default 14). These files live on the same server, so the service can also copy every new backup off the machine with `rclone`: put an `rclone.conf` with your remote (S3, Backblaze B2, SFTP and others, see `rclone config`) into `docker/backup/rclone/` (git-ignored, or point `RCLONE_CONFIG_DIR` elsewhere) and set `BACKUP_REMOTE` to `remote:bucket/path`. Remote copies older than `BACKUP_REMOTE_KEEP_DAYS` (default 30) are deleted. A failed copy is logged and does not stop the local backups.
+The `backup` service writes a compressed `pg_dump` to `BACKUP_PATH` every `BACKUP_INTERVAL_SECONDS` (default daily) and removes files older than `BACKUP_KEEP_DAYS` (default 14). These files live on the same server, so the service can also copy every new backup off the machine with `rclone`: put an `rclone.conf` with your remote (S3, Backblaze B2, SFTP and others, see `rclone config`) into `docker/backup/rclone/` (git-ignored, or point `RCLONE_CONFIG_DIR` elsewhere) and set `BACKUP_REMOTE` to `remote:bucket/path`. Remote copies older than `BACKUP_REMOTE_KEEP_DAYS` (default 30) are deleted. A failed copy is logged and does not stop the local backups. The `backup` container is marked unhealthy when no new dump appeared within two backup intervals (`docker compose -f docker-compose.prod.yml ps`).
 
 Restore into an empty database:
 

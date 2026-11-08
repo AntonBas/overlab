@@ -3,11 +3,15 @@
 
 	header {
 		X-Content-Type-Options nosniff
+		Strict-Transport-Security "max-age=31536000"
 		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
 		-Server
 	}
+
+	@notSvgMedia not path /media/*.svg
+	header @notSvgMedia Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
 	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
 	handle @uploads {
@@ -31,6 +35,16 @@
 			Disallow: /admin
 			Sitemap: {scheme}://{hostport}/sitemap.xml
 			ROBOTS 200
+	}
+
+	@svgMedia path /media/*.svg
+	handle @svgMedia {
+		reverse_proxy backend:8080 {
+			header_down Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+			header_down Cache-Control "public, max-age=86400"
+			header_down -Pragma
+			header_down -Expires
+		}
 	}
 
 	@mapImages path /media/maps/*

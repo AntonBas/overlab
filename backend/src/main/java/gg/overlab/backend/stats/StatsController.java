@@ -12,6 +12,7 @@ import gg.overlab.backend.stats.dto.StatsSnapshotDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -69,7 +70,7 @@ public class StatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to) {
         StatsFilter filter = StatsFilter.of(queue, tier, mapSlug, platform, region);
-        return historyService.getHeroHistory(slug, filter, from, to);
+        return historyService.getHeroHistory(slug, filter, floorToHour(from), ceilToHour(to));
     }
 
     @Operation(summary = "When the numbers collected from Blizzard last changed")
@@ -110,6 +111,18 @@ public class StatsController {
         if (from == null || to == null) {
             throw new BadRequestException("Provide either 'patch' or both 'from' and 'to'");
         }
-        return historyService.compare(filter, from, to);
+        return historyService.compare(filter, floorToHour(from), ceilToHour(to));
+    }
+
+    private static Instant floorToHour(Instant value) {
+        return value == null ? null : value.truncatedTo(ChronoUnit.HOURS);
+    }
+
+    private static Instant ceilToHour(Instant value) {
+        if (value == null) {
+            return null;
+        }
+        Instant floor = value.truncatedTo(ChronoUnit.HOURS);
+        return floor.equals(value) ? floor : floor.plus(1, ChronoUnit.HOURS);
     }
 }
