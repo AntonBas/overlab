@@ -1632,6 +1632,18 @@ select:disabled {
   background: var(--surface-2);
 }
 
+.favorite-grid li.favorite-grid__item--tank {
+  border-left: 3px solid var(--tank);
+}
+
+.favorite-grid li.favorite-grid__item--damage {
+  border-left: 3px solid var(--damage);
+}
+
+.favorite-grid li.favorite-grid__item--support {
+  border-left: 3px solid var(--support);
+}
+
 .favorite-grid .place-icon {
   min-width: 0;
   gap: 10px;
