@@ -40,7 +40,8 @@ public class EmailService {
         deliver(user.getEmail(), null, new EmailTemplate(
                 "Confirm your Overlab email",
                 "Hi " + user.getDisplayName() + ",",
-                List.of("Confirm your email address to finish creating your account."),
+                List.of("Confirm your email address to finish creating your account. The link works for "
+                        + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm email",
                 frontendUrl + "/verify-email?token=" + rawToken,
                 "If you did not register, ignore this message."));
@@ -51,7 +52,8 @@ public class EmailService {
         deliver(user.getEmail(), null, new EmailTemplate(
                 "Reset your Overlab password",
                 "Hi " + user.getDisplayName() + ",",
-                List.of("Someone asked to set a new password for your account. The link works for a limited time."),
+                List.of("Someone asked to set a new password for your account. The link works for "
+                        + describe(authProperties.resetTokenTtl()) + "."),
                 "Set a new password",
                 frontendUrl + "/reset-password?token=" + rawToken,
                 "If you did not request this, ignore this message."));
@@ -62,7 +64,8 @@ public class EmailService {
         deliver(newEmail, null, new EmailTemplate(
                 "Confirm your new Overlab email",
                 "Hi " + user.getDisplayName() + ",",
-                List.of("Confirm this address as the new email of your Overlab account."),
+                List.of("Confirm this address as the new email of your Overlab account. The link works for "
+                        + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm new email",
                 frontendUrl + "/verify-email?token=" + rawToken,
                 "If you did not request this, ignore this message."));
@@ -123,6 +126,15 @@ public class EmailService {
         helper.setSubject(template.subject());
         helper.setText(template.plainText(), template.html(frontendUrl + LOGO_PATH));
         return message;
+    }
+
+    private static String describe(Duration duration) {
+        long hours = duration.toHours();
+        if (hours >= 1) {
+            return hours + (hours == 1 ? " hour" : " hours");
+        }
+        long minutes = Math.max(1, duration.toMinutes());
+        return minutes + (minutes == 1 ? " minute" : " minutes");
     }
 
     private boolean pause() {
