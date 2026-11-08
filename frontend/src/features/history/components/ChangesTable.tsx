@@ -77,10 +77,44 @@ export function ChangesTable({
     return <EmptyState>No heroes match these filters.</EmptyState>;
   }
 
+  const sortOptions: { value: ChangeSort; label: string }[] = [
+    { value: "NAME", label: "Hero" },
+    { value: "WIN_CHANGE", label: "Win rate" },
+    { value: "PICK_CHANGE", label: "Pick rate" },
+    ...(showBan ? [{ value: "BAN_CHANGE" as const, label: "Ban rate" }] : []),
+  ];
+
   return (
     <>
+      <div className="table-sort">
+        <label className="table-sort__field">
+          <span className="field__label">Sort by</span>
+          <select
+            value={sort}
+            onChange={(event) => toggle(event.target.value as ChangeSort)}
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          className="button button--ghost"
+          aria-label={descending ? "Sorted descending" : "Sorted ascending"}
+          onClick={() => setDescending((current) => !current)}
+        >
+          {descending ? (
+            <ArrowDown size={16} aria-hidden="true" />
+          ) : (
+            <ArrowUp size={16} aria-hidden="true" />
+          )}
+        </button>
+      </div>
       <div className="table-wrap">
-        <table className="table">
+        <table className="table table--cards">
           <thead>
             <tr>
               <th scope="col" aria-sort={ariaSort("NAME")}>
@@ -146,14 +180,14 @@ export function ChangesTable({
                     )}
                   </span>
                 </th>
-                <td>
+                <td data-label="Win rate">
                   <ChangeCell
                     before={change.winRateBefore}
                     after={change.winRateAfter}
                     change={change.winRateChange}
                   />
                 </td>
-                <td>
+                <td data-label="Pick rate">
                   <ChangeCell
                     before={change.pickRateBefore}
                     after={change.pickRateAfter}
@@ -161,7 +195,7 @@ export function ChangesTable({
                   />
                 </td>
                 {showBan && (
-                  <td>
+                  <td data-label="Ban rate">
                     {change.banRateBefore === null ||
                     change.banRateAfter === null ? (
                       "-"

@@ -63,7 +63,7 @@ export function DataTable<T>({
       )}
       {filtered.length === 0 && <EmptyState>Nothing matches.</EmptyState>}
       <div className="table-wrap" hidden={filtered.length === 0}>
-        <table className="table">
+        <table className="table table--cards">
           <thead>
             <tr>
               {columns.map((column) => (
@@ -77,7 +77,9 @@ export function DataTable<T>({
             {visible.map((row) => (
               <tr key={rowKey(row)}>
                 {columns.map((column) => (
-                  <td key={column.header}>{column.render(row)}</td>
+                  <td key={column.header} data-label={column.header}>
+                    {column.render(row)}
+                  </td>
                 ))}
               </tr>
             ))}

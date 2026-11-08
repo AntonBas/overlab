@@ -206,7 +206,7 @@ export function UsersAdminPage() {
       )}
       {users.data && users.data.content.length > 0 && (
         <div className="table-wrap">
-          <table className="table">
+          <table className="table table--cards">
             <thead>
               <tr>
                 <th scope="col">User</th>
@@ -223,7 +223,7 @@ export function UsersAdminPage() {
                     {entry.displayName}
                     <span className="muted"> {entry.email}</span>
                   </th>
-                  <td>
+                  <td data-label="Role">
                     {entry.id === currentUser?.id ? (
                       <StatusBadge
                         value={entry.role}
@@ -248,13 +248,13 @@ export function UsersAdminPage() {
                       </select>
                     )}
                   </td>
-                  <td>{humanize(entry.provider)}</td>
-                  <td>
+                  <td data-label="Sign-in">{humanize(entry.provider)}</td>
+                  <td data-label="Last sign-in">
                     {entry.lastLoginAt
                       ? formatDateTime(entry.lastLoginAt)
                       : "never"}
                   </td>
-                  <td>
+                  <td data-label="Status">
                     {entry.id === currentUser?.id ? (
                       <StatusBadge value="Active" tone="good" />
                     ) : (
