@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: docker/caddy/Dockerfile
-      args:
-        VITE_SUPPORT_URL: ${SUPPORT_URL:-}
     container_name: overlab-edge
     restart: unless-stopped
     environment:

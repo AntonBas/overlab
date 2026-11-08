@@ -227,12 +227,6 @@ ul {
   color: var(--muted);
 }
 
-.site-footer__support {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .site-footer__main {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(2, minmax(120px, 1fr));
