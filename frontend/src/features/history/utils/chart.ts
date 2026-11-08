@@ -80,7 +80,6 @@ export function nearestDotIndex(
 }
 
 export const HISTORY_PERIODS = [
-  { id: "7d", label: "7 days", days: 7 },
   { id: "30d", label: "30 days", days: 30 },
   { id: "90d", label: "90 days", days: 90 },
   { id: "365d", label: "Year", days: 365 },
