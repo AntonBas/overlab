@@ -23,7 +23,7 @@ export interface AdminAbility {
 
 export type RelationType = "COUNTER" | "SYNERGY";
 
-export type FeedbackType = "INACCURACY" | "BUG" | "TYPO" | "OTHER";
+export type FeedbackType = "INACCURACY" | "BUG" | "TYPO" | "OTHER" | "BUSINESS";
 
 export type FeedbackStatus = "NEW" | "RESOLVED" | "DISMISSED";
 
@@ -33,6 +33,7 @@ export interface FeedbackMessage {
   message: string;
   pagePath: string | null;
   authorName: string | null;
+  contactEmail: string | null;
   status: FeedbackStatus;
   createdAt: string;
   resolvedAt: string | null;

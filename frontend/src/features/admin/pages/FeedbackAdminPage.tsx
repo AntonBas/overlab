@@ -29,6 +29,7 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
   BUG: "Bug",
   TYPO: "Typo",
   OTHER: "Other",
+  BUSINESS: "Business",
 };
 
 const RELATION_LABELS: Record<RelationType, string> = {
@@ -100,7 +101,14 @@ export function FeedbackAdminPage() {
               },
               {
                 header: "From",
-                render: (row) => row.authorName ?? "Guest",
+                render: (row) =>
+                  row.contactEmail ? (
+                    <a href={`mailto:${row.contactEmail}`}>
+                      {row.authorName ?? row.contactEmail}
+                    </a>
+                  ) : (
+                    (row.authorName ?? "Guest")
+                  ),
               },
               {
                 header: "Sent",

@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                         .requestMatchers("/api/me/**").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/feedback", "/api/business").permitAll()
                         .requestMatchers("/api/admin/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()

@@ -40,6 +40,7 @@ export function Footer() {
             <Link to="/terms">Terms</Link>
             <Link to="/cookies">Cookies</Link>
             <Link to={feedbackPath}>Send feedback</Link>
+            <Link to="/business">Sponsorship and business</Link>
           </nav>
         </div>
         <div className="site-footer__fine-print">
