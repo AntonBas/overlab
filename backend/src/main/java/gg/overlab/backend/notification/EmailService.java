@@ -1,18 +1,29 @@
 package gg.overlab.backend.notification;
 
+import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.user.User;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
+
+    private static final int MAX_ATTEMPTS = 3;
+    private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
     private final JavaMailSender mailSender;
     private final AuthProperties authProperties;
@@ -20,48 +31,106 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    @Value("${app.contact-email:}")
+    private String contactEmail;
+
+    @Async(AsyncConfig.MAIL_EXECUTOR)
     public void sendVerification(User user, String rawToken) {
-        send(user, "Confirm your Overlab email",
-                "Hi " + user.getDisplayName() + ",\n\nConfirm your email address:\n"
-                        + frontendUrl + "/verify-email?token=" + rawToken
-                        + "\n\nIf you did not register, ignore this message.");
+        deliver(user.getEmail(), null, new EmailTemplate(
+                "Confirm your Overlab email",
+                "Hi " + user.getDisplayName() + ",",
+                List.of("Confirm your email address to finish creating your account."),
+                "Confirm email",
+                frontendUrl + "/verify-email?token=" + rawToken,
+                "If you did not register, ignore this message."));
     }
 
+    @Async(AsyncConfig.MAIL_EXECUTOR)
     public void sendPasswordReset(User user, String rawToken) {
-        send(user, "Reset your Overlab password",
-                "Hi " + user.getDisplayName() + ",\n\nSet a new password:\n"
-                        + frontendUrl + "/reset-password?token=" + rawToken
-                        + "\n\nIf you did not request this, ignore this message.");
+        deliver(user.getEmail(), null, new EmailTemplate(
+                "Reset your Overlab password",
+                "Hi " + user.getDisplayName() + ",",
+                List.of("Someone asked to set a new password for your account. The link works for a limited time."),
+                "Set a new password",
+                frontendUrl + "/reset-password?token=" + rawToken,
+                "If you did not request this, ignore this message."));
     }
 
+    @Async(AsyncConfig.MAIL_EXECUTOR)
     public void sendEmailChange(User user, String newEmail, String rawToken) {
-        send(user, newEmail, "Confirm your new Overlab email",
-                "Hi " + user.getDisplayName() + ",\n\nConfirm this address as your new Overlab email:\n"
-                        + frontendUrl + "/verify-email?token=" + rawToken
-                        + "\n\nIf you did not request this, ignore this message.");
+        deliver(newEmail, null, new EmailTemplate(
+                "Confirm your new Overlab email",
+                "Hi " + user.getDisplayName() + ",",
+                List.of("Confirm this address as the new email of your Overlab account."),
+                "Confirm new email",
+                frontendUrl + "/verify-email?token=" + rawToken,
+                "If you did not request this, ignore this message."));
     }
 
+    @Async(AsyncConfig.MAIL_EXECUTOR)
     public void sendGoogleSignInNotice(User user) {
-        send(user, "Your Overlab account uses Google sign-in",
-                "Hi " + user.getDisplayName() + ",\n\nSomeone asked to reset the password for this address, but your "
-                        + "account signs in with Google and has no password. Use \"Sign in with Google\" at "
-                        + frontendUrl + "/login.\n\nIf this was not you, ignore this message.");
+        deliver(user.getEmail(), null, new EmailTemplate(
+                "Your Overlab account uses Google sign-in",
+                "Hi " + user.getDisplayName() + ",",
+                List.of("Someone asked to reset the password for this address, but your account signs in with "
+                        + "Google and has no password."),
+                "Sign in with Google",
+                frontendUrl + "/login",
+                "If this was not you, ignore this message."));
     }
 
-    private void send(User user, String subject, String text) {
-        send(user, user.getEmail(), subject, text);
+    @Async(AsyncConfig.MAIL_EXECUTOR)
+    public void sendBusinessInquiry(String senderName, String senderEmail, String message) {
+        if (!StringUtils.hasText(contactEmail)) {
+            log.info("CONTACT_EMAIL is not set, the business message from {} is only stored", senderEmail);
+            return;
+        }
+        deliver(contactEmail, senderEmail, new EmailTemplate(
+                "Overlab business message from " + senderName,
+                "New message from " + senderName + " (" + senderEmail + "):",
+                List.of(message),
+                null,
+                null,
+                "Reply to this email to answer the sender. The message is also stored in the admin panel."));
     }
 
-    private void send(User user, String recipient, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(authProperties.mailFrom());
-        message.setTo(recipient);
-        message.setSubject(subject);
-        message.setText(text);
+    private void deliver(String recipient, String replyTo, EmailTemplate template) {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                mailSender.send(buildMessage(recipient, replyTo, template));
+                return;
+            } catch (MailException | MessagingException exception) {
+                log.warn("Sending '{}' failed (attempt {}/{}): {}", template.subject(), attempt, MAX_ATTEMPTS,
+                        exception.getMessage());
+                if (attempt == MAX_ATTEMPTS || !pause()) {
+                    log.error("Giving up on '{}'", template.subject());
+                    return;
+                }
+            }
+        }
+    }
+
+    private MimeMessage buildMessage(String recipient, String replyTo, EmailTemplate template)
+            throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(authProperties.mailFrom());
+        helper.setTo(recipient);
+        if (replyTo != null) {
+            helper.setReplyTo(replyTo);
+        }
+        helper.setSubject(template.subject());
+        helper.setText(template.plainText(), template.html());
+        return message;
+    }
+
+    private boolean pause() {
         try {
-            mailSender.send(message);
-        } catch (RuntimeException exception) {
-            log.error("Failed to send '{}' email to user {}: {}", subject, user.getId(), exception.getMessage());
+            Thread.sleep(RETRY_DELAY);
+            return true;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return false;
         }
     }
 }
