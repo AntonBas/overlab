@@ -13,6 +13,7 @@ import { FavoritesFilterButton } from "../../personal/components/FavoritesFilter
 import { usePersonalData } from "../../personal/context/usePersonalData";
 import { fetchMaps } from "../api/mapsApi";
 import { MapCard } from "../components/MapCard";
+import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 const OTHER = "Other";
 
@@ -81,50 +82,52 @@ export function MapsPage() {
       )}
       {maps.data && (
         <>
-          <div className="filters">
-            <label className="field">
-              <span className="field__label">Map</span>
-              <input
-                type="search"
-                value={search}
-                placeholder="Search by name"
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </label>
-            <div className="field">
-              <span className="field__label">Mode</span>
-              <div className="segmented" role="group" aria-label="Mode">
-                <button
-                  type="button"
-                  className={clsx("segmented__item", {
-                    "segmented__item--active": mode === null,
-                  })}
-                  aria-pressed={mode === null}
-                  onClick={() => setMode(null)}
-                >
-                  All modes
-                </button>
-                {modes.map((value) => (
+          <FiltersPanel>
+            <div className="filters">
+              <label className="field">
+                <span className="field__label">Map</span>
+                <input
+                  type="search"
+                  value={search}
+                  placeholder="Search by name"
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </label>
+              <div className="field">
+                <span className="field__label">Mode</span>
+                <div className="segmented" role="group" aria-label="Mode">
                   <button
-                    key={value}
                     type="button"
                     className={clsx("segmented__item", {
-                      "segmented__item--active": mode === value,
+                      "segmented__item--active": mode === null,
                     })}
-                    aria-pressed={mode === value}
-                    onClick={() => setMode(value)}
+                    aria-pressed={mode === null}
+                    onClick={() => setMode(null)}
                   >
-                    <ModeIcon mode={value} />
-                    {MAP_MODE_LABELS[value]}
+                    All modes
                   </button>
-                ))}
+                  {modes.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={clsx("segmented__item", {
+                        "segmented__item--active": mode === value,
+                      })}
+                      aria-pressed={mode === value}
+                      onClick={() => setMode(value)}
+                    >
+                      <ModeIcon mode={value} />
+                      {MAP_MODE_LABELS[value]}
+                    </button>
+                  ))}
+                </div>
               </div>
+              <FavoritesFilterButton
+                active={onlyFavorites}
+                onToggle={() => setOnlyFavorites(!onlyFavorites)}
+              />
             </div>
-            <FavoritesFilterButton
-              active={onlyFavorites}
-              onToggle={() => setOnlyFavorites(!onlyFavorites)}
-            />
-          </div>
+          </FiltersPanel>
           {matching.length === 0 && (
             <p className="muted">No maps match these filters.</p>
           )}

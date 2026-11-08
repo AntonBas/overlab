@@ -21,6 +21,7 @@ import { ROLES } from "../../stats/filters";
 import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/PerkList";
+import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function PerksPage() {
   usePageTitle("Perks");
@@ -69,43 +70,45 @@ export function PerksPage() {
         title="Perks"
         subtitle="Minor and major perks of every hero, left and right as in the game"
       />
-      <div className="filters">
-        <label className="field">
-          <span className="field__label">Hero</span>
-          <input
-            type="search"
-            value={query}
-            placeholder="Search by name"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-        <div className="field">
-          <span className="field__label">Role</span>
-          <div className="segmented" role="group" aria-label="Role">
-            {[null, ...ROLES].map((value) => (
-              <button
-                key={value ?? "all"}
-                type="button"
-                className={clsx("segmented__item", {
-                  "segmented__item--active": role === value,
-                })}
-                aria-pressed={role === value}
-                onClick={() => setRole(value)}
-              >
-                {value ? (
-                  <RoleBadge role={value} />
-                ) : (
-                  <AllRolesBadge label="All" />
-                )}
-              </button>
-            ))}
+      <FiltersPanel>
+        <div className="filters">
+          <label className="field">
+            <span className="field__label">Hero</span>
+            <input
+              type="search"
+              value={query}
+              placeholder="Search by name"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </label>
+          <div className="field">
+            <span className="field__label">Role</span>
+            <div className="segmented" role="group" aria-label="Role">
+              {[null, ...ROLES].map((value) => (
+                <button
+                  key={value ?? "all"}
+                  type="button"
+                  className={clsx("segmented__item", {
+                    "segmented__item--active": role === value,
+                  })}
+                  aria-pressed={role === value}
+                  onClick={() => setRole(value)}
+                >
+                  {value ? (
+                    <RoleBadge role={value} />
+                  ) : (
+                    <AllRolesBadge label="All" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
+          <FavoritesFilterButton
+            active={onlyFavorites}
+            onToggle={() => setOnlyFavorites(!onlyFavorites)}
+          />
         </div>
-        <FavoritesFilterButton
-          active={onlyFavorites}
-          onToggle={() => setOnlyFavorites(!onlyFavorites)}
-        />
-      </div>
+      </FiltersPanel>
       {visibleHeroes.length === 0 ? (
         <EmptyState>
           {onlyFavorites && favoriteHeroes.size === 0

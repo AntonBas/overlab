@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
 import {
@@ -56,90 +57,92 @@ export function StatsFilters({
     })),
   ];
   return (
-    <form
-      className="filters"
-      aria-label="Statistics filters"
-      onSubmit={(event) => event.preventDefault()}
-    >
-      {!quickPlay && (
-        <RankFilter
-          value={filters.tier}
-          disabled={!detailed}
-          onChange={(tier) => onChange({ tier })}
-        />
-      )}
-
-      {maps && (
-        <IconSelect
-          label="Map"
-          value={filters.map}
-          options={mapOptions}
-          wide
-          searchable
-          disabled={!detailed}
-          onChange={(map) => onChange({ map })}
-        />
-      )}
-
-      {children}
-
-      <IconSelect
-        label="Platform"
-        value={filters.platform}
-        options={PLATFORM_OPTIONS}
-        onChange={(platform) => onChange({ platform })}
-      />
-
-      <IconSelect
-        label="Region"
-        value={filters.region}
-        options={REGION_OPTIONS}
-        onChange={(region) => onChange({ region })}
-      />
-
-      {onSearchChange && (
-        <label className="field">
-          <span className="field__label">Hero</span>
-          <input
-            type="search"
-            value={search ?? ""}
-            placeholder="Search by name"
-            onChange={(event) => onSearchChange(event.target.value)}
+    <FiltersPanel>
+      <form
+        className="filters"
+        aria-label="Statistics filters"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        {!quickPlay && (
+          <RankFilter
+            value={filters.tier}
+            disabled={!detailed}
+            onChange={(tier) => onChange({ tier })}
           />
-        </label>
-      )}
+        )}
 
-      <div className="segmented" role="group" aria-label="Role">
-        <button
-          type="button"
-          className={clsx("segmented__item", {
-            "segmented__item--active": filters.role === null,
-          })}
-          aria-pressed={filters.role === null}
-          onClick={() => onChange({ role: null })}
-        >
-          <AllRolesBadge label="All roles" />
-        </button>
-        {ROLES.map((role: HeroRole) => (
+        {maps && (
+          <IconSelect
+            label="Map"
+            value={filters.map}
+            options={mapOptions}
+            wide
+            searchable
+            disabled={!detailed}
+            onChange={(map) => onChange({ map })}
+          />
+        )}
+
+        {children}
+
+        <IconSelect
+          label="Platform"
+          value={filters.platform}
+          options={PLATFORM_OPTIONS}
+          onChange={(platform) => onChange({ platform })}
+        />
+
+        <IconSelect
+          label="Region"
+          value={filters.region}
+          options={REGION_OPTIONS}
+          onChange={(region) => onChange({ region })}
+        />
+
+        {onSearchChange && (
+          <label className="field">
+            <span className="field__label">Hero</span>
+            <input
+              type="search"
+              value={search ?? ""}
+              placeholder="Search by name"
+              onChange={(event) => onSearchChange(event.target.value)}
+            />
+          </label>
+        )}
+
+        <div className="segmented" role="group" aria-label="Role">
           <button
-            key={role}
             type="button"
             className={clsx("segmented__item", {
-              "segmented__item--active": filters.role === role,
+              "segmented__item--active": filters.role === null,
             })}
-            aria-pressed={filters.role === role}
-            onClick={() => onChange({ role })}
+            aria-pressed={filters.role === null}
+            onClick={() => onChange({ role: null })}
           >
-            <RoleBadge role={role} />
+            <AllRolesBadge label="All roles" />
           </button>
-        ))}
-      </div>
-      {!detailed && (
-        <p className="filters__note muted">
-          {maps ? "Ranks and maps are" : "Ranks are"} available for PC in Europe
-          only. Other platforms and regions show overall statistics.
-        </p>
-      )}
-    </form>
+          {ROLES.map((role: HeroRole) => (
+            <button
+              key={role}
+              type="button"
+              className={clsx("segmented__item", {
+                "segmented__item--active": filters.role === role,
+              })}
+              aria-pressed={filters.role === role}
+              onClick={() => onChange({ role })}
+            >
+              <RoleBadge role={role} />
+            </button>
+          ))}
+        </div>
+        {!detailed && (
+          <p className="filters__note muted">
+            {maps ? "Ranks and maps are" : "Ranks are"} available for PC in
+            Europe only. Other platforms and regions show overall statistics.
+          </p>
+        )}
+      </form>
+    </FiltersPanel>
   );
 }
