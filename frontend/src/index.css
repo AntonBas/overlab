@@ -1307,9 +1307,161 @@ input[type="range"] {
   }
 }
 
-@media (max-width: 640px) {
+.table-sort {
+  display: none;
+}
+
+@media (max-width: 760px) {
   .table th,
   .table td {
+    padding-inline: 4px;
+  }
+
+  .table th:first-child,
+  .table td:first-child {
+    padding-left: 8px;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    padding-right: 8px;
+  }
+
+  .table__sort svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .table__hero {
+    gap: 4px;
+  }
+
+  .table__hero a {
+    font-size: 0.9rem;
+  }
+
+  .table__hero .portrait {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .table:not(.table--cards) th,
+  .table:not(.table--cards) td {
     padding-inline: 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .table-sort {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .table-sort__field {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .table-sort__field select {
+    width: 100%;
+  }
+
+  .table.table--cards thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table.table--cards,
+  .table.table--cards tbody,
+  .table.table--cards tr,
+  .table.table--cards th,
+  .table.table--cards td {
+    display: block;
+    width: 100%;
+  }
+
+  .table.table--cards tbody tr {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table.table--cards tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .table.table--cards tbody th {
+    padding: 0 0 8px;
+    border: 0;
+    text-align: left;
+  }
+
+  .table.table--cards td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .table.table--cards td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    text-align: left;
+  }
+
+  .table.table--cards td[data-label=""]::before {
+    content: none;
+  }
+
+  .table.table--cards td:empty {
+    display: none;
+  }
+
+  .admin .table.table--cards td:has(> .form__actions) {
+    position: static;
+    width: 100%;
+    padding-top: 8px;
+    background: none;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 380px) {
+  .table:not(.table--cards) td {
+    font-size: 0.875rem;
+  }
+
+  .table__hero .role-badge__image {
+    display: none;
+  }
+}
+
+@media (max-width: 340px) {
+  .table__hero .portrait {
+    display: none;
+  }
+
+  .table th:first-child,
+  .table td:first-child {
+    padding-left: 4px;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    padding-right: 4px;
   }
 }

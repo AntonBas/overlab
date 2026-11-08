@@ -116,7 +116,7 @@ export function AuditAdminPage() {
       )}
       {log.data && log.data.content.length > 0 && (
         <div className="table-wrap">
-          <table className="table">
+          <table className="table table--cards">
             <thead>
               <tr>
                 <th scope="col">When</th>
@@ -129,16 +129,22 @@ export function AuditAdminPage() {
             <tbody>
               {log.data.content.map((entry) => (
                 <tr key={entry.id}>
-                  <td className="nowrap">{formatDateTime(entry.occurredAt)}</td>
-                  <td>{describeActor(entry.actorId, entry.actorRole)}</td>
-                  <td>
+                  <td className="nowrap" data-label="When">
+                    {formatDateTime(entry.occurredAt)}
+                  </td>
+                  <td data-label="Actor">
+                    {describeActor(entry.actorId, entry.actorRole)}
+                  </td>
+                  <td data-label="Action">
                     <StatusBadge
                       value={entry.action}
                       tone={ACTION_TONES[entry.action]}
                     />
                   </td>
-                  <td>{describeEntity(entry.entityType, entry.entityId)}</td>
-                  <td>
+                  <td data-label="Entity">
+                    {describeEntity(entry.entityType, entry.entityId)}
+                  </td>
+                  <td data-label="Changes">
                     <ChangeView action={entry.action} changes={entry.changes} />
                   </td>
                 </tr>
