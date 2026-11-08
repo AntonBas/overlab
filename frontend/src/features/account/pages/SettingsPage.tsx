@@ -22,7 +22,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="settings settings--narrow">
+    <div className="settings">
       <AccountHeader user={user} />
       <SettingsSection
         title="Profile"
