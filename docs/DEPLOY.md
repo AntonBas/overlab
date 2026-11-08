@@ -5,7 +5,7 @@ Overlab runs as one stack on a single server (any VPS with Docker): a Caddy edge
 ## What you need
 
 - A server with Docker and the Compose plugin, ports 80 and 443 open
-- A domain with an `A` record pointing to the server (for example `overlab.gg`)
+- A domain with an `A` record pointing to the server (for example `overlabgg.com`)
 - An SMTP account for verification and password reset emails
 - Optional: Google OAuth credentials (redirect URI `https://<domain>/login/oauth2/code/google`)
 

@@ -19,7 +19,7 @@ public record AuthProperties(
         String adminPassword,
         int rateLimitPerMinute) {
 
-    private static final String DEFAULT_MAIL_FROM = "noreply@overlab.gg";
+    private static final String DEFAULT_MAIL_FROM = "noreply@overlabgg.com";
 
     public AuthProperties {
         if (mailFrom == null || mailFrom.isBlank()) {

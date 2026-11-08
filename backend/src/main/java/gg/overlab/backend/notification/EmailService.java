@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final String LOGO_PATH = "/email-logo.png";
     private static final int MAX_ATTEMPTS = 3;
     private static final Duration RETRY_DELAY = Duration.ofSeconds(5);
 
@@ -120,7 +121,7 @@ public class EmailService {
             helper.setReplyTo(replyTo);
         }
         helper.setSubject(template.subject());
-        helper.setText(template.plainText(), template.html());
+        helper.setText(template.plainText(), template.html(frontendUrl + LOGO_PATH));
         return message;
     }
 
