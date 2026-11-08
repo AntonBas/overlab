@@ -67,7 +67,7 @@ function AbilityRows({ heroSlug }: { heroSlug: string }) {
 
   return (
     <>
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <DataTable
         rows={abilities.data}
         rowKey={(ability) => ability.id}

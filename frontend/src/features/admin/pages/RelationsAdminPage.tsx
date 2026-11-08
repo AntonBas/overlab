@@ -200,7 +200,7 @@ export function RelationsAdminPage() {
           onChange={setFilter}
         />
       )}
-      <StatusMessage error={removal.error} success={removal.success} />
+      <StatusMessage error={removal.error} />
       {relations.loading && <Spinner />}
       {relations.error && (
         <ErrorMessage failure={relations.error} onRetry={relations.reload} />

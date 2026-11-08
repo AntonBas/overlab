@@ -86,7 +86,7 @@ function MapForm({
           onSaved();
         }}
       />
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <div className="form__actions">
         <button type="submit" className="button" disabled={save.saving}>
           Save

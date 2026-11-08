@@ -67,7 +67,7 @@ export function GuidesAdminPage() {
           onChange={setFilter}
         />
       )}
-      <StatusMessage error={removal.error} success={removal.success} />
+      <StatusMessage error={removal.error} />
       {guides.loading && <Spinner />}
       {guides.error && (
         <ErrorMessage failure={guides.error} onRetry={guides.reload} />

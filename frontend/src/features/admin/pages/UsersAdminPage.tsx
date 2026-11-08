@@ -83,7 +83,7 @@ export function UsersAdminPage() {
           Search
         </button>
       </form>
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       {users.loading && <Spinner />}
       {users.error && (
         <ErrorMessage failure={users.error} onRetry={users.reload} />

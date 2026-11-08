@@ -19,7 +19,7 @@ export function ExportAccount() {
 
   return (
     <>
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <button
         type="button"
         className="button button--ghost"
