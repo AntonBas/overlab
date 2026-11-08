@@ -1,15 +1,17 @@
-import clsx from "clsx";
 import { useState } from "react";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { IconSelect } from "../../../components/ui/IconSelect";
+import type { IconSelectOption } from "../../../components/ui/IconSelect";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import type { Guide, GuideKind } from "../../../types/api";
 import { GUIDE_KIND_LABELS, GUIDE_KINDS } from "../labels";
 import { SpotRail } from "./SpotRail";
-import "../guides.css";
 
 type GroupBy = "hero" | "map" | "none";
+
+const ALL = "all";
 
 interface SpotsSectionProps {
   title: string;
@@ -24,16 +26,12 @@ interface Group {
   count: number;
 }
 
-function groupOf(guide: Guide, groupBy: GroupBy): Group | null {
+function groupOf(guide: Guide, groupBy: GroupBy): Omit<Group, "count"> | null {
   if (groupBy === "hero") {
-    return { key: guide.heroSlug, label: guide.heroName, count: 1 };
+    return { key: guide.heroSlug, label: guide.heroName };
   }
   if (groupBy === "map") {
-    return {
-      key: guide.mapSlug ?? "",
-      label: guide.mapName ?? "Any map",
-      count: 1,
-    };
+    return { key: guide.mapSlug ?? "", label: guide.mapName ?? "Any map" };
   }
   return null;
 }
@@ -48,115 +46,93 @@ export function SpotsSection({
   groupBy,
   emptyMessage,
 }: SpotsSectionProps) {
-  const [groupFilter, setGroupFilter] = useState<string | null>(null);
+  const [groupFilter, setGroupFilter] = useState<string>(ALL);
+  const [kindFilter, setKindFilter] = useState<string>(ALL);
   const heroPortraits = useHeroPortraits();
   const mapVisuals = useMapVisuals();
-  const [kindFilter, setKindFilter] = useState<GuideKind | null>(null);
 
   const groups = new Map<string, Group>();
   guides.forEach((guide) => {
     const group = groupOf(guide, groupBy);
     if (group) {
       const known = groups.get(group.key);
-      groups.set(group.key, {
-        ...group,
-        count: (known?.count ?? 0) + 1,
-      });
+      groups.set(group.key, { ...group, count: (known?.count ?? 0) + 1 });
     }
   });
+  const sortedGroups = [...groups.values()].sort((first, second) =>
+    first.label.localeCompare(second.label),
+  );
   const kinds = GUIDE_KINDS.filter((kind) =>
     guides.some((guide) => guide.kind === kind),
   );
   const visible = guides.filter(
     (guide) =>
-      (groupFilter === null || groupKey(guide, groupBy) === groupFilter) &&
-      (kindFilter === null || guide.kind === kindFilter),
+      (groupFilter === ALL || groupKey(guide, groupBy) === groupFilter) &&
+      (kindFilter === ALL || guide.kind === kindFilter),
   );
 
-  function selectGroup(next: string | null) {
-    setGroupFilter(next);
-  }
-
-  function selectKind(next: GuideKind | null) {
-    setKindFilter(next);
-  }
+  const groupLabel = groupBy === "hero" ? "Hero" : "Map";
+  const allGroupsLabel = groupBy === "hero" ? "All heroes" : "All maps";
+  const groupOptions: IconSelectOption<string>[] = [
+    {
+      value: ALL,
+      label: `${allGroupsLabel} (${guides.length})`,
+    },
+    ...sortedGroups.map((group) => ({
+      value: group.key,
+      label: `${group.label} (${group.count})`,
+      icon:
+        groupBy === "hero" ? (
+          <HeroPortrait
+            name={group.label}
+            url={heroPortraits[group.key] ?? null}
+            size={20}
+          />
+        ) : mapVisuals[group.key]?.mode ? (
+          <ModeIcon mode={mapVisuals[group.key].mode ?? "CONTROL"} />
+        ) : undefined,
+    })),
+  ];
+  const kindOptions: IconSelectOption<string>[] = [
+    { value: ALL, label: "All types" },
+    ...kinds.map((kind: GuideKind) => ({
+      value: kind,
+      label: `${GUIDE_KIND_LABELS[kind]} (${guides.filter((guide) => guide.kind === kind).length})`,
+    })),
+  ];
+  const showGroupSelect = groups.size > 1;
+  const showKindSelect = kinds.length > 1;
 
   return (
     <section className="section" aria-labelledby="spots-heading">
       <div className="section__heading">
         <h2 id="spots-heading">{title}</h2>
-        {kinds.length > 1 && (
-          <div className="segmented" role="group" aria-label="Type">
-            <button
-              type="button"
-              className={clsx("segmented__item", {
-                "segmented__item--active": kindFilter === null,
-              })}
-              aria-pressed={kindFilter === null}
-              onClick={() => selectKind(null)}
-            >
-              All types
-            </button>
-            {kinds.map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                className={clsx("segmented__item", {
-                  "segmented__item--active": kindFilter === kind,
-                })}
-                aria-pressed={kindFilter === kind}
-                onClick={() => selectKind(kind)}
-              >
-                {GUIDE_KIND_LABELS[kind]}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
-      {groups.size > 1 && (
-        <ul className="chip-list spot-groups">
-          <li>
-            <button
-              type="button"
-              className={clsx("chip chip--button", {
-                "chip--active": groupFilter === null,
-              })}
-              aria-pressed={groupFilter === null}
-              onClick={() => selectGroup(null)}
-            >
-              All <span className="muted">{guides.length}</span>
-            </button>
-          </li>
-          {[...groups.values()].map((group) => (
-            <li key={group.key}>
-              <button
-                type="button"
-                className={clsx("chip chip--button", {
-                  "chip--active": groupFilter === group.key,
-                })}
-                aria-pressed={groupFilter === group.key}
-                onClick={() => selectGroup(group.key)}
-              >
-                {groupBy === "hero" && (
-                  <HeroPortrait
-                    name={group.label}
-                    url={heroPortraits[group.key] ?? null}
-                    size={20}
-                  />
-                )}
-                {groupBy === "map" && mapVisuals[group.key]?.mode && (
-                  <ModeIcon mode={mapVisuals[group.key].mode ?? "CONTROL"} />
-                )}
-                {group.label} <span className="muted">{group.count}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {(showGroupSelect || showKindSelect) && (
+        <div className="spot-filters">
+          {showGroupSelect && (
+            <IconSelect
+              label={groupLabel}
+              value={groupFilter}
+              options={groupOptions}
+              searchable
+              onChange={setGroupFilter}
+            />
+          )}
+          {showKindSelect && (
+            <IconSelect
+              label="Type"
+              value={kindFilter}
+              options={kindOptions}
+              onChange={setKindFilter}
+            />
+          )}
+        </div>
       )}
       {guides.length === 0 ? (
         <EmptyState>{emptyMessage}</EmptyState>
       ) : visible.length === 0 ? (
-        <EmptyState>No spots of this type.</EmptyState>
+        <EmptyState>No spots match these filters.</EmptyState>
       ) : (
         <SpotRail
           guides={visible}
