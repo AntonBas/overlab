@@ -3178,10 +3178,15 @@ input[type="range"] {
 }
 
 .hero-tags {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hero-tags__stats {
+  display: flex;
+  min-height: 28px;
 }
 
 .stat-chips {
@@ -3218,6 +3223,10 @@ input[type="range"] {
 
 .stat-chip--ban {
   border-left-color: var(--bar-ban);
+}
+
+.stat-chip--reserved {
+  visibility: hidden;
 }
 
 .place-icon {

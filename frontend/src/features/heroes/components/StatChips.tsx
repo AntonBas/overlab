@@ -24,7 +24,8 @@ export function StatChips({
     { tone: "win", label: "Win", title: "Win rate", value: winRate },
     { tone: "pick", label: "Pick", title: "Pick rate", value: pickRate },
   ];
-  if (showBan && banRate !== null) {
+  const hasBan = showBan && banRate !== null;
+  if (hasBan) {
     chips.push({
       tone: "ban",
       label: "Ban",
@@ -45,6 +46,14 @@ export function StatChips({
           <strong>{formatPercent(chip.value)}</strong>
         </span>
       ))}
+      {!showBan && (
+        <span
+          className="stat-chip stat-chip--ban stat-chip--reserved"
+          aria-hidden="true"
+        >
+          Ban <strong>00.0%</strong>
+        </span>
+      )}
     </span>
   );
 }
