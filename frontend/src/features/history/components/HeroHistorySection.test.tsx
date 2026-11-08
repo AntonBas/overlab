@@ -90,15 +90,17 @@ describe("HeroHistorySection", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("has no ban rate in Quick Play", async () => {
+  it("disables ban rate in Quick Play", async () => {
     renderWithRouter(<HeroHistorySection slug="ana" queue="QUICK_PLAY" />);
 
     const switcher = await screen.findByRole("group", { name: "Statistic" });
 
     expect(
-      within(switcher).queryByRole("button", { name: /^Ban rate/ }),
-    ).toBeNull();
-    expect(within(switcher).getAllByRole("button")).toHaveLength(2);
+      within(switcher).getByRole("button", { name: /^Ban rate/ }),
+    ).toBeDisabled();
+    expect(
+      within(switcher).getByRole("button", { name: /^Win rate/ }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("shows what the page passes in as children", async () => {

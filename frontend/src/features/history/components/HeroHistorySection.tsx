@@ -33,6 +33,8 @@ const METRICS: MetricDefinition[] = [
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
 
+const DEFAULT_PERIOD_ID: HistoryPeriodId = "30d";
+
 export interface CurrentStats {
   winRate: number;
   pickRate: number;
@@ -59,7 +61,7 @@ export function HeroHistorySection({
   headerAction,
   children,
 }: HeroHistorySectionProps) {
-  const [periodId, setPeriodId] = useState<HistoryPeriodId>("7d");
+  const [periodId, setPeriodId] = useState<HistoryPeriodId>(DEFAULT_PERIOD_ID);
   const [selectedMetric, setSelectedMetric] = useState<Metric>("win");
   const period = HISTORY_PERIODS.find((entry) => entry.id === periodId)!;
   const range = useMemo(() => periodRange(period.days), [period.days]);
@@ -78,11 +80,12 @@ export function HeroHistorySection({
   );
   const patches = useFetch(fetchPatches, []);
 
-  const metrics = METRICS.filter(
-    (entry) => entry.id !== "ban" || queue === "COMPETITIVE",
-  );
+  const isAvailable = (entry: MetricDefinition) =>
+    entry.id !== "ban" || queue === "COMPETITIVE";
   const metric =
-    metrics.find((entry) => entry.id === selectedMetric) ?? metrics[0];
+    METRICS.find(
+      (entry) => entry.id === selectedMetric && isAvailable(entry),
+    ) ?? METRICS[0];
   const points = history.data?.points ?? [];
   const series = points.flatMap((point) => {
     const value =
@@ -108,10 +111,16 @@ export function HeroHistorySection({
       {children}
       <div className="stat-switch">
         <div className="segmented" role="group" aria-label="Statistic">
-          {metrics.map((entry) => (
+          {METRICS.map((entry) => (
             <button
               key={entry.id}
               type="button"
+              disabled={!isAvailable(entry)}
+              title={
+                isAvailable(entry)
+                  ? undefined
+                  : `${entry.label} is only tracked in Competitive`
+              }
               className={clsx("segmented__item", {
                 "segmented__item--active": entry.id === metric.id,
               })}
@@ -122,7 +131,11 @@ export function HeroHistorySection({
             </button>
           ))}
         </div>
-        <div className="segmented" role="group" aria-label="Period">
+        <div
+          className="segmented segmented--quiet"
+          role="group"
+          aria-label="Period"
+        >
           {HISTORY_PERIODS.map((entry) => (
             <button
               key={entry.id}
