@@ -75,6 +75,7 @@ export function StatsFilters({
           value={filters.map}
           options={mapOptions}
           wide
+          searchable
           disabled={!detailed}
           onChange={(map) => onChange({ map })}
         />

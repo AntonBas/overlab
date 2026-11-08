@@ -63,6 +63,7 @@ export function HeroSelect({
         value={value}
         options={options}
         wide
+        searchable
         onChange={onChange}
       />
       {error && <span className="form-field__error">{error}</span>}

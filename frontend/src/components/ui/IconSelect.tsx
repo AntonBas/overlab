@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { matchesName } from "../../utils/search";
 export interface IconSelectOption<T extends string> {
   value: T;
   label: string;
@@ -21,6 +22,7 @@ interface IconSelectProps<T extends string> {
   options: readonly IconSelectOption<T>[];
   wide?: boolean;
   disabled?: boolean;
+  searchable?: boolean;
   onChange: (value: T) => void;
 }
 
@@ -47,9 +49,15 @@ export function IconSelect<T extends string>({
   options,
   wide = false,
   disabled = false,
+  searchable = false,
   onChange,
 }: IconSelectProps<T>) {
-  const values = options.map((option) => option.value);
+  const [query, setQuery] = useState("");
+  const visibleOptions =
+    searchable && query.trim() !== ""
+      ? options.filter((option) => matchesName(option.label, query))
+      : options;
+  const values = visibleOptions.map((option) => option.value);
   const selected =
     options.find((option) => option.value === value) ?? options[0];
   const identifier = useId();
@@ -57,6 +65,8 @@ export function IconSelect<T extends string>({
   const listId = `${identifier}-list`;
   const optionId = (index: number) => `${identifier}-${index}`;
   const container = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const search = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(values.indexOf(value));
 
@@ -73,25 +83,40 @@ export function IconSelect<T extends string>({
     return () => document.removeEventListener("mousedown", closeOnOutsideClick);
   }, [open]);
 
+  useEffect(() => {
+    if (open && searchable) {
+      search.current?.focus();
+    }
+  }, [open, searchable]);
+
   function openList() {
-    setHighlighted(values.indexOf(value));
+    setQuery("");
+    setHighlighted(options.findIndex((option) => option.value === value));
     setOpen(true);
+  }
+
+  function closeList() {
+    setOpen(false);
+    if (searchable) {
+      trigger.current?.focus();
+    }
   }
 
   function choose(option: IconSelectOption<T>) {
     onChange(option.value);
-    setOpen(false);
+    closeList();
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key === "Escape") {
-      setOpen(false);
+      closeList();
       return;
     }
     if (event.key === "Tab") {
       setOpen(false);
       return;
     }
+    const typing = event.target instanceof HTMLInputElement;
     const arrow =
       event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
     if (arrow !== 0) {
@@ -101,16 +126,19 @@ export function IconSelect<T extends string>({
         return;
       }
       setHighlighted((current) =>
-        Math.min(options.length - 1, Math.max(0, current + arrow)),
+        Math.min(visibleOptions.length - 1, Math.max(0, current + arrow)),
       );
+      return;
+    }
+    if (event.key === " " && typing) {
       return;
     }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      if (open) {
-        choose(options[highlighted]);
-      } else {
+      if (!open) {
         openList();
+      } else if (visibleOptions[highlighted]) {
+        choose(visibleOptions[highlighted]);
       }
     }
   }
@@ -134,6 +162,7 @@ export function IconSelect<T extends string>({
         aria-activedescendant={open ? optionId(highlighted) : undefined}
         title={selected.label}
         disabled={disabled}
+        ref={trigger}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
       >
@@ -146,13 +175,36 @@ export function IconSelect<T extends string>({
           role="listbox"
           aria-labelledby={labelId}
         >
-          {options.map((option, index) => (
+          {searchable && (
+            <li role="presentation" className="icon-select__search">
+              <input
+                ref={search}
+                type="search"
+                value={query}
+                placeholder="Type to search"
+                aria-label={`Search ${label.toLowerCase()}`}
+                autoComplete="off"
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setHighlighted(0);
+                }}
+                onKeyDown={handleKeyDown}
+              />
+            </li>
+          )}
+          {visibleOptions.length === 0 && (
+            <li role="presentation" className="icon-select__empty">
+              Nothing found
+            </li>
+          )}
+          {visibleOptions.map((option, index) => (
             <Fragment key={option.value}>
-              {option.group && option.group !== options[index - 1]?.group && (
-                <li role="presentation" className="icon-select__group">
-                  {option.group}
-                </li>
-              )}
+              {option.group &&
+                option.group !== visibleOptions[index - 1]?.group && (
+                  <li role="presentation" className="icon-select__group">
+                    {option.group}
+                  </li>
+                )}
               <li
                 id={optionId(index)}
                 role="option"

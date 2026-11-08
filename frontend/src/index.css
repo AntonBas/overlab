@@ -3801,6 +3801,27 @@ input[type="range"] {
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
 }
 
+.icon-select__search {
+  position: sticky;
+  top: -4px;
+  z-index: 1;
+  margin: -4px -4px 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.icon-select__search input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.icon-select__empty {
+  padding: 10px 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .icon-select__option {
   display: flex;
   align-items: center;
