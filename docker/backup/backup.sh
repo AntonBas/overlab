@@ -37,12 +37,17 @@ backup_media() {
 while true; do
     STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
     FILE="${BACKUP_DIR}/overlab-${STAMP}.sql.gz"
-    if pg_dump -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" | gzip > "${FILE}.tmp"; then
+    RAW="${FILE}.raw"
+    if pg_dump -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" > "${RAW}" \
+        && [ -s "${RAW}" ] \
+        && gzip -c "${RAW}" > "${FILE}.tmp" \
+        && gzip -t "${FILE}.tmp"; then
+        rm -f "${RAW}"
         mv "${FILE}.tmp" "${FILE}"
         echo "Backup written: ${FILE}"
         copy_offsite "${FILE}"
     else
-        rm -f "${FILE}.tmp"
+        rm -f "${RAW}" "${FILE}.tmp"
         echo "Backup failed at ${STAMP}" >&2
     fi
     backup_media
