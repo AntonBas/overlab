@@ -36,7 +36,7 @@ describe("IconSelect", () => {
     const onChange = renderSelect(true);
 
     await userEvent.click(screen.getByRole("combobox"));
-    await userEvent.type(screen.getByRole("searchbox"), "junk q");
+    await userEvent.type(screen.getByRole("searchbox"), "junker q");
 
     expect(screen.getAllByRole("option")).toHaveLength(1);
     await userEvent.keyboard("{Enter}");

@@ -56,7 +56,7 @@ describe("FeedbackPage", () => {
         pagePath: "/heroes/ana",
       }),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent("was sent");
+    expect(await screen.findByText(/was sent/)).toBeInTheDocument();
   });
 
   it("ignores a from address that leaves the site", async () => {

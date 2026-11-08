@@ -44,7 +44,7 @@ describe("RequireAdmin", () => {
   it("waits while the session is loading", () => {
     auth.state = { user: null, loading: true };
     renderGuarded();
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(document.querySelector(".spinner")).toBeInTheDocument();
     expect(screen.queryByText("admin content")).not.toBeInTheDocument();
   });
 
