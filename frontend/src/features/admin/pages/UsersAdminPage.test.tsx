@@ -55,14 +55,16 @@ describe("UsersAdminPage", () => {
     renderWithRouter(<UsersAdminPage />, "/admin/users");
 
     expect(await screen.findByText("ana@overlab.gg")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Block" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Active" })).toHaveLength(1);
   });
 
   it("blocks a user after confirmation", async () => {
     vi.mocked(setUserEnabled).mockResolvedValue(user({ enabled: false }));
     renderWithRouter(<UsersAdminPage />, "/admin/users");
 
-    await userEvent.click(await screen.findByRole("button", { name: "Block" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Active" }),
+    );
     await userEvent.click(
       screen.getByRole("dialog").querySelector("button.button--danger")!,
     );
@@ -74,8 +76,9 @@ describe("UsersAdminPage", () => {
     vi.mocked(setUserRole).mockResolvedValue(user({ role: "ADMIN" }));
     renderWithRouter(<UsersAdminPage />, "/admin/users");
 
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Make admin" }),
+    await userEvent.selectOptions(
+      await screen.findByRole("combobox", { name: /Role of ana@overlab.gg/ }),
+      "ADMIN",
     );
     await userEvent.click(
       within(screen.getByRole("dialog")).getByRole("button", {

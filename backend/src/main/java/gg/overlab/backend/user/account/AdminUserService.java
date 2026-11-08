@@ -44,6 +44,9 @@ public class AdminUserService {
         if (!enabled && user.getId().equals(actorId)) {
             throw new BadRequestException("You cannot block your own account");
         }
+        if (!enabled) {
+            requireAnotherActiveAdmin(user);
+        }
         UserStatusSnapshot before = new UserStatusSnapshot(user.isEnabled());
         user.setEnabled(enabled);
         if (!enabled) {
@@ -62,6 +65,9 @@ public class AdminUserService {
         if (user.getRole() == role) {
             return toDto(user);
         }
+        if (role != UserRole.ADMIN) {
+            requireAnotherActiveAdmin(user);
+        }
         UserRoleSnapshot before = new UserRoleSnapshot(user.getRole());
         user.setRole(role);
         if (role != UserRole.ADMIN) {
@@ -69,6 +75,17 @@ public class AdminUserService {
         }
         auditService.logUpdate("User", user.getId(), before, new UserRoleSnapshot(role));
         return toDto(user);
+    }
+
+    private void requireAnotherActiveAdmin(User target) {
+        if (target.getRole() != UserRole.ADMIN || !target.isEnabled()) {
+            return;
+        }
+        boolean anotherActiveAdmin = userRepository.lockEnabledByRole(UserRole.ADMIN).stream()
+                .anyMatch(admin -> !admin.getId().equals(target.getId()));
+        if (!anotherActiveAdmin) {
+            throw new BadRequestException("At least one active administrator must remain");
+        }
     }
 
     private AdminUserDto toDto(User user) {
