@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useState } from "react";
 import { FormField } from "../../../components/ui/FormField";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -22,7 +23,10 @@ export function UsersAdminPage() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const [pending, setPending] = useState<AdminUser | null>(null);
-  const [pendingRole, setPendingRole] = useState<AdminUser | null>(null);
+  const [pendingRole, setPendingRole] = useState<{
+    entry: AdminUser;
+    role: AdminUser["role"];
+  } | null>(null);
   const users = useFetch(() => fetchAdminUsers(query, page), [query, page]);
   const save = useSave();
 
@@ -47,10 +51,10 @@ export function UsersAdminPage() {
     if (!pendingRole) {
       return;
     }
-    const target = pendingRole;
-    const promote = target.role !== "ADMIN";
+    const { entry: target, role } = pendingRole;
+    const promote = role === "ADMIN";
     const changed = await save.run(
-      () => setUserRole(target.id, promote ? "ADMIN" : "USER"),
+      () => setUserRole(target.id, role),
       promote
         ? `${target.email} is now an admin.`
         : `${target.email} is no longer an admin.`,
@@ -101,9 +105,6 @@ export function UsersAdminPage() {
                 <th scope="col">Sign-in</th>
                 <th scope="col">Last sign-in</th>
                 <th scope="col">Status</th>
-                <th scope="col">
-                  <span className="visually-hidden">Actions</span>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -113,7 +114,31 @@ export function UsersAdminPage() {
                     {entry.displayName}
                     <span className="muted"> {entry.email}</span>
                   </th>
-                  <td>{humanize(entry.role)}</td>
+                  <td>
+                    {entry.id === currentUser?.id ? (
+                      <StatusBadge
+                        value={entry.role}
+                        tone={entry.role === "ADMIN" ? "warning" : "neutral"}
+                      />
+                    ) : (
+                      <select
+                        className={clsx("select-pill", {
+                          "select-pill--warning": entry.role === "ADMIN",
+                        })}
+                        aria-label={`Role of ${entry.email}`}
+                        value={entry.role}
+                        onChange={(event) =>
+                          setPendingRole({
+                            entry,
+                            role: event.target.value as AdminUser["role"],
+                          })
+                        }
+                      >
+                        <option value="USER">User</option>
+                        <option value="ADMIN">Admin</option>
+                      </select>
+                    )}
+                  </td>
                   <td>{humanize(entry.provider)}</td>
                   <td>
                     {entry.lastLoginAt
@@ -121,31 +146,25 @@ export function UsersAdminPage() {
                       : "never"}
                   </td>
                   <td>
-                    <StatusBadge
-                      value={entry.enabled ? "Active" : "Blocked"}
-                      tone={entry.enabled ? "good" : "bad"}
-                    />
-                  </td>
-                  <td>
-                    {entry.id !== currentUser?.id && (
-                      <>
-                        <button
-                          type="button"
-                          className="button button--ghost"
-                          onClick={() => setPendingRole(entry)}
-                        >
-                          {entry.role === "ADMIN"
-                            ? "Remove admin"
-                            : "Make admin"}
-                        </button>
-                        <button
-                          type="button"
-                          className="button button--ghost"
-                          onClick={() => setPending(entry)}
-                        >
-                          {entry.enabled ? "Block" : "Unblock"}
-                        </button>
-                      </>
+                    {entry.id === currentUser?.id ? (
+                      <StatusBadge value="Active" tone="good" />
+                    ) : (
+                      <button
+                        type="button"
+                        className={clsx(
+                          "status-badge",
+                          "status-badge--action",
+                          entry.enabled
+                            ? "status-badge--good"
+                            : "status-badge--bad",
+                        )}
+                        title={
+                          entry.enabled ? "Click to block" : "Click to unblock"
+                        }
+                        onClick={() => setPending(entry)}
+                      >
+                        {entry.enabled ? "Active" : "Blocked"}
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -179,16 +198,16 @@ export function UsersAdminPage() {
         <ConfirmDialog
           title={
             pendingRole.role === "ADMIN"
-              ? "Remove admin rights?"
-              : "Make this user an admin?"
+              ? "Make this user an admin?"
+              : "Remove admin rights?"
           }
           message={
             pendingRole.role === "ADMIN"
-              ? `${pendingRole.email} will lose access to the admin panel and will be signed out.`
-              : `${pendingRole.email} will get full access to the admin panel.`
+              ? `${pendingRole.entry.email} will get full access to the admin panel.`
+              : `${pendingRole.entry.email} will lose access to the admin panel and will be signed out.`
           }
           confirmLabel={
-            pendingRole.role === "ADMIN" ? "Remove admin" : "Make admin"
+            pendingRole.role === "ADMIN" ? "Make admin" : "Remove admin"
           }
           busy={save.saving}
           onConfirm={() => void confirmRoleChange()}

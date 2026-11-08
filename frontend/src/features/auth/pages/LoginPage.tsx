@@ -90,19 +90,25 @@ export function LoginPage() {
         <Link className="auth-link auth-link--aside" to="/forgot-password">
           Forgot your password?
         </Link>
-        {error && (
+        {error && !unverified && (
           <p className="form__error" role="alert">
             {error}
           </p>
         )}
         {unverified && (
-          <button
-            type="button"
-            className="button button--ghost"
-            onClick={resend}
-          >
-            Send the confirmation email again
-          </button>
+          <div className="auth-alert" role="alert">
+            <p>
+              Your email is not verified yet. Check your inbox for the
+              confirmation link.
+            </p>
+            <button
+              type="button"
+              className="auth-alert__action"
+              onClick={resend}
+            >
+              Send the confirmation email again
+            </button>
+          </div>
         )}
         {info && <p className="notice">{info}</p>}
         <button type="submit" className="button" disabled={submitting}>

@@ -968,6 +968,64 @@ select:disabled {
   width: 100%;
 }
 
+.form-field__control {
+  position: relative;
+}
+
+.form-field__control input {
+  padding-right: 44px;
+}
+
+.form-field__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.form-field__toggle:hover {
+  color: var(--text);
+}
+
+.auth-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: 0.9rem;
+}
+
+.auth-alert p {
+  margin: 0;
+}
+
+.auth-alert__action {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-alert__action:hover {
+  text-decoration: underline;
+}
+
 .form-field__error,
 .form__error {
   color: var(--bad);
@@ -1313,6 +1371,47 @@ select:disabled {
   color: var(--link);
   border-color: color-mix(in srgb, var(--link) 40%, transparent);
   background: color-mix(in srgb, var(--link) 12%, transparent);
+}
+
+.status-badge--action {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.status-badge--action:hover {
+  filter: brightness(1.2);
+}
+
+.select-pill {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-image: none;
+}
+
+.select-pill option {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.select-pill--good {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background-color: color-mix(in srgb, var(--good) 12%, transparent);
+}
+
+.select-pill--bad {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+  background-color: color-mix(in srgb, var(--bad) 12%, transparent);
+}
+
+.select-pill--warning {
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .changes strong {
