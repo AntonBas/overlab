@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { NAV_LINKS } from "./navLinks";
 
 export function Footer() {
   const { pathname } = useLocation();
@@ -8,21 +9,50 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="container">
-        <p>
-          Overlab is an unofficial fan site and is not affiliated with or
-          endorsed by Blizzard Entertainment. Overwatch is a trademark of
-          Blizzard Entertainment.
-        </p>
-        <p className="muted">
-          Statistics come from Blizzard's public hero statistics page. Counters,
-          synergies and perks are curated recommendations.
-        </p>
-        <nav className="site-footer__links" aria-label="Legal">
-          <Link to="/privacy">Privacy</Link>
-          <Link to="/terms">Terms</Link>
-          <Link to="/cookies">Cookies</Link>
-          <Link to={feedbackPath}>Send feedback</Link>
-        </nav>
+        <div className="site-footer__main">
+          <div className="site-footer__brand">
+            <Link to="/" className="brand">
+              <img
+                src="/favicon.svg"
+                alt=""
+                width={28}
+                height={28}
+                className="brand__logo"
+              />
+              Overlab
+            </Link>
+            <p>
+              Hero statistics, counters, synergies and perks, with history
+              across patches.
+            </p>
+          </div>
+          <nav className="site-footer__column" aria-label="Explore">
+            <h2>Explore</h2>
+            {NAV_LINKS.map((link) => (
+              <Link key={link.to} to={link.to}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <nav className="site-footer__column" aria-label="Legal">
+            <h2>Site</h2>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+            <Link to="/cookies">Cookies</Link>
+            <Link to={feedbackPath}>Send feedback</Link>
+          </nav>
+        </div>
+        <div className="site-footer__fine-print">
+          <p>
+            Overlab is an unofficial fan site and is not affiliated with or
+            endorsed by Blizzard Entertainment. Overwatch is a trademark of
+            Blizzard Entertainment.
+          </p>
+          <p>
+            Statistics come from Blizzard's public hero statistics page.
+            Counters, synergies and perks are curated recommendations.
+          </p>
+        </div>
       </div>
     </footer>
   );

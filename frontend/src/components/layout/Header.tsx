@@ -4,15 +4,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { HeroSearch } from "./HeroSearch";
-
-const LINKS = [
-  { to: "/stats", label: "Statistics" },
-  { to: "/heroes", label: "Heroes" },
-  { to: "/perks", label: "Perks" },
-  { to: "/counters", label: "Counters" },
-  { to: "/maps", label: "Maps" },
-  { to: "/changes", label: "Changes" },
-];
+import { NAV_LINKS } from "./navLinks";
 
 export function Header() {
   const { user, loading, signOut } = useAuth();
@@ -53,7 +45,7 @@ export function Header() {
         >
           <nav aria-label="Main" onClick={() => setMenuOpen(false)}>
             <ul className="nav">
-              {LINKS.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <li key={link.to}>
                   <NavLink
                     to={link.to}
