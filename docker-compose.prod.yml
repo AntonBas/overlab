@@ -31,6 +31,7 @@ services:
     build:
       context: ./backend
     restart: unless-stopped
+    mem_limit: 1536m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_HOST: postgres
