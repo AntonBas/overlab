@@ -16,7 +16,7 @@ git clone https://github.com/AntonBas/overlab.git && cd overlab
 touch .env.prod
 ```
 
-Fill in `.env.prod` (the names are the ones `docker-compose.prod.yml` reads; `.env.example` shows the format): `SITE_ADDRESS`, `FRONTEND_URL`, `DB_PASSWORD`, `JWT_SECRET` (at least 32 random characters, for example `openssl rand -hex 32`), the `MAIL_*` values, `EMAIL_FROM`, `CONTACT_EMAIL` (shown on the legal pages and the address that receives messages from the Business page; optional until the mailbox exists), and `GRAFANA_ADMIN_PASSWORD`. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first start to create the admin account, then clear them.
+Fill in `.env.prod` (copy the variable names from `.env.example`; the "Production only" block at its end lists the ones used only on the server, and empty optional values fall back to defaults): `SITE_ADDRESS`, `FRONTEND_URL`, `DB_PASSWORD`, `JWT_SECRET` (at least 32 random characters, for example `openssl rand -hex 32`), the `MAIL_*` values, `EMAIL_FROM`, `CONTACT_EMAIL` (shown on the legal pages and the address that receives messages from the Business page; optional until the mailbox exists), and `GRAFANA_ADMIN_PASSWORD`. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first start to create the admin account, then clear them.
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
