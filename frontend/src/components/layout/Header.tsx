@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Menu, X } from "lucide-react";
+import { LogIn, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
@@ -88,14 +88,13 @@ export function Header() {
               </>
             )}
             {!loading && !user && (
-              <>
-                <Link className="nav__link" to="/login">
-                  Sign in
-                </Link>
-                <Link className="button" to="/register">
-                  Create account
-                </Link>
-              </>
+              <Link
+                className="button button--ghost button--compact"
+                to="/login"
+              >
+                <LogIn aria-hidden="true" size={16} />
+                Sign in
+              </Link>
             )}
           </div>
         </div>

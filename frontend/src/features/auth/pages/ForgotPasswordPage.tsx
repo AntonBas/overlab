@@ -30,13 +30,21 @@ export function ForgotPasswordPage() {
           instructions is on its way: a link to set a new password, or a
           reminder to use Google sign-in.
         </p>
-        <Link to="/login">Back to sign in</Link>
+        <p className="muted">Nothing in your inbox? Check the spam folder.</p>
+        <p className="auth-card__switch">
+          <Link className="auth-link" to="/login">
+            Back to sign in
+          </Link>
+        </p>
       </AuthLayout>
     );
   }
 
   return (
     <AuthLayout title="Reset password">
+      <p className="muted">
+        Enter your email and we will send a link to set a new password.
+      </p>
       <form onSubmit={submit} className="form">
         <FormField
           label="Email"
@@ -51,6 +59,11 @@ export function ForgotPasswordPage() {
           Send the link
         </button>
       </form>
+      <p className="auth-card__switch">
+        <Link className="auth-link" to="/login">
+          Back to sign in
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

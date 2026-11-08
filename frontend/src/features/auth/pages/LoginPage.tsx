@@ -87,6 +87,9 @@ export function LoginPage() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
+        <Link className="auth-link auth-link--aside" to="/forgot-password">
+          Forgot your password?
+        </Link>
         {error && (
           <p className="form__error" role="alert">
             {error}
@@ -106,14 +109,15 @@ export function LoginPage() {
           {submitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
+      <div className="auth-card__divider">or</div>
       <a className="button button--ghost" href="/oauth2/authorization/google">
         Continue with Google
       </a>
-      <p className="muted">
-        <Link to="/forgot-password">Forgot your password?</Link>
-      </p>
-      <p className="muted">
-        No account yet? <Link to="/register">Create one</Link>
+      <p className="auth-card__switch">
+        No account yet?{" "}
+        <Link className="auth-link" to="/register">
+          Create one
+        </Link>
       </p>
     </AuthLayout>
   );
