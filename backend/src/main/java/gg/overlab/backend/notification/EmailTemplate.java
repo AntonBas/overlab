@@ -20,6 +20,9 @@ public record EmailTemplate(String subject, String greeting, List<String> paragr
             <tr><td style="font-size:15px;line-height:1.5">
             %s
             </td></tr>
+            <tr><td style="font-size:12px;line-height:1.4;color:#9ca3af;padding-top:24px;\
+            border-top:1px solid #e5e7eb">Overlab is an unofficial fan site and is not affiliated with \
+            Blizzard Entertainment.</td></tr>
             </table>
             </td></tr>
             </table>
@@ -43,9 +46,7 @@ public record EmailTemplate(String subject, String greeting, List<String> paragr
             body.append("<p style=\"margin:24px 0\"><a href=\"").append(escape(actionUrl))
                     .append("\" style=\"background:#f97316;color:#ffffff;text-decoration:none;padding:12px 20px;")
                     .append("border-radius:6px;display:inline-block;font-weight:bold\">")
-                    .append(escape(actionLabel)).append("</a></p>")
-                    .append("<p style=\"font-size:13px;color:#6b7280;word-break:break-all\">")
-                    .append(escape(actionUrl)).append("</p>");
+                    .append(escape(actionLabel)).append("</a></p>");
         }
         body.append("<p style=\"font-size:13px;color:#6b7280\">").append(escape(footnote)).append("</p>");
         return HTML_LAYOUT.formatted(escape(logoUrl), body);

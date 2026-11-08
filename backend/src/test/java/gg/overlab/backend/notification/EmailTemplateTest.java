@@ -27,5 +27,7 @@ class EmailTemplateTest {
         assertThat(withLink.plainText()).contains("Open:\nhttps://overlab.gg/a").endsWith("End");
         assertThat(withoutLink.plainText()).isEqualTo("Hi,\n\nBody\n\nEnd");
         assertThat(withoutLink.html("https://overlabgg.com/email-logo.png")).doesNotContain("<a href");
+        assertThat(withLink.html("https://overlabgg.com/email-logo.png").split("https://overlab.gg/a", -1))
+                .hasSize(2);
     }
 }
