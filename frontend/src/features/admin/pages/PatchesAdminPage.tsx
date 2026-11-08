@@ -203,7 +203,11 @@ export function PatchesAdminPage() {
             { header: "Title", render: (patch) => patch.title ?? "" },
             {
               header: "Released",
-              render: (patch) => formatDateTime(patch.releasedAt),
+              render: (patch) => (
+                <span className="nowrap">
+                  {formatDateTime(patch.releasedAt)}
+                </span>
+              ),
             },
             {
               header: "",
