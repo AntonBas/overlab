@@ -121,7 +121,7 @@ export function MapsAdminPage() {
         <DataTable
           rows={maps.data}
           rowKey={(map) => map.slug}
-          pageSize={30}
+          pageSize={15}
           searchLabel="Search maps"
           matches={(map, query) => matchesName(map.name, query)}
           columns={[

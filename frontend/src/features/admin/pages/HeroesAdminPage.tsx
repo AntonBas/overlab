@@ -122,7 +122,7 @@ export function HeroesAdminPage() {
         <DataTable
           rows={heroes.data}
           rowKey={(hero) => hero.slug}
-          pageSize={30}
+          pageSize={15}
           searchLabel="Search heroes"
           matches={(hero, query) => matchesName(hero.name, query)}
           columns={[
