@@ -54,22 +54,24 @@ function renderSection(groupBy: "hero" | "map" | "none") {
 }
 
 describe("SpotsSection", () => {
-  it("narrows the list to a hero from its chip", async () => {
+  it("narrows the list to a hero chosen in the select", async () => {
     renderSection("hero");
 
     expect(screen.getByText("Illari pylon")).toBeInTheDocument();
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: /^Ashe/ }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Hero" }));
+    await userEvent.click(screen.getByRole("option", { name: /^Ashe/ }));
 
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
     expect(screen.queryByText("Illari pylon")).not.toBeInTheDocument();
   });
 
-  it("filters by type", async () => {
+  it("filters by type chosen in the select", async () => {
     renderSection("hero");
 
+    await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
     await userEvent.click(
-      screen.getByRole("button", { name: "Ultimate spot" }),
+      screen.getByRole("option", { name: /^Ultimate spot/ }),
     );
 
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
