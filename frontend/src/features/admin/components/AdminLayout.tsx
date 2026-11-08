@@ -9,7 +9,6 @@ import {
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { ADMIN_SECTIONS, LEAVE_WARNING } from "./adminSections";
 import { UnsavedChangesContext } from "./forms/unsavedChanges";
-import "../admin.css";
 
 export function AdminLayout() {
   const location = useLocation();

@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { formatPercent } from "../../utils/format";
-import "./ui.css";
 
 interface RateBarProps {
   value: number | null;

@@ -21,7 +21,6 @@ import { ImageUploadField } from "../components/forms/ImageUploadField";
 import { StatusMessage } from "../components/ui/StatusMessage";
 import { useSave } from "../components/forms/useSave";
 import { useUnsavedChanges } from "../components/forms/unsavedChanges";
-import "../admin.css";
 
 const MODES: MapMode[] = [
   "CONTROL",

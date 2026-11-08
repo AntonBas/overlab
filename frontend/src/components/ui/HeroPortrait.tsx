@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./ui.css";
 
 interface HeroPortraitProps {
   name: string;

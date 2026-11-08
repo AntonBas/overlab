@@ -29,7 +29,6 @@ import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
 import { fetchMap, fetchMaps } from "../api/mapsApi";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
-import "../maps.css";
 
 export function MapPage() {
   const { slug = "" } = useParams();

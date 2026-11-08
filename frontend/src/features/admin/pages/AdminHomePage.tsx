@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { ADMIN_SECTIONS } from "../components/adminSections";
-import "../admin.css";
 
 export function AdminHomePage() {
   usePageTitle("Admin");

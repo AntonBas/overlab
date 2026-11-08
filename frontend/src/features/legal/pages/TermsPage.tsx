@@ -1,7 +1,6 @@
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { ContactLine } from "../components/ContactLine";
-import "../legal.css";
 
 export function TermsPage() {
   usePageTitle("Terms of use");

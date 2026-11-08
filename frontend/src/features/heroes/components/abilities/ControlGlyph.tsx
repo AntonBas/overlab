@@ -1,5 +1,4 @@
 import type { ControlScheme } from "../../context/controlSchemeContext";
-import "../../heroes.css";
 
 type FaceButton = "A" | "B" | "X" | "Y";
 type PlayStationSymbol = "Cross" | "Circle" | "Square" | "Triangle";

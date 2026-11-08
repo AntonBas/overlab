@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapVisual } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/api";
 import { SpotCard } from "./SpotCard";
-import "../guides.css";
 
 interface SpotRailProps {
   guides: Guide[];

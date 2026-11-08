@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { ContactLine } from "../components/ContactLine";
-import "../legal.css";
 
 export function PrivacyPage() {
   usePageTitle("Privacy policy");

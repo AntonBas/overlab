@@ -5,7 +5,6 @@ import { fetchHeroes } from "../../features/heroes/api/heroesApi";
 import type { Hero } from "../../types/api";
 import { HeroPortrait } from "../ui/HeroPortrait";
 import { matchHeroes } from "../../utils/search";
-import "./layout.css";
 
 export function HeroSearch() {
   const navigate = useNavigate();

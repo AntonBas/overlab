@@ -10,7 +10,6 @@ import type { RelationKind } from "../../api/relationFeedbackApi";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 import { AbilityText } from "../abilities/AbilityText";
 import { RelationVoteButtons } from "./RelationVoteButtons";
-import "../../heroes.css";
 
 interface RelationAvatarProps {
   hero: RelatedHero;

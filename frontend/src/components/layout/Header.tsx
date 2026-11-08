@@ -5,7 +5,6 @@ import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { HeroSearch } from "./HeroSearch";
 import { NAV_LINKS } from "./navLinks";
-import "./layout.css";
 
 export function Header() {
   const { user, loading, signOut } = useAuth();

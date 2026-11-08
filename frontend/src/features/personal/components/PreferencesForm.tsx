@@ -21,7 +21,6 @@ import {
 } from "../../stats/filterOptions";
 import { savePreferences } from "../api/personalApi";
 import { usePersonalData } from "../context/usePersonalData";
-import "../personal.css";
 
 const NO_DEFAULT = "";
 
