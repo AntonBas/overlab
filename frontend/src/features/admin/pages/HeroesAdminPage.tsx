@@ -3,6 +3,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
+import { matchesName } from "../../../utils/search";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { ROLE_LABELS } from "../../../utils/format";
@@ -122,6 +123,8 @@ export function HeroesAdminPage() {
           rows={heroes.data}
           rowKey={(hero) => hero.slug}
           pageSize={30}
+          searchLabel="Search heroes"
+          matches={(hero, query) => matchesName(hero.name, query)}
           columns={[
             {
               header: "Name",

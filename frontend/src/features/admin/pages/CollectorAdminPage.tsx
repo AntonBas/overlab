@@ -140,7 +140,7 @@ export function CollectorAdminPage() {
               render: (job) => (
                 <button
                   type="button"
-                  className="button"
+                  className="button button--ghost"
                   disabled={running || start.saving}
                   onClick={() => setConfirming(job)}
                 >

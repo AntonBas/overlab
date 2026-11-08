@@ -559,6 +559,23 @@ select:disabled {
   background: var(--surface-2);
 }
 
+.table td .button {
+  padding: 5px 12px;
+  font-size: 0.875rem;
+}
+
+.table-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.table-search input {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+
 .table thead th {
   background: var(--surface-2);
   font-size: 0.8rem;
@@ -1160,13 +1177,29 @@ select:disabled {
   z-index: 50;
 }
 
+.dialog__backdrop {
+  backdrop-filter: blur(3px);
+}
+
 .dialog {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
   padding: 24px;
-  max-width: 420px;
+  max-width: 440px;
   width: calc(100% - 32px);
+}
+
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.dialog p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .dialog__actions {
@@ -1859,8 +1892,19 @@ select:disabled {
 }
 
 .drawer .admin__form h2 {
-  margin-top: 0;
-  padding-right: 44px;
+  margin: 0 0 4px;
+  padding: 0 44px 16px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.25rem;
+}
+
+.drawer .form__actions {
+  position: sticky;
+  bottom: -24px;
+  margin: 8px -24px -24px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
 }
 
 body.drawer-open {

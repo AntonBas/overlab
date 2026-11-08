@@ -3,6 +3,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
+import { matchesName } from "../../../utils/search";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { MAP_MODE_LABELS } from "../../../utils/format";
@@ -121,6 +122,8 @@ export function MapsAdminPage() {
           rows={maps.data}
           rowKey={(map) => map.slug}
           pageSize={30}
+          searchLabel="Search maps"
+          matches={(map, query) => matchesName(map.name, query)}
           columns={[
             {
               header: "Name",
