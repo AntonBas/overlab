@@ -48,23 +48,30 @@ export function FeedbackPage() {
 
   if (sent) {
     return (
-      <>
+      <div className="settings">
         <PageHeader title="Thank you" />
-        <p role="status">Your message was sent. We read every one of them.</p>
-        <p>
-          <Link to={from ?? "/"}>{from ? "Back to the page" : "Home"}</Link>
-        </p>
-      </>
+        <div className="settings-section">
+          <p role="status">Your message was sent. We read every one of them.</p>
+          <Link className="button" to={from ?? "/"}>
+            {from ? "Back to the page" : "Home"}
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="settings">
       <PageHeader
         title="Send feedback"
         subtitle="Found a wrong number, a bug or a typo? Tell us."
       />
-      <form className="form" onSubmit={submit}>
+      <form className="form settings-section" onSubmit={submit}>
+        {from && (
+          <p className="feedback-origin">
+            About page <code>{from}</code>
+          </p>
+        )}
         <div className="form-field">
           <label htmlFor="feedback-type">What is it about?</label>
           <select
@@ -88,9 +95,11 @@ export function FeedbackPage() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
           />
-          <span className="muted">
-            {from ? `About ${from}. ` : ""}At least {MIN_LENGTH} characters (
-            {length}/{MAX_LENGTH}).
+          <span className="feedback-counter muted">
+            <span>At least {MIN_LENGTH} characters</span>
+            <span>
+              {length}/{MAX_LENGTH}
+            </span>
           </span>
         </div>
         {error && (
@@ -108,6 +117,6 @@ export function FeedbackPage() {
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

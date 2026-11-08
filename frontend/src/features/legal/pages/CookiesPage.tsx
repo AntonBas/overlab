@@ -5,7 +5,7 @@ import { CookieSettings } from "../components/CookieSettings";
 export function CookiesPage() {
   usePageTitle("Cookie policy");
   return (
-    <>
+    <div className="legal-page">
       <PageHeader title="Cookie policy" />
       <div className="legal">
         <section>
@@ -42,6 +42,6 @@ export function CookiesPage() {
         </section>
         <CookieSettings />
       </div>
-    </>
+    </div>
   );
 }
