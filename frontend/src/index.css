@@ -1488,12 +1488,8 @@ select:disabled {
   margin-inline: auto;
 }
 
-.settings .form:not(.preferences-form) {
-  max-width: 440px;
-}
-
-.settings-section--danger .form {
-  max-width: none;
+.settings--narrow {
+  max-width: 600px;
 }
 
 .settings-section .button {
@@ -1515,7 +1511,11 @@ select:disabled {
 
 .settings-section h2 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+}
+
+.settings-section > .muted {
+  margin: 0;
 }
 
 .account-header {
@@ -1684,9 +1684,19 @@ select:disabled {
 
 .preferences-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
   align-items: end;
+}
+
+.preferences-form .icon-select {
+  --icon-select-width: 100%;
+}
+
+@media (max-width: 560px) {
+  .preferences-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .preferences-form__footer {
