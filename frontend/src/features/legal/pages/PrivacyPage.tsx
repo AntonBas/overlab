@@ -6,7 +6,7 @@ import { ContactLine } from "../components/ContactLine";
 export function PrivacyPage() {
   usePageTitle("Privacy policy");
   return (
-    <>
+    <div className="legal-page">
       <PageHeader title="Privacy policy" />
       <div className="legal">
         <section>
@@ -100,6 +100,6 @@ export function PrivacyPage() {
           </p>
         </section>
       </div>
-    </>
+    </div>
   );
 }

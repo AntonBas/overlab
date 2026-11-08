@@ -5,7 +5,7 @@ import { ContactLine } from "../components/ContactLine";
 export function TermsPage() {
   usePageTitle("Terms of use");
   return (
-    <>
+    <div className="legal-page">
       <PageHeader title="Terms of use" />
       <div className="legal">
         <section>
@@ -53,6 +53,6 @@ export function TermsPage() {
           <ContactLine />
         </section>
       </div>
-    </>
+    </div>
   );
 }
