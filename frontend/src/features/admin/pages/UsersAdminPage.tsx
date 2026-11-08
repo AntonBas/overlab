@@ -5,29 +5,84 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { useAuth } from "../../auth/context/useAuth";
 import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { SelectField } from "../components/Fields";
 import { Pagination } from "../components/Pagination";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import { StatusBadge } from "../components/StatusBadge";
 import type { AdminUser } from "../types";
 
+interface UserFilterForm {
+  query: string;
+  role: string;
+  enabled: string;
+  emailVerified: string;
+  provider: string;
+  sort: string;
+}
+
+const EMPTY_FILTERS: UserFilterForm = {
+  query: "",
+  role: "",
+  enabled: "",
+  emailVerified: "",
+  provider: "",
+  sort: "newest",
+};
+
+const SORTS: Record<string, { column: string; direction: "asc" | "desc" }> = {
+  newest: { column: "createdAt", direction: "desc" },
+  oldest: { column: "createdAt", direction: "asc" },
+  lastLogin: { column: "lastLoginAt", direction: "desc" },
+  name: { column: "displayName", direction: "asc" },
+};
+
 export function UsersAdminPage() {
   usePageTitle("Admin: users");
   const { user: currentUser } = useAuth();
-  const [draft, setDraft] = useState("");
-  const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<UserFilterForm>(EMPTY_FILTERS);
   const [page, setPage] = useState(0);
   const [pending, setPending] = useState<AdminUser | null>(null);
   const [pendingRole, setPendingRole] = useState<{
     entry: AdminUser;
     role: AdminUser["role"];
   } | null>(null);
-  const users = useFetch(() => fetchAdminUsers(query, page), [query, page]);
+  const query = useDebouncedValue(filters.query, 350);
+  const sorting = SORTS[filters.sort] ?? SORTS.newest;
+  const users = useFetch(
+    () =>
+      fetchAdminUsers({
+        query,
+        role: filters.role,
+        enabled: filters.enabled,
+        emailVerified: filters.emailVerified,
+        provider: filters.provider,
+        sort: sorting.column,
+        direction: sorting.direction,
+        page,
+      }),
+    [
+      query,
+      filters.role,
+      filters.enabled,
+      filters.emailVerified,
+      filters.provider,
+      filters.sort,
+      page,
+    ],
+  );
+  const filtered = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS);
+
+  function change(key: keyof UserFilterForm, value: string) {
+    setFilters((current) => ({ ...current, [key]: value }));
+    setPage(0);
+  }
   const save = useSave();
 
   async function confirmToggle() {
@@ -68,25 +123,79 @@ export function UsersAdminPage() {
   return (
     <>
       <PageHeader title="Users" />
-      <form
-        className="filters"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setPage(0);
-          setQuery(draft);
-        }}
-      >
+      <div className="filters">
         <FormField
           label="Search"
           name="query"
+          type="search"
           placeholder="Email or name"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
+          value={filters.query}
+          onChange={(event) => change("query", event.target.value)}
         />
-        <button type="submit" className="button">
-          Search
-        </button>
-      </form>
+        <SelectField
+          label="Role"
+          name="role"
+          value={filters.role}
+          onChange={(event) => change("role", event.target.value)}
+        >
+          <option value="">Any</option>
+          <option value="USER">User</option>
+          <option value="ADMIN">Admin</option>
+        </SelectField>
+        <SelectField
+          label="Status"
+          name="enabled"
+          value={filters.enabled}
+          onChange={(event) => change("enabled", event.target.value)}
+        >
+          <option value="">Any</option>
+          <option value="true">Active</option>
+          <option value="false">Blocked</option>
+        </SelectField>
+        <SelectField
+          label="Email"
+          name="emailVerified"
+          value={filters.emailVerified}
+          onChange={(event) => change("emailVerified", event.target.value)}
+        >
+          <option value="">Any</option>
+          <option value="true">Verified</option>
+          <option value="false">Not verified</option>
+        </SelectField>
+        <SelectField
+          label="Sign-in"
+          name="provider"
+          value={filters.provider}
+          onChange={(event) => change("provider", event.target.value)}
+        >
+          <option value="">Any</option>
+          <option value="LOCAL">Local</option>
+          <option value="GOOGLE">Google</option>
+        </SelectField>
+        <SelectField
+          label="Sort by"
+          name="sort"
+          value={filters.sort}
+          onChange={(event) => change("sort", event.target.value)}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="lastLogin">Last sign-in</option>
+          <option value="name">Name A-Z</option>
+        </SelectField>
+        {filtered && (
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={() => {
+              setFilters(EMPTY_FILTERS);
+              setPage(0);
+            }}
+          >
+            Reset
+          </button>
+        )}
+      </div>
       <StatusMessage error={save.error} />
       {users.loading && <Spinner />}
       {users.error && (

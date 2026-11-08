@@ -4,6 +4,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { fetchAuditLog } from "../api/adminApi";
@@ -32,46 +33,46 @@ const ACTION_TONES: Record<AuditAction, "good" | "bad" | "info" | "neutral"> = {
   PASSWORD_CHANGE: "neutral",
 };
 
-const EMPTY: AuditFilters = { page: 0 };
+const EMPTY: Omit<AuditFilters, "page"> = {};
 
 export function AuditAdminPage() {
   usePageTitle("Admin: audit log");
-  const [draft, setDraft] = useState<AuditFilters>(EMPTY);
-  const [applied, setApplied] = useState<AuditFilters>(EMPTY);
-  const log = useFetch(() => fetchAuditLog(applied), [applied]);
+  const [fields, setFields] = useState(EMPTY);
+  const [page, setPage] = useState(0);
+  const applied = useDebouncedValue(fields, 400);
+  const log = useFetch(
+    () => fetchAuditLog({ ...applied, page }),
+    [applied, page],
+  );
+  const filtered = Object.values(fields).some(Boolean);
 
-  function change(key: keyof AuditFilters, value: string) {
-    setDraft((current) => ({ ...current, [key]: value }));
+  function change(key: keyof typeof fields, value: string) {
+    setFields((current) => ({ ...current, [key]: value }));
+    setPage(0);
   }
 
   return (
     <>
       <PageHeader title="Audit log" />
-      <form
-        className="filters"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setApplied({ ...draft, page: 0 });
-        }}
-      >
+      <div className="filters">
         <FormField
           label="Entity"
           name="entityType"
           placeholder="Hero, Guide..."
-          value={draft.entityType ?? ""}
+          value={fields.entityType ?? ""}
           onChange={(event) => change("entityType", event.target.value)}
         />
         <FormField
           label="Actor id"
           name="actorId"
           inputMode="numeric"
-          value={draft.actorId ?? ""}
+          value={fields.actorId ?? ""}
           onChange={(event) => change("actorId", event.target.value)}
         />
         <SelectField
           label="Action"
           name="action"
-          value={draft.action ?? ""}
+          value={fields.action ?? ""}
           onChange={(event) => change("action", event.target.value)}
         >
           <option value="">Any</option>
@@ -85,30 +86,29 @@ export function AuditAdminPage() {
           label="From"
           name="from"
           type="datetime-local"
-          value={draft.from ?? ""}
+          value={fields.from ?? ""}
           onChange={(event) => change("from", event.target.value)}
         />
         <FormField
           label="To"
           name="to"
           type="datetime-local"
-          value={draft.to ?? ""}
+          value={fields.to ?? ""}
           onChange={(event) => change("to", event.target.value)}
         />
-        <button type="submit" className="button">
-          Apply
-        </button>
-        <button
-          type="button"
-          className="button button--ghost"
-          onClick={() => {
-            setDraft(EMPTY);
-            setApplied(EMPTY);
-          }}
-        >
-          Reset
-        </button>
-      </form>
+        {filtered && (
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={() => {
+              setFields(EMPTY);
+              setPage(0);
+            }}
+          >
+            Reset
+          </button>
+        )}
+      </div>
       {log.loading && <Spinner />}
       {log.error && <ErrorMessage failure={log.error} onRetry={log.reload} />}
       {log.data && log.data.content.length === 0 && (
@@ -149,9 +149,9 @@ export function AuditAdminPage() {
       )}
       {log.data && (
         <Pagination
-          page={applied.page}
+          page={page}
           totalPages={log.data.totalPages}
-          onChange={(page) => setApplied((current) => ({ ...current, page }))}
+          onChange={setPage}
         />
       )}
     </>

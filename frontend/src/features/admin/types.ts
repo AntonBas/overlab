@@ -194,6 +194,17 @@ export interface AdminUser {
   lastLoginAt: string | null;
 }
 
+export interface UserFilters {
+  query: string;
+  role: string;
+  enabled: string;
+  emailVerified: string;
+  provider: string;
+  sort: string;
+  direction: "asc" | "desc";
+  page: number;
+}
+
 export interface AuditFilters {
   entityType?: string;
   actorId?: string;

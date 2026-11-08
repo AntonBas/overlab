@@ -2,7 +2,10 @@ package gg.overlab.backend.user.account;
 
 import gg.overlab.backend.common.PageResponse;
 import gg.overlab.backend.config.security.AuthenticatedUser;
+import gg.overlab.backend.user.AuthProvider;
+import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
+import gg.overlab.backend.user.account.dto.AdminUserFilter;
 import gg.overlab.backend.user.account.dto.SetEnabledRequest;
 import gg.overlab.backend.user.account.dto.SetRoleRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,12 +29,20 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
-    @Operation(summary = "Search users by email or display name")
+    @Operation(summary = "Search and filter users by email, name, role, status, verification and sign-in method")
     @GetMapping
     public PageResponse<AdminUserDto> search(@RequestParam(required = false) String q,
+                                             @RequestParam(required = false) UserRole role,
+                                             @RequestParam(required = false) Boolean enabled,
+                                             @RequestParam(required = false) Boolean emailVerified,
+                                             @RequestParam(required = false) AuthProvider provider,
+                                             @RequestParam(defaultValue = "createdAt") String sort,
+                                             @RequestParam(defaultValue = "desc") String direction,
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "20") int size) {
-        return adminUserService.search(q, page, size);
+        AdminUserFilter filter = new AdminUserFilter(q, role, enabled, emailVerified, provider, sort,
+                "asc".equalsIgnoreCase(direction));
+        return adminUserService.search(filter, page, size);
     }
 
     @Operation(summary = "Enable or disable a user")
