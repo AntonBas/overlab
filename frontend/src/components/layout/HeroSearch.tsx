@@ -63,7 +63,7 @@ export function HeroSearch() {
         aria-activedescendant={activeId}
         aria-autocomplete="list"
         autoComplete="off"
-        placeholder="Find a hero"
+        placeholder="Find hero"
         value={query}
         onFocus={loadHeroes}
         onBlur={() => setOpen(false)}
