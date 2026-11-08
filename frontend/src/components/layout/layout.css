@@ -1,7 +1,7 @@
 .main {
   flex: 1;
   padding-top: 24px;
-  padding-bottom: 48px;
+  padding-bottom: 40px;
 }
 
 .skip-link {
@@ -69,7 +69,6 @@
 }
 
 .site-footer {
-  margin-top: 48px;
   border-top: 1px solid var(--border);
   background: var(--surface);
   padding: 40px 0 28px;
