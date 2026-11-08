@@ -161,6 +161,13 @@ class FeedbackIntegrationTest {
     }
 
     @Test
+    void wrongMethodAndContentTypeAreClientErrors() throws Exception {
+        mockMvc.perform(get("/api/business")).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post("/api/business").contentType(MediaType.TEXT_PLAIN).content("text"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
+    @Test
     void businessTypeIsNotAcceptedByThePlainFeedbackEndpoint() throws Exception {
         mockMvc.perform(json(post("/api/feedback"), body("BUSINESS", PREFIX + "Sneaky business message", null)))
                 .andExpect(status().isBadRequest());
