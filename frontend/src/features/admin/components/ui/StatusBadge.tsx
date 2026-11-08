@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { humanize } from "../../../../utils/format";
-import "../../admin.css";
 
 type BadgeTone = "good" | "bad" | "warning" | "info" | "neutral";
 

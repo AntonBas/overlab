@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { saveConsent } from "../consent/consentStore";
 import { useConsent } from "../consent/useConsent";
-import "../legal.css";
 
 export function CookieBanner() {
   const consent = useConsent();

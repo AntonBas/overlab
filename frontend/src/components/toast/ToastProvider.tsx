@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import { ToastContext, type ToastApi } from "./toastContext";
-import "./toast.css";
 
 const TOAST_DURATION_MS = 4000;
 const MAX_VISIBLE_TOASTS = 4;

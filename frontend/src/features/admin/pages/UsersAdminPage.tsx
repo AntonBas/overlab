@@ -17,7 +17,6 @@ import { StatusMessage } from "../components/ui/StatusMessage";
 import { useSave } from "../components/forms/useSave";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import type { AdminUser } from "../types";
-import "../admin.css";
 
 interface UserFilterForm {
   query: string;

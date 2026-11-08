@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { formatDelta } from "../../utils/format";
-import "./ui.css";
 
 interface DeltaValueProps {
   value: number | null;

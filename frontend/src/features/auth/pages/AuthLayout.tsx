@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import "../auth.css";
 
 interface AuthLayoutProps {
   title: string;

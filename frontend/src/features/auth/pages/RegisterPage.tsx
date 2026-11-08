@@ -5,7 +5,6 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { register } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
-import "../auth.css";
 
 export function RegisterPage() {
   usePageTitle("Create account");

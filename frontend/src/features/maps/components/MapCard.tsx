@@ -5,7 +5,6 @@ import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { GameMap } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
-import "../maps.css";
 
 interface MapCardProps {
   map: GameMap;

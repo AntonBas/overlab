@@ -5,7 +5,6 @@ import { useFloatingTip } from "../../../../hooks/useFloatingTip";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
 import type { Ability } from "../../../../types/api";
 import { AbilityKey } from "./AbilityKey";
-import "../../heroes.css";
 
 export function AbilityChip({ ability }: { ability: Ability }) {
   const tipId = useId();

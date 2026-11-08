@@ -10,7 +10,7 @@ Unofficial fan site with Overwatch 2 hero statistics: win rate, pick rate and ba
 
 ## Frontend
 
-React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme follows the system setting), `react-router-dom`, `axios`. Code lives in `src/features/<domain>/` (`stats`, `heroes`, `maps`, `guides`, `auth`). Styles sit next to the code: shared tokens, base styles and classes used by several domains are in `src/index.css`, the rest in `src/features/<domain>/<domain>.css` and `src/components/<group>/<group>.css`, imported by the files that use them, so lazy-loaded pages ship only their own CSS.
+React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme follows the system setting), `react-router-dom`, `axios`. Code lives in `src/features/<domain>/` (`stats`, `heroes`, `maps`, `guides`, `auth`). Styles are split per domain: shared tokens, base styles and classes used by several domains are in `src/index.css`, the rest in `src/features/<domain>/<domain>.css` and `src/components/<group>/<group>.css`. `src/styles.css` imports them all in a fixed order (`index.css` first), because the cascade depends on that order; add a new CSS file there instead of importing it from a component.
 
 | Address | Page |
 |---|---|

@@ -27,7 +27,6 @@ import { HeroSelect } from "../hero/HeroSelect";
 import { StatusMessage } from "../ui/StatusMessage";
 import { useSave } from "./useSave";
 import { useUnsavedChanges } from "./unsavedChanges";
-import "../../admin.css";
 
 interface GuideFormProps {
   guide: Guide | null;

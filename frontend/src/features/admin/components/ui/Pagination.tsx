@@ -1,4 +1,3 @@
-import "../../admin.css";
 interface PaginationProps {
   page: number;
   totalPages: number;

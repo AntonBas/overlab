@@ -1,6 +1,5 @@
 import { usePersonalData } from "../context/usePersonalData";
 import { useRequireLogin } from "../hooks/useRequireLogin";
-import "../personal.css";
 
 interface FavoriteButtonProps {
   kind: "hero" | "map";

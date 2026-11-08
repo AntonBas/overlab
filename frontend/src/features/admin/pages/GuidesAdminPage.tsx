@@ -16,7 +16,6 @@ import { GuideForm } from "../components/forms/GuideForm";
 import { StatusMessage } from "../components/ui/StatusMessage";
 import { useHeroOptions } from "../components/hero/useHeroOptions";
 import { useSave } from "../components/forms/useSave";
-import "../admin.css";
 
 export function GuidesAdminPage() {
   usePageTitle("Admin: guides");

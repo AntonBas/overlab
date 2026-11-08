@@ -18,7 +18,6 @@ import {
 } from "../utils/chart";
 import { buildPatchMarkers, buildSeasonLookup } from "../utils/patchMarkers";
 import { LineChart } from "./LineChart";
-import "../history.css";
 
 type Metric = "win" | "pick" | "ban";
 

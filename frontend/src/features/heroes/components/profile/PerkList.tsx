@@ -11,7 +11,6 @@ import type {
   PerkSlot,
 } from "../../../../types/api";
 import { AbilityText } from "../abilities/AbilityText";
-import "../../heroes.css";
 
 const SLOT_ORDER: PerkSlot[] = ["MINOR", "MAJOR"];
 const SLOT_LABELS: Record<PerkSlot, string> = {

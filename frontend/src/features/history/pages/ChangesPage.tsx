@@ -22,7 +22,6 @@ import { isQuickPlay, toSearchParams } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { ChangesTable } from "../components/ChangesTable";
 import { periodRange } from "../utils/chart";
-import "../history.css";
 
 const PERIODS: Record<string, { label: string; days: number }> = {
   "7d": { label: "Last 7 days", days: 7 },

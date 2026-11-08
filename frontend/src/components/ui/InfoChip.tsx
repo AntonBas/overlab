@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingTip } from "../../hooks/useFloatingTip";
-import "./ui.css";
 
 interface InfoChipProps {
   description?: string;

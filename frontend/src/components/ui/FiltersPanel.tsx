@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useId, useState, type ReactNode } from "react";
-import "./ui.css";
 
 interface FiltersPanelProps {
   children: ReactNode;

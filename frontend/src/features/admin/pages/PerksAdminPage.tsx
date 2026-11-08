@@ -32,7 +32,6 @@ import { useHeroOptions } from "../components/hero/useHeroOptions";
 import { useSave } from "../components/forms/useSave";
 import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import { FormField } from "../../../components/ui/FormField";
-import "../admin.css";
 
 const RECOMMENDATIONS: PerkRecommendation[] = [
   "RECOMMENDED",
