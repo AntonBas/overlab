@@ -204,6 +204,38 @@ class AccountIntegrationTest {
                 .andExpect(jsonPath("$.content[0].email").value(EMAIL));
     }
 
+    @Test
+    void adminCanFilterAndSortUsers() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+        User google = saveUser(GOOGLE_EMAIL, UserRole.USER, AuthProvider.GOOGLE);
+        google.setEnabled(false);
+        userRepository.saveAndFlush(google);
+
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("role", "ADMIN").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].email").value(ADMIN_EMAIL));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("provider", "GOOGLE")
+                        .cookie(adminCookie))
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].email").value(GOOGLE_EMAIL));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("enabled", "false")
+                        .cookie(adminCookie))
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].email").value(GOOGLE_EMAIL));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("emailVerified", "false")
+                        .cookie(adminCookie))
+                .andExpect(jsonPath("$.content.length()").value(0));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("sort", "email")
+                        .param("direction", "asc").cookie(adminCookie))
+                .andExpect(jsonPath("$.content[0].email").value(ADMIN_EMAIL))
+                .andExpect(jsonPath("$.content[2].email").value(EMAIL));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-").param("sort", "password_hash")
+                        .cookie(adminCookie))
+                .andExpect(status().isOk());
+    }
+
     private User saveUser(String email, UserRole role, AuthProvider provider) {
         User account = new User();
         account.setEmail(email);

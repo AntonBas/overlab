@@ -28,6 +28,7 @@ import type {
   FeedbackMessage,
   FeedbackStatus,
   RelationVoteSummary,
+  UserFilters,
 } from "../types";
 
 export async function fetchAdminHeroes(): Promise<AdminHero[]> {
@@ -332,11 +333,20 @@ export async function fetchAuditLog(
 }
 
 export async function fetchAdminUsers(
-  query: string,
-  page: number,
+  filters: UserFilters,
 ): Promise<PageResponse<AdminUser>> {
   const { data } = await api.get<PageResponse<AdminUser>>("/admin/users", {
-    params: { q: query || undefined, page, size: 25 },
+    params: {
+      q: filters.query || undefined,
+      role: filters.role || undefined,
+      enabled: filters.enabled || undefined,
+      emailVerified: filters.emailVerified || undefined,
+      provider: filters.provider || undefined,
+      sort: filters.sort,
+      direction: filters.direction,
+      page: filters.page,
+      size: 25,
+    },
   });
   return data;
 }
