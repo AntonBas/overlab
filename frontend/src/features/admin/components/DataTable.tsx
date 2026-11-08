@@ -21,7 +21,7 @@ export function DataTable<T>({
   rows,
   columns,
   rowKey,
-  pageSize = 20,
+  pageSize = 10,
   emptyMessage = "Nothing here yet.",
   searchLabel,
   matches,

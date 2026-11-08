@@ -1163,8 +1163,16 @@ select:disabled {
 .pagination {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 16px;
+  font-size: 0.85rem;
+}
+
+.pagination .button {
+  min-height: 0;
+  padding: 4px 12px;
+  font-size: 0.85rem;
 }
 
 .dialog__backdrop {
