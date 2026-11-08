@@ -6,21 +6,35 @@ import type {
   RankTier,
   Region,
 } from "../../../types/api";
-import {
-  PLATFORM_LABELS,
-  QUEUE_LABELS,
-  REGION_LABELS,
-  TIER_LABELS,
-} from "../../../utils/format";
-import { SelectField } from "../../admin/components/Fields";
 import { StatusMessage } from "../../admin/components/StatusMessage";
 import { useSave } from "../../admin/components/useSave";
-import { PLATFORMS, QUEUES, REGIONS, TIERS } from "../../stats/filters";
+import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
+import {
+  IconSelect,
+  type IconSelectOption,
+} from "../../../components/ui/IconSelect";
+import {
+  PLATFORM_OPTIONS,
+  QUEUE_OPTIONS,
+  RANK_OPTIONS,
+  REGION_OPTIONS,
+} from "../../stats/filterOptions";
 import { savePreferences } from "../api/personalApi";
 import { usePersonalData } from "../context/usePersonalData";
 
-function toValue<T extends string>(raw: string): T | null {
-  return raw === "" ? null : (raw as T);
+const NO_DEFAULT = "";
+
+function toValue<T extends string>(raw: T | typeof NO_DEFAULT): T | null {
+  return raw === NO_DEFAULT ? null : raw;
+}
+
+function withNoDefault<T extends string>(
+  options: readonly IconSelectOption<T>[],
+): IconSelectOption<T | typeof NO_DEFAULT>[] {
+  return [
+    { value: NO_DEFAULT, label: "No default", icon: <AllItemsIcon /> },
+    ...options,
+  ];
 }
 
 export function PreferencesForm() {
@@ -39,69 +53,38 @@ export function PreferencesForm() {
 
   return (
     <form onSubmit={submit} className="form preferences-form">
-      <SelectField
+      <IconSelect
         label="Mode"
-        name="preferredQueue"
-        value={draft.queue ?? ""}
-        onChange={(event) =>
-          setDraft({ ...draft, queue: toValue<GameQueue>(event.target.value) })
+        value={draft.queue ?? NO_DEFAULT}
+        options={withNoDefault(QUEUE_OPTIONS)}
+        onChange={(value) =>
+          setDraft({ ...draft, queue: toValue<GameQueue>(value) })
         }
-      >
-        <option value="">No default</option>
-        {QUEUES.map((value) => (
-          <option key={value} value={value}>
-            {QUEUE_LABELS[value]}
-          </option>
-        ))}
-      </SelectField>
-      <SelectField
+      />
+      <IconSelect
         label="Rank"
-        name="preferredTier"
-        value={draft.tier ?? ""}
-        onChange={(event) =>
-          setDraft({ ...draft, tier: toValue<RankTier>(event.target.value) })
+        value={draft.tier ?? NO_DEFAULT}
+        options={withNoDefault(RANK_OPTIONS)}
+        onChange={(value) =>
+          setDraft({ ...draft, tier: toValue<RankTier>(value) })
         }
-      >
-        <option value="">No default</option>
-        {TIERS.map((value) => (
-          <option key={value} value={value}>
-            {TIER_LABELS[value]}
-          </option>
-        ))}
-      </SelectField>
-      <SelectField
+      />
+      <IconSelect
         label="Platform"
-        name="preferredPlatform"
-        value={draft.platform ?? ""}
-        onChange={(event) =>
-          setDraft({
-            ...draft,
-            platform: toValue<Platform>(event.target.value),
-          })
+        value={draft.platform ?? NO_DEFAULT}
+        options={withNoDefault(PLATFORM_OPTIONS)}
+        onChange={(value) =>
+          setDraft({ ...draft, platform: toValue<Platform>(value) })
         }
-      >
-        <option value="">No default</option>
-        {PLATFORMS.map((value) => (
-          <option key={value} value={value}>
-            {PLATFORM_LABELS[value]}
-          </option>
-        ))}
-      </SelectField>
-      <SelectField
+      />
+      <IconSelect
         label="Region"
-        name="preferredRegion"
-        value={draft.region ?? ""}
-        onChange={(event) =>
-          setDraft({ ...draft, region: toValue<Region>(event.target.value) })
+        value={draft.region ?? NO_DEFAULT}
+        options={withNoDefault(REGION_OPTIONS)}
+        onChange={(value) =>
+          setDraft({ ...draft, region: toValue<Region>(value) })
         }
-      >
-        <option value="">No default</option>
-        {REGIONS.map((value) => (
-          <option key={value} value={value}>
-            {REGION_LABELS[value]}
-          </option>
-        ))}
-      </SelectField>
+      />
       <div className="preferences-form__footer">
         <button type="submit" className="button" disabled={save.saving}>
           Save defaults

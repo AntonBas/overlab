@@ -22,17 +22,26 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="settings">
+    <div className="settings settings--narrow">
       <AccountHeader user={user} />
-      <SettingsSection title="Profile">
+      <SettingsSection
+        title="Profile"
+        description="The name shown on your account."
+      >
         <ProfileForm />
       </SettingsSection>
       {user.provider === "LOCAL" ? (
         <>
-          <SettingsSection title="Password">
+          <SettingsSection
+            title="Password"
+            description="Use a strong password you do not use anywhere else."
+          >
             <PasswordForm />
           </SettingsSection>
-          <SettingsSection title="Email">
+          <SettingsSection
+            title="Email"
+            description="We send a confirmation link to the new address before switching."
+          >
             <EmailForm currentEmail={user.email} />
           </SettingsSection>
         </>
@@ -46,14 +55,12 @@ export function SettingsPage() {
       )}
       <SettingsSection
         title="Your data"
-
         description="Download everything we store about your account as a JSON file."
       >
         <ExportAccount />
       </SettingsSection>
       <SettingsSection
         title="Delete account"
-
         description="Permanently removes your account, favorites and votes. This cannot be undone."
         danger
       >

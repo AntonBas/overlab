@@ -8,14 +8,11 @@ import {
 import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
-import { Gamepad2, Globe, Monitor } from "lucide-react";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import type { GameMap, HeroRole, Platform, Region } from "../../../types/api";
-import { PLATFORM_LABELS, REGION_LABELS } from "../../../utils/format";
+import type { GameMap, HeroRole } from "../../../types/api";
+import { PLATFORM_OPTIONS, REGION_OPTIONS } from "../filterOptions";
 import {
   ALL_MAPS,
-  PLATFORMS,
-  REGIONS,
   ROLES,
   hasDetailedCoverage,
   isQuickPlay,
@@ -23,27 +20,6 @@ import {
 } from "../filters";
 
 const MAP_ICON_SIZE = 24;
-
-const PLATFORM_OPTIONS: readonly IconSelectOption<Platform>[] = PLATFORMS.map(
-  (platform) => ({
-    value: platform,
-    label: PLATFORM_LABELS[platform],
-    icon:
-      platform === "PC" ? (
-        <Monitor aria-hidden="true" size={18} />
-      ) : (
-        <Gamepad2 aria-hidden="true" size={18} />
-      ),
-  }),
-);
-
-const REGION_OPTIONS: readonly IconSelectOption<Region>[] = REGIONS.map(
-  (region) => ({
-    value: region,
-    label: REGION_LABELS[region],
-    icon: <Globe aria-hidden="true" size={18} />,
-  }),
-);
 
 interface StatsFiltersProps {
   filters: Filters;
