@@ -59,7 +59,7 @@ export function HeroHistorySection({
   headerAction,
   children,
 }: HeroHistorySectionProps) {
-  const [periodId, setPeriodId] = useState<HistoryPeriodId>("30d");
+  const [periodId, setPeriodId] = useState<HistoryPeriodId>("7d");
   const [selectedMetric, setSelectedMetric] = useState<Metric>("win");
   const period = HISTORY_PERIODS.find((entry) => entry.id === periodId)!;
   const range = useMemo(() => periodRange(period.days), [period.days]);
