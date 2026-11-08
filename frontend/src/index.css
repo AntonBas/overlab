@@ -308,7 +308,24 @@ select:disabled {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface);
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left center /
+      40px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right center /
+      40px 100% no-repeat local,
+    radial-gradient(
+        farthest-side at 0 50%,
+        color-mix(in srgb, var(--text) 28%, transparent),
+        transparent
+      )
+      left center / 12px 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--text) 28%, transparent),
+        transparent
+      )
+      right center / 12px 100% no-repeat scroll,
+    var(--surface);
 }
 
 .table {
@@ -581,8 +598,11 @@ select:disabled {
 }
 
 .admin .table td:has(> .form__actions) {
+  position: sticky;
+  right: 0;
   width: 1%;
   white-space: nowrap;
+  background: var(--surface);
 }
 
 .admin .table .form__actions {
@@ -1284,5 +1304,12 @@ input[type="range"] {
 @media (prefers-reduced-motion: reduce) {
   .toast {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .table th,
+  .table td {
+    padding-inline: 10px;
   }
 }
