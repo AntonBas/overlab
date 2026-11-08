@@ -20,6 +20,7 @@ import type {
   FeedbackType,
   RelationType,
 } from "../types";
+import { formatDateTime } from "../../../utils/format";
 
 const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 
@@ -103,7 +104,7 @@ export function FeedbackAdminPage() {
               },
               {
                 header: "Sent",
-                render: (row) => new Date(row.createdAt).toLocaleString(),
+                render: (row) => formatDateTime(row.createdAt),
               },
               {
                 header: "",

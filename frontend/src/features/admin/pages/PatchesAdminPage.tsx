@@ -20,6 +20,7 @@ import { TextAreaField } from "../components/Fields";
 import { StatusMessage } from "../components/StatusMessage";
 import { useSave } from "../components/useSave";
 import { useUnsavedChanges } from "../components/unsavedChanges";
+import { formatDateTime } from "../../../utils/format";
 
 function toLocalInput(iso: string): string {
   const date = new Date(iso);
@@ -202,7 +203,7 @@ export function PatchesAdminPage() {
             { header: "Title", render: (patch) => patch.title ?? "" },
             {
               header: "Released",
-              render: (patch) => new Date(patch.releasedAt).toLocaleString(),
+              render: (patch) => formatDateTime(patch.releasedAt),
             },
             {
               header: "",
