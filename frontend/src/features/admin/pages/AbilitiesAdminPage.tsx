@@ -22,6 +22,7 @@ import { HeroSelect } from "../components/hero/HeroSelect";
 import { StatusMessage } from "../components/ui/StatusMessage";
 import { useSave } from "../components/forms/useSave";
 import type { AdminAbility } from "../types";
+import "../admin.css";
 
 function optionLabel(control: AbilityControl): string {
   const key = CONTROL_KEYS.PC[control];

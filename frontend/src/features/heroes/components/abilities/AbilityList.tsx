@@ -2,6 +2,7 @@ import { NewBadge } from "../../../../components/ui/NewBadge";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
 import type { Ability } from "../../../../types/api";
 import { AbilityKey } from "./AbilityKey";
+import "../../heroes.css";
 
 export function AbilityList({ abilities }: { abilities: Ability[] }) {
   return (

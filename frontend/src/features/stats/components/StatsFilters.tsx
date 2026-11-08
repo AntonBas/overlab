@@ -19,6 +19,7 @@ import {
   isQuickPlay,
   type StatsFilters as Filters,
 } from "../filters";
+import "../stats.css";
 
 const MAP_ICON_SIZE = 24;
 

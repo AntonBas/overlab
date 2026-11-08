@@ -14,6 +14,7 @@ import { Pagination } from "../components/ui/Pagination";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import type { AuditAction, AuditFilters } from "../types";
 import { describeActor, describeEntity } from "../utils/audit";
+import "../admin.css";
 
 const ACTIONS: AuditAction[] = [
   "CREATE",

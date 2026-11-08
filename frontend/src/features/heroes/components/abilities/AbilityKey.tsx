@@ -7,6 +7,7 @@ import {
 } from "../../context/controlSchemeContext";
 import { ABILITY_CONTROL_LABELS } from "../../utils/abilityControls";
 import { ControlGlyph } from "./ControlGlyph";
+import "../../heroes.css";
 
 export function AbilityKey({
   control,

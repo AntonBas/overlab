@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { matchesName } from "../../utils/search";
+import "./ui.css";
 export interface IconSelectOption<T extends string> {
   value: T;
   label: string;

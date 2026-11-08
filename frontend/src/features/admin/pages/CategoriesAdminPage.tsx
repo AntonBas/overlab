@@ -33,6 +33,7 @@ import type {
   AdminHero,
   CategoryMatchupType,
 } from "../types";
+import "../admin.css";
 
 const MATCHUP_LABELS: Record<CategoryMatchupType, string> = {
   STRONG_AGAINST: "Strong against",

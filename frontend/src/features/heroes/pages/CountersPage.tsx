@@ -31,6 +31,7 @@ import {
 } from "../hooks/useRelationFeedback";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import "../heroes.css";
 
 const COLUMNS = [
   {

@@ -1,3 +1,4 @@
+import "./ui.css";
 interface TableSkeletonProps {
   rows?: number;
   label?: string;

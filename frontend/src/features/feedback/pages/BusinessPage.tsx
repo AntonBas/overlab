@@ -5,6 +5,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { contactEmail } from "../../legal/contact";
 import { sendBusinessMessage } from "../api/businessApi";
+import "../feedback.css";
 
 const MIN_LENGTH = 10;
 const MAX_LENGTH = 2000;

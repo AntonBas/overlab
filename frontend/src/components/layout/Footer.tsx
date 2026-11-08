@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "./navLinks";
+import "./layout.css";
 
 export function Footer() {
   const { pathname } = useLocation();

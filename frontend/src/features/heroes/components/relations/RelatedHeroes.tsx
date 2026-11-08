@@ -6,6 +6,7 @@ import type { RelatedHero } from "../../../../types/api";
 import type { RelationKind } from "../../api/relationFeedbackApi";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 import { RelationVoteButtons } from "./RelationVoteButtons";
+import "../../heroes.css";
 
 interface RelatedHeroesProps {
   heroes: RelatedHero[];

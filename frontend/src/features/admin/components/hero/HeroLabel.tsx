@@ -1,5 +1,6 @@
 import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
 import type { AdminHero } from "../../types";
+import "../../admin.css";
 
 interface HeroLabelProps {
   slug: string;

@@ -8,6 +8,7 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroChange } from "../../../types/api";
 import { ROLE_LABELS, formatDate, formatPercent } from "../../../utils/format";
 import { sortChanges, type ChangeSort } from "../utils/changes";
+import "../history.css";
 
 interface ChangesTableProps {
   changes: HeroChange[];

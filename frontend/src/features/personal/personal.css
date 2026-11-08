@@ -1,0 +1,116 @@
+.favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.favorite-grid--wide {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.favorite-grid li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.favorite-grid li.favorite-grid__item--tank {
+  border-left: 3px solid var(--tank);
+}
+
+.favorite-grid li.favorite-grid__item--damage {
+  border-left: 3px solid var(--damage);
+}
+
+.favorite-grid li.favorite-grid__item--support {
+  border-left: 3px solid var(--support);
+}
+
+.favorite-grid .place-icon {
+  min-width: 0;
+  gap: 10px;
+}
+
+.favorite-grid .place-icon a {
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-grid .place-icon a:hover {
+  color: var(--accent);
+}
+
+.favorite-grid__remove {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.favorite-grid__remove:hover,
+.favorite-grid__remove:focus-visible {
+  background: color-mix(in srgb, var(--bad) 18%, transparent);
+  color: var(--bad);
+}
+
+.preferences-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: end;
+}
+
+@media (max-width: 560px) {
+  .preferences-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.preferences-form__footer {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.favorite-button {
+  white-space: nowrap;
+}
+
+.favorite-star {
+  flex-shrink: 0;
+  padding: 4px 6px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.favorite-star:hover,
+.favorite-star[aria-pressed="true"] {
+  color: var(--accent-text);
+}

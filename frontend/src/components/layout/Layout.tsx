@@ -5,6 +5,7 @@ import { Spinner } from "../ui/Spinner";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
+import "./layout.css";
 
 export function Layout() {
   const location = useLocation();
