@@ -11,6 +11,7 @@ import { toFailure } from "../../../services/api";
 import { resendVerification } from "../api/authApi";
 import { useAuth } from "../context/useAuth";
 import { AuthLayout } from "./AuthLayout";
+import "../auth.css";
 
 const OAUTH_ERRORS: Record<string, string> = {
   email_in_use:

@@ -7,6 +7,7 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import type { HeroStat } from "../../../types/api";
 import { formatPercent } from "../../../utils/format";
 import { picksByRole } from "../utils/bestPicks";
+import "../maps.css";
 
 interface MapBestPicksProps {
   heroes: HeroStat[];

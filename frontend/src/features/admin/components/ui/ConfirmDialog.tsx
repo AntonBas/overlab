@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import "../../admin.css";
 
 interface ConfirmDialogProps {
   title: string;

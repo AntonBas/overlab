@@ -1,4 +1,5 @@
 import { AbilityText } from "../abilities/AbilityText";
+import "../../heroes.css";
 
 interface HeroTraitsProps {
   strengths: string | null;

@@ -16,6 +16,7 @@ import { fetchFavorites } from "../api/personalApi";
 import { sortHeroesByRoleThenName } from "../../heroes/utils/sortHeroes";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { usePersonalData } from "../context/usePersonalData";
+import "../personal.css";
 
 export function MyLibraryPage() {
   usePageTitle("My Overlab");

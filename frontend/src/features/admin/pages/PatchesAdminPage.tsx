@@ -21,6 +21,7 @@ import { StatusMessage } from "../components/ui/StatusMessage";
 import { useSave } from "../components/forms/useSave";
 import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import { formatDateTime } from "../../../utils/format";
+import "../admin.css";
 
 function toLocalInput(iso: string): string {
   const date = new Date(iso);

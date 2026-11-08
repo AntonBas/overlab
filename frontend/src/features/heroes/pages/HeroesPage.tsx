@@ -10,6 +10,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { ROLES } from "../../stats/filters";
 import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
+import "../heroes.css";
 
 export function HeroesPage() {
   usePageTitle("Heroes");

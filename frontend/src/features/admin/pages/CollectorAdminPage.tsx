@@ -18,6 +18,7 @@ import { useSave } from "../components/forms/useSave";
 import type { CollectorJob, CollectorRunStatus } from "../types";
 import { describeCron, describeInterval } from "../utils/cron";
 import { splitWords } from "../utils/audit";
+import "../admin.css";
 
 const POLL_INTERVAL_MS = 3000;
 

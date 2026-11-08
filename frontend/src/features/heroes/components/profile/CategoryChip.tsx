@@ -6,6 +6,7 @@ import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
 import { useFloatingTip } from "../../../../hooks/useFloatingTip";
 import type { CategoryMatchup, HeroCategory } from "../../../../types/api";
 import { AbilityText } from "../abilities/AbilityText";
+import "../../heroes.css";
 
 interface CategoryChipProps {
   category: HeroCategory;

@@ -1,4 +1,5 @@
 import { formatPercent } from "../../../../utils/format";
+import "../../heroes.css";
 
 interface StatChipsProps {
   winRate: number;

@@ -4,6 +4,7 @@ import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { forgotPassword } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
+import "../auth.css";
 
 export function ForgotPasswordPage() {
   usePageTitle("Reset password");

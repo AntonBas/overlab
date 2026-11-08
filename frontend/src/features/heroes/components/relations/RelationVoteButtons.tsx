@@ -5,6 +5,7 @@ import type {
   RelationVoteValue,
 } from "../../api/relationFeedbackApi";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
+import "../../heroes.css";
 
 interface RelationVoteButtonsProps {
   feedback: RelationFeedback;

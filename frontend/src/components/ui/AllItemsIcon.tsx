@@ -1,3 +1,4 @@
+import "./ui.css";
 const ALL_ITEMS_ICON = "url(/images/roles/flex.svg)";
 
 export function AllItemsIcon() {

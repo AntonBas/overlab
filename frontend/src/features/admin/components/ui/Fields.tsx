@@ -4,6 +4,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
+import "../../admin.css";
 
 interface FieldShellProps {
   id: string;

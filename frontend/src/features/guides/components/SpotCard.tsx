@@ -9,6 +9,7 @@ import type { Guide } from "../../../types/api";
 import { formatSeconds } from "../../../utils/format";
 import { AbilityText } from "../../heroes/components/abilities/AbilityText";
 import { GUIDE_KIND_LABELS, GUIDE_SIDE_LABELS } from "../labels";
+import "../guides.css";
 
 interface SpotCardProps {
   guide: Guide;

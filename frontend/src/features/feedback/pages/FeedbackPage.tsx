@@ -4,6 +4,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { sendFeedback, type FeedbackType } from "../api/feedbackApi";
+import "../feedback.css";
 
 const MIN_LENGTH = 10;
 const MAX_LENGTH = 2000;

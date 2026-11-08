@@ -1,4 +1,5 @@
 import type { MapMode } from "../../types/api";
+import "./ui.css";
 
 function modeIconUrl(mode: MapMode): string {
   return `/images/modes/${mode.toLowerCase()}.svg`;

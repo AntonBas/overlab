@@ -11,6 +11,7 @@ import { MAP_PLACEHOLDER_URL } from "../../../../utils/modes";
 import { fetchMaps } from "../../../maps/api/mapsApi";
 import { mapPagePath } from "../../utils/mapPagePath";
 import { mapPicks, mapsByGain } from "../../utils/mapPicks";
+import "../../heroes.css";
 
 interface HeroMapPicksProps {
   heroName: string;

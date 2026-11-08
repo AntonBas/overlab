@@ -21,6 +21,7 @@ import type {
   RelationType,
 } from "../types";
 import { formatDateTime } from "../../../utils/format";
+import "../admin.css";
 
 const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 

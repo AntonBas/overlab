@@ -16,6 +16,7 @@ import { useSave } from "../components/forms/useSave";
 import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import type { AdminHero } from "../types";
+import "../admin.css";
 
 function HeroForm({
   hero,

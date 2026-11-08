@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { EmptyState } from "../../../../components/ui/EmptyState";
 import { Pagination } from "./Pagination";
+import "../../admin.css";
 
 export interface Column<T> {
   header: string;

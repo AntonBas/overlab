@@ -3,6 +3,7 @@ import { ROLE_DESCRIPTIONS, SUBROLE_DESCRIPTIONS } from "../../utils/roles";
 import { InfoChip } from "./InfoChip";
 import { RoleBadge } from "./RoleBadge";
 import { SubroleBadge } from "./SubroleBadge";
+import "./ui.css";
 
 interface RoleTagsProps {
   role: HeroRole;

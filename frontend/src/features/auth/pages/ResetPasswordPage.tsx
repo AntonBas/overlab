@@ -5,6 +5,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
 import { resetPassword } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
+import "../auth.css";
 
 export function ResetPasswordPage() {
   usePageTitle("Set a new password");

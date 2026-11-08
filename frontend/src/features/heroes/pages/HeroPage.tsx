@@ -38,6 +38,7 @@ import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/profile/PerkList";
 import { RelationTabs } from "../components/relations/RelationTabs";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
+import "../heroes.css";
 
 export function HeroPage() {
   const { slug = "" } = useParams();

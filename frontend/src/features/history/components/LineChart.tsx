@@ -8,6 +8,7 @@ import {
   type ChartPoint,
   type ChartSize,
 } from "../utils/chart";
+import "../history.css";
 
 export interface ChartMarker {
   time: number;

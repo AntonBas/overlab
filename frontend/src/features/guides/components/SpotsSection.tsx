@@ -7,6 +7,7 @@ import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import type { Guide, GuideKind } from "../../../types/api";
 import { GUIDE_KIND_LABELS, GUIDE_KINDS } from "../labels";
 import { SpotRail } from "./SpotRail";
+import "../guides.css";
 
 type GroupBy = "hero" | "map" | "none";
 

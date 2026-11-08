@@ -3,6 +3,7 @@ import { AllItemsIcon } from "../../../../components/ui/AllItemsIcon";
 import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
 import { IconSelect } from "../../../../components/ui/IconSelect";
 import type { AdminHero } from "../../types";
+import "../../admin.css";
 
 const HERO_ICON_SIZE = 24;
 

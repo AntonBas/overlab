@@ -23,6 +23,7 @@ import { useSave } from "../components/forms/useSave";
 import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import type { AdminHero, HeroRelation, RelationType } from "../types";
 import { describeRelationConflict } from "../utils/relations";
+import "../admin.css";
 
 interface RelationFormProps {
   relation: HeroRelation | null;

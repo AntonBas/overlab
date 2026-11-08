@@ -22,6 +22,7 @@ import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/profile/PerkList";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import "../heroes.css";
 
 export function PerksPage() {
   usePageTitle("Perks");

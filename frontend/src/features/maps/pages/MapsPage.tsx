@@ -14,6 +14,7 @@ import { usePersonalData } from "../../personal/context/usePersonalData";
 import { fetchMaps } from "../api/mapsApi";
 import { MapCard } from "../components/MapCard";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import "../maps.css";
 
 const OTHER = "Other";
 

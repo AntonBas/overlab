@@ -10,6 +10,7 @@ import type {
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 import { CategoryChip } from "../profile/CategoryChip";
 import { RelatedHeroes } from "./RelatedHeroes";
+import "../../heroes.css";
 
 type RelationTabId = "strong" | "struggles" | "synergies";
 

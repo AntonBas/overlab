@@ -9,6 +9,7 @@ import {
 import { X } from "lucide-react";
 import { LEAVE_WARNING } from "../adminSections";
 import { UnsavedChangesContext } from "../forms/unsavedChanges";
+import "../../admin.css";
 
 interface DrawerProps {
   label: string;

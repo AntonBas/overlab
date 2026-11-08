@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { toFailure } from "../../../../services/api";
+import "../../admin.css";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_BYTES = 2 * 1024 * 1024;

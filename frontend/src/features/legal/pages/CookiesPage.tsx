@@ -1,6 +1,7 @@
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { CookieSettings } from "../components/CookieSettings";
+import "../legal.css";
 
 export function CookiesPage() {
   usePageTitle("Cookie policy");

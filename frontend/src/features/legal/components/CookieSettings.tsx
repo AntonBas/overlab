@@ -1,5 +1,6 @@
 import { saveConsent } from "../consent/consentStore";
 import { useConsent } from "../consent/useConsent";
+import "../legal.css";
 
 export function CookieSettings() {
   const consent = useConsent();

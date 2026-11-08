@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameMap } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MapCard } from "./MapCard";
+import "../maps.css";
 
 interface MapNavigationProps {
   current: GameMap;
