@@ -1484,12 +1484,8 @@ select:disabled {
 .settings {
   display: grid;
   gap: 20px;
-  max-width: 800px;
+  max-width: 640px;
   margin-inline: auto;
-}
-
-.settings--narrow {
-  max-width: 600px;
 }
 
 .settings-section .button {
@@ -1613,11 +1609,15 @@ select:disabled {
 
 .favorite-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.favorite-grid--wide {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .favorite-grid li {

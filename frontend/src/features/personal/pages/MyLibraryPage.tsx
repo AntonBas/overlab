@@ -79,7 +79,7 @@ export function MyLibraryPage() {
           <EmptyState>Use the star on a map page to keep it here.</EmptyState>
         )}
         {favorites.data && favorites.data.maps.length > 0 && (
-          <ul className="favorite-grid">
+          <ul className="favorite-grid favorite-grid--wide">
             {favorites.data.maps.map((map) => (
               <li key={map.slug}>
                 <span className="place-icon">
