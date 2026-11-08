@@ -283,10 +283,6 @@ export function PerksAdminPage() {
             { header: "Slot", render: (perk) => humanize(perk.slot) },
             { header: "Position", render: (perk) => humanize(perk.position) },
             {
-              header: "Icon",
-              render: (perk) => (perk.iconUrl ? "Set" : "None"),
-            },
-            {
               header: "Recommendation",
               render: (perk) => humanize(perk.recommendation),
             },

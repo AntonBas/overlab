@@ -137,10 +137,6 @@ export function MapsAdminPage() {
                 map.mode ? MAP_MODE_LABELS[map.mode] : "Unknown",
             },
             {
-              header: "Image",
-              render: (map) => (map.imageUrl ? "Set" : "None"),
-            },
-            {
               header: "",
               render: (map) => (
                 <button
