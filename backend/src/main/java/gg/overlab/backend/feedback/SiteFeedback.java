@@ -35,6 +35,12 @@ public class SiteFeedback extends TimestampedEntity {
     @Column(name = "page_path", length = 255)
     private String pagePath;
 
+    @Column(name = "contact_name", length = 100)
+    private String contactName;
+
+    @Column(name = "contact_email", length = 255)
+    private String contactEmail;
+
     @Column(name = "user_id")
     private Long userId;
 

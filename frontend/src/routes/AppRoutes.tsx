@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
 import { GuidePage } from "../features/guides/pages/GuidePage";
+import { BusinessPage } from "../features/feedback/pages/BusinessPage";
 import { FeedbackPage } from "../features/feedback/pages/FeedbackPage";
 import { HeroPage } from "../features/heroes/pages/HeroPage";
 import { HeroesPage } from "../features/heroes/pages/HeroesPage";
@@ -152,6 +153,7 @@ export function AppRoutes() {
         <Route path="maps/:slug" element={<MapPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
         <Route path="feedback" element={<FeedbackPage />} />
+        <Route path="business" element={<BusinessPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
         <Route path="cookies" element={<CookiesPage />} />

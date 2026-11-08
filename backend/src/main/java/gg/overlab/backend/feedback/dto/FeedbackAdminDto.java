@@ -10,6 +10,7 @@ public record FeedbackAdminDto(
         String message,
         String pagePath,
         String authorName,
+        String contactEmail,
         FeedbackStatus status,
         Instant createdAt,
         Instant resolvedAt) {

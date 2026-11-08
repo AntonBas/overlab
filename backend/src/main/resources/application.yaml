@@ -48,6 +48,7 @@ spring:
 
 app:
   frontend-url: ${FRONTEND_URL}
+  contact-email: ${CONTACT_EMAIL:}
   media:
     directory: ${MEDIA_DIRECTORY:./media}
     base-url: ${MEDIA_BASE_URL:/media}

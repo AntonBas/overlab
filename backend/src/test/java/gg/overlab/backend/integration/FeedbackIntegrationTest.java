@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.feedback.FeedbackService;
+import gg.overlab.backend.feedback.FeedbackType;
 import gg.overlab.backend.feedback.SiteFeedback;
 import gg.overlab.backend.feedback.SiteFeedbackRepository;
 import gg.overlab.backend.user.User;
@@ -135,6 +136,37 @@ class FeedbackIntegrationTest {
     }
 
     @Test
+    void anonymousVisitorsCanSendBusinessMessages() throws Exception {
+        mockMvc.perform(json(post("/api/business"), businessBody("Jane Partner", "jane@partner.test",
+                        PREFIX + "We would like to sponsor the site")))
+                .andExpect(status().isCreated());
+
+        SiteFeedback saved = latest();
+        assertThat(saved.getType()).isEqualTo(FeedbackType.BUSINESS);
+        assertThat(saved.getContactName()).isEqualTo("Jane Partner");
+        assertThat(saved.getContactEmail()).isEqualTo("jane@partner.test");
+        assertThat(saved.getUserId()).isNull();
+
+        mockMvc.perform(get("/api/admin/feedback").cookie(adminCookie))
+                .andExpect(jsonPath("$[?(@.id==" + saved.getId() + ")].authorName").value("Jane Partner"))
+                .andExpect(jsonPath("$[?(@.id==" + saved.getId() + ")].contactEmail").value("jane@partner.test"));
+    }
+
+    @Test
+    void businessMessagesAreValidated() throws Exception {
+        mockMvc.perform(json(post("/api/business"), businessBody("Jane", "not-an-email", MESSAGE)))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(json(post("/api/business"), businessBody("Jane", "jane@partner.test", "short")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void businessTypeIsNotAcceptedByThePlainFeedbackEndpoint() throws Exception {
+        mockMvc.perform(json(post("/api/feedback"), body("BUSINESS", PREFIX + "Sneaky business message", null)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void adminEndpointsAreClosedToUsersAndGuests() throws Exception {
         mockMvc.perform(get("/api/admin/feedback").cookie(userCookie)).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/admin/feedback")).andExpect(status().isUnauthorized());
@@ -157,6 +189,10 @@ class FeedbackIntegrationTest {
         return feedbackRepository.findAll().stream()
                 .filter(feedback -> feedback.getMessage().startsWith(PREFIX))
                 .reduce((first, second) -> second).orElseThrow();
+    }
+
+    private String businessBody(String name, String email, String message) {
+        return "{\"name\":\"" + name + "\",\"email\":\"" + email + "\",\"message\":\"" + message + "\"}";
     }
 
     private String body(String type, String message, String path) {

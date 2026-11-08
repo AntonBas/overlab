@@ -4,5 +4,6 @@ public enum FeedbackType {
     INACCURACY,
     BUG,
     TYPO,
-    OTHER
+    OTHER,
+    BUSINESS
 }

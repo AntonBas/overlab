@@ -15,7 +15,7 @@ public interface SiteFeedbackRepository extends JpaRepository<SiteFeedback, Long
 
     @Query("""
             select new gg.overlab.backend.feedback.dto.FeedbackAdminDto(
-                f.id, f.type, f.message, f.pagePath, u.displayName, f.status, f.createdAt, f.resolvedAt)
+                f.id, f.type, f.message, f.pagePath, coalesce(f.contactName, u.displayName), f.contactEmail, f.status, f.createdAt, f.resolvedAt)
             from SiteFeedback f
             left join gg.overlab.backend.user.User u on u.id = f.userId
             where f.status = :status

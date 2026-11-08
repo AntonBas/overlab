@@ -13,10 +13,10 @@ Overlab runs as one stack on a single server (any VPS with Docker): a Caddy edge
 
 ```bash
 git clone https://github.com/AntonBas/overlab.git && cd overlab
-cp .env.prod.example .env.prod
+touch .env.prod
 ```
 
-Fill in `.env.prod`: `SITE_ADDRESS`, `FRONTEND_URL`, `DB_PASSWORD`, `JWT_SECRET` (at least 32 random characters, for example `openssl rand -hex 32`), the `MAIL_*` values, `EMAIL_FROM`, and `GRAFANA_ADMIN_PASSWORD`. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first start to create the admin account, then clear them.
+Fill in `.env.prod` (the names are the ones `docker-compose.prod.yml` reads; `.env.example` shows the format): `SITE_ADDRESS`, `FRONTEND_URL`, `DB_PASSWORD`, `JWT_SECRET` (at least 32 random characters, for example `openssl rand -hex 32`), the `MAIL_*` values, `EMAIL_FROM`, `CONTACT_EMAIL` (shown on the legal pages and the address that receives messages from the Business page; optional until the mailbox exists), and `GRAFANA_ADMIN_PASSWORD`. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first start to create the admin account, then clear them.
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build

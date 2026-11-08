@@ -29,9 +29,10 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/me` | Favorites and default filters |
 | `/me/settings` | Change name, password and email, download or delete your data |
 | `/feedback?from=<path>` | Form for reporting an inaccuracy, bug or typo (no login needed; opened from the footer link on every page) |
+| `/business` | Sponsorship, advertising and partnership page with a contact form (no login needed; linked from the footer) |
 | `/privacy`, `/terms`, `/cookies` | Legal pages linked from the footer; `/cookies` also holds the consent choices |
 
-A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages comes from the `VITE_CONTACT_EMAIL` build variable.
+A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages and the Business page comes from the `VITE_CONTACT_EMAIL` build variable (in the production compose file it is filled from `CONTACT_EMAIL`); without it they point to the Business page form.
 
 The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
 
@@ -45,7 +46,7 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/abilities` | Abilities per hero: choose the control slot (primary or secondary fire, ability 1 or 2, ultimate, passive); saved at once and written to the audit log |
 | `/admin/perks` | Perks per hero: slot (minor or major), position (left or right, as in the game; one perk per slot and position), recommendation, note, icon upload |
 | `/admin/relations` | Counters and synergies; duplicates and reverse relations are flagged before saving |
-| `/admin/feedback` | Messages from visitors (resolve, dismiss, reopen) and the votes users gave to counters and synergies, most disagreed first |
+| `/admin/feedback` | Messages from visitors, including Business messages with the sender's email (resolve, dismiss, reopen) and the votes users gave to counters and synergies, most disagreed first |
 | `/admin/categories` | Hero categories (name, slug, member heroes) and matchups of a hero against a category (strong, weak or works well with, note) |
 | `/admin/guides` | Spots and setups: paste a YouTube link (`youtu.be/...`, `watch?v=...`), hero, map, type (setup, position, ultimate spot, tip), side (attack, defense, both), optional ability, start and end time as `1:23`, video preview, publish and order. Shown on the map page grouped by hero and on the hero page grouped by map |
 | `/admin/patches`, `/admin/maps` | Patch notes; map mode and image upload |
@@ -191,6 +192,7 @@ Email and password registration plus Google sign-in. Tokens are stored in `httpO
 | `DELETE /api/me` | Delete the account (local accounts confirm with the password); audit entries about the user are anonymized, the last administrator cannot be deleted |
 | `GET /api/me/favorites`, `PUT`/`DELETE /api/me/favorites/heroes/{slug}`, `/maps/{slug}` | Favorite heroes and maps (200 of each at most) |
 | `GET`/`PUT`/`DELETE /api/me/relation-votes` | Agree or disagree with a counter or synergy (`heroSlug`, `relatedHeroSlug`, `type`, `value` `UP`/`DOWN`; the pair works in either direction, one vote per user, 1000 at most) |
+| `POST /api/business` | Send a sponsorship or partnership message (`name`, `email`, `message` of 10 to 2000 characters); login is optional, rate limited per IP. The message is stored as feedback of type `BUSINESS` and emailed to `CONTACT_EMAIL` with the sender as reply-to |
 | `POST /api/feedback` | Send a message about an inaccuracy, bug or typo (`type` `INACCURACY`/`BUG`/`TYPO`/`OTHER`, 10 to 2000 characters, optional site `pagePath`); login is optional, rate limited per IP, a signed in user can have 20 unreviewed messages at most |
 | `GET`/`PUT /api/me/preferences` | Default mode, rank, platform and region for the statistics filters |
 | `GET /api/admin/feedback?status=NEW`, `PUT /api/admin/feedback/{id}/status`, `GET /api/admin/relation-votes/summary` | Admin: review messages (`NEW`, `RESOLVED`, `DISMISSED`) and see votes per recommendation. Votes are never shown publicly and never change the curated data on their own |
@@ -200,7 +202,7 @@ Signing in with Google using an email that already has a password account links 
 
 Password reset for a Google-only account sends an email that explains it signs in with Google instead of staying silent.
 
-Authentication endpoints are rate limited per IP (Redis). `/api/admin/**` requires the `ADMIN` role. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit unless `.env` sets `MAIL_HOST` (and `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH=true`, `MAIL_STARTTLS=true`, `EMAIL_FROM`), for example with Brevo: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, the SMTP login and key from Brevo, and `EMAIL_FROM` set to a sender verified in Brevo; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables.
+Authentication endpoints are rate limited per IP (Redis). `/api/admin/**` requires the `ADMIN` role. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit unless `.env` sets `MAIL_HOST` (and `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH=true`, `MAIL_STARTTLS=true`, `EMAIL_FROM`), for example with Brevo: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, the SMTP login and key from Brevo, and `EMAIL_FROM` set to a sender verified in Brevo; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables. Emails are sent in the background as plain text plus HTML, retried 3 times and never block the request, so a missing mail server does not break registration or password reset (the failure is only logged). `CONTACT_EMAIL` is the address that receives Business page messages; while it is empty the messages are only stored and shown in the admin panel.
 
 ### Audit log
 
