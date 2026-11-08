@@ -224,7 +224,17 @@
   background: var(--surface-2);
 }
 
-@media (max-width: 1080px) {
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .site-header__inner {
+    gap: 16px;
+  }
+
+  .nav__link {
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 1023px) {
   .site-header__toggle {
     display: inline-flex;
     margin-left: auto;
