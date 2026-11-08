@@ -33,7 +33,6 @@
 }
 
 .site-header__account {
-  margin-left: auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -168,6 +167,7 @@
 
 .hero-search {
   position: relative;
+  margin-inline: auto;
   flex: 0 1 180px;
   min-width: 110px;
   display: flex;
@@ -244,12 +244,12 @@
   }
 
   .site-header__account {
-    margin-left: 0;
     flex-wrap: wrap;
   }
 
   .hero-search {
     flex: none;
+    margin-inline: 0;
   }
 }
 
