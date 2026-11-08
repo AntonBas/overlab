@@ -22,7 +22,7 @@ Fill in `.env.prod` (copy the variable names from `.env.example`; the "Productio
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 ```
 
-Caddy obtains and renews the HTTPS certificate automatically. Caddy also sends HSTS and a strict Content-Security-Policy (`docker/caddy/Caddyfile`): when you add analytics, ads or other third-party scripts, allow their hosts there. Redis is capped at 128 MB with LRU eviction, since it only holds cache. The backend refuses to start without `JWT_SECRET`, the database settings and `FRONTEND_URL`.
+Caddy obtains and renews the HTTPS certificate automatically. Caddy also sends HSTS and a strict Content-Security-Policy (`docker/caddy/Caddyfile`): when you add analytics, ads or other third-party scripts, allow their hosts there. Redis is capped at 128 MB with LRU eviction, since it only holds cache. The backend container is capped at 1.5 GB (`mem_limit` in `docker-compose.prod.yml`) so the JVM cannot starve PostgreSQL on a small server. The backend refuses to start without `JWT_SECRET`, the database settings and `FRONTEND_URL`.
 
 ## Updating
 
