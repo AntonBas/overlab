@@ -59,7 +59,7 @@ app:
     verification-token-ttl: 24h
     reset-token-ttl: 1h
     cookie-secure: true
-    mail-from: ${EMAIL_FROM:noreply@overlab.gg}
+    mail-from: ${EMAIL_FROM:noreply@overlabgg.com}
     admin-email: ${ADMIN_EMAIL:}
     admin-password: ${ADMIN_PASSWORD:}
     rate-limit-per-minute: 10

@@ -41,7 +41,7 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
       MAIL_STARTTLS: ${MAIL_STARTTLS:-false}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@overlab.gg}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@overlabgg.com}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       COLLECTOR_GAME_FORMAT: ${COLLECTOR_GAME_FORMAT:-FIVE_VS_FIVE}

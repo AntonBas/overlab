@@ -14,7 +14,9 @@ public record EmailTemplate(String subject, String greeting, List<String> paragr
             <tr><td align="center">
             <table role="presentation" width="520" cellpadding="0" cellspacing="0" \
             style="max-width:520px;background:#ffffff;border-radius:8px;padding:32px">
-            <tr><td style="font-size:20px;font-weight:bold;padding-bottom:16px">Overlab</td></tr>
+            <tr><td style="font-size:20px;font-weight:bold;padding-bottom:16px">
+            <img src="%s" width="40" height="40" alt="" \
+            style="vertical-align:middle;border-radius:8px;margin-right:12px">Overlab</td></tr>
             <tr><td style="font-size:15px;line-height:1.5">
             %s
             </td></tr>
@@ -34,7 +36,7 @@ public record EmailTemplate(String subject, String greeting, List<String> paragr
         return text.append(footnote).toString();
     }
 
-    public String html() {
+    public String html(String logoUrl) {
         StringBuilder body = new StringBuilder("<p>").append(escape(greeting)).append("</p>");
         paragraphs.forEach(paragraph -> body.append("<p>").append(escape(paragraph)).append("</p>"));
         if (actionUrl != null) {
@@ -46,7 +48,7 @@ public record EmailTemplate(String subject, String greeting, List<String> paragr
                     .append(escape(actionUrl)).append("</p>");
         }
         body.append("<p style=\"font-size:13px;color:#6b7280\">").append(escape(footnote)).append("</p>");
-        return HTML_LAYOUT.formatted(body);
+        return HTML_LAYOUT.formatted(escape(logoUrl), body);
     }
 
     private static String escape(String value) {
