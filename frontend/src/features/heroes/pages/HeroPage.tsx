@@ -60,6 +60,7 @@ export function HeroPage() {
         region: "EUROPE",
       }),
     [slug, queue],
+    { keepPrevious: true },
   );
   const perks = useFetch(() => fetchPerks(slug), [slug]);
   const counters = useFetch(() => fetchCounters(slug), [slug]);
@@ -140,14 +141,16 @@ export function HeroPage() {
           subtitle={
             <span className="hero-tags">
               <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
-              {focus && (
-                <StatChips
-                  winRate={focus.winRate}
-                  pickRate={focus.pickRate}
-                  banRate={focus.banRate}
-                  showBan={queue === "COMPETITIVE"}
-                />
-              )}
+              <span className="hero-tags__stats">
+                {focus && (
+                  <StatChips
+                    winRate={focus.winRate}
+                    pickRate={focus.pickRate}
+                    banRate={focus.banRate}
+                    showBan={queue === "COMPETITIVE"}
+                  />
+                )}
+              </span>
             </span>
           }
           actions={
