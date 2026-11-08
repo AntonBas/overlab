@@ -106,7 +106,7 @@ export function PreferencesForm() {
         <button type="submit" className="button" disabled={save.saving}>
           Save defaults
         </button>
-        <StatusMessage error={save.error} success={save.success} />
+        <StatusMessage error={save.error} />
       </div>
     </form>
   );

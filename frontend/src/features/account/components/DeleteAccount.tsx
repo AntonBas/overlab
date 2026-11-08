@@ -53,7 +53,7 @@ export function DeleteAccount() {
           onChange={(event) => setPassword(event.target.value)}
         />
       )}
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <div className="dialog__actions">
         <button
           type="button"

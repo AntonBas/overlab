@@ -46,7 +46,7 @@ export function PasswordForm() {
         error={save.fieldErrors.newPassword}
         onChange={(event) => setNewPassword(event.target.value)}
       />
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <button type="submit" className="button" disabled={save.saving}>
         Change password
       </button>

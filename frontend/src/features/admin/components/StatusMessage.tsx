@@ -1,22 +1,14 @@
 interface StatusMessageProps {
   error?: string | null;
-  success?: string | null;
 }
 
-export function StatusMessage({ error, success }: StatusMessageProps) {
-  if (error) {
-    return (
-      <p className="notice notice--error" role="alert">
-        {error}
-      </p>
-    );
+export function StatusMessage({ error }: StatusMessageProps) {
+  if (!error) {
+    return null;
   }
-  if (success) {
-    return (
-      <p className="notice notice--success" role="status">
-        {success}
-      </p>
-    );
-  }
-  return null;
+  return (
+    <p className="notice notice--error" role="alert">
+      {error}
+    </p>
+  );
 }

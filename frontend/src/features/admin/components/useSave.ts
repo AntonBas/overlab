@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useToast } from "../../../components/toast/toastContext";
 import { toFailure } from "../../../services/api";
 
 export interface SaveState {
@@ -18,6 +19,7 @@ export function useSave(): SaveState {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
+  const { showSuccess } = useToast();
 
   const reset = useCallback(() => {
     setError(null);
@@ -34,6 +36,7 @@ export function useSave(): SaveState {
       try {
         await action();
         setSuccess(successMessage);
+        showSuccess(successMessage);
         return true;
       } catch (failure) {
         const result = toFailure(failure);
@@ -48,7 +51,7 @@ export function useSave(): SaveState {
         setSaving(false);
       }
     },
-    [],
+    [showSuccess],
   );
 
   return { saving, error, fieldErrors, success, run, reset };

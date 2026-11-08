@@ -30,7 +30,7 @@ export function ProfileForm() {
         error={save.fieldErrors.displayName}
         onChange={(event) => setDisplayName(event.target.value)}
       />
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <button type="submit" className="button" disabled={save.saving}>
         Save name
       </button>

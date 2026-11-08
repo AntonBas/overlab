@@ -45,7 +45,7 @@ export function EmailForm({ currentEmail }: { currentEmail: string }) {
         value={currentPassword}
         onChange={(event) => setCurrentPassword(event.target.value)}
       />
-      <StatusMessage error={save.error} success={save.success} />
+      <StatusMessage error={save.error} />
       <button type="submit" className="button" disabled={save.saving}>
         Send confirmation
       </button>

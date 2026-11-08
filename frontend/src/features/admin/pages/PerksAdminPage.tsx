@@ -238,7 +238,7 @@ export function PerksAdminPage() {
           </>
         }
       />
-      <StatusMessage error={importing.error} success={importing.success} />
+      <StatusMessage error={importing.error} />
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}
@@ -255,7 +255,7 @@ export function PerksAdminPage() {
           }}
         />
       )}
-      <StatusMessage error={removal.error} success={removal.success} />
+      <StatusMessage error={removal.error} />
       {heroSlug && perks.loading && <Spinner />}
       {perks.error && (
         <ErrorMessage failure={perks.error} onRetry={perks.reload} />
