@@ -5,7 +5,6 @@ services:
       dockerfile: docker/caddy/Dockerfile
       args:
         VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
-        VITE_SUPPORT_URL: ${SUPPORT_URL:-}
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS, for example overlabgg.com}
