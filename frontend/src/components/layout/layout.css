@@ -141,6 +141,12 @@
 
   .site-footer__brand {
     grid-column: 1 / -1;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .site-footer__brand p {
+    margin-inline: auto;
   }
 }
 
