@@ -5,7 +5,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import { humanize } from "../../../utils/format";
+import { formatDateTime, humanize } from "../../../utils/format";
 import { useAuth } from "../../auth/context/useAuth";
 import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -117,7 +117,7 @@ export function UsersAdminPage() {
                   <td>{humanize(entry.provider)}</td>
                   <td>
                     {entry.lastLoginAt
-                      ? new Date(entry.lastLoginAt).toLocaleString()
+                      ? formatDateTime(entry.lastLoginAt)
                       : "never"}
                   </td>
                   <td>
