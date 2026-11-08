@@ -84,3 +84,7 @@
 		file_server
 	}
 }
+
+{$WWW_ADDRESS:http://www.localhost} {
+	redir {$CANONICAL_URL:http://localhost}{uri} permanent
+}
