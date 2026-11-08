@@ -1,5 +1,7 @@
+import { Coffee } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "./navLinks";
+import { supportUrl } from "./supportUrl";
 
 export function Footer() {
   const { pathname } = useLocation();
@@ -41,6 +43,17 @@ export function Footer() {
             <Link to="/cookies">Cookies</Link>
             <Link to={feedbackPath}>Send feedback</Link>
             <Link to="/business">Sponsorship and business</Link>
+            {supportUrl && (
+              <a
+                className="site-footer__support"
+                href={supportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Coffee aria-hidden="true" size={16} />
+                Support the site
+              </a>
+            )}
           </nav>
         </div>
         <div className="site-footer__fine-print">

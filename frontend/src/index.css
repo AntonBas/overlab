@@ -227,6 +227,12 @@ ul {
   color: var(--muted);
 }
 
+.site-footer__support {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .site-footer__main {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(2, minmax(120px, 1fr));
@@ -374,6 +380,10 @@ ul {
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.button--compact {
+  padding: 6px 14px;
 }
 
 .button--ghost {
@@ -906,6 +916,46 @@ select:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.auth-card__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.auth-card__divider::before,
+.auth-card__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-card__switch {
+  margin: 4px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.auth-link {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-link--aside {
+  align-self: flex-end;
+  margin-top: -8px;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .form {

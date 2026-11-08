@@ -34,6 +34,8 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 
 A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages and the Business page comes from the `VITE_CONTACT_EMAIL` build variable (in the production compose file it is filled from `CONTACT_EMAIL`); without it they point to the Business page form.
 
+The header has a single "Sign in" button; the sign-in and registration pages link to each other. The footer shows a "Support the site" link only when `SUPPORT_URL` (an `https://` address, passed to the frontend build as `VITE_SUPPORT_URL`) is set; leave it empty to hide the link. Check Blizzard's fan content rules before enabling it.
+
 The header has a hero search (keyboard friendly) and a compact menu on narrow screens. Auth and admin pages are loaded lazily. `npm run size` (run in CI after `npm run build`) fails when the entry chunk exceeds 125 KB gzip or any other chunk exceeds 30 KB. Component accessibility is checked with `vitest-axe`.
 
 ### Admin

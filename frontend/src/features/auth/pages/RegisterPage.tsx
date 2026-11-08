@@ -45,7 +45,11 @@ export function RegisterPage() {
       <AuthLayout title="Check your email">
         <p>
           We sent a confirmation link to <strong>{email}</strong>. Open it to
-          activate your account, then <Link to="/login">sign in</Link>.
+          activate your account, then{" "}
+          <Link className="auth-link" to="/login">
+            sign in
+          </Link>
+          .
         </p>
       </AuthLayout>
     );
@@ -108,8 +112,11 @@ export function RegisterPage() {
           {submitting ? "Creating..." : "Create account"}
         </button>
       </form>
-      <p className="muted">
-        Already registered? <Link to="/login">Sign in</Link>
+      <p className="auth-card__switch">
+        Already registered?{" "}
+        <Link className="auth-link" to="/login">
+          Sign in
+        </Link>
       </p>
     </AuthLayout>
   );

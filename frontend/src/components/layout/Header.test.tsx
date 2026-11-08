@@ -32,6 +32,17 @@ describe("Header", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("offers a single sign in button to anonymous visitors", () => {
+    renderWithRouter(<Header />);
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
+    expect(
+      screen.queryByRole("link", { name: "Create account" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("hides the admin link from anonymous visitors", () => {
     renderWithRouter(<Header />);
     expect(

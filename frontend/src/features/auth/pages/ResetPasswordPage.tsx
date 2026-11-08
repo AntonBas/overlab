@@ -38,8 +38,24 @@ export function ResetPasswordPage() {
     return (
       <AuthLayout title="Password changed">
         <p>
-          Your password was changed. <Link to="/login">Sign in</Link> with the
-          new one.
+          Your password was changed.{" "}
+          <Link className="auth-link" to="/login">
+            Sign in
+          </Link>{" "}
+          with the new one.
+        </p>
+      </AuthLayout>
+    );
+  }
+
+  if (!token) {
+    return (
+      <AuthLayout title="Link is incomplete">
+        <p>
+          This page needs the link from your email.{" "}
+          <Link className="auth-link" to="/forgot-password">
+            Request a new link
+          </Link>
         </p>
       </AuthLayout>
     );
@@ -62,14 +78,13 @@ export function ResetPasswordPage() {
         />
         {error && (
           <p className="form__error" role="alert">
-            {error} <Link to="/forgot-password">Request a new link</Link>
+            {error}{" "}
+            <Link className="auth-link" to="/forgot-password">
+              Request a new link
+            </Link>
           </p>
         )}
-        <button
-          type="submit"
-          className="button"
-          disabled={submitting || !token}
-        >
+        <button type="submit" className="button" disabled={submitting}>
           Change password
         </button>
       </form>
