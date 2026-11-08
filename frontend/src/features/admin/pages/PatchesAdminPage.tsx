@@ -13,13 +13,13 @@ import {
   importPatches,
   updatePatch,
 } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { DataTable } from "../components/DataTable";
-import { Drawer } from "../components/Drawer";
-import { TextAreaField } from "../components/Fields";
-import { StatusMessage } from "../components/StatusMessage";
-import { useSave } from "../components/useSave";
-import { useUnsavedChanges } from "../components/unsavedChanges";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { DataTable } from "../components/ui/DataTable";
+import { Drawer } from "../components/ui/Drawer";
+import { TextAreaField } from "../components/ui/Fields";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useSave } from "../components/forms/useSave";
+import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import { formatDateTime } from "../../../utils/format";
 
 function toLocalInput(iso: string): string {

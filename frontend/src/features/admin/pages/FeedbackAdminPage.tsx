@@ -12,8 +12,8 @@ import {
   fetchFeedback,
   fetchRelationVoteSummary,
 } from "../api/adminApi";
-import { DataTable } from "../components/DataTable";
-import { StatusMessage } from "../components/StatusMessage";
+import { DataTable } from "../components/ui/DataTable";
+import { StatusMessage } from "../components/ui/StatusMessage";
 import type {
   FeedbackMessage,
   FeedbackStatus,

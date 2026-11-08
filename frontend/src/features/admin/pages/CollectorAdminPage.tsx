@@ -10,11 +10,11 @@ import {
   fetchCollectorRuns,
   runCollectorJob,
 } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { DataTable } from "../components/DataTable";
-import { StatusBadge } from "../components/StatusBadge";
-import { StatusMessage } from "../components/StatusMessage";
-import { useSave } from "../components/useSave";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { DataTable } from "../components/ui/DataTable";
+import { StatusBadge } from "../components/ui/StatusBadge";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useSave } from "../components/forms/useSave";
 import type { CollectorJob, CollectorRunStatus } from "../types";
 import { describeCron, describeInterval } from "../utils/cron";
 import { splitWords } from "../utils/audit";

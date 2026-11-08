@@ -14,13 +14,13 @@ import {
   updateMap,
   uploadMapImage,
 } from "../api/adminApi";
-import { DataTable } from "../components/DataTable";
-import { Drawer } from "../components/Drawer";
-import { SelectField } from "../components/Fields";
-import { ImageUploadField } from "../components/ImageUploadField";
-import { StatusMessage } from "../components/StatusMessage";
-import { useSave } from "../components/useSave";
-import { useUnsavedChanges } from "../components/unsavedChanges";
+import { DataTable } from "../components/ui/DataTable";
+import { Drawer } from "../components/ui/Drawer";
+import { SelectField } from "../components/ui/Fields";
+import { ImageUploadField } from "../components/forms/ImageUploadField";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useSave } from "../components/forms/useSave";
+import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 
 const MODES: MapMode[] = [
   "CONTROL",

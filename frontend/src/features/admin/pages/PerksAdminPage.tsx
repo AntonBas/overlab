@@ -21,16 +21,16 @@ import {
   updatePerk,
   uploadPerkIcon,
 } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { DataTable } from "../components/DataTable";
-import { Drawer } from "../components/Drawer";
-import { SelectField, TextAreaField } from "../components/Fields";
-import { HeroSelect } from "../components/HeroSelect";
-import { ImageUploadField } from "../components/ImageUploadField";
-import { StatusMessage } from "../components/StatusMessage";
-import { useHeroOptions } from "../components/useHeroOptions";
-import { useSave } from "../components/useSave";
-import { useUnsavedChanges } from "../components/unsavedChanges";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { DataTable } from "../components/ui/DataTable";
+import { Drawer } from "../components/ui/Drawer";
+import { SelectField, TextAreaField } from "../components/ui/Fields";
+import { HeroSelect } from "../components/hero/HeroSelect";
+import { ImageUploadField } from "../components/forms/ImageUploadField";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useHeroOptions } from "../components/hero/useHeroOptions";
+import { useSave } from "../components/forms/useSave";
+import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import { FormField } from "../../../components/ui/FormField";
 
 const RECOMMENDATIONS: PerkRecommendation[] = [

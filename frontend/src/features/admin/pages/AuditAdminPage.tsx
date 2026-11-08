@@ -9,9 +9,9 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { fetchAuditLog } from "../api/adminApi";
 import { ChangeView } from "../components/ChangeView";
-import { SelectField } from "../components/Fields";
-import { Pagination } from "../components/Pagination";
-import { StatusBadge } from "../components/StatusBadge";
+import { SelectField } from "../components/ui/Fields";
+import { Pagination } from "../components/ui/Pagination";
+import { StatusBadge } from "../components/ui/StatusBadge";
 import type { AuditAction, AuditFilters } from "../types";
 import { describeActor, describeEntity } from "../utils/audit";
 

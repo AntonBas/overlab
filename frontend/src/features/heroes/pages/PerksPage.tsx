@@ -20,7 +20,7 @@ import type { HeroRole } from "../../../types/api";
 import { ROLES } from "../../stats/filters";
 import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
-import { PerkList } from "../components/PerkList";
+import { PerkList } from "../components/profile/PerkList";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function PerksPage() {
