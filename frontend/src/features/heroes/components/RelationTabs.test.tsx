@@ -35,17 +35,18 @@ function renderTabs(
 }
 
 describe("RelationTabs", () => {
-  it("opens the struggles tab first and shows the counts", () => {
+  it("opens the first tab and shows the counts", () => {
     renderTabs();
 
+    expect(screen.getByRole("tab", { name: /Strong against/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     expect(
-      screen.getByRole("tab", { name: /Struggles against/ }),
-    ).toHaveAttribute("aria-selected", "true");
-    expect(
-      screen.getByRole("tab", { name: /Strong against 1/ }),
+      screen.getByRole("tab", { name: /Struggles against 2/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Zarya")).toBeInTheDocument();
-    expect(screen.queryByText("Pharah")).not.toBeInTheDocument();
+    expect(screen.getByText("Pharah")).toBeInTheDocument();
+    expect(screen.queryByText("Zarya")).not.toBeInTheDocument();
   });
 
   it("switches the list when another tab is chosen", async () => {
@@ -54,13 +55,13 @@ describe("RelationTabs", () => {
     await userEvent.click(screen.getByRole("tab", { name: /Works well with/ }));
 
     expect(screen.getByText("Sombra")).toBeInTheDocument();
-    expect(screen.queryByText("Zarya")).not.toBeInTheDocument();
+    expect(screen.queryByText("Pharah")).not.toBeInTheDocument();
   });
 
   it("starts on the tab named in the address", () => {
-    renderTabs({}, "/heroes/dva?tab=strong");
+    renderTabs({}, "/heroes/dva?tab=struggles");
 
-    expect(screen.getByText("Pharah")).toBeInTheDocument();
+    expect(screen.getByText("Zarya")).toBeInTheDocument();
   });
 
   it("hides empty tabs and falls back to the first one that has heroes", () => {
@@ -84,11 +85,11 @@ describe("RelationTabs", () => {
   it("moves between tabs with the arrow keys", async () => {
     renderTabs();
 
-    screen.getByRole("tab", { name: /Struggles against/ }).focus();
+    screen.getByRole("tab", { name: /Strong against/ }).focus();
     await userEvent.keyboard("{ArrowRight}");
 
     expect(
-      screen.getByRole("tab", { name: /Works well with/ }),
+      screen.getByRole("tab", { name: /Struggles against/ }),
     ).toHaveAttribute("aria-selected", "true");
   });
 
@@ -101,17 +102,20 @@ describe("RelationTabs", () => {
         { slug: "pharah", name: "Pharah", role: "DAMAGE", portraitUrl: null },
       ],
     };
-    renderTabs({
-      categories: [flying],
-      categoryMatchups: [
-        {
-          heroSlug: "dva",
-          categorySlug: "flying",
-          type: "WEAK_AGAINST",
-          note: null,
-        },
-      ],
-    });
+    renderTabs(
+      {
+        categories: [flying],
+        categoryMatchups: [
+          {
+            heroSlug: "dva",
+            categorySlug: "flying",
+            type: "WEAK_AGAINST",
+            note: null,
+          },
+        ],
+      },
+      "/heroes/dva?tab=struggles",
+    );
 
     expect(screen.getByRole("button", { name: /Flying/ })).toBeInTheDocument();
     expect(screen.getByText("Zarya")).toBeInTheDocument();

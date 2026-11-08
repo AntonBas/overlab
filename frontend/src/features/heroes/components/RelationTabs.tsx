@@ -35,8 +35,6 @@ const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
   synergies: "WORKS_WITH",
 };
 
-const PREFERRED_TAB: RelationTabId = "struggles";
-
 export function RelationTabs({
   strongAgainst,
   counteredBy,
@@ -85,10 +83,7 @@ export function RelationTabs({
   }
 
   const requested = searchParams.get("tab");
-  const active =
-    tabs.find((tab) => tab.id === requested) ??
-    tabs.find((tab) => tab.id === PREFERRED_TAB) ??
-    tabs[0];
+  const active = tabs.find((tab) => tab.id === requested) ?? tabs[0];
 
   function select(id: RelationTabId) {
     setSearchParams(
