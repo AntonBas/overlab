@@ -14,7 +14,7 @@ import {
 } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import type { GameQueue } from "../../../types/api";
-import { HeroMapPicks } from "../components/HeroMapPicks";
+import { HeroMapPicks } from "../components/profile/HeroMapPicks";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
 import { SpotsSection } from "../../guides/components/SpotsSection";
@@ -28,15 +28,15 @@ import {
   fetchHeroAbilities,
   fetchSynergies,
 } from "../api/heroesApi";
-import { StatChips } from "../components/StatChips";
-import { AbilityList } from "../components/AbilityList";
-import { AbilityText } from "../components/AbilityText";
-import { ControlSchemeToggle } from "../components/ControlSchemeToggle";
-import { HeroSectionNav } from "../components/HeroSectionNav";
-import { HeroTraits } from "../components/HeroTraits";
+import { StatChips } from "../components/profile/StatChips";
+import { AbilityList } from "../components/abilities/AbilityList";
+import { AbilityText } from "../components/abilities/AbilityText";
+import { ControlSchemeToggle } from "../components/abilities/ControlSchemeToggle";
+import { HeroSectionNav } from "../components/profile/HeroSectionNav";
+import { HeroTraits } from "../components/profile/HeroTraits";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
-import { PerkList } from "../components/PerkList";
-import { RelationTabs } from "../components/RelationTabs";
+import { PerkList } from "../components/profile/PerkList";
+import { RelationTabs } from "../components/relations/RelationTabs";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
 
 export function HeroPage() {

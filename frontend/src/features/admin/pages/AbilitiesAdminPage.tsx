@@ -16,11 +16,11 @@ import {
   fetchAdminHeroes,
   updateAbilityControl,
 } from "../api/adminApi";
-import { DataTable } from "../components/DataTable";
-import { SelectField } from "../components/Fields";
-import { HeroSelect } from "../components/HeroSelect";
-import { StatusMessage } from "../components/StatusMessage";
-import { useSave } from "../components/useSave";
+import { DataTable } from "../components/ui/DataTable";
+import { SelectField } from "../components/ui/Fields";
+import { HeroSelect } from "../components/hero/HeroSelect";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useSave } from "../components/forms/useSave";
 import type { AdminAbility } from "../types";
 
 function optionLabel(control: AbilityControl): string {

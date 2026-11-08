@@ -18,8 +18,8 @@ vi.mock("../features/heroes/api/heroesApi", () => ({
 
 import { Header } from "../components/layout/Header";
 import { RoleBadge } from "../components/ui/RoleBadge";
-import { PerkList } from "../features/heroes/components/PerkList";
-import { RelatedHeroes } from "../features/heroes/components/RelatedHeroes";
+import { PerkList } from "../features/heroes/components/profile/PerkList";
+import { RelatedHeroes } from "../features/heroes/components/relations/RelatedHeroes";
 import { ChangesTable } from "../features/history/components/ChangesTable";
 import { LineChart } from "../features/history/components/LineChart";
 import { StatsTable } from "../features/stats/components/StatsTable";

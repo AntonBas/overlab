@@ -10,12 +10,12 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { useAuth } from "../../auth/context/useAuth";
 import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { SelectField } from "../components/Fields";
-import { Pagination } from "../components/Pagination";
-import { StatusMessage } from "../components/StatusMessage";
-import { useSave } from "../components/useSave";
-import { StatusBadge } from "../components/StatusBadge";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { SelectField } from "../components/ui/Fields";
+import { Pagination } from "../components/ui/Pagination";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useSave } from "../components/forms/useSave";
+import { StatusBadge } from "../components/ui/StatusBadge";
 import type { AdminUser } from "../types";
 
 interface UserFilterForm {

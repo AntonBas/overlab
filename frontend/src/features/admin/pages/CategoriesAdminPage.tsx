@@ -15,18 +15,18 @@ import {
   updateCategory,
   updateCategoryMatchup,
 } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { DataTable } from "../components/DataTable";
-import { Drawer } from "../components/Drawer";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { DataTable } from "../components/ui/DataTable";
+import { Drawer } from "../components/ui/Drawer";
 import {
   CheckboxField,
   SelectField,
   TextAreaField,
-} from "../components/Fields";
-import { StatusMessage } from "../components/StatusMessage";
-import { useHeroOptions } from "../components/useHeroOptions";
-import { useSave } from "../components/useSave";
-import { useUnsavedChanges } from "../components/unsavedChanges";
+} from "../components/ui/Fields";
+import { StatusMessage } from "../components/ui/StatusMessage";
+import { useHeroOptions } from "../components/hero/useHeroOptions";
+import { useSave } from "../components/forms/useSave";
+import { useUnsavedChanges } from "../components/forms/unsavedChanges";
 import type {
   AdminCategory,
   AdminCategoryMatchup,

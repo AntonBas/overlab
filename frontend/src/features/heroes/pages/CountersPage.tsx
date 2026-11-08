@@ -23,8 +23,8 @@ import {
   fetchHeroCategories,
   fetchHeroes,
 } from "../api/heroesApi";
-import { CategoryChip } from "../components/CategoryChip";
-import { RelationAvatar } from "../components/RelationAvatar";
+import { CategoryChip } from "../components/profile/CategoryChip";
+import { RelationAvatar } from "../components/relations/RelationAvatar";
 import {
   bindRelationFeedback,
   useRelationVotes,
