@@ -181,7 +181,7 @@ export function UsersAdminPage() {
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
           <option value="lastLogin">Last sign-in</option>
-          <option value="name">Name A-Z</option>
+          <option value="name">Name A–Z</option>
         </SelectField>
         {filtered && (
           <button

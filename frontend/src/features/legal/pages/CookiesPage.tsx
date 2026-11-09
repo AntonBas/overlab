@@ -21,8 +21,10 @@ export function CookiesPage() {
               your password again. Removed when you sign out.
             </li>
             <li>
-              <code>overlab.controlScheme</code> and your choices on this page
-              are kept in your browser's local storage to remember preferences.
+              <code>overlab.controlScheme</code>: remembers the controller
+              layout you picked. It is stored, together with your choices on
+              this page, in your browser's local storage rather than in a
+              cookie.
             </li>
           </ul>
         </section>

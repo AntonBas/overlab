@@ -20,8 +20,8 @@ export function PrivacyPage() {
         <section>
           <h2>What we collect</h2>
           <p>
-            Browsing the statistics needs no account and we do not ask for any
-            personal data. If you create an account we store:
+            Browsing the statistics needs no account, and we do not ask for any
+            personal data. If you create an account, we store:
           </p>
           <ul>
             <li>your email address and display name;</li>
@@ -39,9 +39,10 @@ export function PrivacyPage() {
             </li>
           </ul>
           <p>
-            If you send us a feedback message we store its text and the page you
-            sent it from. When you are signed in the message is linked to your
-            account; it is kept, without the link, if you delete the account.
+            If you send us a feedback message, we store its text and the page
+            you sent it from. When you are signed in, the message is linked to
+            your account. If you delete the account, the message is kept without
+            the link.
           </p>
           <p>
             Our security log records account events (sign-in, password change,
@@ -94,10 +95,7 @@ export function PrivacyPage() {
         </section>
         <section>
           <h2>Changes</h2>
-          <p>
-            We will update this page when our practices change and note the date
-            of the latest revision here.
-          </p>
+          <p>We will update this page whenever our practices change.</p>
         </section>
       </div>
     </div>

@@ -89,7 +89,7 @@ export function GuideForm({
   const localErrors: Record<string, string> = {};
   if (youtubeId === null) {
     localErrors.youtubeId =
-      "Paste a YouTube link (youtu.be/... or watch?v=...) or an 11 character id.";
+      "Paste a YouTube link (youtu.be/... or watch?v=...) or an 11-character ID.";
   }
   if (startSeconds === null) {
     localErrors.startSeconds = "Use the format 1:23 or 1:02:03.";

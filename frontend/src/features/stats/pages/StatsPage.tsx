@@ -100,7 +100,7 @@ export function StatsPage() {
           )}
           {showDelta && (
             <p className="muted footnote">
-              Small numbers show the difference from the all-maps value.
+              Small numbers show how each rate differs from its all-maps value.
             </p>
           )}
         </div>

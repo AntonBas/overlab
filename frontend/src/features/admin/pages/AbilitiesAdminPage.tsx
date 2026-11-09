@@ -138,7 +138,7 @@ export function AbilitiesAdminPage() {
             onChange={setHeroSlug}
           />
           <p className="muted">
-            Choose the slot each ability uses; the key in brackets is the PC
+            Choose the slot each ability uses; the key in parentheses is the PC
             default. The site shows the matching button on PC, Xbox, PlayStation
             and Switch.
           </p>

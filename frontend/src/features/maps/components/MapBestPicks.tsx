@@ -128,11 +128,11 @@ export function MapBestPicks({
         ))}
       </div>
       <p className="muted footnote">
-        Each hero shows the win rate on this map, how often the hero is picked
-        and, as the coloured number, how much the win rate differs from the
-        hero&apos;s all-maps win rate. Both lists are weighted by how often the
-        hero is picked, so rarely played heroes do not top them by chance.
-        Differences under 0.5 points are within noise.
+        Each hero shows its win rate on this map and how often it is picked. The
+        colored number shows how far that win rate is from the hero&apos;s
+        all-maps win rate. Both lists are weighted by pick rate, so rarely
+        played heroes do not top them by chance. Differences under 0.5 points
+        are within noise.
       </p>
     </section>
   );

@@ -91,7 +91,7 @@ function RelationForm({
         onChange={(event) => setType(event.target.value as RelationType)}
       >
         <option value="COUNTER">
-          Counter (hero is strong against related hero)
+          Counter (the hero is strong against the related hero)
         </option>
         <option value="SYNERGY">Synergy</option>
       </SelectField>
