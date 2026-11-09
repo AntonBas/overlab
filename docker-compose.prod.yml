@@ -124,6 +124,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      backend:
+        condition: service_started
     logging: *logging
     networks:
       - overlab-net

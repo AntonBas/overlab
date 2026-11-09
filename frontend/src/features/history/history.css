@@ -16,6 +16,24 @@
   cursor: help;
 }
 
+.table__hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.table__hero a {
+  color: var(--text);
+}
+
+.table__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+}
+
 .change__value {
   text-align: right;
 }
@@ -158,6 +176,10 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--accent-text);
+}
+
+.chart__tooltip .delta {
+  margin-left: 0;
 }
 
 .chart__tooltip-effect {

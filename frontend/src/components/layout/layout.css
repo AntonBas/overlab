@@ -154,6 +154,33 @@
   padding: 6px 14px;
 }
 
+.table td .button {
+  padding: 5px 12px;
+  font-size: 0.875rem;
+}
+
+.table thead th {
+  background: var(--surface-2);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
 .main:focus {
   outline: none;
 }

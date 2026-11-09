@@ -114,3 +114,21 @@
 .favorite-star[aria-pressed="true"] {
   color: var(--accent-text);
 }
+
+.map-card__favorite .favorite-star {
+  color: #fff;
+  background: rgb(0 0 0 / 0.55);
+  border-radius: 999px;
+}
+
+.map-card__favorite .favorite-star:hover,
+.map-card__favorite .favorite-star[aria-pressed="true"] {
+  color: var(--accent-text);
+}
+
+.place-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}

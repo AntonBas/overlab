@@ -14,7 +14,7 @@ trap 'docker rm -f "${CONTAINER}" >/dev/null 2>&1 || true' EXIT
 docker run -d --name "${CONTAINER}" -e POSTGRES_USER=overlab -e POSTGRES_PASSWORD=restorecheck -e POSTGRES_DB=restorecheck \
     postgres:16-alpine >/dev/null
 
-until docker exec "${CONTAINER}" pg_isready -U overlab -d restorecheck >/dev/null 2>&1; do
+until docker exec "${CONTAINER}" pg_isready -h 127.0.0.1 -U overlab -d restorecheck >/dev/null 2>&1; do
     sleep 1
 done
 
