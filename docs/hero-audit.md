@@ -6,7 +6,11 @@
 
 ## Статус виправлень
 
-Міграція `V27__hero_audit_fixes.sql` (застосована локально): 3 застарілі перки (D.Mon, Winston, Echo), тексти Emre, Shion, Symmetra, Widowmaker, Moira, рід Doctrine/Lifeweaver/D.Mon у нотатках, видалено 15 хибних зв'язків, додано 8 перевернутих, прибрано `long-range` та WEAK vs `dive` у Emre, додано `hitscan` Shion. Не чіпано (чекають рішення, позначені (?)): Zarya→Genji, Ana↔Roadhog, Pharah↔Roadhog, Moira↔Lucio, Mauga↔Jetpack Cat, Winston/Ball у `fast-targets`, Brigitte/Winston, Ana/Anran, Orisa/Winston, Hanzo WEAK vs `flying`, Doctrine `projectile`, Venture «her/they», Cost of Life (лише одне джерело). Усі пропуски зв'язків і склад категорій — наступний етап.
+Міграція `V27__hero_audit_fixes.sql`: 3 застарілі перки (D.Mon, Winston, Echo), тексти Emre, Shion, Symmetra, Widowmaker, Moira, рід Doctrine/Lifeweaver/D.Mon у нотатках, видалено 15 хибних зв'язків, додано 8 перевернутих, прибрано `long-range` та WEAK vs `dive` у Emre, додано `hitscan` Shion. `imported_description` перків не чіпається, щоб імпорт від Blizzard не затирав правки.
+
+Напряму в БД (без міграцій): додано 204 контри та 132 синергії, Doctrine прибрано з `projectile`. Кожен герой тепер має хоча б один зв'язок; взаємних контр немає.
+
+Не чіпано (чекає рішення): Zarya→Genji, Ana↔Roadhog, Pharah↔Roadhog, Moira↔Lucio, Mauga↔Jetpack Cat, Winston/Ball у `fast-targets`, Brigitte/Winston, Ana/Anran, Orisa/Winston, Hanzo WEAK vs `flying`, Venture «her/they», Cost of Life, склад категорій (розділ 2.5). Без вихідних контр лишились Freja, Lifeweaver, Shion, Wuyang, Jetpack Cat, Lucio.
 
 ## 1. Підсумок
 
