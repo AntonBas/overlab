@@ -1,6 +1,10 @@
 name: Deploy
 
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
@@ -15,16 +19,19 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Check the deploy settings
         env:
           REF: ${{ github.event.inputs.ref || github.ref_name }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
@@ -42,6 +49,40 @@ jobs:
             echo "::error::The ref contains unexpected characters"
             exit 1
           fi
+          if [ -n "$SHA" ] && ! printf '%s' "$SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::The commit id is not valid"
+            exit 1
+          fi
+
+      - name: Require a green Security run
+        if: github.event_name == 'workflow_run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          for attempt in $(seq 1 60); do
+            result="$(gh run list --repo "$REPOSITORY" --workflow Security --commit "$SHA" --event push --limit 1 --json status,conclusion --jq '.[0] | (.status + " " + (.conclusion // ""))' || true)"
+            case "$result" in
+              "completed success")
+                echo "Security passed"
+                exit 0
+                ;;
+              completed*)
+                echo "::error::Security did not pass: $result"
+                exit 1
+                ;;
+              "")
+                echo "Security has not started yet ($attempt/60)"
+                ;;
+              *)
+                echo "Security is still running ($attempt/60)"
+                ;;
+            esac
+            sleep 20
+          done
+          echo "::error::Security did not finish in time"
+          exit 1
 
       - name: Configure SSH
         env:
@@ -56,20 +97,42 @@ jobs:
       - name: Update the server
         env:
           REF: ${{ github.event.inputs.ref || github.ref_name }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<REMOTE
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "bash -s -- '$DEPLOY_PATH' '$REF' '$SHA'" <<'REMOTE'
           set -euo pipefail
-          cd '$DEPLOY_PATH'
+          path="$1"
+          ref="$2"
+          sha="$3"
+          cd "$path"
+          compose="docker compose -f docker-compose.prod.yml --env-file .env.prod"
+          db_user="$(grep -E '^DB_USER=' .env.prod | cut -d= -f2-)"
+          db_name="$(grep -E '^DB_NAME=' .env.prod | cut -d= -f2-)"
+          for attempt in $(seq 1 40); do
+            running="$($compose exec -T postgres psql -U "${db_user:-overlab}" -d "${db_name:-overlab}" -At -c "select count(*) from collector_runs where status = 'RUNNING'" < /dev/null || echo 0)"
+            if [ "$running" = "0" ]; then
+              break
+            fi
+            echo "The collector is running, waiting ($attempt/40)"
+            sleep 30
+          done
+          before="$(git rev-parse HEAD)"
           git fetch --tags --prune origin
-          git checkout --force '$REF'
-          if git show-ref --verify --quiet 'refs/remotes/origin/$REF'; then
-            git reset --hard 'origin/$REF'
+          git checkout --force "$ref"
+          if [ -n "$sha" ]; then
+            git reset --hard "$sha"
+          elif git show-ref --verify --quiet "refs/remotes/origin/$ref"; then
+            git reset --hard "origin/$ref"
           fi
-          docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+          $compose up -d --build
+          if git diff --name-only "$before" HEAD | grep -q '^docker/grafana/'; then
+            $compose restart grafana
+          fi
           docker image prune -f
+          echo "Deployed $(git rev-parse --short HEAD)"
           REMOTE
 
       - name: Wait for the site
