@@ -5,14 +5,32 @@
 }
 
 .hero-traits__column {
-  border-left: 3px solid var(--border, currentColor);
+  --trait-color: var(--link);
   padding-left: 12px;
+  border-left: 3px solid var(--trait-color);
+}
+
+.hero-traits__column--strong {
+  --trait-color: var(--good);
+}
+
+.hero-traits__column--weak {
+  --trait-color: var(--bad);
+}
+
+.hero-traits__column h2 {
+  margin-top: 0;
+  color: var(--trait-color);
 }
 
 .hero-traits__column ul {
   margin: 0;
   padding-left: 16px;
   list-style: disc;
+}
+
+.hero-traits__column li::marker {
+  color: var(--trait-color);
 }
 
 .hero-traits__column li + li {
@@ -654,9 +672,22 @@
   --column-color: var(--link);
   min-width: 0;
   padding: 12px;
-  background: color-mix(in srgb, var(--column-color) 6%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--column-color) 18%, transparent);
+  background: color-mix(in srgb, var(--column-color) 10%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--column-color) 30%, transparent);
+  border-top: 3px solid var(--column-color);
   border-radius: var(--radius);
+}
+
+.matchup__cell--counters {
+  --column-color: var(--good);
+}
+
+.matchup__cell--counteredBy {
+  --column-color: var(--bad);
+}
+
+.matchup__cell--synergies {
+  --column-color: var(--synergy);
 }
 
 .matchup__label {
@@ -667,6 +698,22 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.matchup__label::before {
+  margin-right: 6px;
+}
+
+.matchup__cell--counters .matchup__label::before {
+  content: "\25B2";
+}
+
+.matchup__cell--counteredBy .matchup__label::before {
+  content: "\25BC";
+}
+
+.matchup__cell--synergies .matchup__label::before {
+  content: "\25C6";
 }
 
 .matchup__empty {
@@ -707,7 +754,7 @@
 .relation-avatar__image {
   display: inline-flex;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--role-color, var(--border));
+  box-shadow: 0 0 0 2px var(--column-color, var(--role-color, var(--border)));
 }
 
 .relation-avatar__image .portrait {

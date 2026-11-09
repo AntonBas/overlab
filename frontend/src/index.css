@@ -12,6 +12,7 @@
   --link: #8ec5ff;
   --good: #3ecf8e;
   --bad: #ff6b6b;
+  --synergy: #6ea8ff;
   --tank: #4f9dff;
   --damage: #ff6b6b;
   --support: #3ecf8e;
@@ -36,6 +37,7 @@
     --link: #0b5fc5;
     --good: #0b6b40;
     --bad: #c93030;
+    --synergy: #1f6fd1;
     --tank: #1f6fd1;
     --damage: #c93030;
     --support: #138a55;
@@ -154,14 +156,6 @@ ul {
 
 .prose {
   max-width: 70ch;
-}
-
-.hero-traits__column--strong {
-  border-left-color: #2e9e5b;
-}
-
-.hero-traits__column--weak {
-  border-left-color: #d1495b;
 }
 
 .button {
@@ -1163,14 +1157,6 @@ input[type="range"] {
 
 .matchup--support {
   --role-color: var(--support);
-}
-
-.matchup__cell--counters {
-  --column-color: var(--good);
-}
-
-.matchup__cell--counteredBy {
-  --column-color: var(--bad);
 }
 
 .relation-avatar--tank {
