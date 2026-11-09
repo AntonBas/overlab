@@ -1,6 +1,7 @@
 import { NewBadge } from "../../../../components/ui/NewBadge";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
 import type { Ability } from "../../../../types/api";
+import { formatAbilityDescription } from "../../utils/abilityDescription";
 import { AbilityKey } from "./AbilityKey";
 
 export function AbilityList({ abilities }: { abilities: Ability[] }) {
@@ -21,7 +22,9 @@ export function AbilityList({ abilities }: { abilities: Ability[] }) {
               <AbilityKey control={ability.control} showLabel />
             </span>
             {ability.description && (
-              <span className="muted">{ability.description}</span>
+              <span className="muted">
+                {formatAbilityDescription(ability.description)}
+              </span>
             )}
           </span>
         </li>

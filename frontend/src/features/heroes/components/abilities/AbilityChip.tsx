@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useFloatingTip } from "../../../../hooks/useFloatingTip";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
 import type { Ability } from "../../../../types/api";
+import { formatAbilityDescription } from "../../utils/abilityDescription";
 import { AbilityKey } from "./AbilityKey";
 
 export function AbilityChip({ ability }: { ability: Ability }) {
@@ -39,7 +40,9 @@ export function AbilityChip({ ability }: { ability: Ability }) {
         >
           <strong>{ability.name}</strong>
           <AbilityKey control={ability.control} showLabel />
-          {ability.description && <span>{ability.description}</span>}
+          {ability.description && (
+            <span>{formatAbilityDescription(ability.description)}</span>
+          )}
         </span>,
         document.body,
       )}
