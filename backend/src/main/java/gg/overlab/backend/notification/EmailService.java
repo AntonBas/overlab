@@ -44,7 +44,7 @@ public class EmailService {
                         + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm email",
                 frontendUrl + "/verify-email?token=" + rawToken,
-                "If you did not register, ignore this message."));
+                "If you did not register, you can ignore this message."));
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
@@ -56,7 +56,7 @@ public class EmailService {
                         + describe(authProperties.resetTokenTtl()) + "."),
                 "Set a new password",
                 frontendUrl + "/reset-password?token=" + rawToken,
-                "If you did not request this, ignore this message."));
+                "If you did not request this, you can ignore this message."));
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
@@ -68,7 +68,7 @@ public class EmailService {
                         + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm new email",
                 frontendUrl + "/verify-email?token=" + rawToken,
-                "If you did not request this, ignore this message."));
+                "If you did not request this, you can ignore this message."));
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
@@ -80,7 +80,7 @@ public class EmailService {
                         + "Google and has no password."),
                 "Sign in with Google",
                 frontendUrl + "/login",
-                "If this was not you, ignore this message."));
+                "If this was not you, you can ignore this message."));
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
