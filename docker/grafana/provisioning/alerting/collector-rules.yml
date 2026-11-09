@@ -1,0 +1,194 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: overlab-collector
+    folder: Overlab
+    interval: 5m
+    rules:
+      - uid: collector-daily-stale
+        title: "Collector: no successful daily-overview run for 2 days"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: time() - collector_last_success_timestamp_seconds{collector_job="daily-overview"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 172800
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The daily-overview job has not finished successfully for longer than expected. Check Collector runs in the admin API and the backend logs."
+      - uid: collector-weekly-stale
+        title: "Collector: no successful weekly-maps run for 9 days"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: time() - collector_last_success_timestamp_seconds{collector_job="weekly-maps"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 777600
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The weekly-maps job has not finished successfully for longer than expected. Check Collector runs in the admin API and the backend logs."
+      - uid: collector-rejected-snapshots
+        title: "Collector: Blizzard responses were rejected in the last day"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(collector_rejected_snapshots_total[1d]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Responses from Blizzard failed validation, which usually means the endpoint format changed. Check the collector warnings in the backend logs."
+      - uid: collector-new-hero
+        title: "Collector: a new hero appeared"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(collector_new_heroes_total[6h]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "The collector found a hero that was not in the database. Add the description, strengths, categories, counters and synergies in the admin panel."
+      - uid: collector-new-map
+        title: "Collector: a new map appeared"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(collector_new_maps_total[6h]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "The collector created a map that was not in the database. Set its game mode and image in the admin panel."
+      - uid: collector-role-changed
+        title: "Collector: a hero changed role"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(collector_role_changes_total[6h]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Blizzard moved a hero to another role. Review the curated strengths, categories, counters and synergies of that hero; past statistics now show the new role."

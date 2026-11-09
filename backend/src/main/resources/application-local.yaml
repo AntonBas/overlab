@@ -1,0 +1,33 @@
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:overlab}
+    username: ${DB_USER:overlab}
+  jpa:
+    show-sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  auth:
+    cookie-secure: false
+    rate-limit-per-minute: 60
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    gg.overlab: DEBUG

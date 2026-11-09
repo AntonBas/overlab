@@ -1,0 +1,27 @@
+import { createContext } from "react";
+import type { Preferences } from "../../../types/api";
+
+export interface PersonalDataValue {
+  favoriteHeroes: ReadonlySet<string>;
+  favoriteMaps: ReadonlySet<string>;
+  preferences: Preferences | null;
+  preferencesLoaded: boolean;
+  failure: string | null;
+  toggleHeroFavorite: (slug: string) => Promise<void>;
+  toggleMapFavorite: (slug: string) => Promise<void>;
+  replacePreferences: (preferences: Preferences) => void;
+}
+
+export const EMPTY_PERSONAL_DATA: PersonalDataValue = {
+  favoriteHeroes: new Set(),
+  favoriteMaps: new Set(),
+  preferences: null,
+  preferencesLoaded: false,
+  failure: null,
+  toggleHeroFavorite: () => Promise.resolve(),
+  toggleMapFavorite: () => Promise.resolve(),
+  replacePreferences: () => undefined,
+};
+
+export const PersonalDataContext =
+  createContext<PersonalDataValue>(EMPTY_PERSONAL_DATA);

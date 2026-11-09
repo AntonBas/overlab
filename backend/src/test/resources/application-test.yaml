@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://unused:5432/unused
+    username: unused
+    password: unused
+  data:
+    redis:
+      host: unused
+      port: 6379
+
+app:
+  frontend-url: http://localhost:5173
+  media:
+    directory: build/test-media
+    base-url: /media
+  auth:
+    cookie-secure: false
+    rate-limit-per-minute: 1000
+  rate-limit:
+    api-per-minute: 100000
+    stats-per-minute: 100000
+
+collector:
+  patch-import:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    gg.overlab: INFO

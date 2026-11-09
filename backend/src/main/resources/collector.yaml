@@ -1,0 +1,58 @@
+collector:
+  base-url: https://overwatch.blizzard.com
+  user-agent: "Mozilla/5.0 (compatible; OverlabCollector/1.0)"
+  pause: 3s
+  game-format: ${COLLECTOR_GAME_FORMAT:FIVE_VS_FIVE}
+  min-heroes: 30
+  retry:
+    max-attempts: 3
+    backoff: 5s
+  timeouts:
+    connect: 5s
+    read: 20s
+  retention:
+    detailed-days: 180
+  startup-job: ${COLLECTOR_STARTUP_JOB:}
+  download-portraits: ${COLLECTOR_DOWNLOAD_PORTRAITS:false}
+  import-perks: ${COLLECTOR_IMPORT_PERKS:false}
+  patch-import:
+    enabled: true
+    cron: "0 45 3 * * *"
+  jobs:
+    - name: daily-overview
+      cron: "0 0 4 * * *"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [ALL, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [all-maps]
+    - name: daily-maps
+      after: daily-overview
+      min-interval: 2d
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [ALL]
+      maps: [EACH]
+    - name: weekly-maps
+      after: daily-overview
+      min-interval: 7d
+      queues: [COMPETITIVE]
+      platforms: [PC]
+      regions: [EUROPE]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [EACH]
+    - name: daily-other-regions
+      cron: "0 10 4 * * *"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [AMERICAS, ASIA]
+      tiers: [ALL]
+      maps: [all-maps]
+    - name: daily-console
+      cron: "0 20 4 * * *"
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [CONSOLE]
+      regions: [EUROPE, AMERICAS, ASIA]
+      tiers: [ALL]
+      maps: [all-maps]

@@ -1,0 +1,96 @@
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
+import type { StatsSort } from "../../../types/api";
+import { usePersonalData } from "../../personal/context/usePersonalData";
+import {
+  applyCoverage,
+  parseFilters,
+  toSearchParams,
+  type StatsFilters,
+} from "../filters";
+
+const FILTER_PARAMS = ["queue", "tier", "platform", "region"];
+
+function keepPreserved(
+  target: URLSearchParams,
+  source: URLSearchParams,
+  names: readonly string[],
+) {
+  for (const name of names) {
+    const value = source.get(name);
+    if (value !== null) {
+      target.set(name, value);
+    }
+  }
+}
+
+export function useFilterState(
+  fixedMap?: string,
+  preservedParams: readonly string[] = [],
+) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { preferences } = usePersonalData();
+  const preferencesApplied = useRef(false);
+  const filters = useMemo(() => {
+    const parsed = parseFilters(searchParams);
+    return fixedMap ? { ...parsed, map: fixedMap } : parsed;
+  }, [searchParams, fixedMap]);
+
+  useEffect(() => {
+    if (preferencesApplied.current || !preferences) {
+      return;
+    }
+    preferencesApplied.current = true;
+    if (FILTER_PARAMS.some((name) => searchParams.has(name))) {
+      return;
+    }
+    const withPreferences = parseFilters(searchParams);
+    const next: StatsFilters = applyCoverage({
+      ...withPreferences,
+      queue: preferences.queue ?? withPreferences.queue,
+      tier: preferences.tier ?? withPreferences.tier,
+      platform: preferences.platform ?? withPreferences.platform,
+      region: preferences.region ?? withPreferences.region,
+    });
+    if (next.queue === "QUICK_PLAY") {
+      next.tier = "ALL";
+    }
+    const params = toSearchParams(next);
+    if (fixedMap) {
+      params.delete("map");
+    }
+    keepPreserved(params, searchParams, preservedParams);
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [preferences, searchParams, fixedMap, preservedParams, setSearchParams]);
+
+  const update = useCallback(
+    (patch: Partial<StatsFilters>) => {
+      const next = applyCoverage({ ...filters, ...patch });
+      if (next.queue === "QUICK_PLAY") {
+        next.tier = "ALL";
+      }
+      const params = toSearchParams(next);
+      if (fixedMap) {
+        params.delete("map");
+      }
+      keepPreserved(params, searchParams, preservedParams);
+      setSearchParams(params);
+    },
+    [filters, fixedMap, preservedParams, searchParams, setSearchParams],
+  );
+
+  const changeSort = useCallback(
+    (sort: StatsSort) => {
+      if (filters.sort === sort) {
+        update({ direction: filters.direction === "ASC" ? "DESC" : "ASC" });
+      } else {
+        update({ sort, direction: sort === "NAME" ? "ASC" : "DESC" });
+      }
+    },
+    [filters.sort, filters.direction, update],
+  );
+
+  return { filters, update, changeSort, key: searchParams.toString() };
+}

@@ -1,0 +1,87 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag or branch to deploy
+        required: true
+        default: main
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check the deploy settings
+        env:
+          REF: ${{ github.event.inputs.ref || github.ref_name }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_PATH DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_URL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not set"
+              exit 1
+            fi
+          done
+          if ! printf '%s' "$REF" | grep -Eq '^[A-Za-z0-9._/-]+$'; then
+            echo "::error::The ref contains unexpected characters"
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Update the server
+        env:
+          REF: ${{ github.event.inputs.ref || github.ref_name }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<REMOTE
+          set -euo pipefail
+          cd '$DEPLOY_PATH'
+          git fetch --tags --prune origin
+          git checkout --force '$REF'
+          if git show-ref --verify --quiet 'refs/remotes/origin/$REF'; then
+            git reset --hard 'origin/$REF'
+          fi
+          docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+          docker image prune -f
+          REMOTE
+
+      - name: Wait for the site
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$DEPLOY_URL/sitemap.xml"; then
+              echo "The site answered on attempt $attempt"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::The site did not answer after the deploy"
+          exit 1
