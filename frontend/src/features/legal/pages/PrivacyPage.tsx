@@ -73,8 +73,9 @@ export function PrivacyPage() {
           <h2>Who receives data</h2>
           <p>
             Data is processed by our hosting provider, our email delivery
-            provider, our analytics provider Umami and, if you choose Google
-            sign-in, Google. We do not sell personal data.
+            provider, our analytics provider Umami, our error reporting provider
+            Sentry and, if you choose Google sign-in, Google. We do not sell
+            personal data.
           </p>
         </section>
         <section>

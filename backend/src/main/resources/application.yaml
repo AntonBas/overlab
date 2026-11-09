@@ -64,6 +64,12 @@ app:
     admin-password: ${ADMIN_PASSWORD:}
     rate-limit-per-minute: 10
 
+sentry:
+  dsn: ${SENTRY_DSN:}
+  send-default-pii: false
+  environment: ${SPRING_PROFILES_ACTIVE:local}
+  exception-resolver-order: 2147483647
+
 management:
   endpoints:
     web:

@@ -18,6 +18,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@sentry/react": "^11.11.0",
     "axios": "^1.21.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.68.0",
