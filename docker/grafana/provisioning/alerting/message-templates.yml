@@ -1,0 +1,14 @@
+apiVersion: 1
+
+templates:
+  - orgId: 1
+    name: overlab
+    template: |
+      {{ define "overlab.message" -}}
+      {{ range .Alerts.Firing }}🔴 {{ .Labels.alertname }}
+      {{ .Annotations.summary }}
+
+      {{ end }}{{ range .Alerts.Resolved }}✅ Проблему вирішено: {{ .Labels.alertname }}
+
+      {{ end }}
+      {{- end }}

@@ -7,7 +7,7 @@ groups:
     interval: 5m
     rules:
       - uid: collector-daily-stale
-        title: "Collector: no successful daily-overview run for 2 days"
+        title: "Колектор: щоденний збір не відпрацьовував понад 2 дні"
         condition: C
         data:
           - refId: A
@@ -36,9 +36,9 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "The daily-overview job has not finished successfully for longer than expected. Check Collector runs in the admin API and the backend logs."
+          summary: "Щоденний збір статистики не відпрацював понад 2 дні. Що робити: відкрий адмінку, розділ Collector, і подивись помилку в історії запусків."
       - uid: collector-weekly-stale
-        title: "Collector: no successful weekly-maps run for 9 days"
+        title: "Колектор: тижневий збір по картах не відпрацьовував понад 9 днів"
         condition: C
         data:
           - refId: A
@@ -67,9 +67,9 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "The weekly-maps job has not finished successfully for longer than expected. Check Collector runs in the admin API and the backend logs."
+          summary: "Тижневий збір статистики по картах не відпрацював понад 9 днів. Що робити: відкрий адмінку, розділ Collector, і подивись помилку в історії запусків."
       - uid: collector-rejected-snapshots
-        title: "Collector: Blizzard responses were rejected in the last day"
+        title: "Колектор: Blizzard віддав дані, які не пройшли перевірку"
         condition: C
         data:
           - refId: A
@@ -98,9 +98,9 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Responses from Blizzard failed validation, which usually means the endpoint format changed. Check the collector warnings in the backend logs."
+          summary: "За останню добу Blizzard віддав дані, які не пройшли перевірку. Зазвичай це означає, що Blizzard змінив формат. Що робити: подивись попередження колектора в логах бекенду."
       - uid: collector-new-hero
-        title: "Collector: a new hero appeared"
+        title: "Колектор: з'явився новий герой"
         condition: C
         data:
           - refId: A
@@ -129,9 +129,9 @@ groups:
         labels:
           severity: info
         annotations:
-          summary: "The collector found a hero that was not in the database. Add the description, strengths, categories, counters and synergies in the admin panel."
+          summary: "У статистиці Blizzard з'явився герой, якого ще немає на сайті. Що робити: в адмінці додай опис, сильні й слабкі сторони, категорії, контри та синергії."
       - uid: collector-new-map
-        title: "Collector: a new map appeared"
+        title: "Колектор: з'явилась нова карта"
         condition: C
         data:
           - refId: A
@@ -160,9 +160,9 @@ groups:
         labels:
           severity: info
         annotations:
-          summary: "The collector created a map that was not in the database. Set its game mode and image in the admin panel."
+          summary: "У статистиці з'явилась нова карта. Що робити: в адмінці вкажи її режим і зображення."
       - uid: collector-role-changed
-        title: "Collector: a hero changed role"
+        title: "Колектор: герой змінив роль"
         condition: C
         data:
           - refId: A
@@ -191,4 +191,4 @@ groups:
         labels:
           severity: info
         annotations:
-          summary: "Blizzard moved a hero to another role. Review the curated strengths, categories, counters and synergies of that hero; past statistics now show the new role."
+          summary: "Blizzard перевів героя в іншу роль. Що робити: перевір його сильні й слабкі сторони, категорії, контри та синергії. Минула статистика тепер показується з новою роллю."
