@@ -31,8 +31,9 @@ export function CookiesPage() {
         <section>
           <h2>Analytics</h2>
           <p>
-            Off by default. If enabled in the future, it will only load after
-            you allow it here.
+            Off until you allow it here. When allowed, Umami Cloud (EU) counts
+            visits anonymously. It sets no cookies, does not track you across
+            sites and respects the Do Not Track setting.
           </p>
         </section>
         <section>
