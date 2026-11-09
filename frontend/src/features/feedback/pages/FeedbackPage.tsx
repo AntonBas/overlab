@@ -51,7 +51,7 @@ export function FeedbackPage() {
       <div className="settings">
         <PageHeader title="Thank you" />
         <div className="settings-section">
-          <p role="status">Your message was sent. We read every one of them.</p>
+          <p role="status">Your message was sent. We read every message.</p>
           <Link className="button" to={from ?? "/"}>
             {from ? "Back to the page" : "Home"}
           </Link>

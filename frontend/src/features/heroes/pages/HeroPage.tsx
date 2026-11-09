@@ -195,7 +195,7 @@ export function HeroPage() {
           {stats.error &&
             (stats.error.status === 404 ? (
               <EmptyState>
-                No statistics collected for this hero yet.
+                No statistics have been collected for this hero yet.
               </EmptyState>
             ) : (
               <ErrorMessage failure={stats.error} onRetry={stats.reload} />

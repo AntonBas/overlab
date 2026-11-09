@@ -115,7 +115,7 @@ describe("StatsPage", () => {
       expect.objectContaining({ tier: "GOLD", map: "rialto", role: "SUPPORT" }),
     );
     expect(
-      screen.getByText(/difference from the all-maps value/),
+      screen.getByText(/differs from its all-maps value/),
     ).toBeInTheDocument();
   });
 

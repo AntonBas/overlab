@@ -220,7 +220,7 @@ export function PerksAdminPage() {
               onClick={() =>
                 importing.run(
                   importPerks,
-                  "Import started. It takes a few minutes, reload the list afterwards.",
+                  "Import started. It takes a few minutes; reload the list afterwards.",
                 )
               }
             >

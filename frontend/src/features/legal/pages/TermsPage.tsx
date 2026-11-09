@@ -20,7 +20,7 @@ export function TermsPage() {
           <h2>Statistics and recommendations</h2>
           <p>
             Statistics come from Blizzard's public hero statistics page and may
-            be delayed, incomplete or change without notice. Counter-picks,
+            be delayed or incomplete, or change without notice. Counter-picks,
             synergies, perks and guides are curated recommendations, not
             statistics. Everything is provided as is, without warranty.
           </p>
