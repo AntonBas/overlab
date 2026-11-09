@@ -19,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -52,6 +53,36 @@ jobs:
             echo "::error::The commit id is not valid"
             exit 1
           fi
+
+      - name: Require a green Security run
+        if: github.event_name == 'workflow_run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          for attempt in $(seq 1 60); do
+            result="$(gh run list --repo "$REPOSITORY" --workflow Security --commit "$SHA" --event push --limit 1 --json status,conclusion --jq '.[0] | (.status + " " + (.conclusion // ""))' || true)"
+            case "$result" in
+              "completed success")
+                echo "Security passed"
+                exit 0
+                ;;
+              completed*)
+                echo "::error::Security did not pass: $result"
+                exit 1
+                ;;
+              "")
+                echo "Security has not started yet ($attempt/60)"
+                ;;
+              *)
+                echo "Security is still running ($attempt/60)"
+                ;;
+            esac
+            sleep 20
+          done
+          echo "::error::Security did not finish in time"
+          exit 1
 
       - name: Configure SSH
         env:

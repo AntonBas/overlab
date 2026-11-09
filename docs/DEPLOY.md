@@ -35,7 +35,7 @@ Flyway applies new migrations on startup.
 
 ### Automatic deploy from GitHub
 
-`.github/workflows/deploy.yml` runs the same update over SSH whenever the CI workflow succeeds on `main` (the exact tested commit is deployed, a red CI deploys nothing), when a tag like `v1.0.0` is pushed, or by hand from the Actions tab (choose a tag or branch). Before updating, it waits up to 20 minutes for a running collector job, and it restarts Grafana when files under `docker/grafana/` changed. Nothing runs until these are set in the repository settings (Settings, Secrets and variables, Actions), under the `production` environment:
+`.github/workflows/deploy.yml` runs the same update over SSH whenever the CI workflow succeeds on `main` (the exact tested commit is deployed; a red CI or a red or unfinished-in-20-minutes Security run deploys nothing), when a tag like `v1.0.0` is pushed, or by hand from the Actions tab (choose a tag or branch). Before updating, it waits up to 20 minutes for a running collector job, and it restarts Grafana when files under `docker/grafana/` changed. Nothing runs until these are set in the repository settings (Settings, Secrets and variables, Actions), under the `production` environment:
 
 - Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH` (the project folder on the server), `DEPLOY_SSH_KEY` (a private key of a user that can run Docker; use a key made only for deploys) and `DEPLOY_KNOWN_HOSTS` (the output of `ssh-keyscan <host>`)
 - Variable: `DEPLOY_URL`, for example `https://overlabgg.com`; after the update the workflow waits until `/sitemap.xml` answers
