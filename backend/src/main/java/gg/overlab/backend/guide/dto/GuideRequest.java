@@ -13,7 +13,7 @@ public record GuideRequest(
         @NotBlank @Size(max = 256) String title,
         @Pattern(regexp = "^[a-z0-9]+(-[a-z0-9]+)*$", message = "must contain lowercase letters, digits and dashes")
         @Size(max = 200) String slug,
-        @NotBlank @Pattern(regexp = "^[A-Za-z0-9_-]{11}$", message = "must be an 11 character YouTube video id")
+        @NotBlank @Pattern(regexp = "^[A-Za-z0-9_-]{11}$", message = "must be an 11-character YouTube video ID")
         String youtubeId,
         @Min(0) Integer startSeconds,
         @Size(max = 2000) String description,
