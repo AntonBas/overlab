@@ -63,7 +63,8 @@ export function PrivacyPage() {
         <section>
           <h2>Cookies and local storage</h2>
           <p>
-            Sign-in uses two strictly necessary cookies. Optional analytics and
+            Sign-in uses two strictly necessary cookies. Optional anonymous
+            visit statistics (Umami, no cookies, no personal identifiers) and
             advertising are off until you allow them. Details are in the{" "}
             <Link to="/cookies">cookie policy</Link>.
           </p>
@@ -72,8 +73,8 @@ export function PrivacyPage() {
           <h2>Who receives data</h2>
           <p>
             Data is processed by our hosting provider, our email delivery
-            provider and, if you choose Google sign-in, Google. We do not sell
-            personal data.
+            provider, our analytics provider Umami and, if you choose Google
+            sign-in, Google. We do not sell personal data.
           </p>
         </section>
         <section>
