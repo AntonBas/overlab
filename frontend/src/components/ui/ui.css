@@ -33,6 +33,52 @@
   animation: spin 0.8s linear infinite;
 }
 
+.rate-bar__fill--win {
+  background: var(--bar-win);
+}
+
+.rate-bar__fill--pick {
+  background: var(--bar-pick);
+}
+
+.rate-bar__fill--ban {
+  background: var(--bar-ban);
+}
+
+.form-field__error,
+.form__error {
+  color: var(--bad);
+  font-size: 0.9rem;
+}
+
+.form-field textarea {
+  width: 100%;
+  font: inherit;
+}
+
+.form-field .muted {
+  font-size: 0.85rem;
+}
+
+.mode-heading .mode-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--accent-text);
+}
+
+.spot-groups .portrait,
+.spot-groups .mode-icon {
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.icon-select__icon .thumbnail,
+.icon-select__icon .rank-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

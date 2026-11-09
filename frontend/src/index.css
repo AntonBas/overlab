@@ -355,63 +355,6 @@ select:disabled {
   text-decoration: underline;
 }
 
-.table td .button {
-  padding: 5px 12px;
-  font-size: 0.875rem;
-}
-
-.table thead th {
-  background: var(--surface-2);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.table__sort {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
-}
-
-.table__hero {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 600;
-}
-
-.table__hero a {
-  color: var(--text);
-}
-
-.table__mode {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 400;
-}
-
-.rate-bar__fill--win {
-  background: var(--bar-win);
-}
-
-.rate-bar__fill--pick {
-  background: var(--bar-pick);
-}
-
-.rate-bar__fill--ban {
-  background: var(--bar-ban);
-}
-
 .table-toolbar {
   margin-bottom: 12px;
 }
@@ -544,12 +487,6 @@ select:disabled {
   width: 100%;
 }
 
-.form-field__error,
-.form__error {
-  color: var(--bad);
-  font-size: 0.9rem;
-}
-
 @media (max-width: 640px) {
   .table th,
   .table td {
@@ -573,24 +510,6 @@ select:disabled {
   align-items: start;
 }
 
-.admin__form .hero-select .icon-select {
-  --icon-select-width: 100%;
-  max-width: none;
-}
-
-.hero-select .icon-select {
-  max-width: 320px;
-}
-
-.admin .table th,
-.admin .table td {
-  padding: 12px;
-}
-
-.admin .table-wrap {
-  margin-bottom: 24px;
-}
-
 .admin .table td:has(> .form__actions) {
   position: sticky;
   right: 0;
@@ -599,32 +518,8 @@ select:disabled {
   background: var(--surface);
 }
 
-.admin .table .form__actions {
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-}
-
-.admin .table tbody th {
-  font-weight: 600;
-}
-
-.form__actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.form-field textarea {
-  width: 100%;
-  font: inherit;
-}
-
 .form-field textarea {
   resize: vertical;
-}
-
-.form-field .muted {
-  font-size: 0.85rem;
 }
 
 .notice--success {
@@ -636,16 +531,6 @@ select:disabled {
   color: #fff;
 }
 
-.dialog {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
-  padding: 24px;
-  max-width: 440px;
-  width: calc(100% - 32px);
-}
-
 .dialog h2 {
   margin: 0 0 8px;
   font-size: 1.15rem;
@@ -655,36 +540,6 @@ select:disabled {
   margin: 0 0 20px;
   color: var(--muted);
   line-height: 1.5;
-}
-
-.dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.status-badge--warning {
-  color: var(--accent-text);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.status-badge--info {
-  color: var(--link);
-  border-color: color-mix(in srgb, var(--link) 40%, transparent);
-  background: color-mix(in srgb, var(--link) 12%, transparent);
-}
-
-.select-pill--good {
-  color: var(--good);
-  border-color: color-mix(in srgb, var(--good) 40%, transparent);
-  background-color: color-mix(in srgb, var(--good) 12%, transparent);
-}
-
-.select-pill--bad {
-  color: var(--bad);
-  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
-  background-color: color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
 .changes strong {
@@ -790,10 +645,6 @@ select:disabled {
   margin: 0;
 }
 
-.preferences-form .icon-select {
-  --icon-select-width: 100%;
-}
-
 .link-list {
   display: grid;
   gap: 8px;
@@ -828,24 +679,6 @@ select:disabled {
 
 .thumbnail--banner {
   border-radius: var(--radius);
-}
-
-.admin__picker {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.admin .table thead th,
-.admin .field__label {
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.map-banner__mode .mode-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--accent);
 }
 
 .highlights {
@@ -945,21 +778,6 @@ input[type="range"] {
   margin: 0;
 }
 
-.perk-card--recommended {
-  border-color: var(--good);
-  box-shadow: inset 0 0 0 1px var(--good);
-}
-
-.perk-card--optional {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-.perk-card--avoid {
-  border-color: var(--bad);
-  box-shadow: inset 0 0 0 1px var(--bad);
-}
-
 .tag--optional {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
   color: var(--accent-text);
@@ -980,33 +798,6 @@ input[type="range"] {
   }
 }
 
-.chart__tooltip .delta {
-  margin-left: 0;
-}
-
-.hero-perks--tank {
-  --role-color: var(--tank);
-}
-
-.hero-perks--damage {
-  --role-color: var(--damage);
-}
-
-.hero-perks--support {
-  --role-color: var(--support);
-}
-
-.map-card__favorite .favorite-star {
-  color: #fff;
-  background: rgb(0 0 0 / 0.55);
-  border-radius: 999px;
-}
-
-.map-card__favorite .favorite-star:hover,
-.map-card__favorite .favorite-star[aria-pressed="true"] {
-  color: var(--accent-text);
-}
-
 .segmented__item {
   display: inline-flex;
   align-items: center;
@@ -1015,12 +806,6 @@ input[type="range"] {
   min-height: 40px;
   line-height: 1.2;
   white-space: nowrap;
-}
-
-.mode-heading .mode-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--accent-text);
 }
 
 .section__heading {
@@ -1062,27 +847,6 @@ input[type="range"] {
   color: var(--muted);
 }
 
-.stat-chip--win {
-  border-left-color: var(--bar-win);
-}
-
-.stat-chip--pick {
-  border-left-color: var(--bar-pick);
-}
-
-.place-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  vertical-align: middle;
-}
-
-.spot-groups .portrait,
-.spot-groups .mode-icon {
-  margin-right: 4px;
-  vertical-align: middle;
-}
-
 .glyph--triangle {
   color: #0f9d78;
 }
@@ -1113,22 +877,6 @@ input[type="range"] {
 
 .glyph--xbox-y {
   color: #ffbf00;
-}
-
-.glyph--plain-a,
-.glyph--plain-b,
-.glyph--plain-x,
-.glyph--plain-y {
-  background: #3b3d42;
-  color: #f2f2f2;
-}
-
-.perk-tip--recommended {
-  border-left-color: var(--good);
-}
-
-.perk-tip--avoid {
-  border-left-color: var(--bad);
 }
 
 .matchups {
@@ -1177,14 +925,6 @@ input[type="range"] {
   }
 }
 
-.relation-tabs__chips--strong {
-  --column-color: var(--good);
-}
-
-.relation-tabs__chips--struggles {
-  --column-color: var(--bad);
-}
-
 #hero-statistics,
 #hero-counters,
 #hero-abilities,
@@ -1192,13 +932,6 @@ input[type="range"] {
 #hero-maps,
 #hero-spots {
   scroll-margin-top: 56px;
-}
-
-.icon-select__icon .thumbnail,
-.icon-select__icon .rank-icon {
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
 }
 
 .icon-select__icon .rank-icon {
@@ -1253,10 +986,6 @@ input[type="range"] {
   background: var(--surface-2);
   color: var(--text);
   font-size: 0.85em;
-}
-
-.hero-banner--backdrop .page-header {
-  margin-bottom: 12px;
 }
 
 .toast {
