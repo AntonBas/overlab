@@ -103,7 +103,7 @@ docker/     Prometheus and Grafana configuration
 cp .env.example .env
 ```
 
-Fill in `DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` in `.env`, then:
+Fill in `DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` in `.env`. `SENTRY_DSN` and `SENTRY_DSN_FRONTEND` are optional: when empty, error tracking (Sentry) is off. Then:
 
 ```bash
 docker compose up -d --build

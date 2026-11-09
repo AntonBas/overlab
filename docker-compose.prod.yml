@@ -5,6 +5,7 @@ services:
       dockerfile: docker/caddy/Dockerfile
       args:
         VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+        VITE_SENTRY_DSN: ${SENTRY_DSN_FRONTEND:-}
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS, for example overlabgg.com}
@@ -53,6 +54,7 @@ services:
       MAIL_STARTTLS: ${MAIL_STARTTLS:-true}
       EMAIL_FROM: ${EMAIL_FROM:?Set EMAIL_FROM}
       CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       COLLECTOR_GAME_FORMAT: ${COLLECTOR_GAME_FORMAT:-FIVE_VS_FIVE}
