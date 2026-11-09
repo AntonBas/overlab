@@ -1,20 +1,17 @@
 UPDATE perks p
 SET description = 'Surging Strike gains 125% lifesteal.',
-    imported_description = CASE WHEN p.imported THEN 'Surging Strike gains 125% lifesteal.' ELSE p.imported_description END,
     updated_at = now()
 FROM heroes h
 WHERE p.hero_id = h.id AND h.slug = 'dmon' AND p.name = 'Overstrike';
 
 UPDATE perks p
 SET description = 'Barrier Projector heals allies within it for 30 health per second.',
-    imported_description = CASE WHEN p.imported THEN 'Barrier Projector heals allies within it for 30 health per second.' ELSE p.imported_description END,
     updated_at = now()
 FROM heroes h
 WHERE p.hero_id = h.id AND h.slug = 'winston' AND p.name = 'Revitalizing Barrier';
 
 UPDATE perks p
 SET description = 'Echo has infinite ammo during Flight, and using Flight refills her ammo.',
-    imported_description = CASE WHEN p.imported THEN 'Echo has infinite ammo during Flight, and using Flight refills her ammo.' ELSE p.imported_description END,
     recommendation = 'OPTIONAL',
     recommendation_note = 'Flight is short, so infinite ammo alone is rarely needed, but the refill on use keeps her magazine full when she re-engages. Partial Scan is still the stronger pick.',
     updated_at = now()
