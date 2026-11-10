@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,6 +63,7 @@ class MediaUploadIntegrationTest {
 
         assertThat(Files.readAllBytes(stored)).isEqualTo(PNG);
         mockMvc.perform(get(url)).andExpect(status().isOk());
+        mockMvc.perform(head(url)).andExpect(status().isOk());
 
         mockMvc.perform(delete("/api/admin/maps/busan/image").cookie(adminCookie))
                 .andExpect(status().isOk())
