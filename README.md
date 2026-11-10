@@ -19,8 +19,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
 | `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
-| `/heroes/:slug/counters` | Redirects to the hero page |
-| `/heroes/:slug/perks` | Redirects to `/perks` |
+| `/heroes/:slug/perks`, `/heroes/:slug/counters`, `/heroes/:slug/maps` | Own indexable pages for one hero: perks with the Overlab recommendation, counters and synergies, best and worst maps (with the `?queue=` switch). They link to each other and to the hero page; a page without content (no perks, no counters) is `noindex` and left out of the sitemap |
 | `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps (expandable to every map, each links to its map page), abilities, perks, counters, spots; `/maps/:map/:hero` redirects here |
 | `/patches` | Redirects to `/changes`; patches are shown as dashed lines on the statistics chart and as views in `/changes` |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |
@@ -32,7 +31,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme by default, light theme
 | `/business` | Sponsorship, advertising and partnership page with a contact form (no login needed; linked from the footer) |
 | `/privacy`, `/terms`, `/cookies` | Legal pages linked from the footer; `/cookies` also holds the consent choices |
 
-A cookie banner asks for consent on the first visit. Optional analytics and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages and the Business page comes from the `VITE_CONTACT_EMAIL` build variable (in the production compose file it is filled from `CONTACT_EMAIL`); without it they point to the Business page form.
+A cookie banner asks for consent on the first visit. Optional analytics (Umami; the `/admin` pages are never sent) and advertising stay off until allowed; the choice is stored in local storage (`overlab-cookie-consent`) and read with `useConsent`. The contact line on legal pages and the Business page comes from the `VITE_CONTACT_EMAIL` build variable (in the production compose file it is filled from `CONTACT_EMAIL`); without it they point to the Business page form.
 
 The header has a single "Sign in" button; the sign-in and registration pages link to each other.
 
@@ -57,6 +56,8 @@ The header has a hero search (keyboard friendly) and a compact menu on narrow sc
 | `/admin/audit` | Audit log with filters and "was → became" changes |
 
 Create and edit forms open in a side panel over the table (Esc, the close button or a click outside closes it; unsaved changes ask for confirmation). Forms warn about unsaved changes when you leave the page.
+
+The edge proxy answers `200` for the known application routes and `404` (with the same app shell, which shows the not-found page) for any other path, so crawlers do not index made-up URLs; the routes are listed in `docker/caddy/Caddyfile` and must be extended when a new top-level page is added.
 
 ### Images
 

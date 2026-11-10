@@ -29,7 +29,7 @@ import { PerkList } from "../components/profile/PerkList";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function PerksPage() {
-  usePageTitle("Perks");
+  usePageTitle("Overwatch 2 hero perks: every Minor and Major perk");
   usePageDescription(
     "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions.",
   );
@@ -150,7 +150,7 @@ export function PerksPage() {
                 <div className="hero-perks__top">
                   <Link
                     className="hero-perks__header"
-                    to={`/heroes/${hero.slug}`}
+                    to={`/heroes/${hero.slug}/perks`}
                   >
                     <HeroPortrait
                       name={hero.name}

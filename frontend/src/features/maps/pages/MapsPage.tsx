@@ -55,7 +55,7 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
 }
 
 export function MapsPage() {
-  usePageTitle("Maps");
+  usePageTitle("Overwatch 2 maps: hero win rates by map");
   usePageDescription(
     "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map.",
   );

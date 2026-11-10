@@ -7,10 +7,16 @@ import gg.overlab.backend.guide.Guide;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
+import gg.overlab.backend.hero.perk.Perk;
+import gg.overlab.backend.hero.perk.PerkRepository;
+import gg.overlab.backend.hero.relation.HeroRelation;
+import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -25,13 +31,19 @@ public class SitemapService {
     private final HeroRepository heroRepository;
     private final GameMapRepository mapRepository;
     private final GuideRepository guideRepository;
+    private final PerkRepository perkRepository;
+    private final HeroRelationRepository relationRepository;
     private final String baseUrl;
 
     public SitemapService(HeroRepository heroRepository, GameMapRepository mapRepository,
-                          GuideRepository guideRepository, @Value("${app.frontend-url}") String frontendUrl) {
+                          GuideRepository guideRepository, PerkRepository perkRepository,
+                          HeroRelationRepository relationRepository,
+                          @Value("${app.frontend-url}") String frontendUrl) {
         this.heroRepository = heroRepository;
         this.mapRepository = mapRepository;
         this.guideRepository = guideRepository;
+        this.perkRepository = perkRepository;
+        this.relationRepository = relationRepository;
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
@@ -41,8 +53,26 @@ public class SitemapService {
         StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
                 .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         STATIC_PATHS.forEach(path -> appendUrl(xml, path, null));
+        Set<String> heroesWithPerks = new HashSet<>();
+        for (Perk perk : perkRepository.findAllByOrderByHeroNameAscSlotAscPositionAsc()) {
+            heroesWithPerks.add(perk.getHero().getSlug());
+        }
+        Set<String> heroesWithRelations = new HashSet<>();
+        for (HeroRelation relation : relationRepository.findAllByOrderByIdAsc()) {
+            heroesWithRelations.add(relation.getHero().getSlug());
+            heroesWithRelations.add(relation.getRelatedHero().getSlug());
+        }
         for (Hero hero : heroRepository.findAllByActiveTrueOrderByNameAsc()) {
-            appendUrl(xml, "/heroes/" + hero.getSlug(), lastModified(hero));
+            String heroPath = "/heroes/" + hero.getSlug();
+            LocalDate heroModified = lastModified(hero);
+            appendUrl(xml, heroPath, heroModified);
+            if (heroesWithPerks.contains(hero.getSlug())) {
+                appendUrl(xml, heroPath + "/perks", heroModified);
+            }
+            if (heroesWithRelations.contains(hero.getSlug())) {
+                appendUrl(xml, heroPath + "/counters", heroModified);
+            }
+            appendUrl(xml, heroPath + "/maps", heroModified);
         }
         for (GameMap map : mapRepository.findAllByOrderByNameAsc()) {
             appendUrl(xml, "/maps/" + map.getSlug(), lastModified(map));

@@ -87,7 +87,7 @@ function patchLabel(patch: Patch): string {
 }
 
 export function ChangesPage() {
-  usePageTitle("What changed");
+  usePageTitle("Overwatch 2 hero win rate changes by patch");
   usePageDescription(
     "See which Overwatch 2 heroes gained or lost win and pick rate between patches and over the last weeks.",
   );

@@ -75,7 +75,7 @@
 
 	@linkPreviewBot {
 		header_regexp userAgent User-Agent (?i)(facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal)
-		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|maps/[a-z0-9-]+|guides/[0-9]+(-[A-Za-z0-9-]*)?)/?$
+		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(perks|counters|maps)|maps/[a-z0-9-]+|guides/[0-9]+(-[A-Za-z0-9-]*)?)/?$
 	}
 	handle @linkPreviewBot {
 		rewrite * /api/seo/preview?path={http.request.uri.path}
@@ -88,11 +88,26 @@
 	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
 
 	@appShell not path /assets/*
-	handle {
-		header @appShell Cache-Control "no-cache"
-		root * /srv
-		try_files {path} /index.html
+	header @appShell Cache-Control "no-cache"
+
+	root * /srv
+
+	@staticFile file
+	handle @staticFile {
 		file_server
+	}
+
+	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps)|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
+	handle @appRoute {
+		rewrite * /index.html
+		file_server
+	}
+
+	handle {
+		rewrite * /index.html
+		file_server {
+			status 404
+		}
 	}
 }
 

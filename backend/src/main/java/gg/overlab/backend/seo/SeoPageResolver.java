@@ -5,6 +5,8 @@ import gg.overlab.backend.guide.Guide;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
+import gg.overlab.backend.hero.perk.PerkRepository;
+import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,40 +25,53 @@ public class SeoPageResolver {
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
+    private static final Pattern HERO_SECTION_PATH = Pattern.compile("^/heroes/([A-Za-z0-9-]+)/([a-z]+)$");
     private static final Pattern GUIDE_PATH = Pattern.compile("^(\\d+)(?:-.*)?$");
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     private static final Map<String, String[]> STATIC_PAGES = Map.ofEntries(
-            Map.entry("/", new String[] {SITE_NAME, HOME_DESCRIPTION}),
-            Map.entry("/stats", new String[] {"Hero statistics", "Overwatch 2 hero win, pick and ban rates by rank, "
-                    + "map, region and platform, updated from Blizzard public data."}),
-            Map.entry("/heroes", new String[] {"Heroes",
-                    "All Overwatch 2 heroes with roles, abilities, perks, counters and synergies."}),
-            Map.entry("/counters", new String[] {"Counters", "Curated Overwatch 2 counter picks and synergies "
-                    + "for every hero, with short explanations."}),
-            Map.entry("/perks", new String[] {"Perks",
-                    "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions."}),
-            Map.entry("/changes", new String[] {"What changed", "See which Overwatch 2 heroes gained or lost "
-                    + "win and pick rate between patches and over the last weeks."}),
-            Map.entry("/maps", new String[] {"Maps",
-                    "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map."}),
-            Map.entry("/privacy", new String[] {"Privacy policy", "How Overlab handles your data."}),
-            Map.entry("/terms", new String[] {"Terms of use", "The rules for using Overlab."}),
-            Map.entry("/cookies", new String[] {"Cookie policy", "Which cookies and local storage Overlab uses."}),
+            Map.entry("/", new String[] {SITE_NAME, HOME_DESCRIPTION, SITE_NAME}),
+            Map.entry("/stats", new String[] {"Overwatch 2 hero win, pick and ban rates",
+                    "Overwatch 2 hero win, pick and ban rates by rank, map, region and platform, "
+                            + "updated from Blizzard public data.", "Hero statistics"}),
+            Map.entry("/heroes", new String[] {"All Overwatch 2 heroes: roles, abilities, perks",
+                    "All Overwatch 2 heroes with roles, abilities, perks, counters and synergies.", "Heroes"}),
+            Map.entry("/counters", new String[] {"Overwatch 2 counters and synergies for every hero",
+                    "Curated Overwatch 2 counter picks and synergies for every hero, with short explanations.",
+                    "Counters"}),
+            Map.entry("/perks", new String[] {"Overwatch 2 hero perks: every Minor and Major perk",
+                    "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions.",
+                    "Perks"}),
+            Map.entry("/changes", new String[] {"Overwatch 2 hero win rate changes by patch",
+                    "See which Overwatch 2 heroes gained or lost win and pick rate between patches "
+                            + "and over the last weeks.", "What changed"}),
+            Map.entry("/maps", new String[] {"Overwatch 2 maps: hero win rates by map",
+                    "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map.", "Maps"}),
+            Map.entry("/privacy", new String[] {"Privacy policy", "How Overlab handles your data.",
+                    "Privacy policy"}),
+            Map.entry("/terms", new String[] {"Terms of use", "The rules for using Overlab.", "Terms of use"}),
+            Map.entry("/cookies", new String[] {"Cookie policy", "Which cookies and local storage Overlab uses.",
+                    "Cookie policy"}),
             Map.entry("/business", new String[] {"Sponsorship and business",
-                    "Contact Overlab about sponsorship and partnerships."}));
+                    "Contact Overlab about sponsorship and partnerships.", "Sponsorship and business"}));
 
     private final HeroRepository heroRepository;
     private final GameMapRepository mapRepository;
     private final GuideRepository guideRepository;
+    private final PerkRepository perkRepository;
+    private final HeroRelationRepository relationRepository;
     private final String baseUrl;
 
     public SeoPageResolver(HeroRepository heroRepository, GameMapRepository mapRepository,
-                           GuideRepository guideRepository, @Value("${app.frontend-url}") String frontendUrl) {
+                           GuideRepository guideRepository, PerkRepository perkRepository,
+                           HeroRelationRepository relationRepository,
+                           @Value("${app.frontend-url}") String frontendUrl) {
         this.heroRepository = heroRepository;
         this.mapRepository = mapRepository;
         this.guideRepository = guideRepository;
+        this.perkRepository = perkRepository;
+        this.relationRepository = relationRepository;
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
@@ -65,7 +80,12 @@ public class SeoPageResolver {
         String path = normalize(requestedPath);
         String[] fixed = STATIC_PAGES.get(path);
         if (fixed != null) {
-            return Optional.of(staticPage(path, fixed[0], fixed[1]));
+            return Optional.of(staticPage(path, fixed[0], fixed[1], fixed[2]));
+        }
+        Matcher sectionMatcher = HERO_SECTION_PATH.matcher(path);
+        if (sectionMatcher.matches()) {
+            return HeroSection.fromPath(sectionMatcher.group(2))
+                    .flatMap(section -> heroSectionPage(sectionMatcher.group(1), section));
         }
         Matcher matcher = PAGE_PATH.matcher(path);
         if (!matcher.matches()) {
@@ -88,20 +108,45 @@ public class SeoPageResolver {
         return trimmed.startsWith("/") ? trimmed : "/" + trimmed;
     }
 
-    private SeoPage staticPage(String path, String title, String description) {
-        List<String> data = "/".equals(path) ? List.of(websiteData()) : List.of(breadcrumbs(path, title));
-        return new SeoPage(path, title, description, "website", title, data);
+    private SeoPage staticPage(String path, String title, String description, String heading) {
+        List<String> data = "/".equals(path) ? List.of(websiteData()) : List.of(breadcrumbs(path, heading));
+        return new SeoPage(path, title, description, "website", heading, data);
     }
 
     private Optional<SeoPage> heroPage(String slug) {
         return heroRepository.findBySlug(slug).filter(Hero::isActive).map(hero -> {
             String path = "/heroes/" + hero.getSlug();
+            String lead = hero.getName() + " Overwatch 2 stats: win, pick and ban rates, perks, counters"
+                    + " and best maps.";
             String detail = hero.getDescription() == null || hero.getDescription().isBlank()
-                    ? "Overwatch 2 hero statistics, perks and counters." : hero.getDescription();
-            String description = plain(hero.getName() + ": " + detail);
-            return new SeoPage(path, hero.getName(), description, "website", hero.getName(),
+                    ? lead : lead + " " + hero.getDescription();
+            return new SeoPage(path, hero.getName() + " stats, perks, counters and best maps", plain(detail),
+                    "website", hero.getName(),
                     List.of(breadcrumbs(path, hero.getName(), "/heroes", "Heroes")));
         });
+    }
+
+    private Optional<SeoPage> heroSectionPage(String slug, HeroSection section) {
+        return heroRepository.findBySlug(slug).filter(Hero::isActive)
+                .filter(hero -> hasSectionContent(hero, section))
+                .map(hero -> {
+                    String path = "/heroes/" + hero.getSlug() + "/" + section.path();
+                    String name = hero.getName();
+                    return new SeoPage(path, section.title(name), section.description(name), "website",
+                            section.heading(name), List.of(breadcrumbList(List.of(
+                            new String[] {SITE_NAME, "/"}, new String[] {"Heroes", "/heroes"},
+                            new String[] {name, "/heroes/" + hero.getSlug()},
+                            new String[] {section.label(), path}))));
+                });
+    }
+
+    private boolean hasSectionContent(Hero hero, HeroSection section) {
+        return switch (section) {
+            case PERKS -> perkRepository.existsByHeroId(hero.getId());
+            case COUNTERS -> !relationRepository
+                    .findAllByHeroSlugOrRelatedHeroSlugOrderByIdAsc(hero.getSlug(), hero.getSlug()).isEmpty();
+            case MAPS -> true;
+        };
     }
 
     private Optional<SeoPage> mapPage(String slug) {

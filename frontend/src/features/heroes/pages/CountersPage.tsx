@@ -59,7 +59,7 @@ const COLUMNS = [
 ] as const;
 
 export function CountersPage() {
-  usePageTitle("Counters");
+  usePageTitle("Overwatch 2 counters and synergies for every hero");
   usePageDescription(
     "Curated Overwatch 2 counter picks and synergies for every hero, with short explanations.",
   );
@@ -199,7 +199,7 @@ export function CountersPage() {
                   <div className="matchup__hero">
                     <Link
                       className="matchup__identity"
-                      to={`/heroes/${hero.slug}`}
+                      to={`/heroes/${hero.slug}/counters`}
                     >
                       <HeroPortrait
                         name={hero.name}

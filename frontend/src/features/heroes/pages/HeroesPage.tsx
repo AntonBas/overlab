@@ -17,7 +17,7 @@ import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
 
 export function HeroesPage() {
-  usePageTitle("Heroes");
+  usePageTitle("All Overwatch 2 heroes: roles, abilities, perks");
   usePageDescription(
     "All Overwatch 2 heroes with roles, abilities, perks, counters and synergies.",
   );
