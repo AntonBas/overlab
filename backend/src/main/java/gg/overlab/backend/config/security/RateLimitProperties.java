@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.rate-limit")
 public record RateLimitProperties(int apiPerMinute, int statsPerMinute) {
 
-    private static final int DEFAULT_API_PER_MINUTE = 120;
-    private static final int DEFAULT_STATS_PER_MINUTE = 300;
+    private static final int DEFAULT_API_PER_MINUTE = 600;
+    private static final int DEFAULT_STATS_PER_MINUTE = 1200;
 
     public RateLimitProperties {
         if (apiPerMinute <= 0) {
