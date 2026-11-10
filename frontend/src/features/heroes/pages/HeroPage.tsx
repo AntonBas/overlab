@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -8,16 +8,12 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
-import {
-  plainDescription,
-  usePageDescription,
-} from "../../../hooks/usePageDescription";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
   breadcrumbList,
   useStructuredData,
 } from "../../../hooks/useStructuredData";
-import type { GameQueue } from "../../../types/api";
 import { HeroMapPicks } from "../components/profile/HeroMapPicks";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
 import { fetchGuides } from "../../guides/api/guidesApi";
@@ -41,18 +37,19 @@ import { HeroTraits } from "../components/profile/HeroTraits";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/profile/PerkList";
 import { RelationTabs } from "../components/relations/RelationTabs";
+import { useHeroQueue } from "../hooks/useHeroQueue";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
+import {
+  heroPageDescription,
+  heroPageTitle,
+  heroStatsSentence,
+} from "../utils/heroSeo";
+import { HeroSubnav } from "../components/profile/HeroSubnav";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
   const relationFeedback = useRelationFeedback(slug);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const queue: GameQueue =
-    searchParams.get("queue")?.toUpperCase() === "QUICK_PLAY"
-      ? "QUICK_PLAY"
-      : "COMPETITIVE";
-
-  const linkSuffix = queue === "QUICK_PLAY" ? "?queue=quick_play" : "";
+  const { queue, linkSuffix, changeQueue } = useHeroQueue();
 
   const hero = useFetch(() => fetchHero(slug), [slug]);
   const stats = useFetch(
@@ -72,12 +69,10 @@ export function HeroPage() {
   const categories = useFetch(fetchHeroCategories, []);
   const abilities = useFetch(() => fetchHeroAbilities(slug), [slug]);
   const guides = useFetch(() => fetchGuides({ hero: slug }), [slug]);
-  usePageTitle(hero.data?.name);
+  usePageTitle(hero.data ? heroPageTitle(hero.data.name) : null);
   usePageDescription(
     hero.data
-      ? plainDescription(
-          `${hero.data.name}: ${hero.data.description ?? "Overwatch 2 hero statistics, perks and counters."}`,
-        )
+      ? heroPageDescription(hero.data.name, hero.data.description)
       : null,
   );
   useStructuredData(
@@ -137,6 +132,11 @@ export function HeroPage() {
   ].filter((section) => section.visible);
 
   const backdrop = heroBackdropStyle(slug);
+  const statsSentence = heroStatsSentence(
+    hero.data.name,
+    overall,
+    queue === "COMPETITIVE",
+  );
 
   return (
     <>
@@ -172,18 +172,7 @@ export function HeroPage() {
           actions={
             <>
               <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
-              <QueueToggle
-                value={queue}
-                onChange={(next) => {
-                  const params = new URLSearchParams(searchParams);
-                  if (next === "COMPETITIVE") {
-                    params.delete("queue");
-                  } else {
-                    params.set("queue", "quick_play");
-                  }
-                  setSearchParams(params);
-                }}
-              />
+              <QueueToggle value={queue} onChange={changeQueue} />
             </>
           }
         />
@@ -192,7 +181,14 @@ export function HeroPage() {
             <AbilityText text={hero.data.description} />
           </p>
         )}
+        {statsSentence && <p className="prose muted">{statsSentence}</p>}
       </div>
+      <HeroSubnav
+        slug={slug}
+        name={hero.data.name}
+        current="overview"
+        linkSuffix={linkSuffix}
+      />
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
@@ -202,7 +198,7 @@ export function HeroPage() {
 
       <div id="hero-statistics">
         <HeroHistorySection
-          title="Statistics"
+          title={`${hero.data.name} statistics`}
           slug={slug}
           queue={queue}
           current={focus}
@@ -228,6 +224,7 @@ export function HeroPage() {
             categories={categories.data?.categories}
             categoryMatchups={heroCategoryMatchups}
             feedback={relationFeedback}
+            heroName={hero.data.name}
           />
           <p className="muted footnote">
             Counters and synergies are curated recommendations, not statistics.
@@ -238,7 +235,7 @@ export function HeroPage() {
       {abilities.data && abilities.data.length > 0 && (
         <section className="section" id="hero-abilities">
           <div className="section__heading">
-            <h2>Abilities</h2>
+            <h2>{hero.data.name} abilities</h2>
             <ControlSchemeToggle />
           </div>
           <AbilityList abilities={abilities.data} />
@@ -247,8 +244,13 @@ export function HeroPage() {
 
       {perks.data && perks.data.length > 0 && (
         <section className="section" id="hero-perks">
-          <h2>Perks</h2>
+          <h2>{hero.data.name} perks</h2>
           <PerkList perks={perks.data} />
+          <p className="footnote">
+            <Link to={`/heroes/${slug}/perks`}>
+              All {hero.data.name} perks explained
+            </Link>
+          </p>
         </section>
       )}
 

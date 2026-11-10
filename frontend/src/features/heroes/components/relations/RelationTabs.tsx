@@ -27,6 +27,7 @@ interface RelationTabsProps {
   categoryMatchups?: CategoryMatchup[];
   categories?: HeroCategory[];
   feedback?: RelationFeedback;
+  heroName?: string;
 }
 
 const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
@@ -42,6 +43,7 @@ export function RelationTabs({
   categoryMatchups = [],
   categories = [],
   feedback,
+  heroName,
 }: RelationTabsProps) {
   const baseId = useId();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -106,7 +108,11 @@ export function RelationTabs({
 
   return (
     <section className="section">
-      <h2>Counters and synergies</h2>
+      <h2>
+        {heroName
+          ? `${heroName} counters and synergies`
+          : "Counters and synergies"}
+      </h2>
       <div
         className="segmented"
         role="tablist"

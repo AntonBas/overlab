@@ -22,7 +22,7 @@ import { ALL_MAPS, isQuickPlay } from "../filters";
 import { useFilterState } from "../hooks/useFilterState";
 
 export function StatsPage() {
-  usePageTitle("Hero statistics");
+  usePageTitle("Overwatch 2 hero win, pick and ban rates");
   usePageDescription(
     "Overwatch 2 hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
   );
