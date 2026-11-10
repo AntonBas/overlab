@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { toFailure } from "../../../services/api";
 import { sendFeedback, type FeedbackType } from "../api/feedbackApi";
 
@@ -23,6 +24,7 @@ function sitePath(value: string | null): string | null {
 
 export function FeedbackPage() {
   usePageTitle("Send feedback");
+  useNoIndex();
   const [searchParams] = useSearchParams();
   const from = sitePath(searchParams.get("from"));
   const [type, setType] = useState<FeedbackType>("INACCURACY");

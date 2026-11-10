@@ -7,12 +7,29 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { ROLES } from "../../stats/filters";
 import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
 
 export function HeroesPage() {
   usePageTitle("Heroes");
+  usePageDescription(
+    "All Overwatch 2 heroes with roles, abilities, perks, counters and synergies.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "Heroes", path: "/heroes" },
+      ],
+      window.location.origin,
+    ),
+  );
   const heroes = useFetch(fetchHeroes, []);
   const data = heroes.data;
 
@@ -22,7 +39,7 @@ export function HeroesPage() {
         title="Heroes"
         subtitle="Perks, counters, synergies, map statistics and video guides"
       />
-      {heroes.loading && <Spinner />}
+      {heroes.loading && <Spinner page />}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

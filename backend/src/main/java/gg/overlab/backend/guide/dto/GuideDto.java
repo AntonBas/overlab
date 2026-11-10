@@ -3,6 +3,7 @@ package gg.overlab.backend.guide.dto;
 import gg.overlab.backend.guide.GuideKind;
 import gg.overlab.backend.guide.GuideSide;
 import java.io.Serializable;
+import java.time.Instant;
 
 public record GuideDto(
         Long id,
@@ -22,5 +23,6 @@ public record GuideDto(
         String embedUrl,
         String description,
         int sortOrder,
-        boolean published) implements Serializable {
+        boolean published,
+        Instant createdAt) implements Serializable {
 }

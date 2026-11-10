@@ -28,7 +28,8 @@ public class GuideMapper {
                 embedUrl(guide),
                 guide.getDescription(),
                 guide.getSortOrder(),
-                guide.isPublished());
+                guide.isPublished(),
+                guide.getCreatedAt());
     }
 
     private String embedUrl(Guide guide) {

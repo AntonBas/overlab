@@ -11,6 +11,11 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import type { CategoryMatchup, HeroRole } from "../../../types/api";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
@@ -55,6 +60,18 @@ const COLUMNS = [
 
 export function CountersPage() {
   usePageTitle("Counters");
+  usePageDescription(
+    "Curated Overwatch 2 counter picks and synergies for every hero, with short explanations.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "Counters", path: "/counters" },
+      ],
+      window.location.origin,
+    ),
+  );
   const heroes = useFetch(fetchHeroes, []);
   const relations = useFetch(fetchAllRelations, []);
   const categories = useFetch(fetchHeroCategories, []);
@@ -65,7 +82,7 @@ export function CountersPage() {
   const relationVotes = useRelationVotes();
 
   if (heroes.loading || relations.loading || categories.loading) {
-    return <Spinner />;
+    return <Spinner page />;
   }
   const failure = heroes.error ?? relations.error ?? categories.error;
   if (failure || !heroes.data || !relations.data || !categories.data) {

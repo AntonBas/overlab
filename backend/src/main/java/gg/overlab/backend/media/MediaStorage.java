@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,18 @@ public class MediaStorage {
     public boolean exists(String relativePath) {
         Path target = root.resolve(relativePath).normalize();
         return target.startsWith(root) && Files.isRegularFile(target);
+    }
+
+    public Optional<byte[]> read(String relativePath) {
+        Path target = root.resolve(relativePath).normalize();
+        if (!target.startsWith(root) || !Files.isRegularFile(target)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Files.readAllBytes(target));
+        } catch (IOException exception) {
+            throw new UncheckedIOException(exception);
+        }
     }
 
     public void delete(String relativePath) {

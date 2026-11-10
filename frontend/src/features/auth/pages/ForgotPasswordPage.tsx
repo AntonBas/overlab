@@ -2,11 +2,13 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { forgotPassword } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
 
 export function ForgotPasswordPage() {
   usePageTitle("Reset password");
+  useNoIndex();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);

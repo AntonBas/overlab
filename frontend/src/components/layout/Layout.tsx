@@ -47,7 +47,7 @@ export function Layout() {
       <Header />
       <main id="content" ref={content} tabIndex={-1} className="container main">
         <ErrorBoundary resetKey={location.pathname}>
-          <Suspense fallback={<Spinner />}>
+          <Suspense fallback={<Spinner page />}>
             <Outlet />
           </Suspense>
         </ErrorBoundary>

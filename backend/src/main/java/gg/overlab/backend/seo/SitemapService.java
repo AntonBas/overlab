@@ -3,8 +3,11 @@ package gg.overlab.backend.seo;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
+import gg.overlab.backend.guide.Guide;
+import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -17,16 +20,18 @@ import org.springframework.web.util.HtmlUtils;
 @Service
 public class SitemapService {
 
-    private static final List<String> STATIC_PATHS = List.of("/stats", "/maps", "/perks", "/changes");
+    private static final List<String> STATIC_PATHS = List.of("/stats", "/heroes", "/counters", "/perks", "/maps", "/changes");
 
     private final HeroRepository heroRepository;
     private final GameMapRepository mapRepository;
+    private final GuideRepository guideRepository;
     private final String baseUrl;
 
     public SitemapService(HeroRepository heroRepository, GameMapRepository mapRepository,
-                          @Value("${app.frontend-url}") String frontendUrl) {
+                          GuideRepository guideRepository, @Value("${app.frontend-url}") String frontendUrl) {
         this.heroRepository = heroRepository;
         this.mapRepository = mapRepository;
+        this.guideRepository = guideRepository;
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
@@ -42,6 +47,9 @@ public class SitemapService {
         for (GameMap map : mapRepository.findAllByOrderByNameAsc()) {
             appendUrl(xml, "/maps/" + map.getSlug(), lastModified(map));
         }
+        for (Guide guide : guideRepository.findAllByPublishedTrueOrderBySortOrderAscIdAsc()) {
+            appendUrl(xml, "/guides/" + guide.getId() + "-" + guide.getSlug(), lastModified(guide.getUpdatedAt()));
+        }
         return xml.append("</urlset>\n").toString();
     }
 
@@ -54,10 +62,14 @@ public class SitemapService {
     }
 
     private LocalDate lastModified(Hero hero) {
-        return hero.getUpdatedAt() == null ? null : hero.getUpdatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+        return lastModified(hero.getUpdatedAt());
     }
 
     private LocalDate lastModified(GameMap map) {
-        return map.getUpdatedAt() == null ? null : map.getUpdatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+        return lastModified(map.getUpdatedAt());
+    }
+
+    private LocalDate lastModified(Instant updatedAt) {
+        return updatedAt == null ? null : updatedAt.atZone(ZoneOffset.UTC).toLocalDate();
     }
 }

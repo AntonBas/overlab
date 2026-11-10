@@ -2,12 +2,14 @@ import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { toFailure } from "../../../services/api";
 import { resetPassword } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
 
 export function ResetPasswordPage() {
   usePageTitle("Set a new password");
+  useNoIndex();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   const [password, setPassword] = useState("");

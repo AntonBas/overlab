@@ -1,11 +1,6 @@
 import clsx from "clsx";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  type MouseEvent,
-} from "react";
+import { useCallback, useMemo, useRef, type MouseEvent } from "react";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { ADMIN_SECTIONS, LEAVE_WARNING } from "./adminSections";
 import { UnsavedChangesContext } from "./forms/unsavedChanges";
@@ -19,13 +14,7 @@ export function AdminLayout() {
   const isDirty = useCallback(() => dirty.current, []);
   const context = useMemo(() => ({ setDirty, isDirty }), [setDirty, isDirty]);
 
-  useEffect(() => {
-    const meta = document.createElement("meta");
-    meta.name = "robots";
-    meta.content = "noindex, nofollow";
-    document.head.appendChild(meta);
-    return () => meta.remove();
-  }, []);
+  useNoIndex();
 
   const current = ADMIN_SECTIONS.find((section) =>
     location.pathname.startsWith(section.to),

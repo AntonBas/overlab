@@ -13,6 +13,10 @@ import {
   usePageDescription,
 } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
 import type { GameQueue } from "../../../types/api";
 import { HeroMapPicks } from "../components/profile/HeroMapPicks";
 import { HeroHistorySection } from "../../history/components/HeroHistorySection";
@@ -76,9 +80,21 @@ export function HeroPage() {
         )
       : null,
   );
+  useStructuredData(
+    hero.data
+      ? breadcrumbList(
+          [
+            { name: "Overlab", path: "/" },
+            { name: "Heroes", path: "/heroes" },
+            { name: hero.data.name, path: `/heroes/${hero.data.slug}` },
+          ],
+          window.location.origin,
+        )
+      : null,
+  );
 
   if (hero.loading) {
-    return <Spinner />;
+    return <Spinner page />;
   }
   if (hero.error || !hero.data) {
     return hero.error ? (

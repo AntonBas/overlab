@@ -5,7 +5,12 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import { useFetch } from "../../../hooks/useFetch";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { GuideEmbed } from "../components/GuideEmbed";
 import { fetchGuide } from "../api/guidesApi";
@@ -14,6 +19,41 @@ export function GuidePage() {
   const { path = "" } = useParams();
   const guide = useFetch(() => fetchGuide(path), [path]);
   usePageTitle(guide.data?.title);
+  usePageDescription(
+    guide.data
+      ? `${guide.data.title}: a short ${guide.data.heroName} video guide${guide.data.mapName ? ` for ${guide.data.mapName}` : ""}.`
+      : null,
+  );
+  useStructuredData(
+    guide.data
+      ? breadcrumbList(
+          [
+            { name: "Overlab", path: "/" },
+            { name: "Heroes", path: "/heroes" },
+            {
+              name: guide.data.heroName,
+              path: `/heroes/${guide.data.heroSlug}`,
+            },
+            { name: guide.data.title, path: `/guides/${guide.data.path}` },
+          ],
+          window.location.origin,
+        )
+      : null,
+  );
+  useStructuredData(
+    guide.data
+      ? {
+          "@context": "https://schema.org",
+          "@type": "VideoObject",
+          name: guide.data.title,
+          description: guide.data.description || guide.data.title,
+          thumbnailUrl: `https://i.ytimg.com/vi/${guide.data.youtubeId}/hqdefault.jpg`,
+          embedUrl: guide.data.embedUrl,
+          uploadDate: guide.data.createdAt,
+          url: `${window.location.origin}/guides/${guide.data.path}`,
+        }
+      : null,
+  );
   const heroPortraits = useHeroPortraits();
   const mapVisuals = useMapVisuals();
 

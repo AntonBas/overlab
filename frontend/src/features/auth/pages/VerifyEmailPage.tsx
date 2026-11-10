@@ -2,11 +2,13 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { verifyEmail } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
 
 export function VerifyEmailPage() {
   usePageTitle("Confirm email");
+  useNoIndex();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   const result = useFetch(async () => {

@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { toFailure } from "../../../services/api";
 import { resendVerification } from "../api/authApi";
 import { useAuth } from "../context/useAuth";
@@ -20,6 +21,7 @@ const OAUTH_ERRORS: Record<string, string> = {
 
 export function LoginPage() {
   usePageTitle("Sign in");
+  useNoIndex();
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

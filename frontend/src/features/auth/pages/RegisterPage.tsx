@@ -2,12 +2,14 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { toFailure } from "../../../services/api";
 import { register } from "../api/authApi";
 import { AuthLayout } from "./AuthLayout";
 
 export function RegisterPage() {
   usePageTitle("Create account");
+  useNoIndex();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

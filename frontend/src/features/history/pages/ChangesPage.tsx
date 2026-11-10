@@ -11,6 +11,11 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import type { Patch } from "../../../types/api";
 import { formatDate, formatDateTime } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
@@ -83,6 +88,18 @@ function patchLabel(patch: Patch): string {
 
 export function ChangesPage() {
   usePageTitle("What changed");
+  usePageDescription(
+    "See which Overwatch 2 heroes gained or lost win and pick rate between patches and over the last weeks.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "What changed", path: "/changes" },
+      ],
+      window.location.origin,
+    ),
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") ?? DEFAULT_VIEW;
   const { filters, update: updateFilters } = useFilterState(

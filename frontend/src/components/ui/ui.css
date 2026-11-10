@@ -24,6 +24,11 @@
   padding: 16px 0;
 }
 
+.spinner--page {
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
 .spinner__dot {
   width: 14px;
   height: 14px;

@@ -11,6 +11,11 @@ import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
 import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { usePersonalData } from "../../personal/context/usePersonalData";
@@ -25,6 +30,18 @@ import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function PerksPage() {
   usePageTitle("Perks");
+  usePageDescription(
+    "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "Perks", path: "/perks" },
+      ],
+      window.location.origin,
+    ),
+  );
   const heroes = useFetch(fetchHeroes, []);
   const perks = useFetch(fetchAllPerks, []);
   const [role, setRole] = useState<HeroRole | null>(null);
@@ -33,7 +50,7 @@ export function PerksPage() {
   const { favoriteHeroes } = usePersonalData();
 
   if (heroes.loading || perks.loading) {
-    return <Spinner />;
+    return <Spinner page />;
   }
   const failure = heroes.error ?? perks.error;
   if (failure || !heroes.data || !perks.data) {

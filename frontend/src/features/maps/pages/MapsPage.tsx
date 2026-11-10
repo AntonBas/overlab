@@ -6,6 +6,11 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import type { GameMap, MapMode } from "../../../types/api";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
@@ -51,6 +56,18 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
 
 export function MapsPage() {
   usePageTitle("Maps");
+  usePageDescription(
+    "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "Maps", path: "/maps" },
+      ],
+      window.location.origin,
+    ),
+  );
   const maps = useFetch(fetchMaps, []);
   const { favoriteMaps } = usePersonalData();
   const [search, setSearch] = useState("");
@@ -76,7 +93,7 @@ export function MapsPage() {
         title="Maps"
         subtitle="Pick a map to see which heroes over- or under-perform on it"
       />
-      {maps.loading && <Spinner />}
+      {maps.loading && <Spinner page />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}

@@ -10,3 +10,4 @@ docker/backup/rclone/
 backups/
 /media/
 backend/media/
+.lighthouseci/

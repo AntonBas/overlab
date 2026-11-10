@@ -25,6 +25,7 @@ function guide(overrides: Partial<Guide>): Guide {
     description: null,
     sortOrder: 0,
     published: true,
+    createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };
 }
