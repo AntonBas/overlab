@@ -39,11 +39,7 @@ import { PerkList } from "../components/profile/PerkList";
 import { RelationTabs } from "../components/relations/RelationTabs";
 import { useHeroQueue } from "../hooks/useHeroQueue";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
-import {
-  heroPageDescription,
-  heroPageTitle,
-  heroStatsSentence,
-} from "../utils/heroSeo";
+import { heroPageDescription, heroPageTitle } from "../utils/heroSeo";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
@@ -131,12 +127,6 @@ export function HeroPage() {
   ].filter((section) => section.visible);
 
   const backdrop = heroBackdropStyle(slug);
-  const statsSentence = heroStatsSentence(
-    hero.data.name,
-    overall,
-    queue === "COMPETITIVE",
-  );
-
   return (
     <>
       <div
@@ -180,7 +170,6 @@ export function HeroPage() {
             <AbilityText text={hero.data.description} />
           </p>
         )}
-        {statsSentence && <p className="prose muted">{statsSentence}</p>}
       </div>
       <HeroTraits
         strengths={hero.data.strengths}
