@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
+import { EmailLink } from "../../legal/components/EmailLink";
 import { contactEmail } from "../../legal/contact";
 import { sendBusinessMessage } from "../api/businessApi";
 
@@ -75,7 +76,7 @@ export function BusinessPage() {
           {contactEmail && (
             <p>
               You can also write directly to{" "}
-              <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+              <EmailLink address={contactEmail} />.
             </p>
           )}
         </section>

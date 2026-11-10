@@ -1156,3 +1156,20 @@ input[type="range"] {
     padding-right: 4px;
   }
 }
+
+.email-copy {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0.25rem;
+  background: transparent;
+  color: var(--text-muted, inherit);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-copy:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}

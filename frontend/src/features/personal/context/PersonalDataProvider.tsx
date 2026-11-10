@@ -83,16 +83,23 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
       kind === "hero"
         ? current.current.heroes.has(slug)
         : current.current.maps.has(slug);
+    const field = kind === "hero" ? "heroes" : "maps";
     const apply = (favorite: boolean) => {
+      const next = new Set(current.current[field]);
+      if (favorite) {
+        next.add(slug);
+      } else {
+        next.delete(slug);
+      }
+      current.current = { ...current.current, [field]: next };
       setStored((existing) => {
-        const field = kind === "hero" ? "heroes" : "maps";
-        const next = new Set(existing[field]);
+        const updated = new Set(existing[field]);
         if (favorite) {
-          next.add(slug);
+          updated.add(slug);
         } else {
-          next.delete(slug);
+          updated.delete(slug);
         }
-        return { ...existing, [field]: next };
+        return { ...existing, [field]: updated };
       });
     };
     apply(!wasFavorite);

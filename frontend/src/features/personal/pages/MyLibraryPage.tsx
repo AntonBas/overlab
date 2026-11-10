@@ -36,6 +36,13 @@ export function MyLibraryPage() {
     return <Navigate to="/login" replace state={{ from: "/me" }} />;
   }
 
+  const visibleHeroes = (favorites.data?.heroes ?? []).filter((hero) =>
+    personal.favoriteHeroes.has(hero.slug),
+  );
+  const visibleMaps = (favorites.data?.maps ?? []).filter((map) =>
+    personal.favoriteMaps.has(map.slug),
+  );
+
   return (
     <div className="settings">
       <AccountHeader user={user} />
@@ -43,12 +50,12 @@ export function MyLibraryPage() {
         {favorites.error && (
           <ErrorMessage failure={favorites.error} onRetry={favorites.reload} />
         )}
-        {favorites.data && favorites.data.heroes.length === 0 && (
+        {favorites.data && visibleHeroes.length === 0 && (
           <EmptyState>Use the star on a hero page to keep it here.</EmptyState>
         )}
-        {favorites.data && favorites.data.heroes.length > 0 && (
+        {favorites.data && visibleHeroes.length > 0 && (
           <ul className="favorite-grid">
-            {sortHeroesByRoleThenName(favorites.data.heroes).map((hero) => (
+            {sortHeroesByRoleThenName(visibleHeroes).map((hero) => (
               <li
                 key={hero.slug}
                 className={`favorite-grid__item favorite-grid__item--${hero.role.toLowerCase()}`}
@@ -77,12 +84,12 @@ export function MyLibraryPage() {
         )}
       </SettingsSection>
       <SettingsSection title="Favorite maps">
-        {favorites.data && favorites.data.maps.length === 0 && (
+        {favorites.data && visibleMaps.length === 0 && (
           <EmptyState>Use the star on a map page to keep it here.</EmptyState>
         )}
-        {favorites.data && favorites.data.maps.length > 0 && (
+        {favorites.data && visibleMaps.length > 0 && (
           <ul className="favorite-grid favorite-grid--wide">
-            {favorites.data.maps.map((map) => (
+            {visibleMaps.map((map) => (
               <li key={map.slug}>
                 <span className="place-icon">
                   <Thumbnail url={map.imageUrl} width={48} height={27} />
