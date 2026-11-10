@@ -24,6 +24,7 @@ import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
 import gg.overlab.backend.stats.StatsHistoryService;
+import gg.overlab.backend.stats.StatsSnapshotProvider;
 import gg.overlab.backend.stats.StatsService;
 import gg.overlab.backend.stats.StatsSort;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
@@ -36,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +84,7 @@ class StatsQueriesIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+        clearCaches();
         ana = hero("ana-test", "Ana", HeroRole.SUPPORT);
         genji = hero("genji-test", "Genji", HeroRole.DAMAGE);
         rialto = gameMapRepository.findBySlug("rialto").orElseThrow();
@@ -96,6 +98,16 @@ class StatsQueriesIntegrationTest {
                 stat(ana, rialto, RankTier.ALL, NEW, "48.00", "26.00"),
                 stat(ana, null, RankTier.GOLD, NEW, "46.00", "24.00")));
         heroStatRepository.flush();
+    }
+
+    @AfterEach
+    void tearDown() {
+        clearCaches();
+    }
+
+    private void clearCaches() {
+        cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).clear();
+        cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
     }
 
     @Test
