@@ -32,17 +32,21 @@ export function usePageDescription(description: string | null | undefined) {
     }
     const previous = metaContent('meta[name="description"]');
     const previousOg = metaContent('meta[property="og:description"]');
+    const previousUrl = metaContent('meta[property="og:url"]');
+    const pageUrl = `${window.location.origin}${window.location.pathname}`;
     setMeta('meta[name="description"]', description);
     setMeta('meta[property="og:description"]', description);
+    setMeta('meta[property="og:url"]', pageUrl);
 
     const canonical = document.createElement("link");
     canonical.rel = "canonical";
-    canonical.href = `${window.location.origin}${window.location.pathname}`;
+    canonical.href = pageUrl;
     document.head.appendChild(canonical);
 
     return () => {
       setMeta('meta[name="description"]', previous);
       setMeta('meta[property="og:description"]', previousOg);
+      setMeta('meta[property="og:url"]', previousUrl);
       canonical.remove();
     };
   }, [description]);

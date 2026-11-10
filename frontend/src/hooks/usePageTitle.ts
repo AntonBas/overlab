@@ -4,6 +4,11 @@ const SITE_NAME = "Overlab";
 
 export function usePageTitle(title: string | null | undefined) {
   useEffect(() => {
-    document.title = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+    const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+    const openGraphTitle = document.head.querySelector(
+      'meta[property="og:title"]',
+    );
+    document.title = fullTitle;
+    openGraphTitle?.setAttribute("content", fullTitle);
   }, [title]);
 }

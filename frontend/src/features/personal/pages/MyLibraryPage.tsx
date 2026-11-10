@@ -9,6 +9,7 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { useAuth } from "../../auth/context/useAuth";
 import { AccountHeader } from "../../account/components/AccountHeader";
 import { SettingsSection } from "../../account/components/SettingsSection";
@@ -19,6 +20,7 @@ import { usePersonalData } from "../context/usePersonalData";
 
 export function MyLibraryPage() {
   usePageTitle("My Overlab");
+  useNoIndex();
   const { user, loading } = useAuth();
   const personal = usePersonalData();
   const favorites = useFetch(
@@ -28,7 +30,7 @@ export function MyLibraryPage() {
   );
 
   if (loading) {
-    return <Spinner />;
+    return <Spinner page />;
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: "/me" }} />;

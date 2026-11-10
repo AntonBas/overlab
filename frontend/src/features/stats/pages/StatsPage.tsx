@@ -7,6 +7,11 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
+import { usePageDescription } from "../../../hooks/usePageDescription";
 import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps/api/mapsApi";
 import { fetchStats } from "../api/statsApi";
@@ -18,6 +23,18 @@ import { useFilterState } from "../hooks/useFilterState";
 
 export function StatsPage() {
   usePageTitle("Hero statistics");
+  usePageDescription(
+    "Overwatch 2 hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
+  );
+  useStructuredData(
+    breadcrumbList(
+      [
+        { name: "Overlab", path: "/" },
+        { name: "Hero statistics", path: "/stats" },
+      ],
+      window.location.origin,
+    ),
+  );
   const { filters, update, changeSort, key } = useFilterState();
   const [search, setSearch] = useState("");
   const maps = useFetch(fetchMaps, []);

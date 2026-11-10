@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { useAuth } from "../../auth/context/useAuth";
 import { AccountHeader } from "../components/AccountHeader";
 import { DeleteAccount } from "../components/DeleteAccount";
@@ -12,6 +13,7 @@ import { SettingsSection } from "../components/SettingsSection";
 
 export function SettingsPage() {
   usePageTitle("Account settings");
+  useNoIndex();
   const { user, loading } = useAuth();
 
   if (loading) {

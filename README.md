@@ -68,6 +68,7 @@ Images are files in the media directory (`MEDIA_DIRECTORY`, default `./media`, `
 - **Abilities:** the same import also reads the ability section of every hero page and fills `hero_abilities` (slug, name, description, icon); existing abilities get their name, description and order refreshed and a missing icon filled, and abilities Blizzard no longer lists for a hero are deleted (a renamed ability therefore replaces the old one instead of duplicating it). Text fields (counter and synergy notes, strengths, weaknesses, hero description) can mention an ability as `[[hero-slug/ability-slug]]` (for example `[[dva/defense-matrix]]`); the site shows it as a chip with the icon and a tooltip with the description, and falls back to a plain readable name when the ability is unknown. Blizzard's page does not say which button an ability uses, so `hero_abilities.control_key` (`PRIMARY_FIRE`, `SECONDARY_FIRE`, `ABILITY_1`, `ABILITY_2`, `ULTIMATE`, `JUMP`, `CROUCH`, `PASSIVE`; default PC keys LMB, RMB, Shift, E, Q, Space, Ctrl; the hero page switch also shows the Xbox, PlayStation and Nintendo Switch defaults) is curated by hand, is never touched by the import, and stays empty when unknown.
 - **Maps and perks:** upload in the admin panel (PNG, JPEG or WebP, up to 2 MB; SVG is refused). The file name contains a short hash, so a replaced image is never served stale, and the old file is deleted.
 - **Hero portraits:** the collector can download the portraits from the statistics response (256x256 PNG) into `heroes/`. This is off by default (`COLLECTOR_DOWNLOAD_PORTRAITS=false`) because the images are Blizzard's and the licence question is still open (see `.tasks/current/0008-images-and-storage.md`). Without it the site shows the first letter of the hero name.
+- **WebP portraits:** when `cwebp` is installed (it is in the backend image, package `libwebp-tools`), new portraits are stored as `heroes/<slug>.webp` (quality 85, about 90% smaller than the PNG, visually the same), and on every backend start the portraits that are still PNG are converted once and the old files are deleted; without `cwebp` (for example a plain local run) the PNG is kept. The command can be changed with `app.media.webp-command`.
 - The daily backup also archives the media volume (`overlab-media-<timestamp>.tar.gz`).
 
 ## Architecture
@@ -163,13 +164,16 @@ Curated content, also public `GET` requests:
 | `/api/heroes/{slug}/synergies` | Heroes that work well together (both directions) |
 | `/api/guides?hero=&map=`, `/api/guides/{id}-{slug}` | Published spots and setups (YouTube embeds; `kind`, `side`, `abilitySlug`, `startSeconds`, `endSeconds`) |
 | `/api/patches`, `/api/patches/{slug}`, `/api/patches/at?date=` | Patches and the patch active at a date. `season` is read from a "Season N" in the title and carried over to the later patches until the next season is announced (empty before the first one); to correct it, edit the title of the patch that opens the season |
-| `/api/sitemap.xml` | Sitemap of the public pages (static pages, active heroes, maps); served as `/sitemap.xml` by the edge proxy, which also answers `/robots.txt` with the sitemap link |
+| `/api/sitemap.xml` | Sitemap of the public pages (static pages, active heroes, maps, published guides); served as `/sitemap.xml` by the edge proxy, which also answers `/robots.txt` with the sitemap link |
+| `/api/seo/preview?path=` | Small static HTML with the page title, description, canonical, Open Graph, Twitter card and `schema.org` data. The edge proxy sends link-preview crawlers (Telegram, Discord, Slack, Facebook, X, WhatsApp, LinkedIn and similar) to it for public pages; people and search engines get the normal app, which sets the same metadata itself |
 
 Counters, synergies and perks are curated recommendations, not statistics. They are managed through the admin API (`ADMIN` role): `/api/admin/perks`, `/api/admin/hero-relations`, `/api/admin/hero-categories`, `/api/admin/hero-category-relations`, `/api/admin/guides`, `/api/admin/patches`, `PUT /api/admin/heroes/{slug}` and `PUT /api/admin/maps/{slug}` (image upload: `PUT /api/admin/maps/{slug}/image`, `PUT /api/admin/perks/{id}/icon`). Any admin change clears the content caches.
 
 ### Limits and caching
 
 Public `GET /api/**` requests are limited per client IP in Redis: 120 per minute in general and 300 per minute for `/api/stats/**` (`app.rate-limit.api-per-minute`, `app.rate-limit.stats-per-minute`); the limit is exceeded with `429` in the `ApiError` format. Sign-in and registration endpoints keep their own stricter limit. Public responses carry `Cache-Control: public, max-age=60, stale-while-revalidate=300` and an `ETag`; errors, `/api/auth/**` and `/api/admin/**` are never cached. In `prod` the client IP is read from `X-Forwarded-For` set by Caddy.
+
+The `content` cache is cleared on every backend start, so a release that changes cached response shapes never reads stale entries.
 
 ### OpenAPI
 
@@ -271,4 +275,4 @@ cd frontend && npm run lint && npm run format:check && npm test && npm run build
 
 - `main`: production
 - `develop`: development
-- GitHub Actions runs the backend and frontend checks on every push and pull request. Dependabot opens weekly update pull requests; minor and patch updates are merged automatically after CI passes, major updates are merged manually.
+- GitHub Actions runs the backend and frontend checks on every push and pull request. The Lighthouse workflow audits the production pages (performance, accessibility, best practices, SEO; thresholds in `lighthouserc.json`) after every deploy and weekly; accessibility and SEO below the threshold fail the run, performance and best practices only warn. Dependabot opens weekly update pull requests; minor and patch updates are merged automatically after CI passes, major updates are merged manually.

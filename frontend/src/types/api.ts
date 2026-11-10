@@ -267,6 +267,7 @@ export interface Guide {
   description: string | null;
   sortOrder: number;
   published: boolean;
+  createdAt: string;
 }
 
 export interface Patch {

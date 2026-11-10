@@ -7,7 +7,7 @@ COPY src src
 RUN ./gradlew --no-daemon --console=plain bootJar -x test
 
 FROM eclipse-temurin:21-jre-alpine
-RUN addgroup -S overlab && adduser -S overlab -G overlab
+RUN apk add --no-cache libwebp-tools && addgroup -S overlab && adduser -S overlab -G overlab
 WORKDIR /app
 RUN mkdir -p /app/media && chown overlab:overlab /app/media
 COPY --from=build /workspace/build/libs/app.jar app.jar

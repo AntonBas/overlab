@@ -15,6 +15,10 @@ import { useFetch } from "../../../hooks/useFetch";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import {
+  breadcrumbList,
+  useStructuredData,
+} from "../../../hooks/useStructuredData";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
@@ -62,9 +66,21 @@ export function MapPage() {
       ? `${map.data.name}: win, pick and ban rates of every Overwatch 2 hero on this map.`
       : null,
   );
+  useStructuredData(
+    map.data
+      ? breadcrumbList(
+          [
+            { name: "Overlab", path: "/" },
+            { name: "Maps", path: "/maps" },
+            { name: map.data.name, path: `/maps/${map.data.slug}` },
+          ],
+          window.location.origin,
+        )
+      : null,
+  );
 
   if (map.loading) {
-    return <Spinner />;
+    return <Spinner page />;
   }
   if (map.error || !map.data) {
     return map.error ? (

@@ -73,6 +73,17 @@
 		reverse_proxy backend:8080
 	}
 
+	@linkPreviewBot {
+		header_regexp userAgent User-Agent (?i)(facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal)
+		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|maps/[a-z0-9-]+|guides/[0-9]+(-[A-Za-z0-9-]*)?)/?$
+	}
+	handle @linkPreviewBot {
+		rewrite * /api/seo/preview?path={http.request.uri.path}
+		reverse_proxy backend:8080 {
+			header_down Vary User-Agent
+		}
+	}
+
 	@hashedAssets path /assets/*
 	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
 
