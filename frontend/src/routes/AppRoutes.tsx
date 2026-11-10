@@ -7,11 +7,9 @@ import { FeedbackPage } from "../features/feedback/pages/FeedbackPage";
 import { HeroPage } from "../features/heroes/pages/HeroPage";
 import { HeroesPage } from "../features/heroes/pages/HeroesPage";
 import { CountersPage } from "../features/heroes/pages/CountersPage";
-import { HeroCountersPage } from "../features/heroes/pages/HeroCountersPage";
 import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
 import { PerksPage } from "../features/heroes/pages/PerksPage";
-import { HeroMapsPage } from "../features/heroes/pages/HeroMapsPage";
-import { HeroPerksPage } from "../features/heroes/pages/HeroPerksPage";
+import { HeroSectionRedirect } from "../features/heroes/pages/HeroSectionRedirect";
 import { ChangesPage } from "../features/history/pages/ChangesPage";
 import { MapPage } from "../features/maps/pages/MapPage";
 import { MapsPage } from "../features/maps/pages/MapsPage";
@@ -141,10 +139,19 @@ export function AppRoutes() {
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
         <Route path="counters" element={<CountersPage />} />
-        <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
-        <Route path="heroes/:slug/maps" element={<HeroMapsPage />} />
+        <Route
+          path="heroes/:slug/counters"
+          element={<HeroSectionRedirect section="counters" />}
+        />
+        <Route
+          path="heroes/:slug/maps"
+          element={<HeroSectionRedirect section="maps" />}
+        />
         <Route path="perks" element={<PerksPage />} />
-        <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />
+        <Route
+          path="heroes/:slug/perks"
+          element={<HeroSectionRedirect section="perks" />}
+        />
         <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
         <Route path="changes" element={<ChangesPage />} />
         <Route path="patches/*" element={<Navigate to="/changes" replace />} />

@@ -930,17 +930,6 @@
   border-color: var(--accent);
 }
 
-.hero-subnav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.hero-subnav .section-nav__link {
-  text-decoration: none;
-}
-
 .hero-perks--backdrop {
   background-position: 90% 40%;
   background-size: cover;

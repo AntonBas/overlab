@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -44,7 +44,6 @@ import {
   heroPageTitle,
   heroStatsSentence,
 } from "../utils/heroSeo";
-import { HeroSubnav } from "../components/profile/HeroSubnav";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
@@ -183,12 +182,6 @@ export function HeroPage() {
         )}
         {statsSentence && <p className="prose muted">{statsSentence}</p>}
       </div>
-      <HeroSubnav
-        slug={slug}
-        name={hero.data.name}
-        current="overview"
-        linkSuffix={linkSuffix}
-      />
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
@@ -246,11 +239,6 @@ export function HeroPage() {
         <section className="section" id="hero-perks">
           <h2>{hero.data.name} perks</h2>
           <PerkList perks={perks.data} />
-          <p className="footnote">
-            <Link to={`/heroes/${slug}/perks`}>
-              All {hero.data.name} perks explained
-            </Link>
-          </p>
         </section>
       )}
 

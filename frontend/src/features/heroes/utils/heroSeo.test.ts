@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { HeroMapStat } from "../../../types/api";
 import {
-  SECTION_COPY,
   heroPageDescription,
   heroPageTitle,
   heroStatsSentence,
@@ -31,14 +30,6 @@ describe("hero seo copy", () => {
 
     expect(description.length).toBeLessThanOrEqual(160);
     expect(description).toContain("Ana Overwatch 2 stats");
-  });
-
-  it("names the hero in every section title and description", () => {
-    for (const copy of Object.values(SECTION_COPY)) {
-      expect(copy.title("Ana")).toContain("Ana");
-      expect(copy.heading("Ana")).toContain("Ana");
-      expect(copy.description("Ana")).toContain("Ana");
-    }
   });
 });
 
