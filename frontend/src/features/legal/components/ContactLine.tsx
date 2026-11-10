@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { contactEmail } from "../contact";
+import { EmailLink } from "./EmailLink";
 
 export function ContactLine() {
   if (!contactEmail) {
@@ -11,7 +12,7 @@ export function ContactLine() {
   }
   return (
     <p>
-      Contact: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+      Contact: <EmailLink address={contactEmail} />
     </p>
   );
 }

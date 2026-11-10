@@ -19,7 +19,7 @@ React 19 and TypeScript with Vite. Plain CSS (dark theme only), `react-router-do
 | `/maps`, `/maps/:slug` | Maps; hero statistics with differences from the all-maps values |
 | `/perks` | Perks of all heroes on one page, grouped by role, left and right as in the game |
 | `/counters` | Counters and synergies of all heroes on one page, with role and name filters and a compact or detailed view |
-| `/heroes/:slug/perks`, `/heroes/:slug/counters`, `/heroes/:slug/maps` | Own indexable pages for one hero: perks with the Overlab recommendation, counters and synergies, best and worst maps (with the `?queue=` switch). They link to each other and to the hero page; a page without content (no perks, no counters) is `noindex` and left out of the sitemap |
+| `/heroes/:slug/perks`, `/heroes/:slug/counters`, `/heroes/:slug/maps` | Old addresses: the edge proxy answers `301` to the matching section of the hero page (`/heroes/:slug#perks`, `#counters`, `#maps`); the hero page carries every section, so it is the single page search engines index for a hero |
 | `/heroes/:slug?queue=` | A hero: rates and history, best and weakest maps (expandable to every map, each links to its map page), abilities, perks, counters, spots; `/maps/:map/:hero` redirects here |
 | `/patches` | Redirects to `/changes`; patches are shown as dashed lines on the statistics chart and as views in `/changes` |
 | `/changes?view=7d\|30d\|patch:<slug>&queue=` | Which heroes gained or lost win and pick rate between two snapshots |

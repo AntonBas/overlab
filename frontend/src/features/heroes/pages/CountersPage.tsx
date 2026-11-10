@@ -199,7 +199,7 @@ export function CountersPage() {
                   <div className="matchup__hero">
                     <Link
                       className="matchup__identity"
-                      to={`/heroes/${hero.slug}/counters`}
+                      to={`/heroes/${hero.slug}#counters`}
                     >
                       <HeroPortrait
                         name={hero.name}

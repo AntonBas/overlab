@@ -5,8 +5,6 @@ import gg.overlab.backend.guide.Guide;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
-import gg.overlab.backend.hero.perk.PerkRepository;
-import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +23,6 @@ public class SeoPageResolver {
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
-    private static final Pattern HERO_SECTION_PATH = Pattern.compile("^/heroes/([A-Za-z0-9-]+)/([a-z]+)$");
     private static final Pattern GUIDE_PATH = Pattern.compile("^(\\d+)(?:-.*)?$");
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
@@ -59,19 +56,13 @@ public class SeoPageResolver {
     private final HeroRepository heroRepository;
     private final GameMapRepository mapRepository;
     private final GuideRepository guideRepository;
-    private final PerkRepository perkRepository;
-    private final HeroRelationRepository relationRepository;
     private final String baseUrl;
 
     public SeoPageResolver(HeroRepository heroRepository, GameMapRepository mapRepository,
-                           GuideRepository guideRepository, PerkRepository perkRepository,
-                           HeroRelationRepository relationRepository,
-                           @Value("${app.frontend-url}") String frontendUrl) {
+                           GuideRepository guideRepository, @Value("${app.frontend-url}") String frontendUrl) {
         this.heroRepository = heroRepository;
         this.mapRepository = mapRepository;
         this.guideRepository = guideRepository;
-        this.perkRepository = perkRepository;
-        this.relationRepository = relationRepository;
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
@@ -81,11 +72,6 @@ public class SeoPageResolver {
         String[] fixed = STATIC_PAGES.get(path);
         if (fixed != null) {
             return Optional.of(staticPage(path, fixed[0], fixed[1], fixed[2]));
-        }
-        Matcher sectionMatcher = HERO_SECTION_PATH.matcher(path);
-        if (sectionMatcher.matches()) {
-            return HeroSection.fromPath(sectionMatcher.group(2))
-                    .flatMap(section -> heroSectionPage(sectionMatcher.group(1), section));
         }
         Matcher matcher = PAGE_PATH.matcher(path);
         if (!matcher.matches()) {
@@ -124,29 +110,6 @@ public class SeoPageResolver {
                     "website", hero.getName(),
                     List.of(breadcrumbs(path, hero.getName(), "/heroes", "Heroes")));
         });
-    }
-
-    private Optional<SeoPage> heroSectionPage(String slug, HeroSection section) {
-        return heroRepository.findBySlug(slug).filter(Hero::isActive)
-                .filter(hero -> hasSectionContent(hero, section))
-                .map(hero -> {
-                    String path = "/heroes/" + hero.getSlug() + "/" + section.path();
-                    String name = hero.getName();
-                    return new SeoPage(path, section.title(name), section.description(name), "website",
-                            section.heading(name), List.of(breadcrumbList(List.of(
-                            new String[] {SITE_NAME, "/"}, new String[] {"Heroes", "/heroes"},
-                            new String[] {name, "/heroes/" + hero.getSlug()},
-                            new String[] {section.label(), path}))));
-                });
-    }
-
-    private boolean hasSectionContent(Hero hero, HeroSection section) {
-        return switch (section) {
-            case PERKS -> perkRepository.existsByHeroId(hero.getId());
-            case COUNTERS -> !relationRepository
-                    .findAllByHeroSlugOrRelatedHeroSlugOrderByIdAsc(hero.getSlug(), hero.getSlug()).isEmpty();
-            case MAPS -> true;
-        };
     }
 
     private Optional<SeoPage> mapPage(String slug) {

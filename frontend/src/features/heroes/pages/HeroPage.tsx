@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -39,12 +39,7 @@ import { PerkList } from "../components/profile/PerkList";
 import { RelationTabs } from "../components/relations/RelationTabs";
 import { useHeroQueue } from "../hooks/useHeroQueue";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
-import {
-  heroPageDescription,
-  heroPageTitle,
-  heroStatsSentence,
-} from "../utils/heroSeo";
-import { HeroSubnav } from "../components/profile/HeroSubnav";
+import { heroPageDescription, heroPageTitle } from "../utils/heroSeo";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
@@ -132,12 +127,6 @@ export function HeroPage() {
   ].filter((section) => section.visible);
 
   const backdrop = heroBackdropStyle(slug);
-  const statsSentence = heroStatsSentence(
-    hero.data.name,
-    overall,
-    queue === "COMPETITIVE",
-  );
-
   return (
     <>
       <div
@@ -181,14 +170,7 @@ export function HeroPage() {
             <AbilityText text={hero.data.description} />
           </p>
         )}
-        {statsSentence && <p className="prose muted">{statsSentence}</p>}
       </div>
-      <HeroSubnav
-        slug={slug}
-        name={hero.data.name}
-        current="overview"
-        linkSuffix={linkSuffix}
-      />
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
@@ -246,11 +228,6 @@ export function HeroPage() {
         <section className="section" id="hero-perks">
           <h2>{hero.data.name} perks</h2>
           <PerkList perks={perks.data} />
-          <p className="footnote">
-            <Link to={`/heroes/${slug}/perks`}>
-              All {hero.data.name} perks explained
-            </Link>
-          </p>
         </section>
       )}
 
