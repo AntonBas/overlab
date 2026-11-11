@@ -7,7 +7,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -19,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
     private static final String LOGO_PATH = "/email-logo.png";
@@ -28,12 +26,17 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final AuthProperties authProperties;
+    private final String frontendUrl;
+    private final String contactEmail;
 
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
-
-    @Value("${app.contact-email:}")
-    private String contactEmail;
+    public EmailService(JavaMailSender mailSender, AuthProperties authProperties,
+                        @Value("${app.frontend-url}") String frontendUrl,
+                        @Value("${app.contact-email:}") String contactEmail) {
+        this.mailSender = mailSender;
+        this.authProperties = authProperties;
+        this.frontendUrl = frontendUrl;
+        this.contactEmail = contactEmail;
+    }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
     public void sendVerification(User user, String rawToken) {

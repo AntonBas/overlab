@@ -1,6 +1,7 @@
 plugins {
 	id 'java'
 	id 'checkstyle'
+	id 'jacoco'
 	id 'org.springframework.boot' version '4.1.2'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -56,13 +57,26 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:testcontainers-postgresql'
 	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy tasks.named('jacocoTestReport')
 	testLogging {
 		exceptionFormat = 'full'
+	}
+}
+
+jacoco {
+	toolVersion = '0.8.13'
+}
+
+tasks.named('jacocoTestReport') {
+	reports {
+		xml.required = true
+		html.required = true
 	}
 }
 

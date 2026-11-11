@@ -1,8 +1,7 @@
-package gg.overlab.backend.content;
+package gg.overlab.backend.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gg.overlab.backend.common.SlugService;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
