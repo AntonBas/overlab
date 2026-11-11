@@ -3,11 +3,16 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
+import { useRegion } from "../../features/stats/context/useRegion";
+import { REGIONS } from "../../features/stats/filters";
+import type { Region } from "../../types/api";
+import { REGION_LABELS } from "../../utils/format";
 import { HeroSearch } from "./HeroSearch";
 import { NAV_LINKS } from "./navLinks";
 
 export function Header() {
   const { user, loading, signOut } = useAuth();
+  const { region, rememberRegion } = useRegion();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -72,6 +77,18 @@ export function Header() {
             </ul>
           </nav>
           <HeroSearch />
+          <select
+            className="site-header__region"
+            aria-label="Region"
+            value={region}
+            onChange={(event) => rememberRegion(event.target.value as Region)}
+          >
+            {REGIONS.map((option) => (
+              <option key={option} value={option}>
+                {REGION_LABELS[option]}
+              </option>
+            ))}
+          </select>
           <div className="site-header__account">
             {!loading && user && (
               <>

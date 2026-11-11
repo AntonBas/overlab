@@ -39,6 +39,11 @@
   gap: 12px;
 }
 
+.site-header__region {
+  flex-shrink: 0;
+  padding-block: 6px;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;

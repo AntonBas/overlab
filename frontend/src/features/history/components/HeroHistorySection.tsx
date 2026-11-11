@@ -6,8 +6,8 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
-import type { GameQueue } from "../../../types/api";
-import { formatDateTime } from "../../../utils/format";
+import type { GameQueue, Region } from "../../../types/api";
+import { REGION_LABELS, formatDateTime } from "../../../utils/format";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchHeroHistory } from "../../stats/api/statsApi";
 import { DataFreshness } from "../../stats/components/DataFreshness";
@@ -46,6 +46,7 @@ interface HeroHistorySectionProps {
   slug: string;
   mapSlug?: string;
   queue: GameQueue;
+  region: Region;
   title?: string;
   current?: CurrentStats | null;
   headerAction?: ReactNode;
@@ -56,6 +57,7 @@ export function HeroHistorySection({
   slug,
   mapSlug,
   queue,
+  region,
   title = "History",
   current = null,
   headerAction,
@@ -71,11 +73,11 @@ export function HeroHistorySection({
         queue,
         tier: "ALL",
         platform: "PC",
-        region: "EUROPE",
+        region,
         map: mapSlug,
         ...range,
       }),
-    [slug, mapSlug, queue, range],
+    [slug, mapSlug, queue, region, range],
     { keepPrevious: true },
   );
   const patches = useFetch(fetchPatches, []);
@@ -178,7 +180,7 @@ export function HeroHistorySection({
         </div>
       )}
       <p className="muted footnote">
-        All ranks, PC, Europe.
+        All ranks, PC, {REGION_LABELS[region]}.
         {current && (
           <>
             {" "}
@@ -192,7 +194,7 @@ export function HeroHistorySection({
               queue={queue}
               tier="ALL"
               platform="PC"
-              region="EUROPE"
+              region={region}
             />{" "}
           </>
         )}

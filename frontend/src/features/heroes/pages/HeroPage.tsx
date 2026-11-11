@@ -5,6 +5,8 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
+import { RegionToggle } from "../../../components/ui/RegionToggle";
+import { useRegion } from "../../stats/context/useRegion";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -45,6 +47,7 @@ export function HeroPage() {
   const { slug = "" } = useParams();
   const relationFeedback = useRelationFeedback(slug);
   const { queue, linkSuffix, changeQueue } = useHeroQueue();
+  const { region, rememberRegion } = useRegion();
 
   const hero = useFetch(() => fetchHero(slug), [slug]);
   const stats = useFetch(
@@ -53,9 +56,9 @@ export function HeroPage() {
         queue,
         tier: "ALL",
         platform: "PC",
-        region: "EUROPE",
+        region,
       }),
-    [slug, queue],
+    [slug, queue, region],
     { keepPrevious: true },
   );
   const perks = useFetch(() => fetchPerks(slug), [slug]);
@@ -162,6 +165,7 @@ export function HeroPage() {
             <>
               <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
               <QueueToggle value={queue} onChange={changeQueue} />
+              <RegionToggle value={region} onChange={rememberRegion} />
             </>
           }
         />
@@ -183,6 +187,7 @@ export function HeroPage() {
           title={`${hero.data.name} statistics`}
           slug={slug}
           queue={queue}
+          region={region}
           current={focus}
         >
           {stats.loading && <Spinner label="Loading statistics" />}

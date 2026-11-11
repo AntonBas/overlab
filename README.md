@@ -146,6 +146,7 @@ The statistics endpoints are public `GET` requests.
 | `/api/stats/hero/{slug}` | Statistics of one hero across all maps |
 | `/api/stats/hero/{slug}/history` | Snapshots of one hero over time. Parameters: `queue`, `tier`, `map`, `platform`, `region`, `from`, `to` (ISO date-time; default is the last 90 days, at most 366 days) |
 | `/api/stats/freshness` | When Blizzard's numbers last changed, found by comparing the latest snapshots of one queue, rank, platform and region (`valuesSince` is the first snapshot that already had the current numbers). Parameters: `queue`, `tier`, `platform`, `region` |
+| `/api/stats/coverage` | Which platform, region and queue combinations have ranks and maps collected |
 | `/api/stats/history-start` | When statistics collection started for one queue, rank, platform and region (`firstCapturedAt`, empty when nothing is stored); the changes page uses it to hide patches that cannot be compared. Parameters: `queue`, `tier`, `platform`, `region` |
 | `/api/stats/compare` | Changes between two snapshots, biggest win rate gain first. Use `from` and `to` (the last snapshot at or before each moment) or `patch={slug}` (last snapshot before the release against one a week later) |
 
@@ -224,9 +225,18 @@ The backend collects statistics from Blizzard's public hero statistics page on a
 - `weekly-maps`: every map, every rank from Bronze to Grandmaster for Competitive (about 248 requests, roughly 12 minutes with the 3 s pause). Same rule: runs after `daily-overview` found changes, at most once per 7 days
 - A job with `after: <job name>` instead of `cron` is chained. It starts when the job it follows saved rows, skips itself if its last successful run is younger than `min-interval`, and is shown in the admin panel as "After ... finds changes". Runs started by a patch are not chained, because a patch already runs every job
 - `daily-other-regions`: PC in Americas and Asia, both queues, rank `ALL`, all maps combined
+- `other-regions-ranks`: PC in Americas and Asia, Competitive, every rank from Bronze to Grandmaster (16 requests), all maps combined. Chained after `daily-other-regions`
+- `americas-maps`: PC in Americas, every map, rank `ALL`, both queues (62 requests), at most once per 2 days. Chained after `daily-other-regions`
+- `asia-maps`: the same for PC in Asia, at most once per 7 days, because the sample is smaller and the numbers change slower
+- `americas-rank-maps`: PC in Americas, every map and every rank for Competitive (248 requests, about 12 minutes), at most once per 7 days. Not started by a patch (`run-on-patch: false`)
 - `daily-console`: Console in every region, both queues, rank `ALL`, all maps combined
+- `console-ranks`: Console in Europe and Americas, Competitive, every rank, all maps combined. Chained after `daily-console`
+- `console-asia-ranks`: the same for Console in Asia, at most once per 7 days
+- Maps and rank by map for Console, and rank by map for Asia, are not collected: the samples are too small for those slices to be reliable
 
-Ranks and maps are collected only for PC in Europe. For every other platform and region the statistics page disables the rank and map filters and shows overall numbers (`hasDetailedCoverage` in `frontend/src/features/stats/filters.ts`); change that rule together with the collector jobs.
+`GET /api/stats/coverage` lists which platform, region and queue combinations have ranks (`tiers`, all maps combined) and which have maps (`mapTiers`), read from `snapshot_checks` and cached with the other statistics. The statistics, map, hero and changes pages use it to enable only the rank and map filters that have data, so a job in `collector.yaml` needs no matching frontend change. While the request is loading or failing the pages fall back to the old rule: ranks and maps only for PC in Europe.
+
+The region shown by default is chosen in this order: the region saved in the browser after the visitor picked one (`localStorage` key `overlab.region`), the default region from the profile, the region of the browser time zone (`frontend/src/features/stats/region.ts`: the Americas, including Oceania, for `America/*` and `Australia/*`; Asia for `Asia/*` except the Middle East, the Caucasus and Russia; Europe for the rest), then Europe. The header has a region switch that works on every page, and for a signed-in visitor it also saves the choice as the default region of the profile. The hero page and the hero history chart follow it and have their own switch; the statistics, map and changes pages read it when the address has no `region` parameter. An address without `region` therefore means "the visitor's own region".
 
 The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
 

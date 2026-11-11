@@ -12,10 +12,12 @@ import clsx from "clsx";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import type { GameMap, HeroRole } from "../../../types/api";
 import { PLATFORM_OPTIONS, REGION_OPTIONS } from "../filterOptions";
+import { useCoverage } from "../context/useCoverage";
 import {
   ALL_MAPS,
   ROLES,
-  hasDetailedCoverage,
+  availableTiers,
+  hasMapCoverage,
   isQuickPlay,
   type StatsFilters as Filters,
 } from "../filters";
@@ -40,7 +42,9 @@ export function StatsFilters({
   children,
 }: StatsFiltersProps) {
   const quickPlay = isQuickPlay(filters);
-  const detailed = hasDetailedCoverage(filters);
+  const coverage = useCoverage();
+  const tiers = availableTiers(coverage, filters);
+  const mapCoverage = hasMapCoverage(coverage, filters);
   const mapOptions: IconSelectOption<string>[] = [
     { value: ALL_MAPS, label: "All maps", icon: <AllItemsIcon /> },
     ...(maps ?? []).map((map) => ({
@@ -66,7 +70,7 @@ export function StatsFilters({
         {!quickPlay && (
           <RankFilter
             value={filters.tier}
-            disabled={!detailed}
+            tiers={tiers}
             onChange={(tier) => onChange({ tier })}
           />
         )}
@@ -78,7 +82,7 @@ export function StatsFilters({
             options={mapOptions}
             wide
             searchable
-            disabled={!detailed}
+            disabled={!mapCoverage}
             onChange={(map) => onChange({ map })}
           />
         )}
@@ -136,10 +140,15 @@ export function StatsFilters({
             </button>
           ))}
         </div>
-        {!detailed && (
+        {tiers.length <= 1 && !quickPlay && (
           <p className="filters__note muted">
-            {maps ? "Ranks and maps are" : "Ranks are"} available for PC in
-            Europe only. Other platforms and regions show overall statistics.
+            Ranks are not collected for this platform and region yet. Overall
+            statistics are shown.
+          </p>
+        )}
+        {maps && !mapCoverage && (
+          <p className="filters__note muted">
+            Map statistics are not collected for this platform and region yet.
           </p>
         )}
       </form>

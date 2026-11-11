@@ -24,6 +24,7 @@ import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchComparison, fetchHistoryStart } from "../../stats/api/statsApi";
 import { StatsFilters } from "../../stats/components/StatsFilters";
 import { isQuickPlay, toSearchParams } from "../../stats/filters";
+import { useRegion } from "../../stats/context/useRegion";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { ChangesTable } from "../components/ChangesTable";
 import { periodRange } from "../utils/chart";
@@ -102,6 +103,7 @@ export function ChangesPage() {
   );
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") ?? DEFAULT_VIEW;
+  const { region: defaultRegion } = useRegion();
   const { filters, update: updateFilters } = useFilterState(
     undefined,
     PRESERVED_PARAMS,
@@ -219,7 +221,7 @@ export function ChangesPage() {
   ];
 
   function updateView(next: { view?: string; season?: string }) {
-    const params = toSearchParams(filters);
+    const params = toSearchParams(filters, defaultRegion);
     const nextView = next.view ?? view;
     const nextSeason = next.season ?? selectedSeasonKey;
     if (nextView !== DEFAULT_VIEW) {

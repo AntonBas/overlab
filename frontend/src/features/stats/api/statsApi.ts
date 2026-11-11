@@ -11,7 +11,7 @@ import type {
   StatsComparison,
   StatsSnapshot,
 } from "../../../types/api";
-import type { StatsFilters } from "../filters";
+import type { CoverageEntry, StatsFilters } from "../filters";
 
 export async function fetchFreshness(
   queue: GameQueue,
@@ -22,6 +22,11 @@ export async function fetchFreshness(
   const { data } = await api.get<DataFreshness>("/stats/freshness", {
     params: { queue, tier, platform, region },
   });
+  return data;
+}
+
+export async function fetchCoverage(): Promise<CoverageEntry[]> {
+  const { data } = await api.get<CoverageEntry[]>("/stats/coverage");
   return data;
 }
 

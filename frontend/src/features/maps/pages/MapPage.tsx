@@ -27,7 +27,8 @@ import { FavoriteButton } from "../../personal/components/FavoriteButton";
 import { SpotsSection } from "../../guides/components/SpotsSection";
 import { fetchStats } from "../../stats/api/statsApi";
 import { StatsTable } from "../../stats/components/StatsTable";
-import { ROLES, isQuickPlay } from "../../stats/filters";
+import { useCoverage } from "../../stats/context/useCoverage";
+import { ROLES, availableTiers, isQuickPlay } from "../../stats/filters";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
@@ -37,6 +38,7 @@ import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 export function MapPage() {
   const { slug = "" } = useParams();
   const { filters, update, changeSort, key } = useFilterState(slug);
+  const coverage = useCoverage();
   const map = useFetch(() => fetchMap(slug), [slug]);
   const stats = useFetch(() => fetchStats(filters), [key, slug], {
     keepPrevious: true,
@@ -126,6 +128,7 @@ export function MapPage() {
           {!isQuickPlay(filters) && (
             <RankFilter
               value={filters.tier}
+              tiers={availableTiers(coverage, filters)}
               onChange={(tier) => update({ tier })}
             />
           )}

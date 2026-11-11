@@ -43,6 +43,18 @@ describe("Header", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("lets visitors choose the statistics region", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Header />);
+    expect(screen.getByRole("combobox", { name: "Region" })).toHaveValue(
+      "EUROPE",
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Region" }),
+      "ASIA",
+    );
+  });
+
   it("hides the admin link from anonymous visitors", () => {
     renderWithRouter(<Header />);
     expect(

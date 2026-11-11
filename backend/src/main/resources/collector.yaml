@@ -49,10 +49,57 @@ collector:
       regions: [AMERICAS, ASIA]
       tiers: [ALL]
       maps: [all-maps]
+    - name: other-regions-ranks
+      after: daily-other-regions
+      queues: [COMPETITIVE]
+      platforms: [PC]
+      regions: [AMERICAS, ASIA]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [all-maps]
+    - name: americas-maps
+      after: daily-other-regions
+      min-interval: 2d
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [AMERICAS]
+      tiers: [ALL]
+      maps: [EACH]
+    - name: asia-maps
+      after: daily-other-regions
+      min-interval: 7d
+      queues: [QUICK_PLAY, COMPETITIVE]
+      platforms: [PC]
+      regions: [ASIA]
+      tiers: [ALL]
+      maps: [EACH]
+    - name: americas-rank-maps
+      after: daily-other-regions
+      min-interval: 7d
+      queues: [COMPETITIVE]
+      platforms: [PC]
+      regions: [AMERICAS]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [EACH]
+      run-on-patch: false
     - name: daily-console
       cron: "0 20 4 * * *"
       queues: [QUICK_PLAY, COMPETITIVE]
       platforms: [CONSOLE]
       regions: [EUROPE, AMERICAS, ASIA]
       tiers: [ALL]
+      maps: [all-maps]
+    - name: console-ranks
+      after: daily-console
+      queues: [COMPETITIVE]
+      platforms: [CONSOLE]
+      regions: [EUROPE, AMERICAS]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
+      maps: [all-maps]
+    - name: console-asia-ranks
+      after: daily-console
+      min-interval: 7d
+      queues: [COMPETITIVE]
+      platforms: [CONSOLE]
+      regions: [ASIA]
+      tiers: [BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER]
       maps: [all-maps]
