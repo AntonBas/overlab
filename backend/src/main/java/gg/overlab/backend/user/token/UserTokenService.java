@@ -9,17 +9,22 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HexFormat;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserTokenService {
 
     private static final int TOKEN_BYTES = 32;
+    private static final Duration REUSE_GRACE = Duration.ofSeconds(30);
 
     private final UserTokenRepository tokenRepository;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -39,16 +44,33 @@ public class UserTokenService {
         return rawToken;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidTokenException.class)
     public User consume(String rawToken, UserTokenType type) {
-        UserToken token = tokenRepository.findByHashAndType(hash(rawToken), type)
+        return consumeAny(rawToken, List.of(type)).user();
+    }
+
+    @Transactional(noRollbackFor = InvalidTokenException.class)
+    public ConsumedToken consumeAny(String rawToken, Collection<UserTokenType> types) {
+        UserToken token = tokenRepository.findByHashAndTypeIn(hash(rawToken), types)
                 .orElseThrow(InvalidTokenException::new);
         Instant now = Instant.now();
-        if (token.getUsedAt() != null || token.getExpiresAt().isBefore(now)) {
+        if (token.getUsedAt() != null) {
+            revokeSessionsOnReuse(token, now);
+            throw new InvalidTokenException();
+        }
+        if (token.getExpiresAt().isBefore(now)) {
             throw new InvalidTokenException();
         }
         token.setUsedAt(now);
-        return token.getUser();
+        return new ConsumedToken(token.getUser(), token.getType());
+    }
+
+    private void revokeSessionsOnReuse(UserToken token, Instant now) {
+        if (token.getType() == UserTokenType.REFRESH && token.getUsedAt().isBefore(now.minus(REUSE_GRACE))) {
+            log.warn("A used refresh token was presented again, revoking all sessions of user {}",
+                    token.getUser().getId());
+            tokenRepository.deleteAllByUserAndType(token.getUser().getId(), UserTokenType.REFRESH);
+        }
     }
 
     @Transactional

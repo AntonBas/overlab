@@ -1,5 +1,7 @@
-package gg.overlab.backend.audit;
+package gg.overlab.backend.audit.dto;
 
+import gg.overlab.backend.audit.AuditAction;
+import gg.overlab.backend.audit.AuditLog;
 import java.time.Instant;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public record AuditLogDto(
         Map<String, Object> changes,
         String ipAddress) {
 
-    static AuditLogDto from(AuditLog log) {
+    public static AuditLogDto from(AuditLog log) {
         return new AuditLogDto(log.getId(), log.getOccurredAt(), log.getActorId(), log.getActorRole(),
                 log.getAction(), log.getEntityType(), log.getEntityId(), log.getChanges(), log.getIpAddress());
     }

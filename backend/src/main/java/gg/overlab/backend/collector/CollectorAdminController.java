@@ -1,8 +1,7 @@
 package gg.overlab.backend.collector;
 
 import gg.overlab.backend.audit.AuditService;
-import gg.overlab.backend.collector.run.CollectorRunDto;
-import gg.overlab.backend.collector.run.CollectorRunRepository;
+import gg.overlab.backend.collector.dto.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorTrigger;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CollectorAdminController {
 
     private final RatesCollectorService collectorService;
-    private final CollectorRunRepository runRepository;
     private final AuditService auditService;
     private final PerkImportService perkImportService;
     private final PatchImportService patchImportService;
@@ -40,7 +38,7 @@ public class CollectorAdminController {
     @Operation(summary = "List recent collector runs")
     @GetMapping("/runs")
     public List<CollectorRunDto> runs() {
-        return runRepository.findTop50ByOrderByStartedAtDesc().stream().map(CollectorRunDto::from).toList();
+        return collectorService.recentRuns();
     }
 
     @Operation(summary = "Run a collector job now")

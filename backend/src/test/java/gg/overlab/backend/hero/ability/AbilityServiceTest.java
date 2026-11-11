@@ -1,4 +1,4 @@
-package gg.overlab.backend.content;
+package gg.overlab.backend.hero.ability;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -11,11 +11,6 @@ import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
-import gg.overlab.backend.hero.ability.AbilityControl;
-import gg.overlab.backend.hero.ability.AbilityMapper;
-import gg.overlab.backend.hero.ability.AbilityService;
-import gg.overlab.backend.hero.ability.HeroAbility;
-import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import gg.overlab.backend.hero.ability.dto.AbilityAdminDto;
 import gg.overlab.backend.hero.ability.dto.AbilityControlRequest;
 import gg.overlab.backend.media.MediaUrlResolver;

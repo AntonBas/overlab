@@ -16,7 +16,9 @@ import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.hero.perk.PerkRepository;
+import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
+import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
 import jakarta.servlet.http.Cookie;
 import java.time.Duration;
@@ -34,7 +36,8 @@ import org.springframework.web.context.WebApplicationContext;
 @IntegrationTest
 class AuditIntegrationTest {
 
-    private static final long ADMIN_ID = 900003L;
+    private static final String ADMIN_EMAIL = "audit-admin@overlab.test";
+
     private static final String PERK_BODY = "{\"heroSlug\":\"audit-hero\",\"name\":\"Audit Perk\",\"slot\":\"MAJOR\","
             + "\"position\":\"LEFT\",\"recommendation\":\"%s\"}";
 
@@ -53,16 +56,25 @@ class AuditIntegrationTest {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private MockMvc mockMvc;
+    private Long adminId;
     private Cookie adminCookie;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).ifPresent(userRepository::delete);
         User admin = new User();
-        admin.setId(ADMIN_ID);
-        admin.setEmail("audit-admin@overlab.test");
+        admin.setEmail(ADMIN_EMAIL);
+        admin.setDisplayName("Audit Admin");
         admin.setRole(UserRole.ADMIN);
+        admin.setProvider(AuthProvider.LOCAL);
+        admin.setEmailVerified(true);
+        admin = userRepository.saveAndFlush(admin);
+        adminId = admin.getId();
         adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
         cleanUp();
         Hero hero = new Hero();
@@ -77,7 +89,12 @@ class AuditIntegrationTest {
         perkRepository.deleteAll(perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc("audit-hero"));
         heroRepository.findBySlug("audit-hero").ifPresent(heroRepository::delete);
         auditLogRepository.deleteAll(auditLogRepository.findAll().stream()
-                .filter(entry -> Long.valueOf(ADMIN_ID).equals(entry.getActorId())).toList());
+                .filter(entry -> adminId.equals(entry.getActorId())).toList());
+    }
+
+    @AfterEach
+    void removeAdmin() {
+        userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).ifPresent(userRepository::delete);
     }
 
     @Test
@@ -120,7 +137,7 @@ class AuditIntegrationTest {
 
     private List<AuditLog> entriesOfAdmin() {
         return auditLogRepository.findAll().stream()
-                .filter(entry -> Long.valueOf(ADMIN_ID).equals(entry.getActorId()))
+                .filter(entry -> adminId.equals(entry.getActorId()))
                 .toList();
     }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatDelta,
+  formatPatchDate,
   formatPercent,
   formatRelativeTime,
   formatSeconds,
@@ -64,5 +65,12 @@ describe("humanize", () => {
     expect(humanize("RECOMMENDED")).toBe("Recommended");
     expect(humanize("PASSWORD_CHANGE")).toBe("Password change");
     expect(humanize("LOCAL")).toBe("Local");
+  });
+});
+
+describe("formatPatchDate", () => {
+  it("keeps the calendar day of a patch released at midnight UTC", () => {
+    expect(formatPatchDate("2026-10-13T00:00:00Z")).toContain("13");
+    expect(formatPatchDate("2026-10-13T23:30:00Z")).toContain("13");
   });
 });

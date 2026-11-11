@@ -23,7 +23,7 @@ public class CollectorScheduler implements SchedulingConfigurer {
             if (job.isChained()) {
                 log.info("Collector job '{}' follows '{}' when it finds changes", job.name(), job.after());
             } else if (job.enabled()) {
-                registrar.addCronTask(() -> collectorService.runBlocking(job.name(), CollectorTrigger.SCHEDULED),
+                registrar.addCronTask(() -> collectorService.startIfPossible(job.name(), CollectorTrigger.SCHEDULED),
                         job.cron());
             } else {
                 log.info("Collector job '{}' is disabled and will not be scheduled", job.name());

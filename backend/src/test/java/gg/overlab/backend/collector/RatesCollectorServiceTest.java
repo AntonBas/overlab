@@ -11,8 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.dto.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRun;
-import gg.overlab.backend.collector.run.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
@@ -21,10 +21,10 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
-import gg.overlab.backend.stats.SnapshotCheckRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.SnapshotCheckRepository;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
 
 class RatesCollectorServiceTest {
 
@@ -74,7 +75,7 @@ class RatesCollectorServiceTest {
 
     @Test
     void successfulRunRecordsCountsAndMetrics() {
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         CollectorRun run = lastSavedRun();
         assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.SUCCESS);
@@ -92,7 +93,7 @@ class RatesCollectorServiceTest {
         when(recorder.record(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new SnapshotRecorder.Outcome(0, false));
 
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         CollectorRun run = lastSavedRun();
         assertThat(run.getRowsSaved()).isZero();
@@ -106,7 +107,7 @@ class RatesCollectorServiceTest {
         when(client.fetch(any(), any(), any(), any(), any(), eq("etag-1"))).thenReturn(RatesFetch.unchanged());
         when(recorder.markUnchanged(any(), any(), any(), any(), any(), any())).thenReturn(true);
 
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         verify(validator, times(0)).validate(any());
         verify(recorder, times(0)).record(any(), any(), any(), any(), any(), any(), any(), any(), any());
@@ -132,7 +133,7 @@ class RatesCollectorServiceTest {
 
     @Test
     void quickPlayIsRequestedOnlyForTierAll() {
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         verify(client).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.ALL, "all-maps", null);
         verify(client, times(0)).fetch(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.GOLD, "all-maps", null);
@@ -145,7 +146,7 @@ class RatesCollectorServiceTest {
     void invalidSnapshotIsNotSavedAndRunIsPartial() {
         doThrow(new InvalidSnapshotException("bad numbers")).doNothing().when(validator).validate(any());
 
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         CollectorRun run = lastSavedRun();
         assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.PARTIAL);
@@ -160,7 +161,7 @@ class RatesCollectorServiceTest {
     void runWhereEveryRequestFailsIsFailedAndNotCountedAsSuccess() {
         when(client.fetch(any(), any(), any(), any(), any(), any())).thenThrow(new IllegalStateException("blizzard down"));
 
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         CollectorRun run = lastSavedRun();
         assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.FAILED);
@@ -197,9 +198,36 @@ class RatesCollectorServiceTest {
     void scheduledRunIsSkippedWhileJobIsRunning() {
         service.startAsync("daily", CollectorTrigger.MANUAL);
 
-        service.runBlocking("daily", CollectorTrigger.SCHEDULED);
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
 
         verify(client, times(0)).fetch(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void rejectedExecutionFailsTheRunAndFreesTheJob() {
+        TaskExecutor rejectingExecutor = task -> {
+            throw new TaskRejectedException("queue is full");
+        };
+        RatesCollectorService rejecting = new RatesCollectorService(
+                CollectorFixtures.properties(1, job), client, validator, recorder, mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class),
+                runRepository, metrics, rejectingExecutor);
+
+        assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
+                .isInstanceOf(ConflictException.class);
+
+        assertThat(lastSavedRun().getStatus()).isEqualTo(CollectorRunStatus.FAILED);
+        assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("queue is full");
+    }
+
+    @Test
+    void startIfPossibleSkipsQuietlyWhileJobIsRunning() {
+        service.startAsync("daily", CollectorTrigger.MANUAL);
+
+        service.startIfPossible("daily", CollectorTrigger.SCHEDULED);
+
+        assertThat(queuedTasks).hasSize(1);
     }
 
     @Test

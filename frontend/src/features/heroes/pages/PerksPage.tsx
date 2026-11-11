@@ -29,9 +29,9 @@ import { PerkList } from "../components/profile/PerkList";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function PerksPage() {
-  usePageTitle("Overwatch 2 hero perks: every Minor and Major perk");
+  usePageTitle("Overwatch hero perks: every Minor and Major perk");
   usePageDescription(
-    "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions.",
+    "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
   );
   useStructuredData(
     breadcrumbList(

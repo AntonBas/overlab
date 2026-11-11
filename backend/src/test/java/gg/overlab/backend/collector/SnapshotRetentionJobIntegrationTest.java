@@ -70,14 +70,53 @@ class SnapshotRetentionJobIntegrationTest {
         assertThat(remaining.get(2)).isEqualTo(recent);
     }
 
+    @Test
+    void keepsTheLatestSnapshotOfEveryCombinationInEachWeekIndependently() {
+        Hero newHero = new Hero();
+        newHero.setSlug("retention-groups-hero");
+        newHero.setName("Retention Groups");
+        newHero.setRole(HeroRole.SUPPORT);
+        Hero hero = heroRepository.saveAndFlush(newHero);
+        Instant weekStart = Instant.now().minus(Duration.ofDays(400)).atZone(ZoneOffset.UTC)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().atStartOfDay(ZoneOffset.UTC)
+                .toInstant();
+        for (int week = 0; week < 3; week++) {
+            Instant base = weekStart.plus(Duration.ofDays(7L * week));
+            for (RankTier tier : List.of(RankTier.ALL, RankTier.GOLD)) {
+                heroStatRepository.save(stat(hero, base.plus(Duration.ofDays(1)), tier));
+                heroStatRepository.save(stat(hero, base.plus(Duration.ofDays(4)), tier));
+            }
+        }
+        heroStatRepository.flush();
+
+        int deleted = job.thinOutOldSnapshots();
+
+        List<HeroStat> remaining = heroStatRepository.findAll().stream()
+                .filter(row -> row.getHero().getId().equals(hero.getId()))
+                .toList();
+        assertThat(deleted).isEqualTo(6);
+        assertThat(remaining).hasSize(6);
+        assertThat(remaining).allMatch(row -> row.getCapturedAt().atZone(ZoneOffset.UTC).getDayOfWeek()
+                == DayOfWeek.FRIDAY);
+    }
+
+    @Test
+    void doesNothingWhenThereIsNoOldData() {
+        assertThat(job.thinOutOldSnapshots()).isGreaterThanOrEqualTo(0);
+    }
+
     private HeroStat stat(Hero hero, Instant capturedAt) {
+        return stat(hero, capturedAt, RankTier.ALL);
+    }
+
+    private HeroStat stat(Hero hero, Instant capturedAt, RankTier tier) {
         HeroStat stat = new HeroStat();
         stat.setHero(hero);
         stat.setQueue(GameQueue.COMPETITIVE);
         stat.setGameFormat(GameFormat.FIVE_VS_FIVE);
         stat.setPlatform(Platform.PC);
         stat.setRegion(Region.EUROPE);
-        stat.setTier(RankTier.ALL);
+        stat.setTier(tier);
         stat.setWinRate(new BigDecimal("50.00"));
         stat.setPickRate(new BigDecimal("10.00"));
         stat.setCapturedAt(capturedAt);

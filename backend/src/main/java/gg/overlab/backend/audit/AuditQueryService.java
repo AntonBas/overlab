@@ -1,5 +1,6 @@
 package gg.overlab.backend.audit;
 
+import gg.overlab.backend.audit.dto.AuditLogDto;
 import gg.overlab.backend.common.PageResponse;
 import jakarta.persistence.criteria.Predicate;
 import java.time.Instant;

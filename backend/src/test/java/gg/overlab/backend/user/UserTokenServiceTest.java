@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +41,7 @@ class UserTokenServiceTest {
     @Test
     void consumesValidTokenOnce() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), null);
-        when(repository.findByHashAndType(any(), eq(UserTokenType.PASSWORD_RESET))).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), eq(List.of(UserTokenType.PASSWORD_RESET)))).thenReturn(Optional.of(token));
 
         User result = service.consume("raw", UserTokenType.PASSWORD_RESET);
 
@@ -50,16 +52,40 @@ class UserTokenServiceTest {
     @Test
     void rejectsAlreadyUsedToken() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now());
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.PASSWORD_RESET))
                 .isInstanceOf(InvalidTokenException.class);
     }
 
     @Test
+    void reuseOfAnOldUsedRefreshTokenRevokesAllSessions() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(120));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(InvalidTokenException.class);
+
+        verify(repository).deleteAllByUserAndType(user.getId(), UserTokenType.REFRESH);
+    }
+
+    @Test
+    void immediateSecondUseOfRefreshTokenDoesNotRevokeSessions() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(2));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(InvalidTokenException.class);
+
+        verify(repository, never()).deleteAllByUserAndType(any(), any());
+    }
+
+    @Test
     void rejectsExpiredToken() {
         UserToken token = storedToken(Instant.now().minusSeconds(1), null);
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.EMAIL_VERIFICATION))
                 .isInstanceOf(InvalidTokenException.class);
@@ -67,7 +93,7 @@ class UserTokenServiceTest {
 
     @Test
     void rejectsUnknownToken() {
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.empty());
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
                 .isInstanceOf(InvalidTokenException.class);

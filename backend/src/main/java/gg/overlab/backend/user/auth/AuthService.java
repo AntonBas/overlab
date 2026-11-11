@@ -18,9 +18,11 @@ import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
 import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
 import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +41,7 @@ public class AuthService {
     private final EmailService emailService;
     private final AuthProperties properties;
     private final AuditService auditService;
+    private final LoginAttemptLimiter loginAttemptLimiter;
 
     private volatile String dummyPasswordHash;
 
@@ -62,14 +65,15 @@ public class AuthService {
 
     @Transactional
     public AuthTokens login(LoginRequest request) {
-        User user = userRepository.findByEmailIgnoreCase(normalize(request.email())).orElse(null);
+        String email = normalize(request.email());
+        loginAttemptLimiter.requireAllowed(email);
+        User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         boolean passwordMatches = passwordEncoder.matches(request.password(), hashFor(user));
-        if (user == null || user.getPasswordHash() == null || !passwordMatches) {
+        if (user == null || user.getPasswordHash() == null || !passwordMatches || !user.isEnabled()) {
+            loginAttemptLimiter.recordFailure(email);
             throw new InvalidCredentialsException();
         }
-        if (!user.isEnabled()) {
-            throw new InvalidCredentialsException();
-        }
+        loginAttemptLimiter.reset(email);
         if (!user.isEmailVerified()) {
             throw new EmailNotVerifiedException();
         }
@@ -86,7 +90,7 @@ public class AuthService {
         return tokens;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidTokenException.class)
     public AuthTokens refresh(String rawRefreshToken) {
         User user = tokenService.consume(rawRefreshToken, UserTokenType.REFRESH);
         if (!user.isEnabled()) {
@@ -119,14 +123,13 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String rawToken) {
-        User user;
-        try {
-            user = tokenService.consume(rawToken, UserTokenType.EMAIL_VERIFICATION);
-        } catch (InvalidTokenException exception) {
-            applyEmailChange(tokenService.consume(rawToken, UserTokenType.EMAIL_CHANGE));
+        ConsumedToken consumed = tokenService.consumeAny(rawToken,
+                List.of(UserTokenType.EMAIL_VERIFICATION, UserTokenType.EMAIL_CHANGE));
+        if (consumed.type() == UserTokenType.EMAIL_CHANGE) {
+            applyEmailChange(consumed.user());
             return;
         }
-        user.setEmailVerified(true);
+        consumed.user().setEmailVerified(true);
     }
 
     private void applyEmailChange(User user) {

@@ -12,6 +12,6 @@ describe("hero seo copy", () => {
     const description = heroPageDescription("Ana", "word ".repeat(100));
 
     expect(description.length).toBeLessThanOrEqual(160);
-    expect(description).toContain("Ana Overwatch 2 stats");
+    expect(description).toContain("Ana Overwatch stats");
   });
 });

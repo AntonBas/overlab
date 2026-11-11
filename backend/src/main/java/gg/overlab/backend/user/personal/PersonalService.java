@@ -42,7 +42,7 @@ public class PersonalService {
         if (favoriteRepository.existsByUserIdAndHeroSlug(userId, heroSlug)) {
             return;
         }
-        if (favoriteRepository.findHeroFavorites(userId).size() >= MAX_FAVORITES_PER_KIND) {
+        if (favoriteRepository.countByUserIdAndHeroIsNotNull(userId) >= MAX_FAVORITES_PER_KIND) {
             throw new BadRequestException("You can keep at most " + MAX_FAVORITES_PER_KIND + " favorite heroes");
         }
         UserFavorite favorite = new UserFavorite();
@@ -63,7 +63,7 @@ public class PersonalService {
         if (favoriteRepository.existsByUserIdAndMapSlug(userId, mapSlug)) {
             return;
         }
-        if (favoriteRepository.findMapFavorites(userId).size() >= MAX_FAVORITES_PER_KIND) {
+        if (favoriteRepository.countByUserIdAndMapIsNotNull(userId) >= MAX_FAVORITES_PER_KIND) {
             throw new BadRequestException("You can keep at most " + MAX_FAVORITES_PER_KIND + " favorite maps");
         }
         UserFavorite favorite = new UserFavorite();

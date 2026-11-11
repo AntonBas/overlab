@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
-import { formatPercent } from "../../../utils/format";
+import { DATE_LOCALE, formatPercent } from "../../../utils/format";
 import {
   buildChartGeometry,
   nearestDotIndex,
@@ -31,12 +31,18 @@ const SIZE: ChartSize = {
   padding: { top: 12, right: 12, bottom: 24, left: 44 },
 };
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
+const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
   day: "numeric",
   month: "short",
 });
 
-const fullDateFormat = new Intl.DateTimeFormat("en-GB", {
+const patchDayFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+
+const fullDateFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -44,6 +50,10 @@ const fullDateFormat = new Intl.DateTimeFormat("en-GB", {
 
 function formatDate(time: number): string {
   return dateFormat.format(new Date(time));
+}
+
+function formatPatchDay(time: number): string {
+  return patchDayFormat.format(new Date(time));
 }
 
 const EDGE_SHARE = 18;
@@ -306,14 +316,14 @@ export function LineChart({
               {patchInEffect && (
                 <span className="chart__tooltip-effect">
                   In effect: {patchInEffect.label} ·{" "}
-                  {formatDate(patchInEffect.time)}
+                  {formatPatchDay(patchInEffect.time)}
                 </span>
               )}
               {patchesAtActive.map((marker) => (
                 <span key={marker.time} className="chart__tooltip-patch">
                   {marker.kind === "hotfix"
-                    ? `Hotfix · ${formatDate(marker.time)}`
-                    : `Patch: ${marker.label} · ${formatDate(marker.time)}`}
+                    ? `Hotfix · ${formatPatchDay(marker.time)}`
+                    : `Patch: ${marker.label} · ${formatPatchDay(marker.time)}`}
                   {marker.kind === "hotfix" && marker.parentLabel && (
                     <span className="chart__tooltip-parent">
                       for {marker.parentLabel}

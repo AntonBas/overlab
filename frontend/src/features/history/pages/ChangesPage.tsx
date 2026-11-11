@@ -17,13 +17,18 @@ import {
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import type { Patch } from "../../../types/api";
-import { formatDate, formatDateTime } from "../../../utils/format";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatchDate,
+} from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { fetchHeroes } from "../../heroes/api/heroesApi";
 import { fetchPatches } from "../../patches/api/patchesApi";
 import { fetchComparison, fetchHistoryStart } from "../../stats/api/statsApi";
 import { StatsFilters } from "../../stats/components/StatsFilters";
 import { isQuickPlay, toSearchParams } from "../../stats/filters";
+import { useRegion } from "../../stats/context/useRegion";
 import { useFilterState } from "../../stats/hooks/useFilterState";
 import { ChangesTable } from "../components/ChangesTable";
 import { periodRange } from "../utils/chart";
@@ -83,13 +88,13 @@ function recentGroupKeys(groups: PatchGroup[]): string[] {
 }
 
 function patchLabel(patch: Patch): string {
-  return `${patch.title ?? `Patch ${patch.version}`} · ${formatDate(patch.releasedAt)}`;
+  return `${patch.title ?? `Patch ${patch.version}`} · ${formatPatchDate(patch.releasedAt)}`;
 }
 
 export function ChangesPage() {
-  usePageTitle("Overwatch 2 hero win rate changes by patch");
+  usePageTitle("Overwatch hero win rate changes by patch");
   usePageDescription(
-    "See which Overwatch 2 heroes gained or lost win and pick rate between patches and over the last weeks.",
+    "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",
   );
   useStructuredData(
     breadcrumbList(
@@ -102,6 +107,7 @@ export function ChangesPage() {
   );
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") ?? DEFAULT_VIEW;
+  const { region: defaultRegion } = useRegion();
   const { filters, update: updateFilters } = useFilterState(
     undefined,
     PRESERVED_PARAMS,
@@ -219,7 +225,7 @@ export function ChangesPage() {
   ];
 
   function updateView(next: { view?: string; season?: string }) {
-    const params = toSearchParams(filters);
+    const params = toSearchParams(filters, defaultRegion);
     const nextView = next.view ?? view;
     const nextSeason = next.season ?? selectedSeasonKey;
     if (nextView !== DEFAULT_VIEW) {

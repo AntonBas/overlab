@@ -2,6 +2,7 @@ package gg.overlab.backend.stats;
 
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.exception.core.BadRequestException;
+import gg.overlab.backend.stats.dto.CoverageDto;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroMapStatsDto;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,6 +33,7 @@ public class StatsController {
     private final StatsService statsService;
     private final StatsHistoryService historyService;
     private final StatsFreshnessService freshnessService;
+    private final StatsCoverageService coverageService;
 
     @Operation(summary = "Latest hero statistics for the selected filters")
     @GetMapping
@@ -81,6 +84,12 @@ public class StatsController {
             @RequestParam(defaultValue = "PC") Platform platform,
             @RequestParam(defaultValue = "EUROPE") Region region) {
         return freshnessService.freshness(StatsFilter.of(queue, tier, StatsFilter.ALL_MAPS, platform, region));
+    }
+
+    @Operation(summary = "Which platforms, regions, ranks and maps have collected statistics")
+    @GetMapping("/coverage")
+    public List<CoverageDto> coverage() {
+        return coverageService.coverage();
     }
 
     @Operation(summary = "When statistics collection started for the given filters")

@@ -59,9 +59,9 @@ const COLUMNS = [
 ] as const;
 
 export function CountersPage() {
-  usePageTitle("Overwatch 2 counters and synergies for every hero");
+  usePageTitle("Overwatch counters and synergies for every hero");
   usePageDescription(
-    "Curated Overwatch 2 counter picks and synergies for every hero, with short explanations.",
+    "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
   );
   useStructuredData(
     breadcrumbList(

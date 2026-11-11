@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_MAPS,
   DEFAULT_FILTERS,
-  hasDetailedCoverage,
+  applyCoverage,
+  availableTiers,
+  hasMapCoverage,
+  type Coverage,
   parseFilters,
   toSearchParams,
   type StatsFilters,
@@ -55,31 +58,127 @@ describe("parseFilters", () => {
   });
 });
 
+const COVERAGE: Coverage = [
+  {
+    queue: "COMPETITIVE",
+    platform: "PC",
+    region: "EUROPE",
+    tiers: ["ALL", "GOLD", "MASTER"],
+    mapTiers: ["ALL", "GOLD"],
+  },
+  {
+    queue: "COMPETITIVE",
+    platform: "PC",
+    region: "ASIA",
+    tiers: ["ALL", "GOLD"],
+    mapTiers: [],
+  },
+  {
+    queue: "QUICK_PLAY",
+    platform: "PC",
+    region: "ASIA",
+    tiers: ["ALL"],
+    mapTiers: ["ALL"],
+  },
+];
+
 describe("coverage", () => {
-  it("keeps ranks and maps for PC in Europe", () => {
-    expect(hasDetailedCoverage({ platform: "PC", region: "EUROPE" })).toBe(
-      true,
+  it("keeps ranks and maps where both are collected", () => {
+    const filters = applyCoverage(
+      { ...DEFAULT_FILTERS, tier: "GOLD", map: "rialto" },
+      COVERAGE,
     );
+
+    expect(filters.tier).toBe("GOLD");
+    expect(filters.map).toBe("rialto");
+    expect(hasMapCoverage(COVERAGE, DEFAULT_FILTERS)).toBe(true);
   });
 
-  it("limits other regions to overall statistics", () => {
-    const filters = parseFilters(
-      new URLSearchParams("tier=gold&map=rialto&region=asia"),
+  it("keeps ranks but resets maps where only ranks are collected", () => {
+    const filters = applyCoverage(
+      {
+        ...DEFAULT_FILTERS,
+        region: "ASIA",
+        tier: "GOLD",
+        map: "rialto",
+      },
+      COVERAGE,
     );
 
-    expect(filters.region).toBe("ASIA");
+    expect(filters.tier).toBe("GOLD");
+    expect(filters.map).toBe(ALL_MAPS);
+  });
+
+  it("resets a rank that is not collected for the selected map", () => {
+    const filters = applyCoverage(
+      { ...DEFAULT_FILTERS, tier: "MASTER", map: "rialto" },
+      COVERAGE,
+    );
+
+    expect(filters.tier).toBe("ALL");
+    expect(filters.map).toBe("rialto");
+  });
+
+  it("limits a combination without collected data to overall statistics", () => {
+    const filters = applyCoverage(
+      {
+        ...DEFAULT_FILTERS,
+        platform: "CONSOLE",
+        tier: "MASTER",
+        map: "busan",
+      },
+      COVERAGE,
+    );
+
     expect(filters.tier).toBe("ALL");
     expect(filters.map).toBe(ALL_MAPS);
   });
 
-  it("limits console to overall statistics", () => {
-    const filters = parseFilters(
-      new URLSearchParams("tier=master&map=busan&platform=console"),
+  it("lists the ranks collected for the selection", () => {
+    expect(availableTiers(COVERAGE, DEFAULT_FILTERS)).toEqual([
+      "ALL",
+      "GOLD",
+      "MASTER",
+    ]);
+    expect(
+      availableTiers(COVERAGE, { ...DEFAULT_FILTERS, map: "rialto" }),
+    ).toEqual(["ALL", "GOLD"]);
+  });
+
+  it("falls back to the Europe-only rule while coverage is unknown", () => {
+    const europe = applyCoverage(
+      { ...DEFAULT_FILTERS, tier: "GOLD", map: "rialto" },
+      null,
+    );
+    const asia = applyCoverage(
+      { ...DEFAULT_FILTERS, region: "ASIA", tier: "GOLD", map: "rialto" },
+      null,
     );
 
-    expect(filters.platform).toBe("CONSOLE");
-    expect(filters.tier).toBe("ALL");
-    expect(filters.map).toBe(ALL_MAPS);
+    expect(europe.tier).toBe("GOLD");
+    expect(europe.map).toBe("rialto");
+    expect(asia.tier).toBe("ALL");
+    expect(asia.map).toBe(ALL_MAPS);
+  });
+});
+
+describe("default region", () => {
+  it("uses the given region when the address has none", () => {
+    expect(parseFilters(new URLSearchParams(), "ASIA").region).toBe("ASIA");
+  });
+
+  it("prefers the region from the address", () => {
+    expect(
+      parseFilters(new URLSearchParams("region=americas"), "ASIA").region,
+    ).toBe("AMERICAS");
+  });
+
+  it("leaves out only the region that equals the default", () => {
+    const asia: StatsFilters = { ...DEFAULT_FILTERS, region: "ASIA" };
+    const europe: StatsFilters = DEFAULT_FILTERS;
+
+    expect(toSearchParams(asia, "ASIA").has("region")).toBe(false);
+    expect(toSearchParams(europe, "ASIA").get("region")).toBe("europe");
   });
 });
 

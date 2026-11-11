@@ -1,4 +1,4 @@
-package gg.overlab.backend.content;
+package gg.overlab.backend.guide;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,12 +13,6 @@ import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.guide.Guide;
-import gg.overlab.backend.guide.GuideKind;
-import gg.overlab.backend.guide.GuideMapper;
-import gg.overlab.backend.guide.GuideRepository;
-import gg.overlab.backend.guide.GuideService;
-import gg.overlab.backend.guide.GuideSide;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;

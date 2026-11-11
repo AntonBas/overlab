@@ -5,10 +5,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
+import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
 import jakarta.servlet.http.Cookie;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -23,13 +26,19 @@ import org.springframework.web.context.WebApplicationContext;
 @IntegrationTest
 class SecurityMatrixIntegrationTest {
 
+    private static final String ADMIN_EMAIL = "matrix-admin@overlab.test";
+
     @Autowired
     private WebApplicationContext context;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private MockMvc mockMvc;
+    private User admin;
     private Cookie userCookie;
     private Cookie adminCookie;
 
@@ -40,7 +49,7 @@ class SecurityMatrixIntegrationTest {
                 Arguments.of(HttpMethod.GET, "/api/patches", 200, 200, 200),
                 Arguments.of(HttpMethod.GET, "/api/guides", 200, 200, 200),
                 Arguments.of(HttpMethod.GET, "/actuator/health", 200, 200, 200),
-                Arguments.of(HttpMethod.GET, "/api/auth/me", 401, 404, 404),
+                Arguments.of(HttpMethod.GET, "/api/auth/me", 401, 404, 200),
                 Arguments.of(HttpMethod.GET, "/v3/api-docs", 401, 403, 200),
                 Arguments.of(HttpMethod.GET, "/api/admin/audit", 401, 403, 200),
                 Arguments.of(HttpMethod.GET, "/api/admin/guides", 401, 403, 200),
@@ -64,7 +73,19 @@ class SecurityMatrixIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         userCookie = new Cookie("access_token", tokenProvider.createAccessToken(account(900001L, UserRole.USER)));
-        adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(account(900002L, UserRole.ADMIN)));
+        admin = new User();
+        admin.setEmail(ADMIN_EMAIL);
+        admin.setDisplayName("Matrix Admin");
+        admin.setRole(UserRole.ADMIN);
+        admin.setProvider(AuthProvider.LOCAL);
+        admin.setEmailVerified(true);
+        admin = userRepository.saveAndFlush(admin);
+        adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+    }
+
+    @AfterEach
+    void removeAdmin() {
+        userRepository.deleteById(admin.getId());
     }
 
     @ParameterizedTest(name = "{0} {1}: anonymous {2}, user {3}, admin {4}")

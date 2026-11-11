@@ -6,17 +6,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.media.MediaProperties;
+import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
+import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
 import jakarta.servlet.http.Cookie;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,11 @@ class MediaUploadIntegrationTest {
     @Autowired
     private MediaProperties mediaProperties;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private User admin;
+
     private MockMvc mockMvc;
     private Cookie adminCookie;
     private Cookie userCookie;
@@ -48,8 +57,20 @@ class MediaUploadIntegrationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-        adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(account(910002L, UserRole.ADMIN)));
+        admin = new User();
+        admin.setEmail("media-admin@overlab.test");
+        admin.setDisplayName("Media Admin");
+        admin.setRole(UserRole.ADMIN);
+        admin.setProvider(AuthProvider.LOCAL);
+        admin.setEmailVerified(true);
+        admin = userRepository.saveAndFlush(admin);
+        adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
         userCookie = new Cookie("access_token", tokenProvider.createAccessToken(account(910001L, UserRole.USER)));
+    }
+
+    @AfterEach
+    void removeAdmin() {
+        userRepository.deleteById(admin.getId());
     }
 
     @Test
@@ -62,7 +83,9 @@ class MediaUploadIntegrationTest {
         Path stored = mediaProperties.directory().toAbsolutePath().resolve(url.substring("/media/".length()));
 
         assertThat(Files.readAllBytes(stored)).isEqualTo(PNG);
-        mockMvc.perform(get(url)).andExpect(status().isOk());
+        mockMvc.perform(get(url)).andExpect(status().isOk())
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("Content-Security-Policy", org.hamcrest.Matchers.containsString("sandbox")));
         mockMvc.perform(head(url)).andExpect(status().isOk());
 
         mockMvc.perform(delete("/api/admin/maps/busan/image").cookie(adminCookie))

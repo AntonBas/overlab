@@ -32,7 +32,7 @@ public class CollectorStartupRunner implements ApplicationRunner {
             log.warn("{} collector run(s) were interrupted by a restart and marked as failed", interrupted);
         }
         if (StringUtils.hasText(properties.startupJob())) {
-            collectorService.runBlocking(properties.startupJob(), CollectorTrigger.STARTUP);
+            collectorService.startIfPossible(properties.startupJob(), CollectorTrigger.STARTUP);
         }
     }
 }

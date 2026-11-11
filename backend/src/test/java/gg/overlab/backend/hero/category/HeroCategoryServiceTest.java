@@ -1,4 +1,4 @@
-package gg.overlab.backend.content;
+package gg.overlab.backend.hero.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,12 +12,6 @@ import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
-import gg.overlab.backend.hero.category.CategoryMatchupType;
-import gg.overlab.backend.hero.category.HeroCategory;
-import gg.overlab.backend.hero.category.HeroCategoryRelation;
-import gg.overlab.backend.hero.category.HeroCategoryRelationRepository;
-import gg.overlab.backend.hero.category.HeroCategoryRepository;
-import gg.overlab.backend.hero.category.HeroCategoryService;
 import gg.overlab.backend.hero.category.dto.CategoryAdminDto;
 import gg.overlab.backend.hero.category.dto.CategoryMatchupAdminDto;
 import gg.overlab.backend.hero.category.dto.CategoryMatchupRequest;

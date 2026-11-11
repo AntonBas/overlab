@@ -55,9 +55,9 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
 }
 
 export function MapsPage() {
-  usePageTitle("Overwatch 2 maps: hero win rates by map");
+  usePageTitle("Overwatch maps: hero win rates by map");
   usePageDescription(
-    "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map.",
+    "Overwatch maps by game mode, with hero win, pick and ban rates on each map.",
   );
   useStructuredData(
     breadcrumbList(

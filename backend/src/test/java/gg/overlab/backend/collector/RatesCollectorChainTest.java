@@ -80,7 +80,7 @@ class RatesCollectorChainTest {
     void startsDependentJobWhenParentSavedRows() {
         recorderSaves(5);
 
-        service.runBlocking("overview", CollectorTrigger.SCHEDULED);
+        service.runInline("overview", CollectorTrigger.SCHEDULED);
 
         assertThat(savedRuns()).extracting(CollectorRun::getJobName).containsExactly("overview", "maps");
         assertThat(savedRuns().get(1).getTrigger()).isEqualTo(CollectorTrigger.CHAINED);
@@ -90,7 +90,7 @@ class RatesCollectorChainTest {
     void skipsDependentJobWhenNothingChanged() {
         recorderSaves(0);
 
-        service.runBlocking("overview", CollectorTrigger.SCHEDULED);
+        service.runInline("overview", CollectorTrigger.SCHEDULED);
 
         assertThat(savedRuns()).extracting(CollectorRun::getJobName).containsExactly("overview");
     }
@@ -100,7 +100,7 @@ class RatesCollectorChainTest {
         recorderSaves(5);
         childRanSuccessfully(Duration.ofHours(10));
 
-        service.runBlocking("overview", CollectorTrigger.SCHEDULED);
+        service.runInline("overview", CollectorTrigger.SCHEDULED);
 
         assertThat(savedRuns()).extracting(CollectorRun::getJobName).containsExactly("overview");
     }
@@ -110,7 +110,7 @@ class RatesCollectorChainTest {
         recorderSaves(5);
         childRanSuccessfully(Duration.ofDays(3));
 
-        service.runBlocking("overview", CollectorTrigger.SCHEDULED);
+        service.runInline("overview", CollectorTrigger.SCHEDULED);
 
         assertThat(savedRuns()).extracting(CollectorRun::getJobName).containsExactly("overview", "maps");
     }
@@ -119,7 +119,7 @@ class RatesCollectorChainTest {
     void doesNotChainAfterAPatchRun() {
         recorderSaves(5);
 
-        service.runBlocking("overview", CollectorTrigger.PATCH);
+        service.runInline("overview", CollectorTrigger.PATCH);
 
         assertThat(savedRuns()).extracting(CollectorRun::getJobName).containsExactly("overview");
     }

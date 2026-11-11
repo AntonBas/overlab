@@ -1,6 +1,6 @@
 # Overlab
 
-Unofficial fan site with Overwatch 2 hero statistics: win rate, pick rate and ban rate per hero, per map, per rank, region and platform, with history kept as snapshots. Planned extras: perks, hero descriptions, curated counter-picks and synergies, video guides. Not affiliated with Blizzard Entertainment.
+Unofficial fan site with Overwatch hero statistics: win rate, pick rate and ban rate per hero, per map, per rank, region and platform, with history kept as snapshots. Planned extras: perks, hero descriptions, curated counter-picks and synergies, video guides. Not affiliated with Blizzard Entertainment.
 
 ## Stack
 
@@ -97,6 +97,14 @@ frontend/   React SPA
 docker/     Prometheus and Grafana configuration
 ```
 
+### Backend conventions
+
+- Package by feature under `backend/src/main/java/gg/overlab/backend/`: a domain (`hero`, `stats`, `gamemap`, `guide`, `patch`, `feedback`, `user`, `audit`, `collector`, ...) keeps its entity, repository, service, mapper and controllers together, with request and response records in `dto/` and domain exceptions in `exception/`. Shared code lives in `config/`, `exception/`, `common/` and `media/`; keep `common/` small and put new classes in the domain that owns them.
+- Controllers are thin: they validate input, call one service and return a DTO. Business logic and transactions belong in services, and controllers never use repositories. Mappers are explicit classes (no MapStruct), because most DTOs compute fields such as media URLs.
+- Errors use one `ApiError` format produced by `ApiErrorHandler`; new exception types are added there. Filters that must answer with an error (for example the rate limiter) hand the exception to the same handler.
+- Configuration uses constructor injection only; no code comments except Javadoc on public APIs (Checkstyle enforces it).
+- Tests mirror the main packages. Unit tests use Mockito; `integration/` tests start PostgreSQL and Redis with Testcontainers. `architecture/ArchitectureTest` (ArchUnit) guards the layering above and freezes the existing package cycles in `src/test/resources/archunit_store`; do not add new cycles.
+
 ## Running locally
 
 1. Infrastructure:
@@ -146,6 +154,7 @@ The statistics endpoints are public `GET` requests.
 | `/api/stats/hero/{slug}` | Statistics of one hero across all maps |
 | `/api/stats/hero/{slug}/history` | Snapshots of one hero over time. Parameters: `queue`, `tier`, `map`, `platform`, `region`, `from`, `to` (ISO date-time; default is the last 90 days, at most 366 days) |
 | `/api/stats/freshness` | When Blizzard's numbers last changed, found by comparing the latest snapshots of one queue, rank, platform and region (`valuesSince` is the first snapshot that already had the current numbers). Parameters: `queue`, `tier`, `platform`, `region` |
+| `/api/stats/coverage` | Which platform, region and queue combinations have ranks and maps collected |
 | `/api/stats/history-start` | When statistics collection started for one queue, rank, platform and region (`firstCapturedAt`, empty when nothing is stored); the changes page uses it to hide patches that cannot be compared. Parameters: `queue`, `tier`, `platform`, `region` |
 | `/api/stats/compare` | Changes between two snapshots, biggest win rate gain first. Use `from` and `to` (the last snapshot at or before each moment) or `patch={slug}` (last snapshot before the release against one a week later) |
 
@@ -172,7 +181,9 @@ Counters, synergies and perks are curated recommendations, not statistics. They 
 
 ### Limits and caching
 
-Public `GET /api/**` requests are limited per client IP in Redis: 600 per minute in general and 1200 per minute for `/api/stats/**` (a hero page makes about nine API calls, and a search engine crawler renders many pages from a few addresses, so lower limits would give it empty pages) (`app.rate-limit.api-per-minute`, `app.rate-limit.stats-per-minute`); the limit is exceeded with `429` in the `ApiError` format. Sign-in and registration endpoints keep their own stricter limit. Public responses carry `Cache-Control: public, max-age=60, stale-while-revalidate=300` and an `ETag`; errors, `/api/auth/**` and `/api/admin/**` are never cached. In `prod` the client IP is read from `X-Forwarded-For` set by Caddy.
+Public `GET /api/**` requests are limited per client IP in Redis: 600 per minute in general and 1200 per minute for `/api/stats/**` (a hero page makes about nine API calls, and a search engine crawler renders many pages from a few addresses, so lower limits would give it empty pages) (`app.rate-limit.api-per-minute`, `app.rate-limit.stats-per-minute`); the limit is exceeded with `429` in the `ApiError` format and a `Retry-After` header. Counters are atomic Lua scripts in Redis (the expiry is always set); if Redis is unavailable, a per-instance in-memory counter takes over so limits are never silently off. Sign-in and registration endpoints keep their own stricter limit. Public responses carry `Cache-Control: public, max-age=60, stale-while-revalidate=300` and an `ETag`; errors, `/api/auth/**` and `/api/admin/**` are never cached. In `prod` the client IP is read from `X-Forwarded-For` set by Caddy.
+
+Statistics history is cached only for the default range (explicit `from`/`to` always read the database), and comparisons are cached per pair of resolved snapshots rather than per requested bounds, so clients cannot fill the cache with arbitrary keys.
 
 The `content` cache is cleared on every backend start, so a release that changes cached response shapes never reads stale entries.
 
@@ -209,7 +220,7 @@ Signing in with Google using an email that already has a password account links 
 
 Password reset for a Google-only account sends an email that explains it signs in with Google instead of staying silent.
 
-Authentication endpoints are rate limited per IP (Redis). `/api/admin/**` requires the `ADMIN` role. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit unless `.env` sets `MAIL_HOST` (and `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH=true`, `MAIL_STARTTLS=true`, `EMAIL_FROM`), for example with Brevo: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, the SMTP login and key from Brevo, and `EMAIL_FROM` set to a sender verified in Brevo; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables. Emails are sent in the background as plain text plus HTML, retried 3 times and never block the request, so a missing mail server does not break registration or password reset (the failure is only logged). `CONTACT_EMAIL` is the address that receives Business page messages; while it is empty the messages are only stored and shown in the admin panel.
+Authentication endpoints are rate limited per IP (Redis). Sign-in is also limited per account: 10 failed attempts within 15 minutes lock that email address for the rest of the window (`429`), a successful sign-in resets the counter. Passwords must be 8 characters to 72 bytes (the BCrypt limit). Presenting an already used refresh token again (after a 30 second grace period for parallel requests) signs the user out everywhere. `/api/admin/**` requires the `ADMIN` role, and every admin request re-checks in the database that the account is still enabled and still an administrator, so blocking or demoting takes effect immediately instead of when the 15 minute access token expires. To create the first admin, start the backend once with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set. Locally, emails go to Mailpit unless `.env` sets `MAIL_HOST` (and `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH=true`, `MAIL_STARTTLS=true`, `EMAIL_FROM`), for example with Brevo: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, the SMTP login and key from Brevo, and `EMAIL_FROM` set to a sender verified in Brevo; in `prod` set `JWT_SECRET` (at least 32 characters) and the `MAIL_*` variables. Emails are sent in the background as plain text plus HTML, retried 3 times and never block the request, so a missing mail server does not break registration or password reset (the failure is only logged). `CONTACT_EMAIL` is the address that receives Business page messages; while it is empty the messages are only stored and shown in the admin panel.
 
 ### Audit log
 
@@ -217,16 +228,25 @@ Every admin change (perks, counters, synergies, guides, patches, hero and map ed
 
 ## Statistics collector
 
-The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`:
+The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`. Scheduled, startup, manual and chained runs all execute on the single-threaded collector executor (queue of 4), never on the shared scheduler threads, so a long run cannot delay token cleanup or retention; a run that finds the queue full is recorded as failed and can be started again:
 
 - `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
 - `daily-maps`: every map, rank `ALL`, both queues (about 62 requests). It has no schedule: it starts right after `daily-overview` and only when that job saved new rows, and at most once per 2 days (`min-interval: 2d`)
 - `weekly-maps`: every map, every rank from Bronze to Grandmaster for Competitive (about 248 requests, roughly 12 minutes with the 3 s pause). Same rule: runs after `daily-overview` found changes, at most once per 7 days
 - A job with `after: <job name>` instead of `cron` is chained. It starts when the job it follows saved rows, skips itself if its last successful run is younger than `min-interval`, and is shown in the admin panel as "After ... finds changes". Runs started by a patch are not chained, because a patch already runs every job
 - `daily-other-regions`: PC in Americas and Asia, both queues, rank `ALL`, all maps combined
+- `other-regions-ranks`: PC in Americas and Asia, Competitive, every rank from Bronze to Grandmaster (16 requests), all maps combined. Chained after `daily-other-regions`
+- `americas-maps`: PC in Americas, every map, rank `ALL`, both queues (62 requests), at most once per 2 days. Chained after `daily-other-regions`
+- `asia-maps`: the same for PC in Asia, at most once per 7 days, because the sample is smaller and the numbers change slower
+- `americas-rank-maps`: PC in Americas, every map and every rank for Competitive (248 requests, about 12 minutes), at most once per 7 days. Not started by a patch (`run-on-patch: false`)
 - `daily-console`: Console in every region, both queues, rank `ALL`, all maps combined
+- `console-ranks`: Console in Europe and Americas, Competitive, every rank, all maps combined. Chained after `daily-console`
+- `console-asia-ranks`: the same for Console in Asia, at most once per 7 days
+- Maps and rank by map for Console, and rank by map for Asia, are not collected: the samples are too small for those slices to be reliable
 
-Ranks and maps are collected only for PC in Europe. For every other platform and region the statistics page disables the rank and map filters and shows overall numbers (`hasDetailedCoverage` in `frontend/src/features/stats/filters.ts`); change that rule together with the collector jobs.
+`GET /api/stats/coverage` lists which platform, region and queue combinations have ranks (`tiers`, all maps combined) and which have maps (`mapTiers`), read from `snapshot_checks` and cached with the other statistics. The statistics, map, hero and changes pages use it to enable only the rank and map filters that have data, so a job in `collector.yaml` needs no matching frontend change. While the request is loading or failing the pages fall back to the old rule: ranks and maps only for PC in Europe.
+
+The region shown by default is chosen in this order: the region saved in the browser after the visitor picked one (`localStorage` key `overlab.region`), the default region from the profile, the region of the browser time zone (`frontend/src/features/stats/region.ts`: the Americas, including Oceania, for `America/*` and `Australia/*`; Asia for `Asia/*` except the Middle East, the Caucasus and Russia; Europe for the rest), then Europe. The header has a region switch that works on every page, and for a signed-in visitor it also saves the choice as the default region of the profile. The hero page and the hero history chart follow it; the statistics, map and changes pages read it when the address has no `region` parameter. An address without `region` therefore means "the visitor's own region".
 
 The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
 
@@ -246,7 +266,7 @@ To run one job when the backend starts:
 COLLECTOR_STARTUP_JOB=daily-overview ./gradlew bootRun
 ```
 
-The game format stored with every snapshot (`FIVE_VS_FIVE` or `SIX_VS_SIX`) is set with `COLLECTOR_GAME_FORMAT` and must be changed by hand when the game switches format. Snapshots older than 180 days are thinned out weekly, keeping the latest snapshot of each week. Responses are cached in Redis and the caches are cleared after every collector run.
+The game format stored with every snapshot (`FIVE_VS_FIVE` or `SIX_VS_SIX`) is set with `COLLECTOR_GAME_FORMAT` and must be changed by hand when the game switches format. Snapshots older than 180 days are thinned out weekly, keeping the latest snapshot of each combination in every UTC week; the deletion runs one week at a time in separate transactions so it never holds a long lock. Responses are cached in Redis and the caches are cleared after every collector run.
 
 **What is stored.** One row per hero for every combination of mode (Quick Play or Competitive), platform, region, rank and map, with win rate, pick rate and ban rate (Competitive only), the capture time, the game format (`COLLECTOR_GAME_FORMAT`) and the source. A snapshot is stored only when the numbers differ from the previous snapshot of the same combination (a hash of every hero's win, pick and ban rate is compared); an unchanged run only moves the combination's `last_checked_at` in the `snapshot_checks` table, which is also where the last Blizzard `ETag` is kept. The next request sends it as `If-None-Match`, and a `304` answer skips parsing and storage altogether. Pages show the check time ("Checked 5 hours ago") and, from `GET /api/stats/freshness`, when Blizzard last changed the numbers; history charts are extended to the last check. Snapshots are kept as they were captured; older than 180 days they are thinned to the latest one per week. **What is not stored:** anything before the first collector run (Blizzard publishes only current values, and the Internet Archive holds too few copies of the data endpoint to import), individual matches, players, and the game format is not detected automatically because the Blizzard response does not contain it.
 
@@ -270,7 +290,7 @@ cd backend && ./gradlew build
 cd frontend && npm run lint && npm run format:check && npm test && npm run build
 ```
 
-`./gradlew build` runs Checkstyle (no tabs, wildcard imports or code comments) and all tests. Integration tests start their own PostgreSQL and Redis with Testcontainers, so Docker must be running, but `docker compose up` is not needed. They cover the migrations, the statistics queries, the role matrix of every protected endpoint, the sign-in flow and the audit log.
+`./gradlew build` runs Checkstyle (no tabs, wildcard imports or code comments) and all tests. Integration tests start their own PostgreSQL and Redis with Testcontainers, so Docker must be running, but `docker compose up` is not needed. They cover the migrations, the statistics queries, the role matrix of every protected endpoint, the sign-in flow and the audit log. `./gradlew test` also writes a JaCoCo coverage report to `backend/build/reports/jacoco/test/html/index.html` (XML next to it); there is no coverage threshold.
 
 ## Branches and CI
 

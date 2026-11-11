@@ -29,7 +29,12 @@ describe("HeroHistorySection", () => {
 
   it("asks for the history of the hero on one map when a map is given", async () => {
     renderWithRouter(
-      <HeroHistorySection slug="ana" mapSlug="busan" queue="COMPETITIVE" />,
+      <HeroHistorySection
+        slug="ana"
+        mapSlug="busan"
+        queue="COMPETITIVE"
+        region="EUROPE"
+      />,
     );
 
     await waitFor(() =>
@@ -42,7 +47,9 @@ describe("HeroHistorySection", () => {
   });
 
   it("asks for all maps without a map", async () => {
-    renderWithRouter(<HeroHistorySection slug="ana" queue="COMPETITIVE" />);
+    renderWithRouter(
+      <HeroHistorySection slug="ana" queue="COMPETITIVE" region="EUROPE" />,
+    );
 
     await waitFor(() =>
       expect(fetchHeroHistory).toHaveBeenCalledWith(
@@ -57,6 +64,7 @@ describe("HeroHistorySection", () => {
       <HeroHistorySection
         slug="ana"
         queue="COMPETITIVE"
+        region="EUROPE"
         title="Statistics"
         current={{
           winRate: 51.2,
@@ -91,7 +99,9 @@ describe("HeroHistorySection", () => {
   });
 
   it("disables ban rate in Quick Play", async () => {
-    renderWithRouter(<HeroHistorySection slug="ana" queue="QUICK_PLAY" />);
+    renderWithRouter(
+      <HeroHistorySection slug="ana" queue="QUICK_PLAY" region="EUROPE" />,
+    );
 
     const switcher = await screen.findByRole("group", { name: "Statistic" });
 
@@ -105,7 +115,7 @@ describe("HeroHistorySection", () => {
 
   it("shows what the page passes in as children", async () => {
     renderWithRouter(
-      <HeroHistorySection slug="ana" queue="COMPETITIVE">
+      <HeroHistorySection slug="ana" queue="COMPETITIVE" region="EUROPE">
         <p>Loading statistics</p>
       </HeroHistorySection>,
     );

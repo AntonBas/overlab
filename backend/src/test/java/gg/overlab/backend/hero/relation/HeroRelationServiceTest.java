@@ -1,4 +1,4 @@
-package gg.overlab.backend.content;
+package gg.overlab.backend.hero.relation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -15,10 +15,6 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
-import gg.overlab.backend.hero.relation.HeroRelation;
-import gg.overlab.backend.hero.relation.HeroRelationRepository;
-import gg.overlab.backend.hero.relation.HeroRelationService;
-import gg.overlab.backend.hero.relation.RelationType;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.HeroRelationsDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;

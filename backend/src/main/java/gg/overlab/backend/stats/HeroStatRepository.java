@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
 
@@ -103,21 +104,27 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
                                     @Param("region") Region region,
                                     @Param("tier") RankTier tier);
 
-    @Query("""
-            select s from HeroStat s join fetch s.hero h left join fetch s.map
+    default List<HeroStat> findLatestForHero(String heroSlug, GameQueue queue, Platform platform, Region region,
+                                             RankTier tier) {
+        List<Long> ids = findLatestIdsForHero(heroSlug, queue.name(), platform.name(), region.name(), tier.name());
+        return ids.isEmpty() ? List.of() : findWithHeroAndMapByIdIn(ids);
+    }
+
+    @Query(value = """
+            select distinct on (s.map_id) s.id
+            from hero_stats s join heroes h on h.id = s.hero_id
             where h.slug = :heroSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
-              and s.capturedAt = (
-                select max(x.capturedAt) from HeroStat x
-                where x.hero = s.hero and x.queue = s.queue and x.platform = s.platform
-                  and x.region = s.region and x.tier = s.tier
-                  and (x.map = s.map or (x.map is null and s.map is null)))
-            """)
-    List<HeroStat> findLatestForHero(@Param("heroSlug") String heroSlug,
-                                     @Param("queue") GameQueue queue,
-                                     @Param("platform") Platform platform,
-                                     @Param("region") Region region,
-                                     @Param("tier") RankTier tier);
+            order by s.map_id, s.captured_at desc
+            """, nativeQuery = true)
+    List<Long> findLatestIdsForHero(@Param("heroSlug") String heroSlug,
+                                    @Param("queue") String queue,
+                                    @Param("platform") String platform,
+                                    @Param("region") String region,
+                                    @Param("tier") String tier);
+
+    @Query("select s from HeroStat s join fetch s.hero left join fetch s.map where s.id in :ids")
+    List<HeroStat> findWithHeroAndMapByIdIn(@Param("ids") Collection<Long> ids);
 
     @Query("""
             select s from HeroStat s
@@ -210,17 +217,21 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
                                       @Param("tier") RankTier tier,
                                       @Param("capturedAt") Instant capturedAt);
 
+    @Query("select min(s.capturedAt) from HeroStat s where s.capturedAt < :threshold")
+    Optional<Instant> findOldestCaptureBefore(@Param("threshold") Instant threshold);
+
+    @Transactional
     @Modifying
     @Query(value = """
             delete from hero_stats
-            where captured_at < cast(:threshold as timestamptz)
+            where captured_at >= cast(:windowStart as timestamptz)
+              and captured_at < cast(:windowEnd as timestamptz)
               and id not in (
-                select distinct on (hero_id, map_id, queue, game_format, platform, region, tier,
-                                    date_trunc('week', captured_at)) id
+                select distinct on (hero_id, map_id, queue, game_format, platform, region, tier) id
                 from hero_stats
-                where captured_at < cast(:threshold as timestamptz)
-                order by hero_id, map_id, queue, game_format, platform, region, tier,
-                         date_trunc('week', captured_at), captured_at desc)
+                where captured_at >= cast(:windowStart as timestamptz)
+                  and captured_at < cast(:windowEnd as timestamptz)
+                order by hero_id, map_id, queue, game_format, platform, region, tier, captured_at desc)
             """, nativeQuery = true)
-    int deleteOlderKeepingWeeklyLatest(@Param("threshold") Instant threshold);
+    int deleteWindowKeepingLatest(@Param("windowStart") Instant windowStart, @Param("windowEnd") Instant windowEnd);
 }

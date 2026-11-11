@@ -1,5 +1,8 @@
-package gg.overlab.backend.collector.run;
+package gg.overlab.backend.collector.dto;
 
+import gg.overlab.backend.collector.run.CollectorRun;
+import gg.overlab.backend.collector.run.CollectorRunStatus;
+import gg.overlab.backend.collector.run.CollectorTrigger;
 import java.time.Instant;
 
 public record CollectorRunDto(

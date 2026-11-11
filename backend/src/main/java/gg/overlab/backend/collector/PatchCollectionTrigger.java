@@ -48,7 +48,7 @@ public class PatchCollectionTrigger {
                 continue;
             }
             try {
-                collectorService.runBlocking(job.name(), CollectorTrigger.PATCH);
+                collectorService.runInline(job.name(), CollectorTrigger.PATCH);
             } catch (RuntimeException exception) {
                 log.error("Collector job '{}' failed after a patch", job.name(), exception);
             }

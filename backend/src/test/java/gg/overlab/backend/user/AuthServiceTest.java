@@ -12,17 +12,22 @@ import static org.mockito.Mockito.when;
 import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.exception.core.TooManyRequestsException;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.auth.AuthService;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.AuthTokens;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
 import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
 import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
+import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,15 +38,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 class AuthServiceTest {
 
+    private static final List<UserTokenType> VERIFICATION_TYPES =
+            List.of(UserTokenType.EMAIL_VERIFICATION, UserTokenType.EMAIL_CHANGE);
+
     private final UserRepository userRepository = mock(UserRepository.class);
     private final UserTokenService tokenService = mock(UserTokenService.class);
     private final EmailService emailService = mock(EmailService.class);
     private final AuditService auditService = mock(AuditService.class);
+    private final LoginAttemptLimiter loginAttemptLimiter = mock(LoginAttemptLimiter.class);
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
     private final JwtTokenProvider jwtTokenProvider =
             new JwtTokenProvider(AuthFixtures.properties(), new MockEnvironment());
     private final AuthService service = new AuthService(userRepository, new UserMapper(), passwordEncoder,
-            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties(), auditService);
+            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties(), auditService,
+            loginAttemptLimiter);
 
     private User existingUser;
 
@@ -99,6 +109,28 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "wrong-password")))
                 .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void loginRecordsFailureForWrongPasswordAndResetsOnSuccess() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+
+        assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "wrong-password")))
+                .isInstanceOf(InvalidCredentialsException.class);
+        verify(loginAttemptLimiter).recordFailure("ana@overlab.gg");
+
+        service.login(new LoginRequest("ana@overlab.gg", "correct-password"));
+        verify(loginAttemptLimiter).reset("ana@overlab.gg");
+    }
+
+    @Test
+    void loginIsRejectedBeforeCheckingPasswordWhenAccountIsLocked() {
+        org.mockito.Mockito.doThrow(new TooManyRequestsException("locked"))
+                .when(loginAttemptLimiter).requireAllowed("ana@overlab.gg");
+
+        assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "correct-password")))
+                .isInstanceOf(TooManyRequestsException.class);
+        verify(userRepository, never()).findByEmailIgnoreCase(any());
     }
 
     @Test
@@ -181,11 +213,36 @@ class AuthServiceTest {
     @Test
     void verifyEmailMarksUserVerified() {
         existingUser.setEmailVerified(false);
-        when(tokenService.consume("verify-token", UserTokenType.EMAIL_VERIFICATION)).thenReturn(existingUser);
+        when(tokenService.consumeAny("verify-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_VERIFICATION));
 
         service.verifyEmail("verify-token");
 
         assertThat(existingUser.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    void verifyEmailAppliesPendingEmailForEmailChangeToken() {
+        existingUser.setPendingEmail("new@overlab.gg");
+        when(userRepository.existsByEmailIgnoreCase("new@overlab.gg")).thenReturn(false);
+        when(tokenService.consumeAny("change-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_CHANGE));
+
+        service.verifyEmail("change-token");
+
+        assertThat(existingUser.getEmail()).isEqualTo("new@overlab.gg");
+        assertThat(existingUser.getPendingEmail()).isNull();
+        assertThat(existingUser.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    void verifyEmailRejectsEmailChangeWhenAddressWasTakenMeanwhile() {
+        existingUser.setPendingEmail("taken@overlab.gg");
+        when(userRepository.existsByEmailIgnoreCase("taken@overlab.gg")).thenReturn(true);
+        when(tokenService.consumeAny("change-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_CHANGE));
+
+        assertThatThrownBy(() -> service.verifyEmail("change-token")).isInstanceOf(InvalidTokenException.class);
     }
 
     @Test

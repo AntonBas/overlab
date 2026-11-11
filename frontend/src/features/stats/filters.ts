@@ -55,17 +55,76 @@ export const SORTS: readonly StatsSort[] = [
 ];
 export const DIRECTIONS: readonly SortDirection[] = ["ASC", "DESC"];
 
-export function hasDetailedCoverage(
-  filters: Pick<StatsFilters, "platform" | "region">,
-): boolean {
-  return filters.platform === "PC" && filters.region === "EUROPE";
+export interface CoverageEntry {
+  queue: GameQueue;
+  platform: Platform;
+  region: Region;
+  tiers: RankTier[];
+  mapTiers: RankTier[];
 }
 
-export function applyCoverage(filters: StatsFilters): StatsFilters {
-  if (hasDetailedCoverage(filters)) {
-    return filters;
+export type Coverage = readonly CoverageEntry[] | null;
+
+const FALLBACK_DETAILED: Pick<CoverageEntry, "tiers" | "mapTiers"> = {
+  tiers: [...TIERS],
+  mapTiers: [...TIERS],
+};
+
+const FALLBACK_OVERALL: Pick<CoverageEntry, "tiers" | "mapTiers"> = {
+  tiers: ["ALL"],
+  mapTiers: [],
+};
+
+function entryFor(
+  coverage: Coverage,
+  filters: Pick<StatsFilters, "queue" | "platform" | "region">,
+): Pick<CoverageEntry, "tiers" | "mapTiers"> {
+  if (coverage === null) {
+    return filters.platform === "PC" && filters.region === "EUROPE"
+      ? FALLBACK_DETAILED
+      : FALLBACK_OVERALL;
   }
-  return { ...filters, tier: "ALL", map: ALL_MAPS };
+  return (
+    coverage.find(
+      (entry) =>
+        entry.queue === filters.queue &&
+        entry.platform === filters.platform &&
+        entry.region === filters.region,
+    ) ?? FALLBACK_OVERALL
+  );
+}
+
+export function availableTiers(
+  coverage: Coverage,
+  filters: Pick<StatsFilters, "queue" | "platform" | "region" | "map">,
+): readonly RankTier[] {
+  const entry = entryFor(coverage, filters);
+  const tiers = filters.map === ALL_MAPS ? entry.tiers : entry.mapTiers;
+  return TIERS.filter((tier) => tiers.includes(tier));
+}
+
+export function hasMapCoverage(
+  coverage: Coverage,
+  filters: Pick<StatsFilters, "queue" | "platform" | "region">,
+): boolean {
+  return entryFor(coverage, filters).mapTiers.length > 0;
+}
+
+export function applyCoverage(
+  filters: StatsFilters,
+  coverage: Coverage,
+): StatsFilters {
+  const mapped = hasMapCoverage(coverage, filters)
+    ? filters
+    : { ...filters, map: ALL_MAPS };
+  const tiers = availableTiers(coverage, mapped);
+  if (tiers.includes(mapped.tier)) {
+    return mapped;
+  }
+  return {
+    ...mapped,
+    tier: tiers.includes("ALL") ? "ALL" : (tiers[0] ?? "ALL"),
+  };
 }
 
 function pick<T extends string>(
@@ -77,10 +136,13 @@ function pick<T extends string>(
   return match ?? fallback;
 }
 
-export function parseFilters(params: URLSearchParams): StatsFilters {
+export function parseFilters(
+  params: URLSearchParams,
+  defaultRegion: Region = DEFAULT_FILTERS.region,
+): StatsFilters {
   const rawRole = params.get("role");
   const queue = pick(params.get("queue"), QUEUES, DEFAULT_FILTERS.queue);
-  return applyCoverage({
+  return {
     queue,
     tier:
       queue === "QUICK_PLAY"
@@ -88,7 +150,7 @@ export function parseFilters(params: URLSearchParams): StatsFilters {
         : pick(params.get("tier"), TIERS, DEFAULT_FILTERS.tier),
     map: params.get("map") || DEFAULT_FILTERS.map,
     platform: pick(params.get("platform"), PLATFORMS, DEFAULT_FILTERS.platform),
-    region: pick(params.get("region"), REGIONS, DEFAULT_FILTERS.region),
+    region: pick(params.get("region"), REGIONS, defaultRegion),
     role: rawRole ? pick(rawRole, ROLES, ROLES[0]) : null,
     sort: pick(params.get("sort"), SORTS, DEFAULT_FILTERS.sort),
     direction: pick(
@@ -96,14 +158,18 @@ export function parseFilters(params: URLSearchParams): StatsFilters {
       DIRECTIONS,
       DEFAULT_FILTERS.direction,
     ),
-  });
+  };
 }
 
-export function toSearchParams(filters: StatsFilters): URLSearchParams {
+export function toSearchParams(
+  filters: StatsFilters,
+  defaultRegion: Region = DEFAULT_FILTERS.region,
+): URLSearchParams {
   const params = new URLSearchParams();
+  const defaults = { ...DEFAULT_FILTERS, region: defaultRegion };
   (Object.keys(DEFAULT_FILTERS) as (keyof StatsFilters)[]).forEach((key) => {
     const value = filters[key];
-    if (value !== null && value !== DEFAULT_FILTERS[key]) {
+    if (value !== null && value !== defaults[key]) {
       params.set(key, String(value).toLowerCase());
     }
   });

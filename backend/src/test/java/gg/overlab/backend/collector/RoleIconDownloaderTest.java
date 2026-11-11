@@ -2,6 +2,7 @@ package gg.overlab.backend.collector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import gg.overlab.backend.media.MediaProperties;
@@ -57,6 +58,18 @@ class RoleIconDownloaderTest {
         downloader(false).ensureRoleIcon("TANK", SOURCE);
 
         assertThat(Files.exists(directory.resolve("roles"))).isFalse();
+        server.verify();
+    }
+
+    @Test
+    void refusesResponsesLargerThanTheLimitAndErrors() {
+        server.expect(requestTo(SOURCE)).andRespond(withSuccess("<svg>" + "x".repeat(70_000) + "</svg>",
+                MediaType.valueOf("image/svg+xml")));
+        server.expect(requestTo(SOURCE)).andRespond(withServerError());
+        ImageDownloader downloader = new ImageDownloader(builder, "test-agent");
+
+        assertThat(downloader.downloadSvg(SOURCE)).isEmpty();
+        assertThat(downloader.downloadSvg(SOURCE)).isEmpty();
         server.verify();
     }
 

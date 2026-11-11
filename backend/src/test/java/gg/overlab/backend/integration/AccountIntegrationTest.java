@@ -15,6 +15,9 @@ import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
+import gg.overlab.backend.user.token.UserTokenService;
+import gg.overlab.backend.user.token.UserTokenType;
+import java.time.Duration;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,9 @@ class AccountIntegrationTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private UserTokenService userTokenService;
+
     private MockMvc mockMvc;
     private User user;
     private Cookie userCookie;
@@ -72,6 +78,64 @@ class AccountIntegrationTest {
         mockMvc.perform(json(put("/api/me/profile"), "{\"displayName\":\"New Name\"}").cookie(userCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.displayName").value("New Name"));
+    }
+
+    @Test
+    void emailChangeTokenAppliesPendingEmailOnce() throws Exception {
+        user.setPendingEmail(OTHER_EMAIL);
+        userRepository.saveAndFlush(user);
+        String token = userTokenService.issue(user, UserTokenType.EMAIL_CHANGE, Duration.ofHours(1));
+
+        mockMvc.perform(json(post("/api/auth/verify-email"), "{\"token\":\"" + token + "\"}"))
+                .andExpect(status().isNoContent());
+
+        User changed = userRepository.findById(user.getId()).orElseThrow();
+        assertThat(changed.getEmail()).isEqualTo(OTHER_EMAIL);
+        assertThat(changed.getPendingEmail()).isNull();
+        mockMvc.perform(json(post("/api/auth/verify-email"), "{\"token\":\"" + token + "\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void adminTokenStopsWorkingAfterTheAdminIsDisabledOrDemoted() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isOk());
+
+        admin.setEnabled(false);
+        userRepository.saveAndFlush(admin);
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isUnauthorized());
+
+        admin.setEnabled(true);
+        admin.setRole(UserRole.USER);
+        userRepository.saveAndFlush(admin);
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void crossOriginStateChangingRequestsFromForeignOriginsAreRejected() throws Exception {
+        mockMvc.perform(post("/api/auth/logout").header("Origin", "https://evil.example").cookie(userCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void loginIsLockedAfterRepeatedFailures() throws Exception {
+        String body = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+        for (int attempt = 0; attempt < 10; attempt++) {
+            String address = "10.9.8." + (attempt + 1);
+            mockMvc.perform(json(post("/api/auth/login"), body).with(request -> {
+                request.setRemoteAddr(address);
+                return request;
+            })).andExpect(status().isUnauthorized());
+        }
+
+        mockMvc.perform(json(post("/api/auth/login"),
+                        "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}")
+                        .with(request -> {
+                            request.setRemoteAddr("10.9.9.9");
+                            return request;
+                        }))
+                .andExpect(status().isTooManyRequests());
     }
 
     @Test
@@ -199,6 +263,22 @@ class AccountIntegrationTest {
         User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
         Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
 
+        mockMvc.perform(get("/api/admin/users").param("q", "account-test").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].email").value(EMAIL));
+    }
+
+    @Test
+    void userSearchTreatsWildcardCharactersLiterally() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+
+        mockMvc.perform(get("/api/admin/users").param("q", "account_test").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0));
+        mockMvc.perform(get("/api/admin/users").param("q", "%").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0));
         mockMvc.perform(get("/api/admin/users").param("q", "account-test").cookie(adminCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].email").value(EMAIL));

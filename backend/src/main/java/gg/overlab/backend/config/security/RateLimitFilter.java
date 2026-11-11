@@ -1,19 +1,17 @@
 package gg.overlab.backend.config.security;
 
+import gg.overlab.backend.exception.core.TooManyRequestsException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@Slf4j
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final Set<String> LIMITED_PATHS = Set.of(
@@ -27,15 +25,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final String STATS_PREFIX = "/api/stats";
     private static final Duration WINDOW = Duration.ofMinutes(1);
 
-    private final StringRedisTemplate redisTemplate;
+    private final RateLimitCounter counter;
     private final AuthProperties authProperties;
     private final RateLimitProperties rateLimitProperties;
+    private final HandlerExceptionResolver exceptionResolver;
 
-    public RateLimitFilter(StringRedisTemplate redisTemplate, AuthProperties authProperties,
-                           RateLimitProperties rateLimitProperties) {
-        this.redisTemplate = redisTemplate;
+    public RateLimitFilter(RateLimitCounter counter, AuthProperties authProperties,
+                           RateLimitProperties rateLimitProperties, HandlerExceptionResolver exceptionResolver) {
+        this.counter = counter;
         this.authProperties = authProperties;
         this.rateLimitProperties = rateLimitProperties;
+        this.exceptionResolver = exceptionResolver;
     }
 
     @Override
@@ -47,11 +47,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         if (isLimitExceeded(request, resolveRule(request))) {
-            response.setStatus(429);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write("{\"status\":\"Too Many Requests\",\"statusCode\":429,\"timestamp\":\""
-                    + Instant.now() + "\",\"message\":\"Too many requests, try again later\",\"path\":\""
-                    + request.getRequestURI() + "\",\"subErrors\":[]}");
+            response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(WINDOW.toSeconds()));
+            exceptionResolver.resolveException(request, response, null,
+                    new TooManyRequestsException("Too many requests, try again later"));
             return;
         }
         filterChain.doFilter(request, response);
@@ -73,16 +71,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean isLimitExceeded(HttpServletRequest request, Rule rule) {
         String key = "overlab:ratelimit:" + rule.bucket() + ":" + request.getRemoteAddr();
-        try {
-            Long count = redisTemplate.opsForValue().increment(key);
-            if (count != null && count == 1L) {
-                redisTemplate.expire(key, WINDOW);
-            }
-            return count != null && count > rule.limit();
-        } catch (RuntimeException exception) {
-            log.warn("Rate limit check skipped: {}", exception.getMessage());
-            return false;
-        }
+        return counter.increment(key, WINDOW) > rule.limit();
     }
 
     private record Rule(String bucket, int limit) {

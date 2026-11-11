@@ -1,7 +1,7 @@
 package gg.overlab.backend.collector;
 
+import gg.overlab.backend.collector.dto.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRun;
-import gg.overlab.backend.collector.run.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 public class RatesCollectorService {
 
     private static final String EACH_MAP = "EACH";
+    private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
     private static final int MAX_ERROR_SUMMARY_LENGTH = 1000;
     private static final int MAX_DISTINCT_ERRORS = 3;
 
@@ -70,6 +72,10 @@ public class RatesCollectorService {
         this.executor = executor;
     }
 
+    public List<CollectorRunDto> recentRuns() {
+        return runRepository.findTop50ByOrderByStartedAtDesc().stream().map(CollectorRunDto::from).toList();
+    }
+
     public List<CollectorJob> jobs() {
         return properties.jobs();
     }
@@ -77,21 +83,36 @@ public class RatesCollectorService {
     public CollectorRunDto startAsync(String jobName, CollectorTrigger trigger) {
         CollectorJob job = findJob(jobName);
         CollectorRun run = begin(job, trigger);
-        executor.execute(() -> {
-            finish(job, run);
-            runDependents(job, run);
-        });
+        try {
+            executor.execute(() -> {
+                finish(job, run);
+                runDependents(job, run);
+            });
+        } catch (TaskRejectedException exception) {
+            abandon(job, run);
+            throw new ConflictException("Collector queue is full, job was not started: " + job.name());
+        }
         return CollectorRunDto.from(run);
     }
 
-    public void runBlocking(String jobName, CollectorTrigger trigger) {
+    public void startIfPossible(String jobName, CollectorTrigger trigger) {
+        try {
+            startAsync(jobName, trigger);
+        } catch (ConflictException exception) {
+            log.warn("Collector job '{}' skipped: {}", jobName, exception.getMessage());
+        }
+    }
+
+    boolean runInline(String jobName, CollectorTrigger trigger) {
         CollectorJob job = findJob(jobName);
         try {
             CollectorRun run = begin(job, trigger);
             finish(job, run);
             runDependents(job, run);
+            return true;
         } catch (ConflictException exception) {
             log.warn("Collector job '{}' skipped: {}", jobName, exception.getMessage());
+            return false;
         }
     }
 
@@ -112,7 +133,7 @@ public class RatesCollectorService {
             log.info("Collector job '{}' starts because '{}' saved {} rows", dependent.name(), parent.name(),
                     parentRun.getRowsSaved());
             try {
-                runBlocking(dependent.name(), CollectorTrigger.CHAINED);
+                runInline(dependent.name(), CollectorTrigger.CHAINED);
             } catch (RuntimeException exception) {
                 log.error("Collector job '{}' failed after '{}'", dependent.name(), parent.name(), exception);
             }
@@ -151,6 +172,14 @@ public class RatesCollectorService {
             runningJobs.remove(job.name());
             throw exception;
         }
+    }
+
+    private void abandon(CollectorJob job, CollectorRun run) {
+        run.setStatus(CollectorRunStatus.FAILED);
+        run.setErrorSummary(QUEUE_FULL_SUMMARY);
+        run.setFinishedAt(Instant.now());
+        runRepository.save(run);
+        runningJobs.remove(job.name());
     }
 
     private void finish(CollectorJob job, CollectorRun run) {

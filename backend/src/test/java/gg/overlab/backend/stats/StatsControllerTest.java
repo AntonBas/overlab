@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gg.overlab.backend.exception.api.ApiErrorHandler;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.stats.dto.CoverageDto;
 import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
@@ -28,11 +29,13 @@ class StatsControllerTest {
     private final StatsService statsService = mock(StatsService.class);
     private final StatsHistoryService historyService = mock(StatsHistoryService.class);
     private final StatsFreshnessService freshnessService = mock(StatsFreshnessService.class);
+    private final StatsCoverageService coverageService = mock(StatsCoverageService.class);
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService, historyService, freshnessService))
+        mockMvc = MockMvcBuilders.standaloneSetup(new StatsController(statsService, historyService, freshnessService,
+                coverageService))
                 .setControllerAdvice(new ApiErrorHandler())
                 .build();
     }
@@ -127,5 +130,17 @@ class StatsControllerTest {
         mockMvc.perform(get("/api/stats/compare").param("patch", "season-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.queue").value("COMPETITIVE"));
+    }
+
+    @Test
+    void coverageListsCollectedCombinations() throws Exception {
+        when(coverageService.coverage()).thenReturn(List.of(new CoverageDto(GameQueue.COMPETITIVE, Platform.PC,
+                Region.ASIA, List.of(RankTier.ALL, RankTier.GOLD), List.of(RankTier.ALL))));
+
+        mockMvc.perform(get("/api/stats/coverage"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].region").value("ASIA"))
+                .andExpect(jsonPath("$[0].tiers[1]").value("GOLD"))
+                .andExpect(jsonPath("$[0].mapTiers[0]").value("ALL"));
     }
 }
