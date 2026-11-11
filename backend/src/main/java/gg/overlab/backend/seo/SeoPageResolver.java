@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeoPageResolver {
 
     static final String SITE_NAME = "Overlab";
-    static final String HOME_DESCRIPTION = "Overwatch 2 hero statistics by map and rank: win, pick and ban rates, "
+    static final String HOME_DESCRIPTION = "Overwatch hero statistics by map and rank: win, pick and ban rates, "
             + "perks, counters and video guides. Unofficial fan site.";
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
@@ -29,22 +29,22 @@ public class SeoPageResolver {
 
     private static final Map<String, String[]> STATIC_PAGES = Map.ofEntries(
             Map.entry("/", new String[] {SITE_NAME, HOME_DESCRIPTION, SITE_NAME}),
-            Map.entry("/stats", new String[] {"Overwatch 2 hero win, pick and ban rates",
-                    "Overwatch 2 hero win, pick and ban rates by rank, map, region and platform, "
+            Map.entry("/stats", new String[] {"Overwatch hero win, pick and ban rates",
+                    "Overwatch hero win, pick and ban rates by rank, map, region and platform, "
                             + "updated from Blizzard public data.", "Hero statistics"}),
-            Map.entry("/heroes", new String[] {"All Overwatch 2 heroes: roles, abilities, perks",
-                    "All Overwatch 2 heroes with roles, abilities, perks, counters and synergies.", "Heroes"}),
-            Map.entry("/counters", new String[] {"Overwatch 2 counters and synergies for every hero",
-                    "Curated Overwatch 2 counter picks and synergies for every hero, with short explanations.",
+            Map.entry("/heroes", new String[] {"All Overwatch heroes: roles, abilities, perks",
+                    "All Overwatch heroes with roles, abilities, perks, counters and synergies.", "Heroes"}),
+            Map.entry("/counters", new String[] {"Overwatch counters and synergies for every hero",
+                    "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
                     "Counters"}),
-            Map.entry("/perks", new String[] {"Overwatch 2 hero perks: every Minor and Major perk",
-                    "Every Overwatch 2 hero perk in one place, with Minor and Major slots and descriptions.",
+            Map.entry("/perks", new String[] {"Overwatch hero perks: every Minor and Major perk",
+                    "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
                     "Perks"}),
-            Map.entry("/changes", new String[] {"Overwatch 2 hero win rate changes by patch",
-                    "See which Overwatch 2 heroes gained or lost win and pick rate between patches "
+            Map.entry("/changes", new String[] {"Overwatch hero win rate changes by patch",
+                    "See which Overwatch heroes gained or lost win and pick rate between patches "
                             + "and over the last weeks.", "What changed"}),
-            Map.entry("/maps", new String[] {"Overwatch 2 maps: hero win rates by map",
-                    "Overwatch 2 maps by game mode, with hero win, pick and ban rates on each map.", "Maps"}),
+            Map.entry("/maps", new String[] {"Overwatch maps: hero win rates by map",
+                    "Overwatch maps by game mode, with hero win, pick and ban rates on each map.", "Maps"}),
             Map.entry("/privacy", new String[] {"Privacy policy", "How Overlab handles your data.",
                     "Privacy policy"}),
             Map.entry("/terms", new String[] {"Terms of use", "The rules for using Overlab.", "Terms of use"}),
@@ -102,7 +102,7 @@ public class SeoPageResolver {
     private Optional<SeoPage> heroPage(String slug) {
         return heroRepository.findBySlug(slug).filter(Hero::isActive).map(hero -> {
             String path = "/heroes/" + hero.getSlug();
-            String lead = hero.getName() + " Overwatch 2 stats: win, pick and ban rates, perks, counters"
+            String lead = hero.getName() + " Overwatch stats: win, pick and ban rates, perks, counters"
                     + " and best maps.";
             String detail = hero.getDescription() == null || hero.getDescription().isBlank()
                     ? lead : lead + " " + hero.getDescription();
@@ -115,7 +115,7 @@ public class SeoPageResolver {
     private Optional<SeoPage> mapPage(String slug) {
         return mapRepository.findBySlug(slug).map(map -> {
             String path = "/maps/" + map.getSlug();
-            String description = map.getName() + ": win, pick and ban rates of every Overwatch 2 hero on this map.";
+            String description = map.getName() + ": win, pick and ban rates of every Overwatch hero on this map.";
             return new SeoPage(path, map.getName(), description, "website", map.getName(),
                     List.of(breadcrumbs(path, map.getName(), "/maps", "Maps")));
         });

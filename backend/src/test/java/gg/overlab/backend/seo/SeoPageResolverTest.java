@@ -24,7 +24,7 @@ class SeoPageResolverTest {
     @Test
     void resolvesStaticPagesAndIgnoresTrailingSlash() {
         assertThat(resolver.resolve("/stats/")).hasValueSatisfying(page -> {
-            assertThat(page.title()).isEqualTo("Overwatch 2 hero win, pick and ban rates");
+            assertThat(page.title()).isEqualTo("Overwatch hero win, pick and ban rates");
             assertThat(page.heading()).isEqualTo("Hero statistics");
             assertThat(page.path()).isEqualTo("/stats");
         });
@@ -50,7 +50,7 @@ class SeoPageResolverTest {
 
         assertThat(page.title()).isEqualTo("Ana stats, perks, counters and best maps");
         assertThat(page.heading()).isEqualTo("Ana");
-        assertThat(page.description()).startsWith("Ana Overwatch 2 stats: win, pick and ban rates, perks, counters")
+        assertThat(page.description()).startsWith("Ana Overwatch stats: win, pick and ban rates, perks, counters")
                 .contains("Heals allies and counters reinhardt.");
         assertThat(page.structuredData().getFirst()).contains("BreadcrumbList", "https://example.com/heroes");
     }

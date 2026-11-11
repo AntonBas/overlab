@@ -65,7 +65,7 @@ export function MapPage() {
   usePageTitle(map.data?.name);
   usePageDescription(
     map.data
-      ? `${map.data.name}: win, pick and ban rates of every Overwatch 2 hero on this map.`
+      ? `${map.data.name}: win, pick and ban rates of every Overwatch hero on this map.`
       : null,
   );
   useStructuredData(
