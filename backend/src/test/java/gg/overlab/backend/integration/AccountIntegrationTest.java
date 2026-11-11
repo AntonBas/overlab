@@ -15,6 +15,9 @@ import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
 import gg.overlab.backend.user.UserRole;
+import gg.overlab.backend.user.token.UserTokenService;
+import gg.overlab.backend.user.token.UserTokenType;
+import java.time.Duration;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,9 @@ class AccountIntegrationTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private UserTokenService userTokenService;
+
     private MockMvc mockMvc;
     private User user;
     private Cookie userCookie;
@@ -72,6 +78,22 @@ class AccountIntegrationTest {
         mockMvc.perform(json(put("/api/me/profile"), "{\"displayName\":\"New Name\"}").cookie(userCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.displayName").value("New Name"));
+    }
+
+    @Test
+    void emailChangeTokenAppliesPendingEmailOnce() throws Exception {
+        user.setPendingEmail(OTHER_EMAIL);
+        userRepository.saveAndFlush(user);
+        String token = userTokenService.issue(user, UserTokenType.EMAIL_CHANGE, Duration.ofHours(1));
+
+        mockMvc.perform(json(post("/api/auth/verify-email"), "{\"token\":\"" + token + "\"}"))
+                .andExpect(status().isNoContent());
+
+        User changed = userRepository.findById(user.getId()).orElseThrow();
+        assertThat(changed.getEmail()).isEqualTo(OTHER_EMAIL);
+        assertThat(changed.getPendingEmail()).isNull();
+        mockMvc.perform(json(post("/api/auth/verify-email"), "{\"token\":\"" + token + "\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

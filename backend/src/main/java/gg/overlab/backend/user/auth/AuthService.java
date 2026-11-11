@@ -18,9 +18,11 @@ import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
 import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
 import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -119,14 +121,13 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String rawToken) {
-        User user;
-        try {
-            user = tokenService.consume(rawToken, UserTokenType.EMAIL_VERIFICATION);
-        } catch (InvalidTokenException exception) {
-            applyEmailChange(tokenService.consume(rawToken, UserTokenType.EMAIL_CHANGE));
+        ConsumedToken consumed = tokenService.consumeAny(rawToken,
+                List.of(UserTokenType.EMAIL_VERIFICATION, UserTokenType.EMAIL_CHANGE));
+        if (consumed.type() == UserTokenType.EMAIL_CHANGE) {
+            applyEmailChange(consumed.user());
             return;
         }
-        user.setEmailVerified(true);
+        consumed.user().setEmailVerified(true);
     }
 
     private void applyEmailChange(User user) {

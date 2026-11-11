@@ -9,7 +9,9 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HexFormat;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -41,14 +43,19 @@ public class UserTokenService {
 
     @Transactional
     public User consume(String rawToken, UserTokenType type) {
-        UserToken token = tokenRepository.findByHashAndType(hash(rawToken), type)
+        return consumeAny(rawToken, List.of(type)).user();
+    }
+
+    @Transactional
+    public ConsumedToken consumeAny(String rawToken, Collection<UserTokenType> types) {
+        UserToken token = tokenRepository.findByHashAndTypeIn(hash(rawToken), types)
                 .orElseThrow(InvalidTokenException::new);
         Instant now = Instant.now();
         if (token.getUsedAt() != null || token.getExpiresAt().isBefore(now)) {
             throw new InvalidTokenException();
         }
         token.setUsedAt(now);
-        return token.getUser();
+        return new ConsumedToken(token.getUser(), token.getType());
     }
 
     @Transactional

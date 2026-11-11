@@ -20,9 +20,12 @@ import gg.overlab.backend.user.auth.dto.RegisterRequest;
 import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
 import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
+import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class AuthServiceTest {
+
+    private static final List<UserTokenType> VERIFICATION_TYPES =
+            List.of(UserTokenType.EMAIL_VERIFICATION, UserTokenType.EMAIL_CHANGE);
 
     private final UserRepository userRepository = mock(UserRepository.class);
     private final UserTokenService tokenService = mock(UserTokenService.class);
@@ -181,11 +187,36 @@ class AuthServiceTest {
     @Test
     void verifyEmailMarksUserVerified() {
         existingUser.setEmailVerified(false);
-        when(tokenService.consume("verify-token", UserTokenType.EMAIL_VERIFICATION)).thenReturn(existingUser);
+        when(tokenService.consumeAny("verify-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_VERIFICATION));
 
         service.verifyEmail("verify-token");
 
         assertThat(existingUser.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    void verifyEmailAppliesPendingEmailForEmailChangeToken() {
+        existingUser.setPendingEmail("new@overlab.gg");
+        when(userRepository.existsByEmailIgnoreCase("new@overlab.gg")).thenReturn(false);
+        when(tokenService.consumeAny("change-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_CHANGE));
+
+        service.verifyEmail("change-token");
+
+        assertThat(existingUser.getEmail()).isEqualTo("new@overlab.gg");
+        assertThat(existingUser.getPendingEmail()).isNull();
+        assertThat(existingUser.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    void verifyEmailRejectsEmailChangeWhenAddressWasTakenMeanwhile() {
+        existingUser.setPendingEmail("taken@overlab.gg");
+        when(userRepository.existsByEmailIgnoreCase("taken@overlab.gg")).thenReturn(true);
+        when(tokenService.consumeAny("change-token", VERIFICATION_TYPES))
+                .thenReturn(new ConsumedToken(existingUser, UserTokenType.EMAIL_CHANGE));
+
+        assertThatThrownBy(() -> service.verifyEmail("change-token")).isInstanceOf(InvalidTokenException.class);
     }
 
     @Test

@@ -15,6 +15,7 @@ import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +40,7 @@ class UserTokenServiceTest {
     @Test
     void consumesValidTokenOnce() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), null);
-        when(repository.findByHashAndType(any(), eq(UserTokenType.PASSWORD_RESET))).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), eq(List.of(UserTokenType.PASSWORD_RESET)))).thenReturn(Optional.of(token));
 
         User result = service.consume("raw", UserTokenType.PASSWORD_RESET);
 
@@ -50,7 +51,7 @@ class UserTokenServiceTest {
     @Test
     void rejectsAlreadyUsedToken() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now());
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.PASSWORD_RESET))
                 .isInstanceOf(InvalidTokenException.class);
@@ -59,7 +60,7 @@ class UserTokenServiceTest {
     @Test
     void rejectsExpiredToken() {
         UserToken token = storedToken(Instant.now().minusSeconds(1), null);
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.of(token));
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.EMAIL_VERIFICATION))
                 .isInstanceOf(InvalidTokenException.class);
@@ -67,7 +68,7 @@ class UserTokenServiceTest {
 
     @Test
     void rejectsUnknownToken() {
-        when(repository.findByHashAndType(any(), any())).thenReturn(Optional.empty());
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
                 .isInstanceOf(InvalidTokenException.class);
