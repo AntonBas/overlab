@@ -269,6 +269,22 @@ class AccountIntegrationTest {
     }
 
     @Test
+    void userSearchTreatsWildcardCharactersLiterally() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+
+        mockMvc.perform(get("/api/admin/users").param("q", "account_test").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0));
+        mockMvc.perform(get("/api/admin/users").param("q", "%").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0));
+        mockMvc.perform(get("/api/admin/users").param("q", "account-test").cookie(adminCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].email").value(EMAIL));
+    }
+
+    @Test
     void adminCanFilterAndSortUsers() throws Exception {
         User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
         Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));

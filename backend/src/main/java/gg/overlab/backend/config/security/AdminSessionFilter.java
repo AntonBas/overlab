@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,13 +18,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class AdminSessionFilter extends OncePerRequestFilter {
 
-    private static final String ADMIN_PREFIX = "/api/admin/";
+    private static final List<String> ADMIN_PREFIXES = List.of("/api/admin/", "/v3/api-docs", "/swagger-ui");
 
     private final UserRepository userRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith(ADMIN_PREFIX);
+        String path = request.getRequestURI();
+        return ADMIN_PREFIXES.stream().noneMatch(path::startsWith);
     }
 
     @Override

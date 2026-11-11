@@ -55,6 +55,17 @@ class AdminSessionFilterTest {
     }
 
     @Test
+    void alsoProtectsTheApiDocumentation() throws Exception {
+        authenticate(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user(UserRole.USER, true)));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(new MockHttpServletRequest("GET", "/v3/api-docs"), response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+    }
+
+    @Test
     void leavesNonAdminTokensToTheAuthorizationRules() throws Exception {
         AuthenticatedUser principal = new AuthenticatedUser(2L, "user@overlab.gg", UserRole.USER);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,

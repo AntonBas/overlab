@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AdminUserService {
 
+    private static final char LIKE_ESCAPE = '\\';
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> SORTABLE_COLUMNS = Set.of("createdAt", "lastLoginAt", "displayName", "email");
 
@@ -83,6 +84,10 @@ public class AdminUserService {
         return toDto(user);
     }
 
+    private static String escapeLike(String value) {
+        return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    }
+
     private static String sortColumn(String sortBy) {
         if (sortBy == null || !SORTABLE_COLUMNS.contains(sortBy)) {
             return "createdAt";
@@ -94,9 +99,9 @@ public class AdminUserService {
         return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.hasText(filter.query())) {
-                String pattern = "%" + filter.query().trim().toLowerCase(Locale.ROOT) + "%";
-                predicates.add(builder.or(builder.like(builder.lower(root.get("email")), pattern),
-                        builder.like(builder.lower(root.get("displayName")), pattern)));
+                String pattern = "%" + escapeLike(filter.query().trim().toLowerCase(Locale.ROOT)) + "%";
+                predicates.add(builder.or(builder.like(builder.lower(root.get("email")), pattern, LIKE_ESCAPE),
+                        builder.like(builder.lower(root.get("displayName")), pattern, LIKE_ESCAPE)));
             }
             if (filter.role() != null) {
                 predicates.add(builder.equal(root.get("role"), filter.role()));

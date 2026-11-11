@@ -2,6 +2,7 @@ package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -78,6 +79,9 @@ class StatsQueriesIntegrationTest {
     @Autowired
     private CacheManager cacheManager;
 
+
+
+
     private Hero ana;
     private Hero genji;
     private GameMap rialto;
@@ -108,6 +112,36 @@ class StatsQueriesIntegrationTest {
     private void clearCaches() {
         cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).clear();
         cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+    }
+
+    @Test
+    void onlyTheDefaultHistoryRangeIsCached() {
+        StatsFilter filter = allMaps();
+        String key = "history:ana-test:" + filter.cacheKey();
+
+        historyService.getHeroHistory("ana-test", filter, OLD.minus(Duration.ofDays(1)), NEW.plus(Duration.ofDays(1)));
+        assertThat(cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).get(key)).isNull();
+
+        historyService.getHeroHistory("ana-test", filter, null, null);
+        await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
+                assertThat(cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).get(key)).isNotNull());
+    }
+
+    @Test
+    void comparisonsAreCachedPerResolvedCapturePairNotPerRequestedBounds() {
+        StatsFilter filter = allMaps();
+
+        StatsComparisonDto first = historyService.compare(filter, OLD.plus(Duration.ofHours(1)),
+                NEW.plus(Duration.ofHours(1)));
+        StatsComparisonDto second = historyService.compare(filter, OLD.plus(Duration.ofHours(3)),
+                NEW.plus(Duration.ofHours(9)));
+
+        assertThat(second).isEqualTo(first);
+        var cache = cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME);
+        await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
+                assertThat(cache.get("compare:" + filter.cacheKey() + ":" + OLD + ":" + NEW)).isNotNull());
+        assertThat(cache.get("compare:" + filter.cacheKey() + ":" + OLD.plus(Duration.ofHours(1)) + ":"
+                + NEW.plus(Duration.ofHours(1)))).isNull();
     }
 
     @Test

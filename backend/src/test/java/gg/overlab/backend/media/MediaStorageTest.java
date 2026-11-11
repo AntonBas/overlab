@@ -38,6 +38,20 @@ class MediaStorageTest {
     }
 
     @Test
+    void failedSaveLeavesNoTemporaryFileBehind() throws Exception {
+        Path blockedTarget = directory.resolve("maps/busan.png");
+        Files.createDirectories(blockedTarget);
+        Files.writeString(blockedTarget.resolve("keep.txt"), "x");
+
+        assertThatThrownBy(() -> storage().save(MediaFolder.MAPS, "busan.png", new byte[] {1}))
+                .isInstanceOf(java.io.UncheckedIOException.class);
+
+        try (var files = Files.list(directory.resolve("maps"))) {
+            assertThat(files).extracting(path -> path.getFileName().toString()).containsExactly("busan.png");
+        }
+    }
+
+    @Test
     void rejectsNamesThatCouldEscapeTheFolder() {
         MediaStorage storage = storage();
 

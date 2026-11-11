@@ -14,6 +14,10 @@ public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long
     @Query("select f from UserFavorite f join fetch f.map m where f.userId = :userId order by m.name")
     List<UserFavorite> findMapFavorites(@Param("userId") Long userId);
 
+    long countByUserIdAndHeroIsNotNull(Long userId);
+
+    long countByUserIdAndMapIsNotNull(Long userId);
+
     boolean existsByUserIdAndHeroSlug(Long userId, String heroSlug);
 
     boolean existsByUserIdAndMapSlug(Long userId, String mapSlug);

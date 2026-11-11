@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class MediaStorage {
 
@@ -22,12 +24,14 @@ public class MediaStorage {
 
     public String save(MediaFolder folder, String fileName, byte[] content) {
         Path target = resolve(folder, fileName);
+        Path temporary = null;
         try {
             Files.createDirectories(target.getParent());
-            Path temporary = Files.createTempFile(target.getParent(), "upload-", ".tmp");
+            temporary = Files.createTempFile(target.getParent(), "upload-", ".tmp");
             Files.write(temporary, content);
             Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException exception) {
+            deleteQuietly(temporary);
             throw new UncheckedIOException(exception);
         }
         return relativePath(folder, fileName);
@@ -59,6 +63,17 @@ public class MediaStorage {
             Files.deleteIfExists(target);
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
+        }
+    }
+
+    private void deleteQuietly(Path file) {
+        if (file == null) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException exception) {
+            log.warn("Could not remove the temporary file {}: {}", file, exception.getMessage());
         }
     }
 

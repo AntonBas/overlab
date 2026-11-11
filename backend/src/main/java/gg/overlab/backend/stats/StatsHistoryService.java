@@ -6,9 +6,6 @@ import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.patch.PatchService;
 import gg.overlab.backend.patch.dto.PatchDto;
-import gg.overlab.backend.hero.HeroRoleChangeRepository;
-import gg.overlab.backend.stats.dto.HeroChangeDto;
-import gg.overlab.backend.stats.dto.HeroRoleChangeDto;
 import gg.overlab.backend.stats.dto.HeroHistoryDto;
 import gg.overlab.backend.stats.dto.HeroHistoryPointDto;
 import gg.overlab.backend.stats.dto.HistoryStartDto;
@@ -18,8 +15,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +34,12 @@ public class StatsHistoryService {
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final PatchService patchService;
-    private final HeroRoleChangeRepository roleChangeRepository;
+    private final StatsComparisonProvider comparisonProvider;
     private final StatsMapper statsMapper;
 
     @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
-            key = "'history:' + #heroSlug + ':' + #filter.cacheKey() + ':' + #from + ':' + #to")
+            key = "'history:' + #heroSlug + ':' + #filter.cacheKey()",
+            condition = "#from == null && #to == null")
     @Transactional(readOnly = true)
     public HeroHistoryDto getHeroHistory(String heroSlug, StatsFilter filter, Instant from, Instant to) {
         Instant end = to == null ? Instant.now() : to;
@@ -67,8 +63,6 @@ public class StatsHistoryService {
                 filter.region(), start, end, points);
     }
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
-            key = "'compare:' + #filter.cacheKey() + ':' + #before + ':' + #after")
     @Transactional(readOnly = true)
     public StatsComparisonDto compare(StatsFilter filter, Instant before, Instant after) {
         return buildComparison(filter, before, after);
@@ -78,29 +72,9 @@ public class StatsHistoryService {
         if (before.isAfter(after)) {
             throw new BadRequestException("'from' must not be after 'to'");
         }
-        Instant beforeCapturedAt = findCapture(filter, before);
-        Instant afterCapturedAt = findCapture(filter, after);
-        Map<Long, HeroStat> beforeByHero = new HashMap<>();
-        loadSnapshot(filter, beforeCapturedAt).forEach(stat -> beforeByHero.put(stat.getHero().getId(), stat));
-
-        Map<Long, HeroRoleChangeDto> roleChanges = new HashMap<>();
-        roleChangeRepository.findAllByChangedAtGreaterThanAndChangedAtLessThanEqualOrderByChangedAtDesc(
-                        beforeCapturedAt, afterCapturedAt)
-                .forEach(change -> roleChanges.putIfAbsent(change.getHero().getId(),
-                        statsMapper.toRoleChangeDto(change)));
-
-        List<HeroChangeDto> heroes = loadSnapshot(filter, afterCapturedAt).stream()
-                .filter(stat -> beforeByHero.containsKey(stat.getHero().getId()))
-                .map(stat -> statsMapper.toChangeDto(beforeByHero.get(stat.getHero().getId()), stat,
-                        roleChanges.get(stat.getHero().getId())))
-                .sorted(Comparator.comparing(HeroChangeDto::winRateChange).reversed())
-                .toList();
-        return new StatsComparisonDto(beforeCapturedAt, afterCapturedAt, filter.queue(), filter.tier(),
-                filter.mapSlug(), filter.platform(), filter.region(), heroes);
+        return comparisonProvider.compareCaptures(filter, findCapture(filter, before), findCapture(filter, after));
     }
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
-            key = "'compare-patch:' + #patchSlug + ':' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public StatsComparisonDto compareAroundPatch(StatsFilter filter, String patchSlug) {
         PatchDto patch = patchService.getBySlug(patchSlug);
@@ -126,14 +100,6 @@ public class StatsHistoryService {
                 : heroStatRepository.findCaptureAtOrBeforeForMap(filter.mapSlug(), filter.queue(), filter.platform(),
                 filter.region(), filter.tier(), at))
                 .orElseThrow(() -> new EntityNotFoundException("Statistics snapshot", at));
-    }
-
-    private List<HeroStat> loadSnapshot(StatsFilter filter, Instant capturedAt) {
-        return filter.isAllMaps()
-                ? heroStatRepository.findSnapshotForAllMaps(filter.queue(), filter.platform(), filter.region(),
-                filter.tier(), capturedAt)
-                : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), filter.platform(),
-                filter.region(), filter.tier(), capturedAt);
     }
 
     private static List<HeroHistoryPointDto> latestPerDay(List<HeroHistoryPointDto> points) {
