@@ -32,13 +32,13 @@ class CollectorStartupRunnerTest {
 
         verify(runRepository).failRunningRuns(eq(CollectorRunStatus.RUNNING), eq(CollectorRunStatus.FAILED),
                 any(Instant.class), anyString());
-        verify(collectorService, never()).runBlocking(anyString(), any(CollectorTrigger.class));
+        verify(collectorService, never()).startIfPossible(anyString(), any(CollectorTrigger.class));
     }
 
     @Test
     void stillRunsTheConfiguredStartupJob() {
         runner("daily-overview").run(null);
 
-        verify(collectorService).runBlocking("daily-overview", CollectorTrigger.STARTUP);
+        verify(collectorService).startIfPossible("daily-overview", CollectorTrigger.STARTUP);
     }
 }

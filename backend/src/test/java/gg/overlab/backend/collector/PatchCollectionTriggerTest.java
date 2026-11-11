@@ -34,9 +34,9 @@ class PatchCollectionTriggerTest {
 
         trigger.onPatchesImported(new PatchesImportedEvent(List.of(Instant.now().minus(1, ChronoUnit.DAYS))));
 
-        verify(collectorService).runBlocking("overview", CollectorTrigger.PATCH);
-        verify(collectorService).runBlocking("console", CollectorTrigger.PATCH);
-        verify(collectorService, never()).runBlocking("manual-only", CollectorTrigger.PATCH);
+        verify(collectorService).runInline("overview", CollectorTrigger.PATCH);
+        verify(collectorService).runInline("console", CollectorTrigger.PATCH);
+        verify(collectorService, never()).runInline("manual-only", CollectorTrigger.PATCH);
         verify(perkImportService).startAsync();
     }
 
@@ -47,7 +47,7 @@ class PatchCollectionTriggerTest {
 
         trigger.onPatchesImported(new PatchesImportedEvent(List.of(Instant.now().minus(1, ChronoUnit.DAYS))));
 
-        verify(collectorService).runBlocking("overview", CollectorTrigger.PATCH);
+        verify(collectorService).runInline("overview", CollectorTrigger.PATCH);
     }
 
     @Test
@@ -56,7 +56,7 @@ class PatchCollectionTriggerTest {
 
         trigger.onPatchesImported(new PatchesImportedEvent(List.of(Instant.now().minus(60, ChronoUnit.DAYS))));
 
-        verify(collectorService, never()).runBlocking("overview", CollectorTrigger.PATCH);
+        verify(collectorService, never()).runInline("overview", CollectorTrigger.PATCH);
         verify(perkImportService, never()).startAsync();
     }
 }
