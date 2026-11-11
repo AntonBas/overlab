@@ -17,7 +17,11 @@ import {
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import type { Patch } from "../../../types/api";
-import { formatDate, formatDateTime } from "../../../utils/format";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatchDate,
+} from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { fetchHeroes } from "../../heroes/api/heroesApi";
 import { fetchPatches } from "../../patches/api/patchesApi";
@@ -84,7 +88,7 @@ function recentGroupKeys(groups: PatchGroup[]): string[] {
 }
 
 function patchLabel(patch: Patch): string {
-  return `${patch.title ?? `Patch ${patch.version}`} · ${formatDate(patch.releasedAt)}`;
+  return `${patch.title ?? `Patch ${patch.version}`} · ${formatPatchDate(patch.releasedAt)}`;
 }
 
 export function ChangesPage() {

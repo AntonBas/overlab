@@ -1,6 +1,7 @@
 import type { DataFreshness } from "../../../types/api";
+import { DATE_LOCALE } from "../../../utils/format";
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
+const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
   day: "numeric",
   month: "short",
   year: "numeric",

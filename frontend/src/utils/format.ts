@@ -22,10 +22,24 @@ export function formatDelta(value: number | null | undefined): string {
   return `${rounded > 0 ? "+" : "−"}${Math.abs(rounded).toFixed(1)}`;
 }
 
+function resolveDateLocale(): string {
+  const language = typeof navigator === "undefined" ? "" : navigator.language;
+  return language.startsWith("en-") ? language : "en-GB";
+}
+
+export const DATE_LOCALE = resolveDateLocale();
+
 export function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(
+  return new Intl.DateTimeFormat(DATE_LOCALE, { dateStyle: "medium" }).format(
     new Date(value),
   );
+}
+
+export function formatPatchDate(value: string | number): string {
+  return new Intl.DateTimeFormat(DATE_LOCALE, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(new Date(value));
 }
 
 export function formatDateTime(value: string, withZone = false): string {
@@ -39,7 +53,7 @@ export function formatDateTime(value: string, withZone = false): string {
         timeZoneName: "short",
       }
     : { dateStyle: "medium", timeStyle: "short" };
-  return new Intl.DateTimeFormat("en-GB", options).format(new Date(value));
+  return new Intl.DateTimeFormat(DATE_LOCALE, options).format(new Date(value));
 }
 
 const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [

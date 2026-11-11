@@ -1,11 +1,13 @@
 import type { Patch } from "../../../types/api";
+import { DATE_LOCALE } from "../../../utils/format";
 import type { ChartMarker } from "../components/LineChart";
 
 const HOTFIX_TITLE = /hotfix|bug fix/i;
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
+const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
   day: "numeric",
   month: "short",
+  timeZone: "UTC",
 });
 
 function patchName(patch: Patch): string {

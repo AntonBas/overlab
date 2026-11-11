@@ -8,3 +8,8 @@ expect.extend(axeMatchers);
 afterEach(() => {
   cleanup();
 });
+
+Object.defineProperty(window.navigator, "language", {
+  value: "en-GB",
+  configurable: true,
+});
