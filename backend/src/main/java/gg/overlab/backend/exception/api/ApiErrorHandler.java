@@ -3,6 +3,7 @@ package gg.overlab.backend.exception.api;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.exception.core.TooManyRequestsException;
 import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
 import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
@@ -45,6 +46,12 @@ public class ApiErrorHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiError> handleConflict(ConflictException exception, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestsException exception,
+                                                          HttpServletRequest request) {
+        return build(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(BadRequestException.class)

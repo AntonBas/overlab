@@ -12,8 +12,10 @@ import static org.mockito.Mockito.when;
 import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.exception.core.TooManyRequestsException;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.auth.AuthService;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.AuthTokens;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
@@ -43,11 +45,13 @@ class AuthServiceTest {
     private final UserTokenService tokenService = mock(UserTokenService.class);
     private final EmailService emailService = mock(EmailService.class);
     private final AuditService auditService = mock(AuditService.class);
+    private final LoginAttemptLimiter loginAttemptLimiter = mock(LoginAttemptLimiter.class);
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
     private final JwtTokenProvider jwtTokenProvider =
             new JwtTokenProvider(AuthFixtures.properties(), new MockEnvironment());
     private final AuthService service = new AuthService(userRepository, new UserMapper(), passwordEncoder,
-            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties(), auditService);
+            jwtTokenProvider, tokenService, emailService, AuthFixtures.properties(), auditService,
+            loginAttemptLimiter);
 
     private User existingUser;
 
@@ -105,6 +109,28 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "wrong-password")))
                 .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void loginRecordsFailureForWrongPasswordAndResetsOnSuccess() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+
+        assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "wrong-password")))
+                .isInstanceOf(InvalidCredentialsException.class);
+        verify(loginAttemptLimiter).recordFailure("ana@overlab.gg");
+
+        service.login(new LoginRequest("ana@overlab.gg", "correct-password"));
+        verify(loginAttemptLimiter).reset("ana@overlab.gg");
+    }
+
+    @Test
+    void loginIsRejectedBeforeCheckingPasswordWhenAccountIsLocked() {
+        org.mockito.Mockito.doThrow(new TooManyRequestsException("locked"))
+                .when(loginAttemptLimiter).requireAllowed("ana@overlab.gg");
+
+        assertThatThrownBy(() -> service.login(new LoginRequest("ana@overlab.gg", "correct-password")))
+                .isInstanceOf(TooManyRequestsException.class);
+        verify(userRepository, never()).findByEmailIgnoreCase(any());
     }
 
     @Test

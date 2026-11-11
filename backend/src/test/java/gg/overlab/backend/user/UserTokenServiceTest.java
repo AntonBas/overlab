@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,6 +56,30 @@ class UserTokenServiceTest {
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.PASSWORD_RESET))
                 .isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    void reuseOfAnOldUsedRefreshTokenRevokesAllSessions() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(120));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(InvalidTokenException.class);
+
+        verify(repository).deleteAllByUserAndType(user.getId(), UserTokenType.REFRESH);
+    }
+
+    @Test
+    void immediateSecondUseOfRefreshTokenDoesNotRevokeSessions() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(2));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(InvalidTokenException.class);
+
+        verify(repository, never()).deleteAllByUserAndType(any(), any());
     }
 
     @Test

@@ -1,11 +1,12 @@
 package gg.overlab.backend.config.security;
 
+import gg.overlab.backend.user.UserRepository;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableWebSecurity
@@ -29,13 +31,18 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtTokenProvider tokenProvider,
                                                    AuthCookieService cookieService,
-                                                   StringRedisTemplate redisTemplate,
+                                                   RateLimitCounter rateLimitCounter,
+                                                   UserRepository userRepository,
+                                                   @Qualifier("handlerExceptionResolver")
+                                                   HandlerExceptionResolver exceptionResolver,
                                                    AuthProperties authProperties,
                                                    RateLimitProperties rateLimitProperties,
                                                    ObjectProvider<ClientRegistrationRepository> clientRegistrations,
                                                    ObjectProvider<OAuth2LoginHandlers> oauthHandlers) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, cookieService);
-        RateLimitFilter rateLimitFilter = new RateLimitFilter(redisTemplate, authProperties, rateLimitProperties);
+        RateLimitFilter rateLimitFilter = new RateLimitFilter(rateLimitCounter, authProperties, rateLimitProperties,
+                exceptionResolver);
+        AdminSessionFilter adminSessionFilter = new AdminSessionFilter(userRepository);
 
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -57,6 +64,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(adminSessionFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(new PublicCacheFilter(), JwtAuthenticationFilter.class);
 

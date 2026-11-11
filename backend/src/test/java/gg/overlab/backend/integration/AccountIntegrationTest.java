@@ -97,6 +97,48 @@ class AccountIntegrationTest {
     }
 
     @Test
+    void adminTokenStopsWorkingAfterTheAdminIsDisabledOrDemoted() throws Exception {
+        User admin = saveUser(ADMIN_EMAIL, UserRole.ADMIN, AuthProvider.LOCAL);
+        Cookie adminCookie = new Cookie("access_token", tokenProvider.createAccessToken(admin));
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isOk());
+
+        admin.setEnabled(false);
+        userRepository.saveAndFlush(admin);
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isUnauthorized());
+
+        admin.setEnabled(true);
+        admin.setRole(UserRole.USER);
+        userRepository.saveAndFlush(admin);
+        mockMvc.perform(get("/api/admin/users").cookie(adminCookie)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void crossOriginStateChangingRequestsFromForeignOriginsAreRejected() throws Exception {
+        mockMvc.perform(post("/api/auth/logout").header("Origin", "https://evil.example").cookie(userCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void loginIsLockedAfterRepeatedFailures() throws Exception {
+        String body = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+        for (int attempt = 0; attempt < 10; attempt++) {
+            String address = "10.9.8." + (attempt + 1);
+            mockMvc.perform(json(post("/api/auth/login"), body).with(request -> {
+                request.setRemoteAddr(address);
+                return request;
+            })).andExpect(status().isUnauthorized());
+        }
+
+        mockMvc.perform(json(post("/api/auth/login"),
+                        "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}")
+                        .with(request -> {
+                            request.setRemoteAddr("10.9.9.9");
+                            return request;
+                        }))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void passwordChangeNeedsTheCurrentPassword() throws Exception {
         mockMvc.perform(json(post("/api/me/password"),
                         "{\"currentPassword\":\"wrong-password\",\"newPassword\":\"brand-new-password\"}")
