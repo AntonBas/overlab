@@ -16,12 +16,9 @@ export function ForgotPasswordPage() {
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
-    try {
-      await forgotPassword(email);
-    } finally {
-      setSent(true);
-      setSubmitting(false);
-    }
+    await forgotPassword(email).catch(() => undefined);
+    setSent(true);
+    setSubmitting(false);
   }
 
   if (sent) {
