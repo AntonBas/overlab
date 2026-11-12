@@ -1,14 +1,30 @@
 package gg.overlab.backend.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaMethod;
+import com.tngtech.archunit.core.domain.JavaParameterizedType;
+import com.tngtech.archunit.core.domain.JavaType;
+import com.tngtech.archunit.core.domain.properties.CanBeAnnotated;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.GeneralCodingRules;
+import jakarta.persistence.Entity;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.RestController;
 
 @AnalyzeClasses(packages = "gg.overlab.backend", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchitectureTest {
@@ -54,6 +70,21 @@ class ArchitectureTest {
             .should().dependOnClassesThat().haveSimpleNameEndingWith("Repository");
 
     @ArchTest
+    static final ArchRule notificationAndMediaDoNotUseRepositories = noClasses()
+            .that().resideInAnyPackage("gg.overlab.backend.notification..", "gg.overlab.backend.media..")
+            .should().dependOnClassesThat().haveSimpleNameEndingWith("Repository");
+
+    @ArchTest
+    static final ArchRule controllersDoNotReturnEntities = noMethods()
+            .that().areDeclaredInClassesThat().areAnnotatedWith(RestController.class)
+            .should().haveRawReturnType(CanBeAnnotated.Predicates.annotatedWith(Entity.class));
+
+    @ArchTest
+    static final ArchRule cachedResultsAreSerializable = methods()
+            .that().areAnnotatedWith(Cacheable.class)
+            .should(haveSerializableReturnType());
+
+    @ArchTest
     static final ArchRule noFieldInjection = GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 
     @ArchTest
@@ -66,4 +97,28 @@ class ArchitectureTest {
     static final ArchRule topLevelPackagesAreFreeOfCycles = slices()
             .matching("gg.overlab.backend.(*)..")
             .should().beFreeOfCycles();
+
+    private static ArchCondition<JavaMethod> haveSerializableReturnType() {
+        return new ArchCondition<>("have a serializable return type") {
+            @Override
+            public void check(JavaMethod method, ConditionEvents events) {
+                if (!isSerializable(method.getReturnType())) {
+                    events.add(SimpleConditionEvent.violated(method, method.getFullName()
+                            + " returns " + method.getReturnType().getName() + " which is not Serializable"));
+                }
+            }
+        };
+    }
+
+    private static boolean isSerializable(JavaType type) {
+        JavaClass raw = type.toErasure();
+        if (raw.isAssignableTo(Serializable.class)) {
+            return true;
+        }
+        boolean container = raw.isAssignableTo(Collection.class) || raw.isAssignableTo(Map.class);
+        if (container && type instanceof JavaParameterizedType parameterized) {
+            return parameterized.getActualTypeArguments().stream().allMatch(ArchitectureTest::isSerializable);
+        }
+        return false;
+    }
 }

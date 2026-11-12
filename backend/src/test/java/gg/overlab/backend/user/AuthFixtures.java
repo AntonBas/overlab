@@ -11,6 +11,11 @@ public final class AuthFixtures {
     private AuthFixtures() {
     }
 
+    public static AuthProperties propertiesWithAdmin(String adminEmail, String adminPassword) {
+        return new AuthProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(14), Duration.ofHours(24),
+                Duration.ofHours(1), false, "noreply@overlab.gg", adminEmail, adminPassword, 10);
+    }
+
     public static AuthProperties properties() {
         return new AuthProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(14), Duration.ofHours(24),
                 Duration.ofHours(1), false, "noreply@overlab.gg", null, null, 10);

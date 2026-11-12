@@ -17,6 +17,11 @@ public class TestcontainersConfig {
     }
 
     @Bean
+    RecordingMailSender mailSender() {
+        return new RecordingMailSender();
+    }
+
+    @Bean
     @ServiceConnection(name = "redis")
     GenericContainer<?> redis() {
         return new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
