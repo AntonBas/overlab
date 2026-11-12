@@ -21,18 +21,21 @@ public class StatsFreshnessService {
 
     private static final int MAX_SNAPSHOTS = 30;
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final SnapshotCheckService snapshotCheckService;
 
     @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public DataFreshnessDto freshness(StatsFilter filter) {
-        List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), filter.platform(),
+        List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), currentGameFormat.get(),
+                filter.platform(),
                 filter.region(), filter.tier(), PageRequest.of(0, MAX_SNAPSHOTS));
         if (times.isEmpty()) {
             throw new EntityNotFoundException("Statistics", filter.cacheKey());
         }
-        Map<Instant, String> signatures = heroStatRepository.findRatesAt(filter.queue(), filter.platform(),
+        Map<Instant, String> signatures = heroStatRepository.findRatesAt(filter.queue(), currentGameFormat.get(),
+                filter.platform(),
                         filter.region(), filter.tier(), times).stream()
                 .collect(Collectors.groupingBy(RateRow::capturedAt,
                         Collectors.collectingAndThen(Collectors.toList(), StatsFreshnessService::signatureOf)));

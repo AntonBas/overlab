@@ -69,7 +69,8 @@ public class SnapshotQualityChecker {
             return;
         }
         Map<String, HeroStat> previousBySlug = previous.stream()
-                .collect(Collectors.toMap(stat -> stat.getHero().getSlug(), Function.identity(), (first, second) -> first));
+                .collect(Collectors.toMap(stat -> stat.getHero().getSlug(), Function.identity(),
+                        (first, second) -> first));
         int outliers = 0;
         for (BlizzardRatesResponse.HeroRate rate : rates) {
             HeroStat before = previousBySlug.get(rate.id());

@@ -2,8 +2,10 @@ package gg.overlab.backend.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,19 +17,23 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 class EmailServiceTest {
 
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
     private final EmailService service = new EmailService(mailSender, AuthFixtures.properties(),
-            "https://overlabgg.com", "contact@overlabgg.com");
+            "https://overlabgg.com", "contact@overlabgg.com", Duration.ZERO, Runnable::run);
     private final EmailService serviceWithoutContact = new EmailService(mailSender, AuthFixtures.properties(),
-            "https://overlabgg.com", "");
+            "https://overlabgg.com", "", Duration.ZERO, Runnable::run);
     private final User user = AuthFixtures.user(1, "ana@overlab.gg", UserRole.USER, false);
 
     @BeforeEach
@@ -92,5 +98,37 @@ class EmailServiceTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         message.writeTo(output);
         return output.toString(StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void retriesAFailingSendAndGivesUpAfterThreeAttempts() {
+        doThrow(new MailSendException("smtp down")).when(mailSender).send(any(MimeMessage.class));
+
+        service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
+
+        verify(mailSender, times(3)).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void stopsRetryingOnceTheSendSucceeds() {
+        doThrow(new MailSendException("smtp down")).doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
+
+        verify(mailSender, times(2)).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void insideATransactionTheEmailIsSentOnlyAfterTheCommit() {
+        TransactionSynchronizationManager.initSynchronization();
+        try {
+            service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
+
+            verify(mailSender, never()).send(any(MimeMessage.class));
+            TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+            verify(mailSender).send(any(MimeMessage.class));
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 }

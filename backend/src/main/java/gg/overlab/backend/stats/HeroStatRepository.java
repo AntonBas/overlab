@@ -17,9 +17,11 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select distinct s.capturedAt from HeroStat s
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
             order by s.capturedAt desc
             """)
     List<Instant> findRecentCaptureTimes(@Param("queue") GameQueue queue,
+                                         @Param("gameFormat") GameFormat gameFormat,
                                          @Param("platform") Platform platform,
                                          @Param("region") Region region,
                                          @Param("tier") RankTier tier,
@@ -30,9 +32,11 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             from HeroStat s
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt in :capturedAt
             """)
     List<RateRow> findRatesAt(@Param("queue") GameQueue queue,
+                              @Param("gameFormat") GameFormat gameFormat,
                               @Param("platform") Platform platform,
                               @Param("region") Region region,
                               @Param("tier") RankTier tier,
@@ -79,12 +83,15 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s join fetch s.hero
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt = (
                 select max(x.capturedAt) from HeroStat x
                 where x.map is null
-                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier)
+                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier
+                  and x.gameFormat = :gameFormat)
             """)
     List<HeroStat> findLatestForAllMaps(@Param("queue") GameQueue queue,
+                                        @Param("gameFormat") GameFormat gameFormat,
                                         @Param("platform") Platform platform,
                                         @Param("region") Region region,
                                         @Param("tier") RankTier tier);
@@ -93,20 +100,24 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s join fetch s.hero join s.map m
             where m.slug = :mapSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt = (
                 select max(x.capturedAt) from HeroStat x join x.map xm
                 where xm.slug = :mapSlug
-                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier)
+                  and x.queue = :queue and x.platform = :platform and x.region = :region and x.tier = :tier
+                  and x.gameFormat = :gameFormat)
             """)
     List<HeroStat> findLatestForMap(@Param("mapSlug") String mapSlug,
                                     @Param("queue") GameQueue queue,
+                                    @Param("gameFormat") GameFormat gameFormat,
                                     @Param("platform") Platform platform,
                                     @Param("region") Region region,
                                     @Param("tier") RankTier tier);
 
-    default List<HeroStat> findLatestForHero(String heroSlug, GameQueue queue, Platform platform, Region region,
-                                             RankTier tier) {
-        List<Long> ids = findLatestIdsForHero(heroSlug, queue.name(), platform.name(), region.name(), tier.name());
+    default List<HeroStat> findLatestForHero(String heroSlug, GameQueue queue, GameFormat gameFormat,
+                                             Platform platform, Region region, RankTier tier) {
+        List<Long> ids = findLatestIdsForHero(heroSlug, queue.name(), gameFormat.name(), platform.name(),
+                region.name(), tier.name());
         return ids.isEmpty() ? List.of() : findWithHeroAndMapByIdIn(ids);
     }
 
@@ -115,10 +126,12 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             from hero_stats s join heroes h on h.id = s.hero_id
             where h.slug = :heroSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.game_format = :gameFormat
             order by s.map_id, s.captured_at desc
             """, nativeQuery = true)
     List<Long> findLatestIdsForHero(@Param("heroSlug") String heroSlug,
                                     @Param("queue") String queue,
+                                    @Param("gameFormat") String gameFormat,
                                     @Param("platform") String platform,
                                     @Param("region") String region,
                                     @Param("tier") String tier);
@@ -130,11 +143,13 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s
             where s.hero.slug = :heroSlug and s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt between :from and :to
             order by s.capturedAt
             """)
     List<HeroStat> findHistoryForAllMaps(@Param("heroSlug") String heroSlug,
                                          @Param("queue") GameQueue queue,
+                                         @Param("gameFormat") GameFormat gameFormat,
                                          @Param("platform") Platform platform,
                                          @Param("region") Region region,
                                          @Param("tier") RankTier tier,
@@ -145,12 +160,14 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s join s.map m
             where s.hero.slug = :heroSlug and m.slug = :mapSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt between :from and :to
             order by s.capturedAt
             """)
     List<HeroStat> findHistoryForMap(@Param("heroSlug") String heroSlug,
                                      @Param("mapSlug") String mapSlug,
                                      @Param("queue") GameQueue queue,
+                                     @Param("gameFormat") GameFormat gameFormat,
                                      @Param("platform") Platform platform,
                                      @Param("region") Region region,
                                      @Param("tier") RankTier tier,
@@ -161,9 +178,11 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select max(s.capturedAt) from HeroStat s
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt <= :at
             """)
     Optional<Instant> findCaptureAtOrBeforeForAllMaps(@Param("queue") GameQueue queue,
+                                                      @Param("gameFormat") GameFormat gameFormat,
                                                       @Param("platform") Platform platform,
                                                       @Param("region") Region region,
                                                       @Param("tier") RankTier tier,
@@ -173,8 +192,10 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select min(s.capturedAt) from HeroStat s
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
             """)
     Optional<Instant> findFirstCaptureForAllMaps(@Param("queue") GameQueue queue,
+                                                 @Param("gameFormat") GameFormat gameFormat,
                                                  @Param("platform") Platform platform,
                                                  @Param("region") Region region,
                                                  @Param("tier") RankTier tier);
@@ -183,10 +204,12 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select max(s.capturedAt) from HeroStat s join s.map m
             where m.slug = :mapSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt <= :at
             """)
     Optional<Instant> findCaptureAtOrBeforeForMap(@Param("mapSlug") String mapSlug,
                                                   @Param("queue") GameQueue queue,
+                                                  @Param("gameFormat") GameFormat gameFormat,
                                                   @Param("platform") Platform platform,
                                                   @Param("region") Region region,
                                                   @Param("tier") RankTier tier,
@@ -196,9 +219,11 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s join fetch s.hero
             where s.map is null
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt = :capturedAt
             """)
     List<HeroStat> findSnapshotForAllMaps(@Param("queue") GameQueue queue,
+                                          @Param("gameFormat") GameFormat gameFormat,
                                           @Param("platform") Platform platform,
                                           @Param("region") Region region,
                                           @Param("tier") RankTier tier,
@@ -208,14 +233,18 @@ public interface HeroStatRepository extends JpaRepository<HeroStat, Long> {
             select s from HeroStat s join fetch s.hero join s.map m
             where m.slug = :mapSlug
               and s.queue = :queue and s.platform = :platform and s.region = :region and s.tier = :tier
+              and s.gameFormat = :gameFormat
               and s.capturedAt = :capturedAt
             """)
     List<HeroStat> findSnapshotForMap(@Param("mapSlug") String mapSlug,
                                       @Param("queue") GameQueue queue,
+                                      @Param("gameFormat") GameFormat gameFormat,
                                       @Param("platform") Platform platform,
                                       @Param("region") Region region,
                                       @Param("tier") RankTier tier,
                                       @Param("capturedAt") Instant capturedAt);
+
+    Optional<HeroStat> findFirstByOrderByCapturedAtDesc();
 
     @Query("select min(s.capturedAt) from HeroStat s where s.capturedAt < :threshold")
     Optional<Instant> findOldestCaptureBefore(@Param("threshold") Instant threshold);

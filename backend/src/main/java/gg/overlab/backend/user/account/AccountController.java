@@ -79,7 +79,7 @@ public class AccountController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@AuthenticationPrincipal AuthenticatedUser user,
-                       @RequestBody DeleteAccountRequest request,
+                       @Valid @RequestBody DeleteAccountRequest request,
                        HttpServletResponse response) {
         accountService.deleteAccount(user.id(), request);
         cookieService.clearTokens(response);

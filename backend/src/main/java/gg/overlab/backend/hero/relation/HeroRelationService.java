@@ -44,7 +44,8 @@ public class HeroRelationService {
     public HeroCountersDto getCounters(String heroSlug) {
         requireHero(heroSlug);
         List<RelatedHeroDto> counters = relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getRelatedHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();
+                .stream().map(relation -> related(relation.getRelatedHero(), relation))
+                .sorted(BY_ROLE_THEN_NAME).toList();
         List<RelatedHeroDto> counteredBy = relationRepository
                 .findAllByRelatedHeroSlugAndType(heroSlug, RelationType.COUNTER)
                 .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();

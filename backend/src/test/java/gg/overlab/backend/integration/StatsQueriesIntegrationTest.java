@@ -146,7 +146,7 @@ class StatsQueriesIntegrationTest {
 
     @Test
     void allMapsQueryReturnsOnlyTheNewestSnapshotOfThatCombination() {
-        List<HeroStat> stats = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE, Platform.PC,
+        List<HeroStat> stats = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC,
                 Region.EUROPE, RankTier.ALL);
 
         assertThat(stats).hasSize(2).allMatch(stat -> stat.getCapturedAt().equals(NEW));
@@ -154,8 +154,26 @@ class StatsQueriesIntegrationTest {
     }
 
     @Test
+    void snapshotsOfAnotherGameFormatNeverMixIntoTheCurrentOne() {
+        Instant sixVsSixTime = NEW.plus(Duration.ofHours(1));
+        HeroStat sixVsSix = stat(ana, null, RankTier.ALL, sixVsSixTime, "50.00", "30.00");
+        sixVsSix.setGameFormat(GameFormat.SIX_VS_SIX);
+        heroStatRepository.saveAndFlush(sixVsSix);
+
+        List<HeroStat> fiveVsFive = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE,
+                GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL);
+        List<HeroStat> sixVsSixStats = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE,
+                GameFormat.SIX_VS_SIX, Platform.PC, Region.EUROPE, RankTier.ALL);
+
+        assertThat(fiveVsFive).hasSize(2).allMatch(stat -> stat.getCapturedAt().equals(NEW));
+        assertThat(sixVsSixStats).singleElement().satisfies(stat -> assertThat(stat.getCapturedAt()).isEqualTo(sixVsSixTime));
+        assertThat(heroStatRepository.findFirstByOrderByCapturedAtDesc()).get()
+                .satisfies(stat -> assertThat(stat.getGameFormat()).isEqualTo(GameFormat.SIX_VS_SIX));
+    }
+
+    @Test
     void differentTierIsASeparateSnapshot() {
-        List<HeroStat> stats = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE, Platform.PC,
+        List<HeroStat> stats = heroStatRepository.findLatestForAllMaps(GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC,
                 Region.EUROPE, RankTier.GOLD);
 
         assertThat(stats).hasSize(1);
@@ -164,7 +182,7 @@ class StatsQueriesIntegrationTest {
 
     @Test
     void mapQueryReturnsTheNewestSnapshotOfThatMapOnly() {
-        List<HeroStat> stats = heroStatRepository.findLatestForMap("rialto", GameQueue.COMPETITIVE, Platform.PC,
+        List<HeroStat> stats = heroStatRepository.findLatestForMap("rialto", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC,
                 Region.EUROPE, RankTier.ALL);
 
         assertThat(stats).hasSize(1);
@@ -174,15 +192,15 @@ class StatsQueriesIntegrationTest {
 
     @Test
     void unknownCombinationIsEmpty() {
-        assertThat(heroStatRepository.findLatestForAllMaps(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE,
+        assertThat(heroStatRepository.findLatestForAllMaps(GameQueue.QUICK_PLAY, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE,
                 RankTier.ALL)).isEmpty();
-        assertThat(heroStatRepository.findLatestForMap("busan", GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE,
+        assertThat(heroStatRepository.findLatestForMap("busan", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE,
                 RankTier.ALL)).isEmpty();
     }
 
     @Test
     void heroQueryReturnsLatestRowPerMapIncludingTheOverallRow() {
-        List<HeroStat> stats = heroStatRepository.findLatestForHero("ana-test", GameQueue.COMPETITIVE, Platform.PC,
+        List<HeroStat> stats = heroStatRepository.findLatestForHero("ana-test", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC,
                 Region.EUROPE, RankTier.ALL);
 
         assertThat(stats).hasSize(2).allMatch(stat -> stat.getCapturedAt().equals(NEW));

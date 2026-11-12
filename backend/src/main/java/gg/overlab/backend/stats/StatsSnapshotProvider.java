@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsSnapshotProvider {
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final StatsMapper statsMapper;
     private final SnapshotCheckService snapshotCheckService;
@@ -26,9 +27,11 @@ public class StatsSnapshotProvider {
     @Transactional(readOnly = true)
     public StatsSnapshotDto getSnapshot(StatsFilter filter) {
         List<HeroStat> stats = filter.isAllMaps()
-                ? heroStatRepository.findLatestForAllMaps(filter.queue(), filter.platform(), filter.region(),
+                ? heroStatRepository.findLatestForAllMaps(filter.queue(), currentGameFormat.get(),
+                          filter.platform(), filter.region(),
                 filter.tier())
-                : heroStatRepository.findLatestForMap(filter.mapSlug(), filter.queue(), filter.platform(),
+                : heroStatRepository.findLatestForMap(filter.mapSlug(), filter.queue(), currentGameFormat.get(),
+                          filter.platform(),
                 filter.region(), filter.tier());
         if (stats.isEmpty()) {
             throw new EntityNotFoundException("Statistics", filter.cacheKey());
@@ -46,7 +49,8 @@ public class StatsSnapshotProvider {
 
     private Map<Long, HeroStat> loadBaseline(StatsFilter filter) {
         Map<Long, HeroStat> baselineByHero = new HashMap<>();
-        heroStatRepository.findLatestForAllMaps(filter.queue(), filter.platform(), filter.region(), filter.tier())
+        heroStatRepository.findLatestForAllMaps(filter.queue(), currentGameFormat.get(),
+                filter.platform(), filter.region(), filter.tier())
                 .forEach(stat -> baselineByHero.put(stat.getHero().getId(), stat));
         return baselineByHero;
     }

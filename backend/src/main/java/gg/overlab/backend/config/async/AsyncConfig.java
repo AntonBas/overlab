@@ -1,6 +1,8 @@
 package gg.overlab.backend.config.async;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,7 @@ public class AsyncConfig {
     @Bean(name = AUDIT_EXECUTOR)
     public Executor auditExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(500);
@@ -29,13 +32,16 @@ public class AsyncConfig {
     }
 
     @Bean(name = MAIL_EXECUTOR)
-    public Executor mailExecutor() {
+    public Executor mailExecutor(MeterRegistry registry) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(1);
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(200);
         executor.setThreadNamePrefix("mail-");
-        executor.setRejectedExecutionHandler((task, pool) -> log.warn("Mail queue is full, an email was dropped"));
+        executor.setRejectedExecutionHandler((task, pool) -> {
+            registry.counter("mail.dropped").increment();
+            log.warn("Mail queue is full, an email was dropped");
+        });
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(15);
         return executor;

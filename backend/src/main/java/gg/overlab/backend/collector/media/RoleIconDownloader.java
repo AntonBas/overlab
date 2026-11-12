@@ -13,7 +13,8 @@ public class RoleIconDownloader {
     private final MediaStorage mediaStorage;
     private final boolean enabled;
 
-    public RoleIconDownloader(ImageDownloader imageDownloader, MediaStorage mediaStorage, @Value("${collector.download-portraits:false}") boolean enabled) {
+    public RoleIconDownloader(ImageDownloader imageDownloader, MediaStorage mediaStorage,
+                              @Value("${collector.download-portraits:false}") boolean enabled) {
         this.imageDownloader = imageDownloader;
         this.mediaStorage = mediaStorage;
         this.enabled = enabled;

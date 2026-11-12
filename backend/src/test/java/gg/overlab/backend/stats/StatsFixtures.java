@@ -1,5 +1,8 @@
 package gg.overlab.backend.stats;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRole;
@@ -11,13 +14,19 @@ import java.time.Instant;
 
 final class StatsFixtures {
 
+    static CurrentGameFormat fiveVsFive() {
+        CurrentGameFormat format = mock(CurrentGameFormat.class);
+        when(format.get()).thenReturn(GameFormat.FIVE_VS_FIVE);
+        return format;
+    }
+
     static final Instant CAPTURED_AT = Instant.parse("2026-10-25T04:00:00Z");
 
     private StatsFixtures() {
     }
 
     static SnapshotCheckService noChecks() {
-        return new SnapshotCheckService(org.mockito.Mockito.mock(SnapshotCheckRepository.class));
+        return new SnapshotCheckService(mock(SnapshotCheckRepository.class));
     }
 
     static StatsMapper statsMapper() {

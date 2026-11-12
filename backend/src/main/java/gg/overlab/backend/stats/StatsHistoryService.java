@@ -19,6 +19,7 @@ import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class StatsHistoryService {
     public static final Duration MAX_HISTORY_RANGE = Duration.ofDays(366);
     public static final Duration PATCH_COMPARISON_WINDOW = Duration.ofDays(7);
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final PatchService patchService;
@@ -53,11 +55,12 @@ public class StatsHistoryService {
                     + " days");
         }
         HeroDto hero = heroService.getBySlug(heroSlug);
+        GameFormat format = currentGameFormat.get();
         List<HeroStat> stats = filter.isAllMaps()
-                ? heroStatRepository.findHistoryForAllMaps(heroSlug, filter.queue(), filter.platform(),
-                filter.region(), filter.tier(), start, end)
-                : heroStatRepository.findHistoryForMap(heroSlug, filter.mapSlug(), filter.queue(), filter.platform(),
-                filter.region(), filter.tier(), start, end);
+                ? heroStatRepository.findHistoryForAllMaps(heroSlug, filter.queue(), format, filter.platform(),
+                        filter.region(), filter.tier(), start, end)
+                : heroStatRepository.findHistoryForMap(heroSlug, filter.mapSlug(), filter.queue(), format,
+                        filter.platform(), filter.region(), filter.tier(), start, end);
         List<HeroHistoryPointDto> points = latestPerDay(
                 stats.stream().map(statsMapper::toHistoryPoint).toList());
         return new HeroHistoryDto(hero, filter.queue(), filter.tier(), filter.mapSlug(), filter.platform(),
@@ -90,17 +93,18 @@ public class StatsHistoryService {
     @Cacheable(value = CacheNames.STATS, key = "'history-start:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public HistoryStartDto historyStart(StatsFilter filter) {
-        return new HistoryStartDto(heroStatRepository.findFirstCaptureForAllMaps(filter.queue(), filter.platform(),
-                filter.region(), filter.tier()).orElse(null));
+        return new HistoryStartDto(heroStatRepository.findFirstCaptureForAllMaps(filter.queue(),
+                currentGameFormat.get(), filter.platform(), filter.region(), filter.tier()).orElse(null));
     }
 
     private Instant findCapture(StatsFilter filter, Instant at) {
-        return (filter.isAllMaps()
-                ? heroStatRepository.findCaptureAtOrBeforeForAllMaps(filter.queue(), filter.platform(),
-                filter.region(), filter.tier(), at)
-                : heroStatRepository.findCaptureAtOrBeforeForMap(filter.mapSlug(), filter.queue(), filter.platform(),
-                filter.region(), filter.tier(), at))
-                .orElseThrow(() -> new EntityNotFoundException("Statistics snapshot", at));
+        GameFormat format = currentGameFormat.get();
+        Optional<Instant> capture = filter.isAllMaps()
+                ? heroStatRepository.findCaptureAtOrBeforeForAllMaps(filter.queue(), format, filter.platform(),
+                        filter.region(), filter.tier(), at)
+                : heroStatRepository.findCaptureAtOrBeforeForMap(filter.mapSlug(), filter.queue(), format,
+                        filter.platform(), filter.region(), filter.tier(), at);
+        return capture.orElseThrow(() -> new EntityNotFoundException("Statistics snapshot", at));
     }
 
     private static List<HeroHistoryPointDto> latestPerDay(List<HeroHistoryPointDto> points) {

@@ -28,7 +28,8 @@ public interface RelationVoteRepository extends JpaRepository<RelationVote, Long
             join r.hero h
             join r.relatedHero rh
             group by r.id, h.slug, rh.slug, r.type
-            order by count(case when v.value = gg.overlab.backend.hero.relation.feedback.RelationVoteValue.DOWN then 1 end) desc, r.id
+            order by count(case when v.value = gg.overlab.backend.hero.relation.feedback.RelationVoteValue.DOWN
+                                then 1 end) desc, r.id
             """)
     List<RelationVoteSummaryDto> summarize(Pageable pageable);
 

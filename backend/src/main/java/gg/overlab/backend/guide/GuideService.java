@@ -37,7 +37,8 @@ public class GuideService {
     public List<GuideDto> findPublished(String heroSlug, String mapSlug) {
         List<Guide> guides;
         if (heroSlug != null && mapSlug != null) {
-            guides = guideRepository.findAllByHeroSlugAndMapSlugAndPublishedTrueOrderBySortOrderAscIdAsc(heroSlug, mapSlug);
+            guides = guideRepository
+                    .findAllByHeroSlugAndMapSlugAndPublishedTrueOrderBySortOrderAscIdAsc(heroSlug, mapSlug);
         } else if (heroSlug != null) {
             guides = guideRepository.findAllByHeroSlugAndPublishedTrueOrderBySortOrderAscIdAsc(heroSlug);
         } else if (mapSlug != null) {

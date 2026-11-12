@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsComparisonProvider {
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final HeroRoleChangeRepository roleChangeRepository;
     private final StatsMapper statsMapper;
@@ -49,9 +50,11 @@ public class StatsComparisonProvider {
 
     private List<HeroStat> loadSnapshot(StatsFilter filter, Instant capturedAt) {
         return filter.isAllMaps()
-                ? heroStatRepository.findSnapshotForAllMaps(filter.queue(), filter.platform(), filter.region(),
+                ? heroStatRepository.findSnapshotForAllMaps(filter.queue(), currentGameFormat.get(),
+                          filter.platform(), filter.region(),
                 filter.tier(), capturedAt)
-                : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), filter.platform(),
+                : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), currentGameFormat.get(),
+                          filter.platform(),
                 filter.region(), filter.tier(), capturedAt);
     }
 }

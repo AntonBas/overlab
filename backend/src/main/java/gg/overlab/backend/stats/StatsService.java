@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsService {
 
+    private final CurrentGameFormat currentGameFormat;
     private final StatsSnapshotProvider snapshotProvider;
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
@@ -46,7 +47,9 @@ public class StatsService {
                                          Region region) {
         HeroDto hero = heroService.getBySlug(heroSlug);
         RankTier effectiveTier = queue == GameQueue.QUICK_PLAY ? RankTier.ALL : tier;
-        List<HeroStat> stats = heroStatRepository.findLatestForHero(heroSlug, queue, platform, region, effectiveTier);
+        List<HeroStat> stats = heroStatRepository.findLatestForHero(heroSlug, queue, currentGameFormat.get(),
+                platform, region,
+                effectiveTier);
         if (stats.isEmpty()) {
             throw new EntityNotFoundException("Statistics", heroSlug);
         }

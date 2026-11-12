@@ -58,7 +58,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/me/**").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feedback", "/api/business").permitAll()
-                        .requestMatchers(PublicApiPaths.ADMIN_PREFIX + "**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .requestMatchers(PublicApiPaths.ADMIN_PREFIX + "**", "/v3/api-docs/**", "/swagger-ui/**",
+                                "/swagger-ui.html")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated())

@@ -45,7 +45,8 @@ public class ApiErrorHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception,
                                                         HttpServletRequest request) {
-        log.warn("Data integrity violation on {}: {}", request.getRequestURI(), exception.getMostSpecificCause().getMessage());
+        log.warn("Data integrity violation on {}: {}", request.getRequestURI(),
+                exception.getMostSpecificCause().getMessage());
         return build(HttpStatus.CONFLICT, "Request conflicts with existing data", request, List.of());
     }
 

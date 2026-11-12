@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 class StatsSnapshotProviderTest {
 
     private final HeroStatRepository repository = mock(HeroStatRepository.class);
-    private final StatsSnapshotProvider provider = new StatsSnapshotProvider(repository, StatsFixtures.statsMapper(),
+    private final StatsSnapshotProvider provider = new StatsSnapshotProvider(StatsFixtures.fiveVsFive(), repository, StatsFixtures.statsMapper(),
             StatsFixtures.noChecks());
 
     private final Hero ana = StatsFixtures.hero(1, "ana", "Ana", HeroRole.SUPPORT);
@@ -27,7 +27,7 @@ class StatsSnapshotProviderTest {
     @Test
     void allMapsSnapshotHasNoDeltas() {
         StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE);
-        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(ana, null, "47.10", "23.10", "11.90")));
 
         StatsSnapshotDto snapshot = provider.getSnapshot(filter);
@@ -43,9 +43,9 @@ class StatsSnapshotProviderTest {
     @Test
     void mapSnapshotComputesDeltaAgainstAllMaps() {
         StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "rialto", Platform.PC, Region.EUROPE);
-        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(ana, StatsFixtures.map("rialto", "Rialto"), "48.00", "26.20", "11.90")));
-        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(ana, null, "47.10", "23.10", "11.90")));
 
         HeroStatDto hero = provider.getSnapshot(filter).heroes().get(0);
@@ -58,9 +58,9 @@ class StatsSnapshotProviderTest {
     @Test
     void heroMissingFromBaselineHasNoDelta() {
         StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, "rialto", Platform.PC, Region.EUROPE);
-        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(genji, StatsFixtures.map("rialto", "Rialto"), "55.10", "14.10", "10.30")));
-        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForAllMaps(GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(ana, null, "47.10", "23.10", "11.90")));
 
         HeroStatDto hero = provider.getSnapshot(filter).heroes().get(0);
@@ -71,7 +71,7 @@ class StatsSnapshotProviderTest {
     @Test
     void quickPlayBanRateStaysNull() {
         StatsFilter filter = StatsFilter.of(GameQueue.QUICK_PLAY, RankTier.GOLD, "all-maps", Platform.PC, Region.EUROPE);
-        when(repository.findLatestForAllMaps(GameQueue.QUICK_PLAY, Platform.PC, Region.EUROPE, RankTier.ALL))
+        when(repository.findLatestForAllMaps(GameQueue.QUICK_PLAY, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.ALL))
                 .thenReturn(List.of(StatsFixtures.stat(ana, null, "46.60", "19.10", null)));
 
         HeroStatDto hero = provider.getSnapshot(filter).heroes().get(0);
@@ -82,7 +82,7 @@ class StatsSnapshotProviderTest {
     @Test
     void missingSnapshotThrowsNotFound() {
         StatsFilter filter = StatsFilter.of(GameQueue.COMPETITIVE, RankTier.GOLD, "rialto", Platform.PC, Region.EUROPE);
-        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, Platform.PC, Region.EUROPE, RankTier.GOLD))
+        when(repository.findLatestForMap("rialto", GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE, RankTier.GOLD))
                 .thenReturn(List.of());
 
         assertThatThrownBy(() -> provider.getSnapshot(filter)).isInstanceOf(EntityNotFoundException.class);

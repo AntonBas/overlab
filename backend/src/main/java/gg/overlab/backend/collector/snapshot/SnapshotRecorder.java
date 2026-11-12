@@ -50,7 +50,7 @@ public class SnapshotRecorder {
                           List<BlizzardRatesResponse.HeroRate> rates, String etag) {
         String signature = signatureOf(queue, rates);
         SnapshotCheck check = find(queue, platform, region, tier, mapSlug)
-                .orElseGet(() -> newCheck(queue, platform, region, tier, mapSlug, signature, capturedAt));
+                .orElseGet(() -> newCheck(queue, gameFormat, platform, region, tier, mapSlug, capturedAt));
         boolean unchanged = check.getSignature().equals(signature);
         check.setLastCheckedAt(capturedAt);
         check.setEtag(etag);
@@ -71,11 +71,11 @@ public class SnapshotRecorder {
                 mapSlug);
     }
 
-    private SnapshotCheck newCheck(GameQueue queue, Platform platform, Region region, RankTier tier,
-                                   String mapSlug, String incomingSignature, Instant capturedAt) {
+    private SnapshotCheck newCheck(GameQueue queue, GameFormat gameFormat, Platform platform, Region region,
+                                   RankTier tier, String mapSlug, Instant capturedAt) {
         List<HeroStat> latest = StatsFilter.ALL_MAPS.equals(mapSlug)
-                ? heroStatRepository.findLatestForAllMaps(queue, platform, region, tier)
-                : heroStatRepository.findLatestForMap(mapSlug, queue, platform, region, tier);
+                ? heroStatRepository.findLatestForAllMaps(queue, gameFormat, platform, region, tier)
+                : heroStatRepository.findLatestForMap(mapSlug, queue, gameFormat, platform, region, tier);
         SnapshotCheck check = new SnapshotCheck();
         check.setQueue(queue);
         check.setPlatform(platform);

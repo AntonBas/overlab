@@ -15,7 +15,8 @@ public class BlizzardHeroPageClient {
 
     private final RestClient restClient;
 
-    public BlizzardHeroPageClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
+    public BlizzardHeroPageClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder,
+            CollectorProperties properties) {
         this.restClient = builder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.USER_AGENT, properties.userAgent())

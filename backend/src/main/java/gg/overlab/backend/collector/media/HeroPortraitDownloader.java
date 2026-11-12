@@ -16,7 +16,8 @@ public class HeroPortraitDownloader {
     private final boolean enabled;
 
     public HeroPortraitDownloader(ImageDownloader imageDownloader, MediaStorage mediaStorage,
-                           WebpConverter webpConverter, @Value("${collector.download-portraits:false}") boolean enabled) {
+                                  WebpConverter webpConverter,
+                                  @Value("${collector.download-portraits:false}") boolean enabled) {
         this.imageDownloader = imageDownloader;
         this.mediaStorage = mediaStorage;
         this.webpConverter = webpConverter;

@@ -52,6 +52,7 @@ public class OAuthUserService {
 
     private String displayNameFor(String name, String email) {
         String candidate = name == null || name.isBlank() ? email.substring(0, email.indexOf('@')) : name.trim();
-        return candidate.length() > DISPLAY_NAME_MAX_LENGTH ? candidate.substring(0, DISPLAY_NAME_MAX_LENGTH) : candidate;
+        return candidate.length() > DISPLAY_NAME_MAX_LENGTH
+                ? candidate.substring(0, DISPLAY_NAME_MAX_LENGTH) : candidate;
     }
 }

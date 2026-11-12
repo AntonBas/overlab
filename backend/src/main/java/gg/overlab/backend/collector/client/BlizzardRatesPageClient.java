@@ -15,7 +15,8 @@ public class BlizzardRatesPageClient {
 
     private final RestClient restClient;
 
-    public BlizzardRatesPageClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
+    public BlizzardRatesPageClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder,
+            CollectorProperties properties) {
         this.restClient = builder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.USER_AGENT, properties.userAgent())

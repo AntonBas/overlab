@@ -131,8 +131,8 @@ class AuditIntegrationTest {
                         .content(PERK_BODY.formatted("RECOMMENDED").replace("audit-hero", "missing-hero")))
                 .andExpect(status().isNotFound());
 
-        Thread.sleep(500);
-        assertThat(entriesOfAdmin()).isEmpty();
+        await().during(Duration.ofMillis(500)).atMost(Duration.ofSeconds(2))
+                .untilAsserted(() -> assertThat(entriesOfAdmin()).isEmpty());
     }
 
     private List<AuditLog> entriesOfAdmin() {

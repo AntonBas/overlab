@@ -124,8 +124,9 @@ public class SeoPageResolver {
     }
 
     String plain(String text) {
-        String readable = WHITESPACE.matcher(LINK_MARKUP.matcher(text == null ? "" : text)
-                .replaceAll(match -> Matcher.quoteReplacement(match.group(1).replace('-', ' ')))).replaceAll(" ").trim();
+        String withoutLinks = LINK_MARKUP.matcher(text == null ? "" : text)
+                .replaceAll(match -> Matcher.quoteReplacement(match.group(1).replace('-', ' ')));
+        String readable = WHITESPACE.matcher(withoutLinks).replaceAll(" ").trim();
         return readable.length() > MAX_DESCRIPTION_LENGTH
                 ? readable.substring(0, MAX_DESCRIPTION_LENGTH - 1).stripTrailing() + "…" : readable;
     }

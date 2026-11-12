@@ -13,7 +13,8 @@ public class PatchNotesClient {
 
     private final RestClient restClient;
 
-    public PatchNotesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
+    public PatchNotesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder,
+            CollectorProperties properties) {
         this.restClient = builder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.USER_AGENT, properties.userAgent())

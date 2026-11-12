@@ -41,7 +41,8 @@ public class BlizzardRatesClient {
     private final Duration pause;
     private volatile int competitiveQueue = COMPETITIVE_QUEUES.get(0);
 
-    public BlizzardRatesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
+    public BlizzardRatesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder,
+            CollectorProperties properties) {
         this.retry = properties.retry();
         this.pause = properties.pause();
         this.restClient = builder
