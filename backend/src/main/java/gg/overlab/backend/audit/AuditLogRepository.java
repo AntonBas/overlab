@@ -21,4 +21,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
     @Modifying
     @Query("delete from AuditLog a where a.entityType = :entityType and a.occurredAt < :threshold")
     int deleteByEntityTypeBefore(@Param("entityType") String entityType, @Param("threshold") Instant threshold);
+
+    @Modifying
+    @Query("update AuditLog a set a.ipAddress = null where a.ipAddress is not null and a.occurredAt < :threshold")
+    int clearIpAddressesBefore(@Param("threshold") Instant threshold);
 }

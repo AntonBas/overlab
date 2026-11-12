@@ -1,5 +1,6 @@
 package gg.overlab.backend.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,5 +61,21 @@ class LoginAttemptLimiterTest {
         limiter.reset("ana@overlab.gg");
 
         verify(counter, org.mockito.Mockito.times(2)).reset(org.mockito.ArgumentMatchers.argThat(key -> key.startsWith("overlab:login-failures:")));
+    }
+
+    @Test
+    void mailCooldownIsPerAddressSoAStrangerCannotSilenceTheOwner() {
+        when(counter.increment(anyString(), any())).thenReturn(1L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isFalse();
+    }
+
+    @Test
+    void mailIsThrottledWhenTheSameAddressRepeatsOrTheHourlyCapIsReached() {
+        when(counter.increment(anyString(), any())).thenReturn(2L);
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+
+        when(counter.increment(anyString(), any())).thenReturn(11L);
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
     }
 }

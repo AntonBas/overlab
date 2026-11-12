@@ -2,6 +2,7 @@ package gg.overlab.backend.collector.media;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -34,5 +35,10 @@ class SvgValidatorTest {
         ""})
     void rejectsAnythingThatCouldExecuteOrLoadExternalContent(String svg) {
         assertThat(SvgValidator.isSafe(svg)).isFalse();
+    }
+
+    @Test
+    void rejectsCssEscapesThatCouldHideAnExternalUrl() {
+        assertThat(SvgValidator.isSafe("<svg><style>.a{fill:u\\72l(https://evil.example/x)}</style></svg>")).isFalse();
     }
 }

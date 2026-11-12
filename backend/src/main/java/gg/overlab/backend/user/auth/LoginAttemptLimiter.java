@@ -26,6 +26,8 @@ public class LoginAttemptLimiter {
     private static final Duration WINDOW = Duration.ofMinutes(15);
     private static final String KEY_PREFIX = "overlab:login-failures:";
     private static final Duration MAIL_COOLDOWN = Duration.ofMinutes(1);
+    private static final Duration MAIL_HOURLY_WINDOW = Duration.ofHours(1);
+    private static final int MAX_MAILS_PER_EMAIL_PER_HOUR = 10;
     private static final String MAIL_KEY_PREFIX = "overlab:mail-cooldown:";
     private static final String UNKNOWN_ADDRESS = "unknown";
 
@@ -44,7 +46,12 @@ public class LoginAttemptLimiter {
     }
 
     public boolean isMailThrottled(String purpose, String normalizedEmail) {
-        return counter.increment(MAIL_KEY_PREFIX + purpose + ":" + hash(normalizedEmail), MAIL_COOLDOWN) > 1;
+        boolean addressCooldown = counter.increment(
+                MAIL_KEY_PREFIX + purpose + ":" + hash(normalizedEmail + "|" + clientAddress()), MAIL_COOLDOWN) > 1;
+        boolean emailHourlyCapReached = counter.increment(
+                MAIL_KEY_PREFIX + purpose + ":hourly:" + hash(normalizedEmail), MAIL_HOURLY_WINDOW)
+                > MAX_MAILS_PER_EMAIL_PER_HOUR;
+        return addressCooldown || emailHourlyCapReached;
     }
 
     public void reset(String normalizedEmail) {

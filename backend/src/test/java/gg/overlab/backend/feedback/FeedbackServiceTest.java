@@ -167,6 +167,19 @@ class FeedbackServiceTest {
     }
 
     @Test
+    void adminListHandlesAnonymousMessagesWithoutAnyAccountAuthor() {
+        SiteFeedback anonymous = new SiteFeedback();
+        anonymous.setType(FeedbackType.TYPO);
+        anonymous.setMessage("Typo on the page");
+        when(repository.findByStatusOrderByCreatedAtDesc(eq(FeedbackStatus.NEW), any()))
+                .thenReturn(List.of(anonymous));
+
+        List<FeedbackAdminDto> result = service.findForAdmin(FeedbackStatus.NEW);
+
+        assertThat(result).extracting(FeedbackAdminDto::authorName).containsExactly((String) null);
+    }
+
+    @Test
     void adminListShowsTheContactNameOrTheAccountName() {
         SiteFeedback business = new SiteFeedback();
         business.setType(FeedbackType.BUSINESS);

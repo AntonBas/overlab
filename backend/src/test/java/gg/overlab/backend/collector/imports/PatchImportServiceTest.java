@@ -68,6 +68,33 @@ class PatchImportServiceTest {
     }
 
     @Test
+    void secondPatchOfTheSameDayGetsTheNextVersionAndTheStoredOneIsNotDuplicated() {
+        String page = """
+                <html><body>
+                <div class="PatchNotes-patch">
+                  <div class="PatchNotes-date">October 6, 2026</div>
+                  <div class="PatchNotes-section PatchNotes-section-hero_update">
+                    <h4 class="PatchNotes-sectionTitle">Hotfix</h4></div>
+                </div>
+                <div class="PatchNotes-patch">
+                  <div class="PatchNotes-date">October 6, 2026</div>
+                  <div class="PatchNotes-section PatchNotes-section-hero_update">
+                    <h4 class="PatchNotes-sectionTitle">Hero Updates</h4></div>
+                </div>
+                </body></html>
+                """;
+        when(client.fetch()).thenReturn(page);
+        when(patchRepository.countByReleasedAt(Instant.parse("2026-10-06T00:00:00Z"))).thenReturn(1L);
+
+        int created = service().importNew();
+
+        ArgumentCaptor<Patch> saved = ArgumentCaptor.forClass(Patch.class);
+        verify(patchRepository, times(1)).save(saved.capture());
+        assertThat(created).isEqualTo(1);
+        assertThat(saved.getValue().getVersion()).isEqualTo("2026-10-06-2");
+    }
+
+    @Test
     void savesNothingWhenNoPatchTouchesHeroesOrMaps() {
         when(client.fetch()).thenReturn("""
                 <div class="PatchNotes-patch"><div class="PatchNotes-date">October 20, 2026</div>

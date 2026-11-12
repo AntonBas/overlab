@@ -23,5 +23,10 @@ public class AuditRetentionJob {
         if (deleted > 0) {
             log.info("Deleted {} user audit entries older than {}", deleted, properties.userEventRetention());
         }
+        int cleared = repository.clearIpAddressesBefore(Instant.now().minus(properties.userEventRetention()));
+        if (cleared > 0) {
+            log.info("Cleared the IP address of {} audit entries older than {}", cleared,
+                    properties.userEventRetention());
+        }
     }
 }

@@ -16,7 +16,7 @@ final class SvgValidator {
             "mask", "lineargradient", "radialgradient", "stop", "title", "desc", "style");
     private static final Set<String> REFERENCE_ATTRIBUTES = Set.of("href", "xlink:href");
     private static final Pattern UNSAFE_STYLE = Pattern.compile(
-            "@import|javascript:|expression\\(|behavior:|url\\(\\s*['\"]?(?!#)", Pattern.CASE_INSENSITIVE);
+            "@import|javascript:|expression\\(|behavior:|\\\\|url\\(\\s*['\"]?(?!#)", Pattern.CASE_INSENSITIVE);
 
     private SvgValidator() {
     }

@@ -21,4 +21,8 @@ public interface CollectorRunRepository extends JpaRepository<CollectorRun, Long
             + "where run.status = :running")
     int failRunningRuns(@Param("running") CollectorRunStatus running, @Param("failed") CollectorRunStatus failed,
                         @Param("now") Instant now, @Param("summary") String summary);
+
+    @Modifying
+    @Query("delete from CollectorRun run where run.status <> :running and run.startedAt < :threshold")
+    int deleteFinishedBefore(@Param("running") CollectorRunStatus running, @Param("threshold") Instant threshold);
 }

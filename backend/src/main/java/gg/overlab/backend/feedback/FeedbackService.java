@@ -125,9 +125,13 @@ public class FeedbackService {
         }
     }
 
+    private String authorName(Long userId, Map<Long, String> names) {
+        return userId == null ? null : names.get(userId);
+    }
+
     private FeedbackAdminDto toAdminDto(SiteFeedback feedback, Map<Long, String> names) {
         String author = feedback.getContactName() != null ? feedback.getContactName()
-                : names.get(feedback.getUserId());
+                : authorName(feedback.getUserId(), names);
         return new FeedbackAdminDto(feedback.getId(), feedback.getType(), feedback.getMessage(),
                 feedback.getPagePath(), author, feedback.getContactEmail(), feedback.getStatus(),
                 feedback.getCreatedAt(), feedback.getResolvedAt());

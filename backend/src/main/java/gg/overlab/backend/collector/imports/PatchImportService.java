@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -52,10 +53,19 @@ public class PatchImportService {
 
     private int saveNew(List<ParsedPatch> parsed) {
         List<Instant> createdReleases = new ArrayList<>();
-        Map<LocalDate, Integer> entriesPerDate = new HashMap<>();
+        Map<LocalDate, Long> totalPerDate = parsed.stream()
+                .collect(Collectors.groupingBy(ParsedPatch::date, Collectors.counting()));
+        Map<LocalDate, Integer> seenPerDate = new HashMap<>();
         for (ParsedPatch entry : parsed) {
-            int sameDayIndex = entriesPerDate.merge(entry.date(), 1, Integer::sum);
-            String version = sameDayIndex == 1 ? entry.date().toString() : entry.date() + "-" + sameDayIndex;
+            int pagePosition = seenPerDate.merge(entry.date(), 1, Integer::sum) - 1;
+            Instant dayStart = entry.date().atStartOfDay(ZoneOffset.UTC).toInstant();
+            long newOnThisDay = totalPerDate.get(entry.date()) - patchRepository.countByReleasedAt(dayStart);
+            if (pagePosition >= newOnThisDay) {
+                continue;
+            }
+            long chronologicalIndex = totalPerDate.get(entry.date()) - pagePosition;
+            String version = chronologicalIndex == 1 ? entry.date().toString()
+                    : entry.date() + "-" + chronologicalIndex;
             if (patchRepository.existsByVersionIgnoreCase(version)) {
                 continue;
             }
@@ -63,11 +73,10 @@ public class PatchImportService {
             patch.setVersion(version);
             patch.setSlug(slugService.generateUnique(version, patchRepository::existsBySlug));
             patch.setTitle(entry.title());
-            Instant releasedAt = entry.date().atStartOfDay(ZoneOffset.UTC).toInstant();
-            patch.setReleasedAt(releasedAt);
+            patch.setReleasedAt(dayStart);
             patch.setNotes(properties.baseUrl() + PatchNotesClient.PATCH_NOTES_PATH + "#patch-" + entry.date());
             patchRepository.save(patch);
-            createdReleases.add(releasedAt);
+            createdReleases.add(dayStart);
         }
         log.info("Patch import finished: {} balance patches found, {} new", parsed.size(), createdReleases.size());
         if (!createdReleases.isEmpty()) {

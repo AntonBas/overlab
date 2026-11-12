@@ -108,4 +108,32 @@ class AdminSessionFilterTest {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,
                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
     }
+
+    @Test
+    void rejectsADisabledUserOnStateChangingRequestsOutsideThePersonalArea() throws Exception {
+        AuthenticatedUser principal = new AuthenticatedUser(3L, "user@overlab.gg", UserRole.USER);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        when(accessChecker.isActiveUser(3L)).thenReturn(false);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(new MockHttpServletRequest("POST", "/api/feedback"), response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verifyNoInteractions(chain);
+    }
+
+    @Test
+    void doesNotBlockLogoutOrRefreshForADisabledUser() throws Exception {
+        AuthenticatedUser principal = new AuthenticatedUser(3L, "user@overlab.gg", UserRole.USER);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/auth/logout");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        verifyNoInteractions(accessChecker);
+    }
 }

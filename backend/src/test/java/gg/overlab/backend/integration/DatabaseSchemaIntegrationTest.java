@@ -19,7 +19,7 @@ class DatabaseSchemaIntegrationTest {
                 "select version from flyway_schema_history where success order by installed_rank", String.class);
 
         assertThat(versions).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18",
-                "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30");
+                "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31");
     }
 
     @Test
@@ -67,5 +67,13 @@ class DatabaseSchemaIntegrationTest {
                 "select column_name from information_schema.columns where table_name = 'users'", String.class);
 
         assertThat(columns).contains("google_subject").doesNotContain("provider_id");
+    }
+
+    @Test
+    void perkPositionsAreUniquePerHeroAndSlot() {
+        Integer indexes = jdbcTemplate.queryForObject(
+                "select count(*) from pg_indexes where indexname = 'uq_perks_hero_slot_position'", Integer.class);
+
+        assertThat(indexes).isEqualTo(1);
     }
 }
