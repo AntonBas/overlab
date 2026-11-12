@@ -37,10 +37,36 @@ Flyway applies new migrations on startup.
 
 `.github/workflows/deploy.yml` runs the same update over SSH whenever the CI workflow succeeds on `main` (the exact tested commit is deployed; a red CI or a red or unfinished-in-20-minutes Security run deploys nothing), when a tag like `v1.0.0` is pushed, or by hand from the Actions tab (choose a tag or branch). Before updating, it waits up to 20 minutes for a running collector job, and it restarts Grafana when files under `docker/grafana/` changed. Nothing runs until these are set in the repository settings (Settings, Secrets and variables, Actions), under the `production` environment:
 
-- Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH` (the project folder on the server), `DEPLOY_SSH_KEY` (a private key of a user that can run Docker; use a key made only for deploys) and `DEPLOY_KNOWN_HOSTS` (the output of `ssh-keyscan <host>`)
+- Secrets: `DEPLOY_HOST`, `DEPLOY_USER` (`deploy`, see below), `DEPLOY_SSH_KEY` (a private key made only for deploys) and `DEPLOY_KNOWN_HOSTS` (the output of `ssh-keyscan <host>`)
 - Variable: `DEPLOY_URL`, for example `https://overlabgg.com`; after the update the workflow waits until `/sitemap.xml` answers
 
-The server needs the repository cloned in `DEPLOY_PATH` and a filled `.env.prod`.
+The server needs the repository cloned in `/opt/overlab` and a filled `.env.prod`.
+
+#### Restricted deploy user
+
+The deploy key can only run one script, never a shell. On the server, as `root`, copy `docker/deploy/overlab-deploy` and `docker/deploy/overlab-deploy-entry` to `/usr/local/bin/` (owner `root`, mode `755`), then:
+
+```bash
+adduser --disabled-password --gecos "" deploy
+```
+
+```bash
+install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
+```
+
+```bash
+printf 'restrict,command="/usr/local/bin/overlab-deploy-entry" %s\n' "<the public deploy key>" > /home/deploy/.ssh/authorized_keys
+```
+
+```bash
+chown deploy:deploy /home/deploy/.ssh/authorized_keys && chmod 600 /home/deploy/.ssh/authorized_keys
+```
+
+```bash
+printf 'deploy ALL=(root) NOPASSWD: /usr/local/bin/overlab-deploy\n' > /etc/sudoers.d/overlab-deploy && chmod 440 /etc/sudoers.d/overlab-deploy && visudo -cf /etc/sudoers.d/overlab-deploy
+```
+
+The workflow calls `ssh deploy@host "<ref> <sha>"`. The entry script validates the two values and runs `overlab-deploy` through `sudo`; `overlab-deploy` is owned by `root`, so the `deploy` user cannot change it, and it is not in the `docker` group.
 
 ## Monitoring
 

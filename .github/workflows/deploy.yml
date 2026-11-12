@@ -34,12 +34,11 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
           DEPLOY_URL: ${{ vars.DEPLOY_URL }}
         run: |
-          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_PATH DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_URL; do
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_URL; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is not set"
               exit 1
@@ -100,40 +99,8 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "bash -s -- '$DEPLOY_PATH' '$REF' '$SHA'" <<'REMOTE'
-          set -euo pipefail
-          path="$1"
-          ref="$2"
-          sha="$3"
-          cd "$path"
-          compose="docker compose -f docker-compose.prod.yml --env-file .env.prod"
-          db_user="$(grep -E '^DB_USER=' .env.prod | cut -d= -f2-)"
-          db_name="$(grep -E '^DB_NAME=' .env.prod | cut -d= -f2-)"
-          for attempt in $(seq 1 40); do
-            running="$($compose exec -T postgres psql -U "${db_user:-overlab}" -d "${db_name:-overlab}" -At -c "select count(*) from collector_runs where status = 'RUNNING'" < /dev/null || echo 0)"
-            if [ "$running" = "0" ]; then
-              break
-            fi
-            echo "The collector is running, waiting ($attempt/40)"
-            sleep 30
-          done
-          before="$(git rev-parse HEAD)"
-          git fetch --tags --prune origin
-          git checkout --force "$ref"
-          if [ -n "$sha" ]; then
-            git reset --hard "$sha"
-          elif git show-ref --verify --quiet "refs/remotes/origin/$ref"; then
-            git reset --hard "origin/$ref"
-          fi
-          $compose up -d --build
-          if git diff --name-only "$before" HEAD | grep -q '^docker/grafana/'; then
-            $compose restart grafana
-          fi
-          docker image prune -f
-          echo "Deployed $(git rev-parse --short HEAD)"
-          REMOTE
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "$REF $SHA"
 
       - name: Wait for the site
         env:
