@@ -22,6 +22,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/auth/resend-verification",
             "/api/feedback",
             "/api/business");
+    private static final String REFRESH_PATH = "/api/auth/refresh";
     private static final String STATS_PREFIX = "/api/stats";
     private static final Duration WINDOW = Duration.ofMinutes(1);
 
@@ -59,6 +60,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         if ("POST".equals(request.getMethod()) && LIMITED_PATHS.contains(path)) {
             return new Rule(path, authProperties.rateLimitPerMinute());
+        }
+        if ("POST".equals(request.getMethod()) && REFRESH_PATH.equals(path)) {
+            return new Rule("refresh", rateLimitProperties.apiPerMinute());
         }
         if (PublicApiPaths.isPublicRead(request.getMethod(), path)) {
             if (path.startsWith(STATS_PREFIX)) {

@@ -9,7 +9,7 @@ import type {
   PerkPosition,
   PerkRecommendation,
   PerkSlot,
-} from "../../../../types/api";
+} from "../../../../types/hero";
 import { AbilityText } from "../abilities/AbilityText";
 
 const SLOT_ORDER: PerkSlot[] = ["MINOR", "MAJOR"];

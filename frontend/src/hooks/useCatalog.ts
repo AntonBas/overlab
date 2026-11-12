@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { fetchHeroes } from "../features/heroes/api/heroesApi";
-import { fetchMaps } from "../features/maps/api/mapsApi";
-import type { MapMode } from "../types/api";
+import { fetchHeroes } from "../features/heroes";
+import { fetchMaps } from "../features/maps";
+import type { MapMode } from "../types/map";
 import { useFetch } from "./useFetch";
 
 export interface MapVisual {

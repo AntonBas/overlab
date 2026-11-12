@@ -73,7 +73,7 @@ class HeroCategoryServiceTest {
     @Test
     void creatingACategorySavesItsMembers() {
         Hero zarya = hero("zarya", "Zarya", HeroRole.TANK, true);
-        when(categoryRepository.existsBySlugAndIdNot("beam", -1L)).thenReturn(false);
+        when(categoryRepository.existsBySlug("beam")).thenReturn(false);
         when(heroRepository.findAllBySlugIn(any())).thenReturn(List.of(zarya));
         when(categoryRepository.save(any(HeroCategory.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -85,7 +85,7 @@ class HeroCategoryServiceTest {
 
     @Test
     void duplicateCategorySlugIsAConflict() {
-        when(categoryRepository.existsBySlugAndIdNot("beam", -1L)).thenReturn(true);
+        when(categoryRepository.existsBySlug("beam")).thenReturn(true);
 
         assertThatThrownBy(() -> service.createCategory(new CategoryRequest("beam", "Beam", null, List.of())))
                 .isInstanceOf(ConflictException.class);
@@ -107,7 +107,7 @@ class HeroCategoryServiceTest {
         hitscan.setId(2L);
         when(heroRepository.findBySlug("pharah")).thenReturn(Optional.of(pharah));
         when(categoryRepository.findBySlug("hitscan")).thenReturn(Optional.of(hitscan));
-        when(relationRepository.existsByHeroIdAndCategoryIdAndIdNot(1L, 2L, -1L)).thenReturn(true);
+        when(relationRepository.existsByHeroIdAndCategoryId(1L, 2L)).thenReturn(true);
 
         assertThatThrownBy(() -> service.createMatchup(
                 new CategoryMatchupRequest("pharah", "hitscan", CategoryMatchupType.WEAK_AGAINST, null)))

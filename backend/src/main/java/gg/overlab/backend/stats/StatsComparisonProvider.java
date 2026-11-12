@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
 import gg.overlab.backend.stats.dto.HeroRoleChangeDto;
@@ -19,11 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsComparisonProvider {
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final HeroRoleChangeRepository roleChangeRepository;
     private final StatsMapper statsMapper;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
+    @Cacheable(value = CacheNames.STATS,
             key = "'compare:' + #filter.cacheKey() + ':' + #beforeCapturedAt + ':' + #afterCapturedAt")
     @Transactional(readOnly = true)
     public StatsComparisonDto compareCaptures(StatsFilter filter, Instant beforeCapturedAt, Instant afterCapturedAt) {
@@ -37,6 +39,7 @@ public class StatsComparisonProvider {
                         statsMapper.toRoleChangeDto(change)));
 
         List<HeroChangeDto> heroes = loadSnapshot(filter, afterCapturedAt).stream()
+                .filter(stat -> stat.getHero().isActive())
                 .filter(stat -> beforeByHero.containsKey(stat.getHero().getId()))
                 .map(stat -> statsMapper.toChangeDto(beforeByHero.get(stat.getHero().getId()), stat,
                         roleChanges.get(stat.getHero().getId())))
@@ -48,9 +51,11 @@ public class StatsComparisonProvider {
 
     private List<HeroStat> loadSnapshot(StatsFilter filter, Instant capturedAt) {
         return filter.isAllMaps()
-                ? heroStatRepository.findSnapshotForAllMaps(filter.queue(), filter.platform(), filter.region(),
+                ? heroStatRepository.findSnapshotForAllMaps(filter.queue(), currentGameFormat.get(),
+                          filter.platform(), filter.region(),
                 filter.tier(), capturedAt)
-                : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), filter.platform(),
+                : heroStatRepository.findSnapshotForMap(filter.mapSlug(), filter.queue(), currentGameFormat.get(),
+                          filter.platform(),
                 filter.region(), filter.tier(), capturedAt);
     }
 }

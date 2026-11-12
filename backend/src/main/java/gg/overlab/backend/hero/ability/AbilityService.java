@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.ability;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -26,7 +27,8 @@ public class AbilityService {
     @Cacheable(value = CacheNames.CONTENT, key = "'abilities:all'")
     @Transactional(readOnly = true)
     public List<AbilityDto> findAll() {
-        return abilityRepository.findAllByOrderByHeroNameAscSortOrderAsc().stream()
+        return abilityRepository.findAllByHeroActiveTrueOrderByHeroNameAscSortOrderAsc()
+                .stream()
                 .map(abilityMapper::toDto)
                 .toList();
     }
@@ -34,7 +36,8 @@ public class AbilityService {
     @Cacheable(value = CacheNames.CONTENT, key = "'abilities:' + #heroSlug")
     @Transactional(readOnly = true)
     public List<AbilityDto> findByHero(String heroSlug) {
-        heroRepository.findBySlug(heroSlug).orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        heroRepository.findBySlugAndActiveTrue(heroSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
         return abilityRepository.findAllByHeroSlugOrderBySortOrderAsc(heroSlug).stream()
                 .map(abilityMapper::toDto)
                 .toList();
@@ -56,7 +59,7 @@ public class AbilityService {
         AbilityAdminDto before = abilityMapper.toAdminDto(ability);
         ability.setControl(request.control());
         AbilityAdminDto after = abilityMapper.toAdminDto(ability);
-        auditService.logUpdate("HeroAbility", id, before, after);
+        auditService.logUpdate(AuditEntityType.ABILITY, id, before, after);
         return after;
     }
 }

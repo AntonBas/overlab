@@ -1,6 +1,7 @@
 package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,12 +35,16 @@ class AuthFlowIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RecordingMailSender mailSender;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         userRepository.findByEmailIgnoreCase(EMAIL).ifPresent(userRepository::delete);
+        mailSender.clear();
     }
 
     @AfterEach
@@ -50,12 +56,14 @@ class AuthFlowIntegrationTest {
     void registerVerifyLoginRefreshAndLogout() throws Exception {
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD
                         + "\",\"displayName\":\"Flow Test\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.emailVerified").value(false));
+                .andExpect(status().isAccepted());
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> assertThat(mailSender.sent())
+                .singleElement()
+                .satisfies(message -> assertThat(message.getSubject()).isEqualTo("Confirm your Overlab email")));
 
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL.toUpperCase() + "\",\"password\":\""
                         + PASSWORD + "\",\"displayName\":\"Flow Test\"}"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isAccepted());
 
         mockMvc.perform(json(post("/api/auth/login"), credentials())).andExpect(status().isForbidden());
 
@@ -84,16 +92,16 @@ class AuthFlowIntegrationTest {
         Cookie newRefresh = refreshed.getResponse().getCookie("refresh_token");
         assertThat(newRefresh.getValue()).isNotEqualTo(refresh.getValue());
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(refresh)).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/auth/refresh").cookie(refresh)).andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/logout").cookie(newRefresh)).andExpect(status().isNoContent());
-        mockMvc.perform(post("/api/auth/refresh").cookie(newRefresh)).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/auth/refresh").cookie(newRefresh)).andExpect(status().isUnauthorized());
     }
 
     @Test
     void wrongPasswordAndUnknownUserGetTheSameAnswer() throws Exception {
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD
-                + "\",\"displayName\":\"Flow Test\"}")).andExpect(status().isCreated());
+                + "\",\"displayName\":\"Flow Test\"}")).andExpect(status().isAccepted());
         User user = userRepository.findByEmailIgnoreCase(EMAIL).orElseThrow();
         user.setEmailVerified(true);
         userRepository.saveAndFlush(user);

@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HeroAbilityRepository extends JpaRepository<HeroAbility, Long> {
 
-    @EntityGraph(attributePaths = "hero")
     boolean existsByHeroId(Long heroId);
 
-    List<HeroAbility> findAllByOrderByHeroNameAscSortOrderAsc();
+    @EntityGraph(attributePaths = "hero")
+    List<HeroAbility> findAllByHeroActiveTrueOrderByHeroNameAscSortOrderAsc();
 
     @EntityGraph(attributePaths = "hero")
     List<HeroAbility> findAllByHeroSlugOrderBySortOrderAsc(String heroSlug);

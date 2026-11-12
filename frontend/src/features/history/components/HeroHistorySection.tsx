@@ -6,11 +6,11 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
-import type { GameQueue, Region } from "../../../types/api";
+import type { GameQueue, Region } from "../../../types/common";
 import { REGION_LABELS, formatDateTime } from "../../../utils/format";
-import { fetchPatches } from "../../patches/api/patchesApi";
-import { fetchHeroHistory } from "../../stats/api/statsApi";
-import { DataFreshness } from "../../stats/components/DataFreshness";
+import { fetchPatches } from "../../patches";
+import { fetchHeroHistory } from "../../stats";
+import { DataFreshness } from "../../stats";
 import {
   HISTORY_PERIODS,
   periodRange,

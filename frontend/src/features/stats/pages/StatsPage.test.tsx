@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { snapshot } from "../../../test/fixtures";
+import { snapshot } from "../../../test/fixtures/stats";
 import { renderWithRouter } from "../../../test/render";
 import type { RequestFailure } from "../../../services/api";
 

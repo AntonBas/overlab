@@ -1,5 +1,6 @@
 package gg.overlab.backend.common;
 
+import gg.overlab.backend.exception.core.ConflictException;
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
@@ -36,14 +37,31 @@ public class SlugService {
     }
 
     public String generateUnique(String text, Predicate<String> isTaken) {
+        return generateUnique(text, Integer.MAX_VALUE, isTaken);
+    }
+
+    public String generateUnique(String text, int maxLength, Predicate<String> isTaken) {
         String base = generate(text);
-        String candidate = base;
+        String candidate = fit(base, maxLength, "");
         int counter = 1;
         while (isTaken.test(candidate)) {
-            candidate = base + "-" + counter;
+            candidate = fit(base, maxLength, "-" + counter);
             counter++;
         }
         return candidate;
+    }
+
+    private String fit(String base, int maxLength, String suffix) {
+        int available = Math.max(1, maxLength - suffix.length());
+        String trimmed = base.length() > available ? base.substring(0, available).replaceAll("-+$", "") : base;
+        return (trimmed.isEmpty() ? FALLBACK_SLUG : trimmed) + suffix;
+    }
+
+    public String requireFree(String slug, Predicate<String> isTaken) {
+        if (isTaken.test(slug)) {
+            throw new ConflictException("Slug is already used: " + slug);
+        }
+        return slug;
     }
 
     private String transliterate(String text) {

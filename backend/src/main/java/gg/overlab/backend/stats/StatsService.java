@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.hero.HeroService;
@@ -22,11 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsService {
 
+    private final CurrentGameFormat currentGameFormat;
     private final StatsSnapshotProvider snapshotProvider;
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final StatsMapper statsMapper;
-    private final SnapshotChecks snapshotChecks;
+    private final SnapshotCheckService snapshotCheckService;
 
     public StatsSnapshotDto getStats(StatsFilter filter, HeroRole role, StatsSort sort, boolean descending) {
         StatsSnapshotDto snapshot = snapshotProvider.getSnapshot(filter);
@@ -38,20 +40,22 @@ public class StatsService {
                 snapshot.platform(), snapshot.region(), heroes);
     }
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
+    @Cacheable(value = CacheNames.STATS,
             key = "'hero:' + #heroSlug + ':' + #queue + ':' + #tier + ':' + #platform + ':' + #region")
     @Transactional(readOnly = true)
     public HeroMapStatsDto getHeroByMaps(String heroSlug, GameQueue queue, RankTier tier, Platform platform,
                                          Region region) {
         HeroDto hero = heroService.getBySlug(heroSlug);
         RankTier effectiveTier = queue == GameQueue.QUICK_PLAY ? RankTier.ALL : tier;
-        List<HeroStat> stats = heroStatRepository.findLatestForHero(heroSlug, queue, platform, region, effectiveTier);
+        List<HeroStat> stats = heroStatRepository.findLatestForHero(heroSlug, queue, currentGameFormat.get(),
+                platform, region,
+                effectiveTier);
         if (stats.isEmpty()) {
             throw new EntityNotFoundException("Statistics", heroSlug);
         }
 
         HeroStat overallStat = stats.stream().filter(stat -> stat.getMap() == null).findFirst().orElse(null);
-        Map<String, Instant> checkedAt = snapshotChecks.lastCheckedByMap(queue, platform, region, effectiveTier);
+        Map<String, Instant> checkedAt = snapshotCheckService.lastCheckedByMap(queue, platform, region, effectiveTier);
         HeroMapStatDto overall = overallStat == null
                 ? null
                 : checkedAt(statsMapper.toMapDto(overallStat, null), StatsFilter.ALL_MAPS, checkedAt);

@@ -15,6 +15,8 @@ collector:
   startup-job: ${COLLECTOR_STARTUP_JOB:}
   download-portraits: ${COLLECTOR_DOWNLOAD_PORTRAITS:false}
   import-perks: ${COLLECTOR_IMPORT_PERKS:false}
+  images:
+    allowed-hosts: ${COLLECTOR_IMAGE_HOSTS:blz-contentstack.com,d15f34w2p8l1cc.cloudfront.net}
   patch-import:
     enabled: true
     cron: "0 45 3 * * *"

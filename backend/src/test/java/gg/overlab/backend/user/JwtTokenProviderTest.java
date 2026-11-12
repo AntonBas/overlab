@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.AuthenticatedUser;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
 import java.time.Duration;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

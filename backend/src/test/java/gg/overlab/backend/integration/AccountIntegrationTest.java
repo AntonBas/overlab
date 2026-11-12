@@ -11,14 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
-import java.time.Duration;
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,23 +119,25 @@ class AccountIntegrationTest {
     }
 
     @Test
-    void loginIsLockedAfterRepeatedFailures() throws Exception {
-        String body = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+    void loginIsLockedForAnAddressAfterRepeatedFailuresButNotForTheOwner() throws Exception {
+        String wrong = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+        String correct = "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}";
         for (int attempt = 0; attempt < 10; attempt++) {
-            String address = "10.9.8." + (attempt + 1);
-            mockMvc.perform(json(post("/api/auth/login"), body).with(request -> {
-                request.setRemoteAddr(address);
-                return request;
-            })).andExpect(status().isUnauthorized());
+            mockMvc.perform(json(post("/api/auth/login"), wrong).with(fromAddress("10.9.8.1")))
+                    .andExpect(status().isUnauthorized());
         }
 
-        mockMvc.perform(json(post("/api/auth/login"),
-                        "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}")
-                        .with(request -> {
-                            request.setRemoteAddr("10.9.9.9");
-                            return request;
-                        }))
+        mockMvc.perform(json(post("/api/auth/login"), correct).with(fromAddress("10.9.8.1")))
                 .andExpect(status().isTooManyRequests());
+        mockMvc.perform(json(post("/api/auth/login"), correct).with(fromAddress("10.9.9.9")))
+                .andExpect(status().isOk());
+    }
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor fromAddress(String address) {
+        return request -> {
+            request.setRemoteAddr(address);
+            return request;
+        };
     }
 
     @Test
@@ -171,7 +173,8 @@ class AccountIntegrationTest {
         mockMvc.perform(json(post("/api/me/email"),
                         "{\"newEmail\":\"" + OTHER_EMAIL + "\",\"currentPassword\":\"" + PASSWORD + "\"}")
                         .cookie(userCookie))
-                .andExpect(status().isConflict());
+                .andExpect(status().isNoContent());
+        assertThat(userRepository.findById(user.getId()).orElseThrow().getPendingEmail()).isNull();
 
         mockMvc.perform(json(post("/api/me/email"),
                         "{\"newEmail\":\"Account-New@overlab.test\",\"currentPassword\":\"" + PASSWORD + "\"}")
@@ -326,7 +329,7 @@ class AccountIntegrationTest {
         if (provider == AuthProvider.LOCAL) {
             account.setPasswordHash(passwordEncoder.encode(PASSWORD));
         } else {
-            account.setProviderId("google-" + email);
+            account.setGoogleSubject("google-" + email);
         }
         return userRepository.saveAndFlush(account);
     }

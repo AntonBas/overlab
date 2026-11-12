@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import type { GameQueue } from "../../../types/api";
+import type { GameQueue } from "../../../types/common";
 
 export function useHeroQueue() {
   const [searchParams, setSearchParams] = useSearchParams();

@@ -1,4 +1,4 @@
-import type { Patch } from "../../../types/api";
+import type { Patch } from "../../../types/patch";
 import { DATE_LOCALE } from "../../../utils/format";
 import type { ChartMarker } from "../components/LineChart";
 

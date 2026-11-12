@@ -2,9 +2,9 @@ package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gg.overlab.backend.collector.AbilityImportWriter;
-import gg.overlab.backend.collector.ParsedAbility;
-import gg.overlab.backend.collector.PerkImportWriter;
+import gg.overlab.backend.collector.imports.AbilityImportWriter;
+import gg.overlab.backend.collector.imports.ImportCounts;
+import gg.overlab.backend.collector.parser.ParsedAbility;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
@@ -46,7 +46,7 @@ class AbilityImportWriterIntegrationTest {
         writer.write("ability-test", List.of(parsed("old-gun", "Old Gun", 0), parsed("dash", "Dash", 1)),
                 url -> Optional.empty());
 
-        PerkImportWriter.Counts counts = writer.write("ability-test",
+        ImportCounts counts = writer.write("ability-test",
                 List.of(parsed("dash", "Dash", 0), parsed("new-gun", "New Gun", 1)), url -> Optional.empty());
 
         assertThat(counts.removed()).isEqualTo(1);
@@ -70,7 +70,7 @@ class AbilityImportWriterIntegrationTest {
     void removesNothingWhenThePageYieldedNoAbilities() {
         writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
 
-        PerkImportWriter.Counts counts = writer.write("ability-test", List.of(), url -> Optional.empty());
+        ImportCounts counts = writer.write("ability-test", List.of(), url -> Optional.empty());
 
         assertThat(counts.removed()).isZero();
         assertThat(abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test")).hasSize(1);
@@ -78,5 +78,41 @@ class AbilityImportWriterIntegrationTest {
 
     private ParsedAbility parsed(String slug, String name, int sortOrder) {
         return new ParsedAbility(slug, name, "Text of " + name, null, sortOrder);
+    }
+
+    @Test
+    void storesTheIconOfANewAbilityAndSkipsTheDownloadWhenOneExists() {
+        byte[] png = {(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 5, 5, 5};
+        ParsedAbility withIcon = new ParsedAbility("dash", "Dash", "Text", "https://cdn.example/dash.png", 0);
+
+        writer.write("ability-test", List.of(withIcon), url -> Optional.of(png));
+        HeroAbility stored = abilityRepository.findByHeroIdAndSlug(hero.getId(), "dash").orElseThrow();
+        assertThat(stored.getIconUrl()).startsWith("abilities/ability-" + stored.getId() + "-").endsWith(".png");
+
+        writer.write("ability-test", List.of(withIcon), url -> {
+            throw new AssertionError("The icon must not be downloaded again");
+        });
+    }
+
+    @Test
+    void countsAnAbilityWhoseTextChangedAsUpdated() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+
+        ImportCounts counts = writer.write("ability-test",
+                List.of(new ParsedAbility("dash", "Dash", "New text", null, 0)), url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new ImportCounts(0, 1, 0));
+        assertThat(abilityRepository.findByHeroIdAndSlug(hero.getId(), "dash").orElseThrow().getDescription())
+                .isEqualTo("New text");
+    }
+
+    @Test
+    void anUnchangedAbilityIsNotCounted() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+
+        ImportCounts counts = writer.write("ability-test", List.of(parsed("dash", "Dash", 0)),
+                url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0, 0));
     }
 }

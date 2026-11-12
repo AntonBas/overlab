@@ -1,4 +1,4 @@
-import type { HeroRole } from "../../types/api";
+import type { HeroRole } from "../../types/hero";
 import { ROLE_DESCRIPTIONS, SUBROLE_DESCRIPTIONS } from "../../utils/roles";
 import { InfoChip } from "./InfoChip";
 import { RoleBadge } from "./RoleBadge";

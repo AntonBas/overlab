@@ -1,6 +1,7 @@
 package gg.overlab.backend.user;
 
 import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.UserRole;
 import java.time.Duration;
 
 public final class AuthFixtures {
@@ -8,6 +9,11 @@ public final class AuthFixtures {
     public static final String SECRET = "0123456789abcdef0123456789abcdef";
 
     private AuthFixtures() {
+    }
+
+    public static AuthProperties propertiesWithAdmin(String adminEmail, String adminPassword) {
+        return new AuthProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(14), Duration.ofHours(24),
+                Duration.ofHours(1), false, "noreply@overlab.gg", adminEmail, adminPassword, 10);
     }
 
     public static AuthProperties properties() {

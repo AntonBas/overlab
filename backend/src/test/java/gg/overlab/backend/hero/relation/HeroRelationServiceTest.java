@@ -22,6 +22,7 @@ import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
 import java.util.List;
 import java.util.Optional;
+import gg.overlab.backend.hero.relation.feedback.RelationVoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,8 @@ class HeroRelationServiceTest {
 
     private final HeroRelationRepository relationRepository = mock(HeroRelationRepository.class);
     private final HeroRepository heroRepository = mock(HeroRepository.class);
-    private final HeroRelationService service = new HeroRelationService(relationRepository, heroRepository,
+    private final RelationVoteRepository voteRepository = mock(RelationVoteRepository.class);
+    private final HeroRelationService service = new HeroRelationService(relationRepository, voteRepository, heroRepository,
             mock(AuditService.class), mock(MediaUrlResolver.class));
 
     private final Hero ana = hero(1, "ana", "Ana", HeroRole.SUPPORT);
@@ -39,8 +41,11 @@ class HeroRelationServiceTest {
     @BeforeEach
     void stubHeroes() {
         when(heroRepository.findBySlug("ana")).thenReturn(Optional.of(ana));
+        when(heroRepository.findBySlugAndActiveTrue("ana")).thenReturn(Optional.of(ana));
         when(heroRepository.findBySlug("genji")).thenReturn(Optional.of(genji));
+        when(heroRepository.findBySlugAndActiveTrue("genji")).thenReturn(Optional.of(genji));
         when(heroRepository.findBySlug("reinhardt")).thenReturn(Optional.of(reinhardt));
+        when(heroRepository.findBySlugAndActiveTrue("reinhardt")).thenReturn(Optional.of(reinhardt));
         when(relationRepository.save(any(HeroRelation.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -121,7 +126,7 @@ class HeroRelationServiceTest {
 
     @Test
     void rejectsDuplicateInEitherDirection() {
-        when(relationRepository.existsByHeroIdAndRelatedHeroIdAndTypeAndIdNot(2L, 1L, RelationType.SYNERGY, -1L))
+        when(relationRepository.existsByHeroIdAndRelatedHeroIdAndType(2L, 1L, RelationType.SYNERGY))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> service.create(new RelationRequest("ana", "genji", RelationType.SYNERGY, null)))

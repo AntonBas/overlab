@@ -38,7 +38,7 @@ public final class SnapshotSignature {
                 .toList());
     }
 
-    private static String plain(BigDecimal value) {
+    static String plain(BigDecimal value) {
         return value == null ? "-" : value.stripTrailingZeros().toPlainString();
     }
 }

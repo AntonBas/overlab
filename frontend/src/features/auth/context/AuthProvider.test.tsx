@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { User } from "../../../types/api";
+import type { User } from "../../../types/user";
 
 vi.mock("../api/authApi", () => ({
   fetchCurrentUser: vi.fn(),

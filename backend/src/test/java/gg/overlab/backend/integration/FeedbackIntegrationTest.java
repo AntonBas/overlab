@@ -9,13 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.feedback.FeedbackType;
 import gg.overlab.backend.feedback.SiteFeedback;
 import gg.overlab.backend.feedback.SiteFeedbackRepository;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;

@@ -6,15 +6,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.exception.api.ApiErrorHandler;
-import gg.overlab.backend.guide.GuideController;
+import gg.overlab.backend.guide.GuideAdminController;
 import gg.overlab.backend.guide.GuideService;
-import gg.overlab.backend.hero.category.HeroCategoryController;
+import gg.overlab.backend.hero.category.HeroCategoryAdminController;
 import gg.overlab.backend.hero.category.HeroCategoryService;
-import gg.overlab.backend.hero.perk.PerkController;
+import gg.overlab.backend.hero.perk.PerkAdminController;
 import gg.overlab.backend.hero.perk.PerkService;
-import gg.overlab.backend.hero.relation.HeroRelationController;
+import gg.overlab.backend.hero.relation.HeroRelationAdminController;
 import gg.overlab.backend.hero.relation.HeroRelationService;
-import gg.overlab.backend.patch.PatchController;
+import gg.overlab.backend.patch.PatchAdminController;
 import gg.overlab.backend.patch.PatchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +29,11 @@ class AdminRequestValidationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
-                        new GuideController(mock(GuideService.class)),
-                        new PerkController(mock(PerkService.class)),
-                        new HeroRelationController(mock(HeroRelationService.class)),
-                        new HeroCategoryController(mock(HeroCategoryService.class)),
-                        new PatchController(mock(PatchService.class)))
+                        new GuideAdminController(mock(GuideService.class)),
+                        new PerkAdminController(mock(PerkService.class)),
+                        new HeroRelationAdminController(mock(HeroRelationService.class)),
+                        new HeroCategoryAdminController(mock(HeroCategoryService.class)),
+                        new PatchAdminController(mock(PatchService.class)))
                 .setControllerAdvice(new ApiErrorHandler())
                 .build();
     }

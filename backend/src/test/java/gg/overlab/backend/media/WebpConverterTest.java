@@ -1,10 +1,12 @@
 package gg.overlab.backend.media;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,6 +16,10 @@ class WebpConverterTest {
 
     @TempDir
     Path directory;
+
+    private WebpConverter converterFor(String command) {
+        return new WebpConverter(command, Duration.ofSeconds(20));
+    }
 
     private String script(String webpContent) throws IOException {
         Path file = directory.resolve("fake-cwebp");
@@ -31,26 +37,36 @@ class WebpConverterTest {
 
     @Test
     void returnsTheConvertedImageWhenItIsSmaller() throws IOException {
-        WebpConverter converter = new WebpConverter(script("WEBP"));
+        WebpConverter converter = converterFor(script("WEBP"));
 
         assertThat(converter.fromPng(PNG)).hasValue("WEBP".getBytes());
     }
 
     @Test
     void keepsTheOriginalWhenTheConversionIsNotSmaller() throws IOException {
-        WebpConverter converter = new WebpConverter(script("A-WEBP-LARGER-THAN-THE-PNG"));
+        WebpConverter converter = converterFor(script("A-WEBP-LARGER-THAN-THE-PNG"));
 
         assertThat(converter.fromPng(PNG)).isEmpty();
     }
 
     @Test
     void reportsAvailabilityOfTheCommand() throws IOException {
-        assertThat(new WebpConverter(script("WEBP")).isAvailable()).isTrue();
-        assertThat(new WebpConverter("definitely-not-installed-cwebp").isAvailable()).isFalse();
+        assertThat(converterFor(script("WEBP")).isAvailable()).isTrue();
+        assertThat(converterFor("definitely-not-installed-cwebp").isAvailable()).isFalse();
     }
 
     @Test
     void returnsNothingWhenTheCommandIsMissing() {
-        assertThat(new WebpConverter("definitely-not-installed-cwebp").fromPng(PNG)).isEmpty();
+        assertThat(converterFor("definitely-not-installed-cwebp").fromPng(PNG)).isEmpty();
+    }
+
+    @Test
+    void stopsAHangingCommandAfterTheTimeout() throws IOException {
+        Path file = directory.resolve("hanging-cwebp");
+        Files.writeString(file, "#!/bin/sh\nsleep 30\n");
+        file.toFile().setExecutable(true);
+        WebpConverter converter = new WebpConverter(file.toString(), Duration.ofMillis(300));
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> assertThat(converter.fromPng(PNG)).isEmpty());
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> assertThat(converter.isAvailable()).isFalse());
     }
 }

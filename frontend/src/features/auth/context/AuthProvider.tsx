@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { User } from "../../../types/api";
+import type { User } from "../../../types/user";
 import * as authApi from "../api/authApi";
 import { AuthContext } from "./authContext";
 

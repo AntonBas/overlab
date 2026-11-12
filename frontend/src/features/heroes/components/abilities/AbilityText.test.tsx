@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { Ability } from "../../../../types/api";
+import type { Ability } from "../../../../types/hero";
 import { AbilitiesContext, abilityKey } from "../../context/abilitiesContext";
 import { AbilityText } from "./AbilityText";
 

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../../test/render";
-import type { User } from "../../../../types/api";
+import type { User } from "../../../../types/user";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 
 let currentUser: User | null = null;

@@ -5,7 +5,7 @@ import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import type { HeroChange } from "../../../types/api";
+import type { HeroChange } from "../../../types/stats";
 import { ROLE_LABELS, formatDate, formatPercent } from "../../../utils/format";
 import { sortChanges, type ChangeSort } from "../utils/changes";
 
@@ -166,10 +166,10 @@ export function ChangesTable({
                       name={change.heroName}
                       url={portraits[change.heroSlug] ?? null}
                     />
+                    <RoleBadge role={change.role} compact />
                     <Link to={`/heroes/${change.heroSlug}`}>
                       {change.heroName}
                     </Link>
-                    <RoleBadge role={change.role} compact />
                     {change.roleChange && (
                       <span
                         className="table__flag"

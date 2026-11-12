@@ -5,10 +5,10 @@ import { DeltaValue } from "../../../../components/ui/DeltaValue";
 import { ModeIcon } from "../../../../components/ui/ModeIcon";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
 import { useFetch } from "../../../../hooks/useFetch";
-import type { HeroMapStat } from "../../../../types/api";
+import type { HeroMapStat } from "../../../../types/stats";
 import { MAP_MODE_LABELS, formatPercent } from "../../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../../utils/modes";
-import { fetchMaps } from "../../../maps/api/mapsApi";
+import { fetchMaps } from "../../../maps";
 import { mapPagePath } from "../../utils/mapPagePath";
 import { mapPicks, mapsByGain } from "../../utils/mapPicks";
 

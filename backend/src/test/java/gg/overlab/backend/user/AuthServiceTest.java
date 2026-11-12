@@ -12,18 +12,18 @@ import static org.mockito.Mockito.when;
 import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.EmailNotVerifiedException;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.exception.core.TooManyRequestsException;
+import gg.overlab.backend.notification.EmailRecipient;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.auth.AuthService;
-import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.AuthTokens;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
-import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
@@ -66,9 +66,7 @@ class AuthServiceTest {
 
     @Test
     void registerCreatesUnverifiedUserAndSendsVerification() {
-        when(userRepository.existsByEmailIgnoreCase("new@overlab.gg")).thenReturn(false);
-
-        UserDto result = service.register(new RegisterRequest("  New@Overlab.gg ", "password-123", " Newbie "));
+        service.register(new RegisterRequest("  New@Overlab.gg ", "password-123", " Newbie "));
 
         ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(saved.capture());
@@ -76,18 +74,20 @@ class AuthServiceTest {
         assertThat(saved.getValue().getDisplayName()).isEqualTo("Newbie");
         assertThat(saved.getValue().getPasswordHash()).isNotEqualTo("password-123");
         assertThat(saved.getValue().getRole()).isEqualTo(UserRole.USER);
-        assertThat(result.emailVerified()).isFalse();
-        verify(emailService).sendVerification(any(User.class), eq("raw-token"));
+        assertThat(saved.getValue().isEmailVerified()).isFalse();
+        verify(emailService).sendVerification(any(EmailRecipient.class), eq("raw-token"));
         verify(auditService).logUserEvent(eq(AuditAction.CREATE), any(), eq("USER"));
     }
 
     @Test
-    void registerRejectsDuplicateEmail() {
-        when(userRepository.existsByEmailIgnoreCase("ana@overlab.gg")).thenReturn(true);
+    void registerForAnExistingEmailOnlyNotifiesTheOwner() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
 
-        assertThatThrownBy(() -> service.register(new RegisterRequest("ana@overlab.gg", "password-123", "Ana")))
-                .isInstanceOf(EmailAlreadyUsedException.class);
+        service.register(new RegisterRequest("ana@overlab.gg", "password-123", "Ana"));
+
+        verify(emailService).sendRegistrationAttemptNotice(existingUser.toEmailRecipient());
         verify(userRepository, never()).save(any());
+        verify(emailService, never()).sendVerification(any(), any());
     }
 
     @Test
@@ -101,6 +101,15 @@ class AuthServiceTest {
         assertThat(tokens.user().email()).isEqualTo("ana@overlab.gg");
         assertThat(existingUser.getLastLoginAt()).isNotNull();
         verify(auditService).logUserEvent(AuditAction.LOGIN, 5L, "USER");
+    }
+
+    @Test
+    void refreshDoesNotCountAsALogin() {
+        when(tokenService.consume("old-refresh", UserTokenType.REFRESH)).thenReturn(existingUser);
+
+        service.refresh("old-refresh");
+
+        assertThat(existingUser.getLastLoginAt()).isNull();
     }
 
     @Test
@@ -179,12 +188,22 @@ class AuthServiceTest {
     }
 
     @Test
+    void forgotPasswordIsSkippedWhileTheMailCooldownIsActive() {
+        when(loginAttemptLimiter.isMailThrottled(eq("password-reset"), eq("ana@overlab.gg"))).thenReturn(true);
+
+        service.forgotPassword("ana@overlab.gg");
+
+        verify(emailService, never()).sendPasswordReset(any(), any());
+        verify(tokenService, never()).revokeAll(any(), any());
+    }
+
+    @Test
     void forgotPasswordSendsResetTokenToLocalUser() {
         when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
 
         service.forgotPassword("ana@overlab.gg");
 
-        verify(emailService).sendPasswordReset(existingUser, "raw-token");
+        verify(emailService).sendPasswordReset(existingUser.toEmailRecipient(), "raw-token");
     }
 
     @Test
@@ -257,5 +276,41 @@ class AuthServiceTest {
         service.logout(null);
 
         verify(tokenService, never()).revoke(any(), any());
+    }
+
+    @Test
+    void resendVerificationSendsANewTokenToAnUnverifiedLocalAccount() {
+        existingUser.setEmailVerified(false);
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+
+        service.resendVerification(" Ana@Overlab.gg ");
+
+        verify(tokenService).revokeAll(existingUser, UserTokenType.EMAIL_VERIFICATION);
+        verify(emailService).sendVerification(existingUser.toEmailRecipient(), "raw-token");
+    }
+
+    @Test
+    void resendVerificationIsSilentForVerifiedGoogleAndUnknownAccounts() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+        service.resendVerification("ana@overlab.gg");
+
+        existingUser.setEmailVerified(false);
+        existingUser.setProvider(AuthProvider.GOOGLE);
+        service.resendVerification("ana@overlab.gg");
+
+        when(userRepository.findByEmailIgnoreCase("ghost@overlab.gg")).thenReturn(Optional.empty());
+        service.resendVerification("ghost@overlab.gg");
+
+        verify(emailService, never()).sendVerification(any(), any());
+    }
+
+    @Test
+    void resendVerificationIsSkippedWhileTheMailCooldownIsActive() {
+        when(loginAttemptLimiter.isMailThrottled("resend-verification", "ana@overlab.gg")).thenReturn(true);
+
+        service.resendVerification("ana@overlab.gg");
+
+        verify(userRepository, never()).findByEmailIgnoreCase(any());
+        verify(emailService, never()).sendVerification(any(), any());
     }
 }

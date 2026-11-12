@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
-import type { Patch } from "../../../types/api";
+import type { Patch } from "../../../types/patch";
 
 vi.mock("../../stats/api/statsApi", () => ({
   fetchComparison: vi.fn(),
@@ -14,8 +14,8 @@ vi.mock("../../heroes/api/heroesApi", () => ({
   fetchHeroes: vi.fn(() => Promise.resolve([])),
 }));
 
-import { fetchPatches } from "../../patches/api/patchesApi";
-import { fetchComparison, fetchHistoryStart } from "../../stats/api/statsApi";
+import { fetchPatches } from "../../patches";
+import { fetchComparison, fetchHistoryStart } from "../../stats";
 import { ChangesPage } from "./ChangesPage";
 
 function patch(

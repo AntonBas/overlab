@@ -1,12 +1,13 @@
 package gg.overlab.backend.user.account;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.PageResponse;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
 import gg.overlab.backend.user.account.dto.AdminUserFilter;
 import gg.overlab.backend.user.token.UserTokenService;
@@ -59,7 +60,7 @@ public class AdminUserService {
         if (!enabled) {
             tokenService.revokeAll(user, UserTokenType.REFRESH);
         }
-        auditService.logUpdate("User", user.getId(), before, new UserStatusSnapshot(enabled));
+        auditService.logUpdate(AuditEntityType.USER, user.getId(), before, new UserStatusSnapshot(enabled));
         return toDto(user);
     }
 
@@ -80,7 +81,7 @@ public class AdminUserService {
         if (role != UserRole.ADMIN) {
             tokenService.revokeAll(user, UserTokenType.REFRESH);
         }
-        auditService.logUpdate("User", user.getId(), before, new UserRoleSnapshot(role));
+        auditService.logUpdate(AuditEntityType.USER, user.getId(), before, new UserRoleSnapshot(role));
         return toDto(user);
     }
 

@@ -5,7 +5,7 @@ import { IconSelect } from "../../../components/ui/IconSelect";
 import type { IconSelectOption } from "../../../components/ui/IconSelect";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
-import type { Guide, GuideKind } from "../../../types/api";
+import type { Guide, GuideKind } from "../../../types/guide";
 import { GUIDE_KIND_LABELS, GUIDE_KINDS } from "../labels";
 import { SpotRail } from "./SpotRail";
 

@@ -22,7 +22,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "hero_category_relations", uniqueConstraints = @UniqueConstraint(columnNames = {"hero_id", "category_id"}))
+@Table(name = "hero_category_relations",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"hero_id", "category_id"}))
 public class HeroCategoryRelation extends TimestampedEntity {
 
     @Id

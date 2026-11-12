@@ -6,10 +6,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.client.BlizzardRatesClient;
+import gg.overlab.backend.collector.client.RatesFetch;
+import gg.overlab.backend.collector.imports.MapDiscoveryService;
+import gg.overlab.backend.collector.media.HeroAssetService;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import gg.overlab.backend.collector.snapshot.RatesValidator;
+import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.RankTier;
@@ -23,7 +30,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.cache.CacheManager;
 
 class RatesCollectorChainTest {
 
@@ -41,9 +47,14 @@ class RatesCollectorChainTest {
         CollectorProperties properties = CollectorFixtures.properties(1, parent, child);
         CollectorMetrics metrics = new CollectorMetrics(new SimpleMeterRegistry(), runRepository, properties,
                 mock(SnapshotCheckRepository.class));
-        metrics.registerLastSuccessGauges();
-        service = new RatesCollectorService(properties, client, mock(RatesValidator.class), recorder,
-                mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, Runnable::run);
+        metrics.registerMeters();
+        SnapshotCollector snapshotCollector = new SnapshotCollector(properties, client, mock(RatesValidator.class),
+                recorder, mock(HeroAssetService.class), metrics);
+        MapSlugResolver mapSlugResolver = new MapSlugResolver(mock(GameMapRepository.class),
+                mock(MapDiscoveryService.class));
+        service = new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
+                new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
+                Runnable::run);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(client.fetch(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag", false));

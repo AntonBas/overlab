@@ -4,28 +4,26 @@ import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditLogRepository;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
-import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserMapper;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
-import gg.overlab.backend.user.account.dto.AccountExportDto;
 import gg.overlab.backend.user.account.dto.ChangeEmailRequest;
 import gg.overlab.backend.user.account.dto.ChangePasswordRequest;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
 import gg.overlab.backend.user.account.dto.UpdateProfileRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.dto.UserDto;
-import gg.overlab.backend.feedback.FeedbackService;
-import gg.overlab.backend.hero.relation.feedback.RelationFeedbackService;
-import gg.overlab.backend.user.personal.PersonalService;
+import gg.overlab.backend.user.auth.AuthService;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,11 +40,10 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final UserTokenService tokenService;
     private final EmailService emailService;
+    private final LoginAttemptLimiter loginAttemptLimiter;
     private final AuthProperties properties;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
-    private final PersonalService personalService;
-    private final RelationFeedbackService relationFeedbackService;
     private final FeedbackService feedbackService;
 
     @Transactional
@@ -72,37 +69,38 @@ public class AccountService {
         User user = loadLocal(userId);
         requirePassword(user, request.currentPassword());
         String newEmail = request.newEmail().trim().toLowerCase(Locale.ROOT);
-        if (userRepository.existsByEmailIgnoreCase(newEmail)) {
-            throw new EmailAlreadyUsedException();
+        Optional<User> owner = userRepository.findByEmailIgnoreCase(newEmail);
+        if (owner.isPresent()) {
+            if (!loginAttemptLimiter.isMailThrottled(AuthService.REGISTRATION_NOTICE, newEmail)) {
+                emailService.sendRegistrationAttemptNotice(owner.get().toEmailRecipient());
+            }
+            return;
         }
         user.setPendingEmail(newEmail);
         tokenService.revokeAll(user, UserTokenType.EMAIL_CHANGE);
         String token = tokenService.issue(user, UserTokenType.EMAIL_CHANGE, properties.verificationTokenTtl());
-        emailService.sendEmailChange(user, newEmail, token);
+        emailService.sendEmailChange(user.toEmailRecipient(), newEmail, token);
+        emailService.sendEmailChangeNotice(user.toEmailRecipient(), newEmail);
     }
 
     @Transactional
     public void deleteAccount(Long userId, DeleteAccountRequest request) {
         User user = load(userId);
-        if (user.getProvider() == AuthProvider.LOCAL) {
+        if (user.getPasswordHash() != null) {
             requirePassword(user, request.password());
         }
-        if (user.getRole() == UserRole.ADMIN && userRepository.countByRole(UserRole.ADMIN) <= 1) {
+        if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
             throw new ConflictException("The last administrator cannot be deleted");
         }
+        feedbackService.clearContactDetails(user.getId());
         auditLogRepository.anonymizeActor(user.getId());
         auditLogRepository.anonymizeUserEntity(String.valueOf(user.getId()));
         userRepository.delete(user);
     }
 
-    @Transactional(readOnly = true)
-    public AccountExportDto export(Long userId) {
-        User user = load(userId);
-        return new AccountExportDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(),
-                user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt(),
-                personalService.favorites(userId), relationFeedbackService.votes(userId),
-                feedbackService.export(userId),
-                personalService.preferences(userId));
+    private boolean isLastActiveAdmin(User user) {
+        return userRepository.lockEnabledByRole(UserRole.ADMIN).stream()
+                .noneMatch(admin -> !admin.getId().equals(user.getId()));
     }
 
     private User load(Long userId) {
@@ -111,17 +109,20 @@ public class AccountService {
 
     private User loadLocal(Long userId) {
         User user = load(userId);
-        if (user.getProvider() != AuthProvider.LOCAL || user.getPasswordHash() == null) {
-            throw new BadRequestException("This account signs in with " + user.getProvider()
-                    + " and has no password");
+        if (user.getPasswordHash() == null) {
+            throw new BadRequestException("This account has no password, it signs in with " + user.getProvider()
+                    + ". Use the password reset to create one");
         }
         return user;
     }
 
     private void requirePassword(User user, String password) {
+        loginAttemptLimiter.requireAllowed(user.getEmail());
         if (password == null || user.getPasswordHash() == null
                 || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            loginAttemptLimiter.recordFailure(user.getEmail());
             throw new BadRequestException(WRONG_PASSWORD);
         }
+        loginAttemptLimiter.reset(user.getEmail());
     }
 }

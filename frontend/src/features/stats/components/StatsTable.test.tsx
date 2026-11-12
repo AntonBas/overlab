@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { heroStat } from "../../../test/fixtures";
+import { heroStat } from "../../../test/fixtures/stats";
 import { renderWithRouter } from "../../../test/render";
 import { StatsTable } from "./StatsTable";
 

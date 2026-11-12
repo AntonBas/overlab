@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { Perk } from "../../../../types/api";
+import type { Perk } from "../../../../types/hero";
 import { PerkList } from "./PerkList";
 
 function perk(overrides: Partial<Perk>): Perk {

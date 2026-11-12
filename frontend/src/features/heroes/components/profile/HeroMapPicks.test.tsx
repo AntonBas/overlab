@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../../test/render";
-import type { HeroMapStat } from "../../../../types/api";
+import type { HeroMapStat } from "../../../../types/stats";
 
 vi.mock("../../../maps/api/mapsApi", () => ({
   fetchMaps: vi.fn(() =>

@@ -1,9 +1,9 @@
 package gg.overlab.backend.user.account.dto;
 
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.feedback.dto.FeedbackDto;
 import gg.overlab.backend.hero.relation.feedback.dto.RelationVoteDto;
 import gg.overlab.backend.user.AuthProvider;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.personal.dto.FavoritesDto;
 import gg.overlab.backend.user.personal.dto.PreferencesDto;
 import java.time.Instant;

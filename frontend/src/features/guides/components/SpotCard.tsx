@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import type { MapVisual } from "../../../hooks/useCatalog";
-import type { Guide } from "../../../types/api";
+import type { Guide } from "../../../types/guide";
 import { formatSeconds } from "../../../utils/format";
-import { AbilityText } from "../../heroes/components/abilities/AbilityText";
+import { AbilityText } from "../../heroes";
 import { GUIDE_KIND_LABELS, GUIDE_SIDE_LABELS } from "../labels";
 
 interface SpotCardProps {

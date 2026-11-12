@@ -14,7 +14,8 @@ public class OpenApiConfig {
                 .title("Overlab API")
                 .description("Hero statistics, curated counter-picks and synergies, guides and personal library. "
                         + "Statistics come from the scheduled collector; counter-picks and synergies are curated "
-                        + "recommendations, not statistics. Unofficial fan site, not affiliated with Blizzard Entertainment.")
+                        + "recommendations, not statistics. Unofficial fan site, "
+                        + "not affiliated with Blizzard Entertainment.")
                 .version("1"));
     }
 }

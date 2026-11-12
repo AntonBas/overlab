@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import { toFailure } from "../../../services/api";
-import type { Preferences } from "../../../types/api";
-import { useAuth } from "../../auth/context/useAuth";
+import type { Preferences } from "../../../types/user";
+import { useAuth } from "../../auth";
 import * as personalApi from "../api/personalApi";
 import { PersonalDataContext } from "./personalDataContext";
 

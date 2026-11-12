@@ -1,8 +1,8 @@
 import { Search } from "lucide-react";
 import { useId, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchHeroes } from "../../features/heroes/api/heroesApi";
-import type { Hero } from "../../types/api";
+import { fetchHeroes } from "../../features/heroes";
+import type { Hero } from "../../types/hero";
 import { HeroPortrait } from "../ui/HeroPortrait";
 import { matchHeroes } from "../../utils/search";
 

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { BadgeCheck, Mail, MailWarning, ShieldCheck } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import type { User } from "../../../types/api";
+import type { User } from "../../../types/user";
 
 const TABS = [
   { to: "/me", label: "My Overlab", end: true },

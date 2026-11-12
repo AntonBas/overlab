@@ -25,7 +25,8 @@ public record CollectorJob(
         String after,
         Duration minInterval) {
 
-    @AssertTrue(message = "a job needs exactly one trigger: a valid Spring cron expression or the name of a job to follow")
+    @AssertTrue(message = "a job needs exactly one trigger: a valid Spring cron expression "
+            + "or the name of a job to follow")
     public boolean isTriggerValid() {
         boolean hasCron = cron != null && !cron.isBlank();
         boolean hasParent = after != null && !after.isBlank();

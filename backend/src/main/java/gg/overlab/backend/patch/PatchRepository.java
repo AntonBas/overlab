@@ -19,6 +19,8 @@ public interface PatchRepository extends JpaRepository<Patch, Long> {
 
     boolean existsByVersionIgnoreCaseAndIdNot(String version, Long id);
 
+    long countByReleasedAt(Instant releasedAt);
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, Long id);

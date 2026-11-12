@@ -14,11 +14,16 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     Optional<UserToken> findByHashAndType(@Param("hash") String hash, @Param("type") UserTokenType type);
 
     @Query("select t from UserToken t join fetch t.user where t.tokenHash = :hash and t.type in :types")
-    Optional<UserToken> findByHashAndTypeIn(@Param("hash") String hash, @Param("types") Collection<UserTokenType> types);
+    Optional<UserToken> findByHashAndTypeIn(@Param("hash") String hash,
+                                            @Param("types") Collection<UserTokenType> types);
 
     @Modifying
     @Query("delete from UserToken t where t.user.id = :userId and t.type = :type")
     void deleteAllByUserAndType(@Param("userId") Long userId, @Param("type") UserTokenType type);
+
+    @Modifying
+    @Query("update UserToken t set t.usedAt = :usedAt where t.id = :id and t.usedAt is null")
+    int markUsed(@Param("id") Long id, @Param("usedAt") Instant usedAt);
 
     @Modifying
     @Query("delete from UserToken t where t.tokenHash = :hash and t.type = :type")

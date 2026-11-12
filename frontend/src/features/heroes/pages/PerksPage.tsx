@@ -16,13 +16,13 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
-import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { usePersonalData } from "../../personal/context/usePersonalData";
+import { FavoritesFilterButton } from "../../personal";
+import { FavoriteButton } from "../../personal";
+import { usePersonalData } from "../../personal";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import type { HeroRole } from "../../../types/api";
-import { ROLES } from "../../stats/filters";
+import type { HeroRole } from "../../../types/hero";
+import { ROLES } from "../../stats";
 import { fetchAllPerks, fetchHeroes } from "../api/heroesApi";
 import { heroBackdropStyle } from "../utils/heroBackdrop";
 import { PerkList } from "../components/profile/PerkList";

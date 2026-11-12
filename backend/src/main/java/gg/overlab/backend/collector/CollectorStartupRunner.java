@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -24,7 +23,6 @@ public class CollectorStartupRunner implements ApplicationRunner {
     private final CollectorRunRepository runRepository;
 
     @Override
-    @Transactional
     public void run(ApplicationArguments args) {
         int interrupted = runRepository.failRunningRuns(CollectorRunStatus.RUNNING, CollectorRunStatus.FAILED,
                 Instant.now(), INTERRUPTED_SUMMARY);

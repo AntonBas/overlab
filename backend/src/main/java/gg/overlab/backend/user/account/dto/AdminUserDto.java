@@ -1,7 +1,7 @@
 package gg.overlab.backend.user.account.dto;
 
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthProvider;
-import gg.overlab.backend.user.UserRole;
 import java.time.Instant;
 
 public record AdminUserDto(

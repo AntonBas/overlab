@@ -1,11 +1,10 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,18 +21,21 @@ public class StatsFreshnessService {
 
     private static final int MAX_SNAPSHOTS = 30;
 
+    private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
-    private final SnapshotChecks snapshotChecks;
+    private final SnapshotCheckService snapshotCheckService;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = "'freshness:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public DataFreshnessDto freshness(StatsFilter filter) {
-        List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), filter.platform(),
+        List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), currentGameFormat.get(),
+                filter.platform(),
                 filter.region(), filter.tier(), PageRequest.of(0, MAX_SNAPSHOTS));
         if (times.isEmpty()) {
             throw new EntityNotFoundException("Statistics", filter.cacheKey());
         }
-        Map<Instant, String> signatures = heroStatRepository.findRatesAt(filter.queue(), filter.platform(),
+        Map<Instant, String> signatures = heroStatRepository.findRatesAt(filter.queue(), currentGameFormat.get(),
+                filter.platform(),
                         filter.region(), filter.tier(), times).stream()
                 .collect(Collectors.groupingBy(RateRow::capturedAt,
                         Collectors.collectingAndThen(Collectors.toList(), StatsFreshnessService::signatureOf)));
@@ -48,20 +50,15 @@ public class StatsFreshnessService {
                 break;
             }
         }
-        Instant checkedAt = SnapshotChecks.latest(times.get(0), snapshotChecks.lastChecked(filter.queue(),
+        Instant checkedAt = SnapshotCheckService.latest(times.get(0), snapshotCheckService.lastChecked(filter.queue(),
                 filter.platform(), filter.region(), filter.tier(), StatsFilter.ALL_MAPS));
         return new DataFreshnessDto(times.get(0), checkedAt, valuesSince, times.size(), changeObserved);
     }
 
     private static String signatureOf(List<RateRow> rows) {
-        return rows.stream()
-                .sorted(Comparator.comparing(RateRow::heroId))
-                .map(row -> row.heroId() + ":" + plain(row.winRate()) + ":" + plain(row.pickRate()) + ":"
-                        + plain(row.banRate()))
-                .collect(Collectors.joining(","));
-    }
-
-    private static String plain(BigDecimal value) {
-        return value == null ? "-" : value.stripTrailingZeros().toPlainString();
+        return SnapshotSignature.of(rows.stream()
+                .map(row -> new SnapshotSignature.Entry(String.valueOf(row.heroId()), row.winRate(), row.pickRate(),
+                        row.banRate()))
+                .toList());
     }
 }

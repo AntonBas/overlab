@@ -1,7 +1,5 @@
 package gg.overlab.backend.config.security;
 
-import gg.overlab.backend.user.User;
-import gg.overlab.backend.user.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,7 +30,7 @@ public class JwtTokenProvider {
         this.signingKey = Keys.hmacShaKeyFor(resolveSecret(properties.jwtSecret(), environment));
     }
 
-    public String createAccessToken(User user) {
+    public String createAccessToken(TokenSubject user) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(String.valueOf(user.getId()))

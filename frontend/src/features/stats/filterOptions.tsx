@@ -1,7 +1,7 @@
 import { Gamepad2, Globe, Monitor, Trophy, Zap } from "lucide-react";
 import { AllItemsIcon } from "../../components/ui/AllItemsIcon";
 import type { IconSelectOption } from "../../components/ui/IconSelect";
-import type { GameQueue, Platform, RankTier, Region } from "../../types/api";
+import type { GameQueue, Platform, RankTier, Region } from "../../types/common";
 import {
   PLATFORM_LABELS,
   QUEUE_LABELS,

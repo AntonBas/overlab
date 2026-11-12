@@ -69,7 +69,7 @@ class StatsFreshnessIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+        CacheTestSupport.clearAll(cacheManager);
         int sequence = SCOPE_SEQUENCE.getAndIncrement();
         platform = Platform.values()[sequence % Platform.values().length];
         region = Region.values()[sequence / Platform.values().length % Region.values().length];

@@ -1,11 +1,8 @@
 import { api } from "../../../services/api";
-import type {
-  AbilityControl,
-  GameMap,
-  Guide,
-  Patch,
-  Perk,
-} from "../../../types/api";
+import type { Guide } from "../../../types/guide";
+import type { AbilityControl, Perk } from "../../../types/hero";
+import type { GameMap } from "../../../types/map";
+import type { Patch } from "../../../types/patch";
 import type {
   AdminAbility,
   AdminCategory,

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,6 +19,10 @@ public interface RelationVoteRepository extends JpaRepository<RelationVote, Long
 
     void deleteByRelationIdAndUserId(Long relationId, Long userId);
 
+    @Modifying
+    @Query("delete from RelationVote v where v.relation.id = :relationId")
+    void deleteAllByRelationId(@Param("relationId") Long relationId);
+
     @Query("""
             select new gg.overlab.backend.hero.relation.feedback.dto.RelationVoteSummaryDto(
                 r.id, h.slug, rh.slug, r.type,
@@ -28,7 +33,8 @@ public interface RelationVoteRepository extends JpaRepository<RelationVote, Long
             join r.hero h
             join r.relatedHero rh
             group by r.id, h.slug, rh.slug, r.type
-            order by count(case when v.value = gg.overlab.backend.hero.relation.feedback.RelationVoteValue.DOWN then 1 end) desc, r.id
+            order by count(case when v.value = gg.overlab.backend.hero.relation.feedback.RelationVoteValue.DOWN
+                                then 1 end) desc, r.id
             """)
     List<RelationVoteSummaryDto> summarize(Pageable pageable);
 

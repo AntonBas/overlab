@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.category;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -31,9 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class HeroCategoryService {
 
-    private static final String CATEGORY_AUDIT_TYPE = "HeroCategory";
-    private static final String MATCHUP_AUDIT_TYPE = "HeroCategoryRelation";
-
     private static final Comparator<Hero> BY_ROLE_THEN_NAME =
             Comparator.comparing(Hero::getRole).thenComparing(Hero::getName);
 
@@ -49,6 +47,7 @@ public class HeroCategoryService {
         List<HeroCategoryDto> categories = categoryRepository.findAllByOrderByNameAsc().stream()
                 .map(this::toDto).toList();
         List<CategoryMatchupDto> matchups = relationRepository.findAllByOrderByIdAsc().stream()
+                .filter(relation -> relation.getHero().isActive())
                 .map(relation -> new CategoryMatchupDto(relation.getHero().getSlug(), relation.getCategory().getSlug(),
                         relation.getType(), relation.getNote()))
                 .toList();
@@ -64,9 +63,9 @@ public class HeroCategoryService {
     @Transactional
     public CategoryAdminDto createCategory(CategoryRequest request) {
         HeroCategory category = new HeroCategory();
-        applyCategory(category, request, -1L);
+        applyCategory(category, request, null);
         CategoryAdminDto created = toAdminDto(categoryRepository.save(category));
-        auditService.logCreate(CATEGORY_AUDIT_TYPE, created.id(), created);
+        auditService.logCreate(AuditEntityType.HERO_CATEGORY, created.id(), created);
         return created;
     }
 
@@ -77,7 +76,7 @@ public class HeroCategoryService {
         CategoryAdminDto before = toAdminDto(category);
         applyCategory(category, request, id);
         CategoryAdminDto after = toAdminDto(category);
-        auditService.logUpdate(CATEGORY_AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.HERO_CATEGORY, id, before, after);
         return after;
     }
 
@@ -85,7 +84,7 @@ public class HeroCategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         HeroCategory category = requireCategory(id);
-        auditService.logDelete(CATEGORY_AUDIT_TYPE, id, toAdminDto(category));
+        auditService.logDelete(AuditEntityType.HERO_CATEGORY, id, toAdminDto(category));
         categoryRepository.delete(category);
     }
 
@@ -98,9 +97,9 @@ public class HeroCategoryService {
     @Transactional
     public CategoryMatchupAdminDto createMatchup(CategoryMatchupRequest request) {
         HeroCategoryRelation relation = new HeroCategoryRelation();
-        applyMatchup(relation, request, -1L);
+        applyMatchup(relation, request, null);
         CategoryMatchupAdminDto created = toAdminDto(relationRepository.save(relation));
-        auditService.logCreate(MATCHUP_AUDIT_TYPE, created.id(), created);
+        auditService.logCreate(AuditEntityType.HERO_CATEGORY_RELATION, created.id(), created);
         return created;
     }
 
@@ -111,7 +110,7 @@ public class HeroCategoryService {
         CategoryMatchupAdminDto before = toAdminDto(relation);
         applyMatchup(relation, request, id);
         CategoryMatchupAdminDto after = toAdminDto(relation);
-        auditService.logUpdate(MATCHUP_AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.HERO_CATEGORY_RELATION, id, before, after);
         return after;
     }
 
@@ -119,12 +118,15 @@ public class HeroCategoryService {
     @Transactional
     public void deleteMatchup(Long id) {
         HeroCategoryRelation relation = requireMatchup(id);
-        auditService.logDelete(MATCHUP_AUDIT_TYPE, id, toAdminDto(relation));
+        auditService.logDelete(AuditEntityType.HERO_CATEGORY_RELATION, id, toAdminDto(relation));
         relationRepository.delete(relation);
     }
 
     private void applyCategory(HeroCategory category, CategoryRequest request, Long excludedId) {
-        if (categoryRepository.existsBySlugAndIdNot(request.slug(), excludedId)) {
+        boolean slugTaken = excludedId == null
+                ? categoryRepository.existsBySlug(request.slug())
+                : categoryRepository.existsBySlugAndIdNot(request.slug(), excludedId);
+        if (slugTaken) {
             throw new ConflictException("A category with slug " + request.slug() + " already exists");
         }
         Set<String> requestedSlugs = new LinkedHashSet<>(request.heroSlugs());
@@ -146,7 +148,10 @@ public class HeroCategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Hero", request.heroSlug()));
         HeroCategory category = categoryRepository.findBySlug(request.categorySlug())
                 .orElseThrow(() -> new EntityNotFoundException("Hero category", request.categorySlug()));
-        if (relationRepository.existsByHeroIdAndCategoryIdAndIdNot(hero.getId(), category.getId(), excludedId)) {
+        boolean matchupTaken = excludedId == null
+                ? relationRepository.existsByHeroIdAndCategoryId(hero.getId(), category.getId())
+                : relationRepository.existsByHeroIdAndCategoryIdAndIdNot(hero.getId(), category.getId(), excludedId);
+        if (matchupTaken) {
             throw new ConflictException("A matchup between this hero and category already exists");
         }
         relation.setHero(hero);

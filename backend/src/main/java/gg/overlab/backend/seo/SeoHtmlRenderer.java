@@ -1,7 +1,5 @@
 package gg.overlab.backend.seo;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
@@ -10,25 +8,17 @@ public class SeoHtmlRenderer {
 
     private static final String DISCLAIMER =
             "Overlab is an unofficial fan site and is not affiliated with Blizzard Entertainment.";
-    private static final List<String[]> NAVIGATION = List.of(
-            new String[] {"/stats", "Hero statistics"},
-            new String[] {"/heroes", "Heroes"},
-            new String[] {"/counters", "Counters"},
-            new String[] {"/perks", "Perks"},
-            new String[] {"/maps", "Maps"},
-            new String[] {"/changes", "What changed"});
+    private final SiteUrl siteUrl;
 
-    private final String baseUrl;
-
-    public SeoHtmlRenderer(@Value("${app.frontend-url}") String frontendUrl) {
-        this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+    public SeoHtmlRenderer(SiteUrl siteUrl) {
+        this.siteUrl = siteUrl;
     }
 
     public String render(SeoPage page) {
         String title = SeoPageResolver.SITE_NAME.equals(page.title())
                 ? page.title() : page.title() + " | " + SeoPageResolver.SITE_NAME;
-        String url = baseUrl + ("/".equals(page.path()) ? "/" : page.path());
-        String image = baseUrl + "/og-image.png";
+        String url = siteUrl.absolute(page.path());
+        String image = siteUrl.absolute("/og-image.png");
         StringBuilder html = new StringBuilder("<!doctype html>\n<html lang=\"en\">\n<head>\n")
                 .append("<meta charset=\"UTF-8\">\n")
                 .append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n")
@@ -51,8 +41,9 @@ public class SeoHtmlRenderer {
                 .append(json).append("</script>\n"));
         html.append("</head>\n<body>\n<h1>").append(escape(page.heading())).append("</h1>\n")
                 .append("<p>").append(escape(page.description())).append("</p>\n<nav>\n");
-        NAVIGATION.forEach(link -> html.append("<a href=\"").append(escape(baseUrl + link[0])).append("\">")
-                .append(escape(link[1])).append("</a>\n"));
+        StaticSeoPage.navigationPages().forEach(link -> html.append("<a href=\"")
+                .append(escape(siteUrl.absolute(link.path()))).append("\">")
+                .append(escape(link.heading())).append("</a>\n"));
         return html.append("</nav>\n<p>").append(escape(DISCLAIMER)).append("</p>\n</body>\n</html>\n").toString();
     }
 

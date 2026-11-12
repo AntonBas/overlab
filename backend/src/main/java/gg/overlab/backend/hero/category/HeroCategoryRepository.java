@@ -12,5 +12,7 @@ public interface HeroCategoryRepository extends JpaRepository<HeroCategory, Long
 
     Optional<HeroCategory> findBySlug(String slug);
 
+    boolean existsBySlug(String slug);
+
     boolean existsBySlugAndIdNot(String slug, Long id);
 }

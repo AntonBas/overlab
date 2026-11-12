@@ -1,4 +1,4 @@
-import type { HeroRole } from "../types/api";
+import type { HeroRole } from "../types/hero";
 
 export const ROLE_DESCRIPTIONS: Record<HeroRole, string> = {
   TANK: "Tanks absorb damage and create space so the team can take fights.",

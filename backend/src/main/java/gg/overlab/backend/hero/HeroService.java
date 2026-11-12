@@ -1,6 +1,8 @@
 package gg.overlab.backend.hero;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.dto.HeroAdminDto;
@@ -8,6 +10,7 @@ import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.hero.dto.HeroUpdateRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -17,13 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class HeroService {
 
-    public static final String CACHE_NAME = "heroes";
-
     private final HeroRepository heroRepository;
     private final HeroMapper heroMapper;
     private final AuditService auditService;
 
-    @Cacheable(value = CACHE_NAME, key = "'all'")
+    @Cacheable(value = CacheNames.HEROES, key = "'all'")
     @Transactional(readOnly = true)
     public List<HeroDto> findAll() {
         return heroRepository.findAllByActiveTrueOrderByNameAsc().stream()
@@ -31,10 +32,10 @@ public class HeroService {
                 .toList();
     }
 
-    @Cacheable(value = CACHE_NAME, key = "#slug")
+    @Cacheable(value = CacheNames.HEROES, key = "'slug:' + #slug")
     @Transactional(readOnly = true)
     public HeroDto getBySlug(String slug) {
-        Hero hero = heroRepository.findBySlug(slug)
+        Hero hero = heroRepository.findBySlugAndActiveTrue(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
         return heroMapper.toDto(hero);
     }
@@ -45,6 +46,7 @@ public class HeroService {
     }
 
     @EvictContentCaches
+    @CacheEvict(value = CacheNames.STATS, allEntries = true)
     @Transactional
     public HeroAdminDto update(String slug, HeroUpdateRequest request) {
         Hero hero = heroRepository.findBySlug(slug)
@@ -55,7 +57,7 @@ public class HeroService {
         hero.setWeaknesses(request.weaknesses());
         hero.setActive(request.active());
         HeroAdminDto after = heroMapper.toAdminDto(hero);
-        auditService.logUpdate("Hero", slug, before, after);
+        auditService.logUpdate(AuditEntityType.HERO, slug, before, after);
         return after;
     }
 }

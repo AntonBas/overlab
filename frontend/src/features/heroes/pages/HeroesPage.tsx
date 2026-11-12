@@ -12,7 +12,7 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import { ROLES } from "../../stats/filters";
+import { ROLES } from "../../stats";
 import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
 

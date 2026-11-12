@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { heroStat } from "../../../test/fixtures";
+import { heroStat } from "../../../test/fixtures/stats";
 import { picksByRole } from "./bestPicks";
 
 function slugs(heroes: { heroSlug: string }[]): string[] {

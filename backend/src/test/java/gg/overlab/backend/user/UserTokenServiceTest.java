@@ -9,7 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.token.UserToken;
 import gg.overlab.backend.user.token.UserTokenRepository;
 import gg.overlab.backend.user.token.UserTokenService;
@@ -42,11 +43,34 @@ class UserTokenServiceTest {
     void consumesValidTokenOnce() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), null);
         when(repository.findByHashAndTypeIn(any(), eq(List.of(UserTokenType.PASSWORD_RESET)))).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(1);
 
         User result = service.consume("raw", UserTokenType.PASSWORD_RESET);
 
         assertThat(result).isSameAs(user);
         assertThat(token.getUsedAt()).isNotNull();
+    }
+
+    @Test
+    void rejectsATokenThatAConcurrentRequestAlreadyConsumed() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), null);
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(0);
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
+    }
+
+    @Test
+    void rejectsAOneTimeTokenThatAConcurrentRequestAlreadyConsumed() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), null);
+        token.setType(UserTokenType.PASSWORD_RESET);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(0);
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.PASSWORD_RESET))
+                .isExactlyInstanceOf(InvalidTokenException.class);
     }
 
     @Test
@@ -80,6 +104,26 @@ class UserTokenServiceTest {
                 .isInstanceOf(InvalidTokenException.class);
 
         verify(repository, never()).deleteAllByUserAndType(any(), any());
+    }
+
+    @Test
+    void secondUseWithinTheGraceWindowIsReportedAsConcurrent() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(2));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
+    }
+
+    @Test
+    void anOldReuseIsNotReportedAsConcurrent() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(120));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isNotInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
     }
 
     @Test

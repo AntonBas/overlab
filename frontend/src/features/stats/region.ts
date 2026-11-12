@@ -1,4 +1,4 @@
-import type { Region } from "../../types/api";
+import type { Region } from "../../types/common";
 
 const STORAGE_KEY = "overlab.region";
 

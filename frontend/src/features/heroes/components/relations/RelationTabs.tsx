@@ -6,7 +6,7 @@ import type {
   CategoryMatchupType,
   HeroCategory,
   RelatedHero,
-} from "../../../../types/api";
+} from "../../../../types/hero";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 import { CategoryChip } from "../profile/CategoryChip";
 import { RelatedHeroes } from "./RelatedHeroes";

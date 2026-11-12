@@ -1,5 +1,6 @@
 package gg.overlab.backend.user;
 
+import gg.overlab.backend.config.security.UserRole;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     boolean existsByEmailIgnoreCase(String email);
 
-    long countByRole(UserRole role);
+    boolean existsByRole(UserRole role);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.role = :role and u.enabled = true")

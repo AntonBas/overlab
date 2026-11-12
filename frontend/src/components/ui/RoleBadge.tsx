@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import type { HeroRole } from "../../types/api";
+import type { HeroRole } from "../../types/hero";
 import { ROLE_LABELS } from "../../utils/format";
 import { checkRoleIcon, roleIconUrl } from "../../utils/roleIcons";
 

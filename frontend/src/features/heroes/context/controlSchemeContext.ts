@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { AbilityControl } from "../../../types/api";
+import type { AbilityControl } from "../../../types/hero";
 
 export type ControlScheme = "PC" | "XBOX" | "PLAYSTATION" | "SWITCH";
 

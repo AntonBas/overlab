@@ -12,18 +12,21 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuditRetentionJob {
 
-    private static final String USER_ENTITY_TYPE = "User";
-
     private final AuditLogRepository repository;
     private final AuditProperties properties;
 
     @Scheduled(cron = "0 30 3 * * *")
     @Transactional
     public void deleteOldUserEvents() {
-        int deleted = repository.deleteByEntityTypeBefore(USER_ENTITY_TYPE,
+        int deleted = repository.deleteByEntityTypeBefore(AuditEntityType.USER,
                 Instant.now().minus(properties.userEventRetention()));
         if (deleted > 0) {
             log.info("Deleted {} user audit entries older than {}", deleted, properties.userEventRetention());
+        }
+        int cleared = repository.clearIpAddressesBefore(Instant.now().minus(properties.userEventRetention()));
+        if (cleared > 0) {
+            log.info("Cleared the IP address of {} audit entries older than {}", cleared,
+                    properties.userEventRetention());
         }
     }
 }

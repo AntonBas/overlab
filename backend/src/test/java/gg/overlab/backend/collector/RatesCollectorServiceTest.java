@@ -11,11 +11,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.client.BlizzardRatesClient;
+import gg.overlab.backend.collector.client.RatesFetch;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
+import gg.overlab.backend.collector.imports.MapDiscoveryService;
+import gg.overlab.backend.collector.media.HeroAssetService;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
+import gg.overlab.backend.collector.snapshot.RatesValidator;
+import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMapRepository;
@@ -33,7 +41,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 
@@ -57,9 +64,8 @@ class RatesCollectorServiceTest {
     void setUp() {
         CollectorProperties properties = CollectorFixtures.properties(1, job);
         metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
-        metrics.registerLastSuccessGauges();
-        service = new RatesCollectorService(properties, client, validator, recorder, mock(GameMapRepository.class),
-                mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, deferredExecutor);
+        metrics.registerMeters();
+        service = serviceWith(properties, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {
@@ -71,6 +77,16 @@ class RatesCollectorServiceTest {
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag-1", false));
         when(recorder.record(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new SnapshotRecorder.Outcome(5, true));
+    }
+
+    private RatesCollectorService serviceWith(CollectorProperties properties, TaskExecutor taskExecutor) {
+        SnapshotCollector snapshotCollector = new SnapshotCollector(properties, client, validator, recorder,
+                mock(HeroAssetService.class), metrics);
+        MapSlugResolver mapSlugResolver = new MapSlugResolver(mock(GameMapRepository.class),
+                mock(MapDiscoveryService.class));
+        return new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
+                new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
+                taskExecutor);
     }
 
     @Test
@@ -208,9 +224,7 @@ class RatesCollectorServiceTest {
         TaskExecutor rejectingExecutor = task -> {
             throw new TaskRejectedException("queue is full");
         };
-        RatesCollectorService rejecting = new RatesCollectorService(
-                CollectorFixtures.properties(1, job), client, validator, recorder, mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class),
-                runRepository, metrics, rejectingExecutor);
+        RatesCollectorService rejecting = serviceWith(CollectorFixtures.properties(1, job), rejectingExecutor);
 
         assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
                 .isInstanceOf(ConflictException.class);

@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useNoIndex } from "../../../hooks/useNoIndex";
-import { useAuth } from "../../auth/context/useAuth";
+import { useAuth } from "../../auth";
 import { AccountHeader } from "../components/AccountHeader";
 import { DeleteAccount } from "../components/DeleteAccount";
 import { EmailForm } from "../components/EmailForm";

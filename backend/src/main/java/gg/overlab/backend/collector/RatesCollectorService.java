@@ -5,29 +5,20 @@ import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
+import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
-import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.gamemap.MapService;
-import gg.overlab.backend.hero.HeroService;
-import gg.overlab.backend.stats.GameQueue;
-import gg.overlab.backend.stats.Platform;
-import gg.overlab.backend.stats.RankTier;
-import gg.overlab.backend.stats.Region;
-import gg.overlab.backend.stats.StatsSnapshotProvider;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
@@ -36,37 +27,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class RatesCollectorService {
 
-    private static final String EACH_MAP = "EACH";
+    private static final int MAX_CONSECUTIVE_FAILURES = 5;
     private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
-    private static final int MAX_ERROR_SUMMARY_LENGTH = 1000;
-    private static final int MAX_DISTINCT_ERRORS = 3;
 
     private final CollectorProperties properties;
-    private final BlizzardRatesClient client;
-    private final RatesValidator validator;
-    private final SnapshotRecorder recorder;
-    private final GameMapRepository gameMapRepository;
-    private final MapDiscoveryService mapDiscovery;
-    private final CacheManager cacheManager;
+    private final SnapshotCollector snapshotCollector;
+    private final MapSlugResolver mapSlugResolver;
+    private final JobChain jobChain;
+    private final CacheEviction cacheEviction;
     private final CollectorRunRepository runRepository;
     private final CollectorMetrics metrics;
     private final TaskExecutor executor;
     private final Set<String> runningJobs = ConcurrentHashMap.newKeySet();
     private final ReentrantLock requestsLock = new ReentrantLock();
 
-    public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
-                                 RatesValidator validator, SnapshotRecorder recorder,
-                                 GameMapRepository gameMapRepository, MapDiscoveryService mapDiscovery,
-                                 CacheManager cacheManager,
+    public RatesCollectorService(CollectorProperties properties, SnapshotCollector snapshotCollector,
+                                 MapSlugResolver mapSlugResolver, JobChain jobChain, CacheEviction cacheEviction,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
                                  @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
-        this.client = client;
-        this.validator = validator;
-        this.recorder = recorder;
-        this.gameMapRepository = gameMapRepository;
-        this.mapDiscovery = mapDiscovery;
-        this.cacheManager = cacheManager;
+        this.snapshotCollector = snapshotCollector;
+        this.mapSlugResolver = mapSlugResolver;
+        this.jobChain = jobChain;
+        this.cacheEviction = cacheEviction;
         this.runRepository = runRepository;
         this.metrics = metrics;
         this.executor = executor;
@@ -103,7 +86,7 @@ public class RatesCollectorService {
         }
     }
 
-    boolean runInline(String jobName, CollectorTrigger trigger) {
+    public boolean runInline(String jobName, CollectorTrigger trigger) {
         CollectorJob job = findJob(jobName);
         try {
             CollectorRun run = begin(job, trigger);
@@ -117,18 +100,11 @@ public class RatesCollectorService {
     }
 
     private void runDependents(CollectorJob parent, CollectorRun parentRun) {
-        if (parentRun.getTrigger() == CollectorTrigger.PATCH || parentRun.getRowsSaved() == 0
-                || parentRun.getStatus() == CollectorRunStatus.FAILED) {
-            return;
-        }
-        for (CollectorJob dependent : properties.jobs()) {
-            if (!dependent.enabled() || !parent.name().equals(dependent.after())) {
-                continue;
-            }
-            if (!intervalElapsed(dependent)) {
-                log.info("Collector job '{}' skipped: it ran less than {} ago", dependent.name(),
-                        dependent.minInterval());
-                continue;
+        for (CollectorJob dependent : jobChain.dependentsToRun(parent, parentRun)) {
+            if (Thread.currentThread().isInterrupted()) {
+                log.warn("Collector job '{}' was not started after '{}': the thread was interrupted",
+                        dependent.name(), parent.name());
+                return;
             }
             log.info("Collector job '{}' starts because '{}' saved {} rows", dependent.name(), parent.name(),
                     parentRun.getRowsSaved());
@@ -138,16 +114,6 @@ public class RatesCollectorService {
                 log.error("Collector job '{}' failed after '{}'", dependent.name(), parent.name(), exception);
             }
         }
-    }
-
-    private boolean intervalElapsed(CollectorJob job) {
-        if (job.minInterval() == null) {
-            return true;
-        }
-        return runRepository.findFirstByJobNameAndStatusOrderByFinishedAtDesc(job.name(), CollectorRunStatus.SUCCESS)
-                .map(CollectorRun::getFinishedAt)
-                .map(finishedAt -> !finishedAt.plus(job.minInterval()).isAfter(Instant.now()))
-                .orElse(true);
     }
 
     private CollectorJob findJob(String jobName) {
@@ -188,13 +154,16 @@ public class RatesCollectorService {
         } catch (RuntimeException exception) {
             log.error("Collector job '{}' crashed", job.name(), exception);
             run.setStatus(CollectorRunStatus.FAILED);
-            run.setErrorSummary(truncate(String.valueOf(exception.getMessage())));
+            run.setErrorSummary(RunErrors.truncate(String.valueOf(exception.getMessage())));
         } finally {
-            run.setFinishedAt(Instant.now());
-            runRepository.save(run);
-            metrics.recordRun(job.name(), run.getStatus(), run.getRowsSaved(),
-                    Duration.between(run.getStartedAt(), run.getFinishedAt()));
-            runningJobs.remove(job.name());
+            try {
+                run.setFinishedAt(Instant.now());
+                runRepository.save(run);
+                metrics.recordRun(job.name(), run.getStatus(), run.getRowsSaved(),
+                        Duration.between(run.getStartedAt(), run.getFinishedAt()));
+            } finally {
+                runningJobs.remove(job.name());
+            }
         }
     }
 
@@ -210,119 +179,54 @@ public class RatesCollectorService {
 
     private void execute(CollectorJob job, CollectorRun run) {
         Instant capturedAt = Instant.now();
-        Set<String> errors = new LinkedHashSet<>();
-        List<String> mapSlugs = resolveMapSlugs(job);
+        RunErrors errors = new RunErrors();
+        List<SnapshotRequest> requests = SnapshotRequest.plan(job, mapSlugResolver.resolve(job));
         log.info("Collector job '{}' started ({})", job.name(), run.getTrigger());
-        for (GameQueue queue : job.queues()) {
-            for (Platform platform : job.platforms()) {
-                for (Region region : job.regions()) {
-                    for (RankTier tier : job.tiers()) {
-                        if (queue == GameQueue.QUICK_PLAY && tier != RankTier.ALL) {
-                            continue;
-                        }
-                        for (String mapSlug : mapSlugs) {
-                            run.setRequestsTotal(run.getRequestsTotal() + 1);
-                            try {
-                                run.setRowsSaved(run.getRowsSaved()
-                                        + collectOne(capturedAt, queue, platform, region, tier, mapSlug));
-                                metrics.recordRequest(job.name(), true);
-                            } catch (RuntimeException exception) {
-                                run.setRequestsFailed(run.getRequestsFailed() + 1);
-                                metrics.recordRequest(job.name(), false);
-                                if (exception instanceof InvalidSnapshotException) {
-                                    metrics.recordRejectedSnapshot();
-                                }
-                                if (errors.size() < MAX_DISTINCT_ERRORS) {
-                                    errors.add(describe(queue, platform, region, tier, mapSlug, exception));
-                                }
-                                log.warn("Collector request failed: {}",
-                                        describe(queue, platform, region, tier, mapSlug, exception));
-                            }
-                            pause();
-                        }
-                    }
+        int consecutiveFailures = 0;
+        boolean interrupted = false;
+        for (SnapshotRequest request : requests) {
+            run.setRequestsTotal(run.getRequestsTotal() + 1);
+            try {
+                run.setRowsSaved(run.getRowsSaved() + snapshotCollector.collect(capturedAt, request));
+                metrics.recordRequest(job.name(), true);
+                consecutiveFailures = 0;
+            } catch (RuntimeException exception) {
+                run.setRequestsFailed(run.getRequestsFailed() + 1);
+                metrics.recordRequest(job.name(), false);
+                if (exception instanceof InvalidSnapshotException) {
+                    metrics.recordRejectedSnapshot();
                 }
+                errors.add(request, exception);
+                consecutiveFailures++;
+                log.warn("Collector request failed: {}", request.describe(exception));
+            }
+            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                log.error("Collector job '{}' stopped after {} failed requests in a row", job.name(),
+                        consecutiveFailures);
+                errors.add(request, new IllegalStateException("Stopped after " + consecutiveFailures
+                        + " failed requests in a row"));
+                break;
+            }
+            if (!Pause.sleep(properties.pause())) {
+                log.warn("Collector job '{}' was interrupted, remaining requests were skipped", job.name());
+                errors.add(request, new IllegalStateException("Interrupted, remaining requests were skipped"));
+                interrupted = true;
+                break;
             }
         }
-        run.setStatus(statusOf(run));
-        run.setErrorSummary(errors.isEmpty() ? null : truncate(String.join("; ", errors)));
-        evictCaches();
+        run.setStatus(statusOf(run, interrupted));
+        run.setErrorSummary(errors.summary());
+        if (run.getRowsSaved() > 0) {
+            cacheEviction.evictAll();
+        }
         log.info("Collector job '{}' finished: {} rows saved, {} of {} requests failed", job.name(),
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
     }
 
-    private CollectorRunStatus statusOf(CollectorRun run) {
-        if (run.getRequestsFailed() == 0) {
+    private CollectorRunStatus statusOf(CollectorRun run, boolean interrupted) {
+        if (run.getRequestsFailed() == 0 && !interrupted) {
             return CollectorRunStatus.SUCCESS;
         }
         return run.getRowsSaved() > 0 ? CollectorRunStatus.PARTIAL : CollectorRunStatus.FAILED;
-    }
-
-    private int collectOne(Instant capturedAt, GameQueue queue, Platform platform, Region region, RankTier tier,
-                           String mapSlug) {
-        String knownEtag = recorder.knownEtag(queue, platform, region, tier, mapSlug).orElse(null);
-        RatesFetch fetched = client.fetch(queue, platform, region, tier, mapSlug, knownEtag);
-        if (fetched.notModified()
-                && recorder.markUnchanged(capturedAt, queue, platform, region, tier, mapSlug)) {
-            metrics.recordUnchangedSnapshot();
-            return 0;
-        }
-        RatesFetch usable = fetched.notModified() ? client.fetch(queue, platform, region, tier, mapSlug) : fetched;
-        validator.validate(usable.rates());
-        List<BlizzardRatesResponse.HeroRate> heroesWithData = validator.withoutEmptyEntries(usable.rates());
-        validator.validateBanRates(queue, heroesWithData);
-        SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
-                region, tier, mapSlug, heroesWithData, usable.etag());
-        if (!outcome.changed()) {
-            metrics.recordUnchangedSnapshot();
-        }
-        return outcome.rowsSaved();
-    }
-
-    private List<String> resolveMapSlugs(CollectorJob job) {
-        List<String> slugs = new ArrayList<>();
-        for (String map : job.maps()) {
-            if (EACH_MAP.equals(map)) {
-                discoverMaps();
-                gameMapRepository.findAll().forEach(gameMap -> slugs.add(gameMap.getSlug()));
-            } else {
-                slugs.add(map);
-            }
-        }
-        return slugs;
-    }
-
-    private void discoverMaps() {
-        try {
-            mapDiscovery.discover();
-        } catch (RuntimeException exception) {
-            log.warn("Map discovery failed: {}", exception.getMessage());
-        }
-    }
-
-    private void evictCaches() {
-        for (String cacheName : List.of(StatsSnapshotProvider.CACHE_NAME, HeroService.CACHE_NAME, MapService.CACHE_NAME)) {
-            Cache cache = cacheManager.getCache(cacheName);
-            if (cache != null) {
-                cache.clear();
-            }
-        }
-    }
-
-    private String describe(GameQueue queue, Platform platform, Region region, RankTier tier, String mapSlug,
-                            RuntimeException exception) {
-        return queue + "/" + platform + "/" + region + "/" + tier + "/" + mapSlug + ": " + exception.getMessage();
-    }
-
-    private String truncate(String text) {
-        return text.length() > MAX_ERROR_SUMMARY_LENGTH ? text.substring(0, MAX_ERROR_SUMMARY_LENGTH) : text;
-    }
-
-    private void pause() {
-        try {
-            Thread.sleep(properties.pause());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

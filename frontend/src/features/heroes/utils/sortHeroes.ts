@@ -1,4 +1,4 @@
-import type { HeroRole } from "../../../types/api";
+import type { HeroRole } from "../../../types/hero";
 
 const ROLE_ORDER: Record<HeroRole, number> = {
   TANK: 0,

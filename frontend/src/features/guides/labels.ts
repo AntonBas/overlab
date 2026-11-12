@@ -1,4 +1,4 @@
-import type { GuideKind, GuideSide } from "../../types/api";
+import type { GuideKind, GuideSide } from "../../types/guide";
 
 export const GUIDE_KIND_LABELS: Record<GuideKind, string> = {
   SETUP: "Setup",

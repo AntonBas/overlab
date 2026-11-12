@@ -1,5 +1,5 @@
-import type { RankTier } from "../../types/api";
-import { RANK_OPTIONS } from "../../features/stats/filterOptions";
+import type { RankTier } from "../../types/common";
+import { RANK_OPTIONS } from "../../features/stats";
 import { IconSelect } from "./IconSelect";
 
 interface RankFilterProps {

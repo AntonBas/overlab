@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Preferences } from "../../../types/api";
+import type { Preferences } from "../../../types/user";
 
 export interface PersonalDataValue {
   favoriteHeroes: ReadonlySet<string>;

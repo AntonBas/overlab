@@ -1,12 +1,12 @@
 import type {
   GameQueue,
-  HeroRole,
   Platform,
   RankTier,
   Region,
   SortDirection,
   StatsSort,
-} from "../../types/api";
+} from "../../types/common";
+import type { HeroRole } from "../../types/hero";
 
 export interface StatsFilters {
   queue: GameQueue;

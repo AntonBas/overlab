@@ -11,6 +11,12 @@ management:
 
 server:
   forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
   error:
     include-message: never
     include-stacktrace: never

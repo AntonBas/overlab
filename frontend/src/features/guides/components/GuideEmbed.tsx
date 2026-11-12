@@ -1,4 +1,4 @@
-import type { Guide } from "../../../types/api";
+import type { Guide } from "../../../types/guide";
 
 export function GuideEmbed({ guide }: { guide: Guide }) {
   return (

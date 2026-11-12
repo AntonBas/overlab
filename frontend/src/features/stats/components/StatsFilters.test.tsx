@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
-import type { GameMap } from "../../../types/api";
+import type { GameMap } from "../../../types/map";
 import {
   DEFAULT_FILTERS,
   type Coverage,

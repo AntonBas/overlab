@@ -1,13 +1,12 @@
+import type { GuideKind, GuideSide } from "../../types/guide";
 import type {
-  GuideKind,
-  GuideSide,
   AbilityControl,
   Hero,
-  MapMode,
   PerkPosition,
   PerkRecommendation,
   PerkSlot,
-} from "../../types/api";
+} from "../../types/hero";
+import type { MapMode } from "../../types/map";
 
 export interface AdminHero extends Hero {
   active: boolean;

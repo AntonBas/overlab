@@ -1,6 +1,5 @@
 package gg.overlab.backend.config.security;
 
-import gg.overlab.backend.user.UserRepository;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,7 +31,7 @@ public class WebSecurityConfig {
                                                    JwtTokenProvider tokenProvider,
                                                    AuthCookieService cookieService,
                                                    RateLimitCounter rateLimitCounter,
-                                                   UserRepository userRepository,
+                                                   AdminAccessChecker adminAccessChecker,
                                                    @Qualifier("handlerExceptionResolver")
                                                    HandlerExceptionResolver exceptionResolver,
                                                    AuthProperties authProperties,
@@ -42,7 +41,7 @@ public class WebSecurityConfig {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, cookieService);
         RateLimitFilter rateLimitFilter = new RateLimitFilter(rateLimitCounter, authProperties, rateLimitProperties,
                 exceptionResolver);
-        AdminSessionFilter adminSessionFilter = new AdminSessionFilter(userRepository);
+        AdminSessionFilter adminSessionFilter = new AdminSessionFilter(adminAccessChecker);
 
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -59,9 +58,11 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/me/**").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feedback", "/api/business").permitAll()
-                        .requestMatchers("/api/admin/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .requestMatchers(PublicApiPaths.ADMIN_PREFIX + "**", "/v3/api-docs/**", "/swagger-ui/**",
+                                "/swagger-ui.html")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(adminSessionFilter, JwtAuthenticationFilter.class)

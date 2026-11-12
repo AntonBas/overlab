@@ -9,5 +9,7 @@ public record FeedbackDto(
         String message,
         String pagePath,
         FeedbackStatus status,
-        Instant createdAt) {
+        Instant createdAt,
+        String contactName,
+        String contactEmail) {
 }

@@ -1,36 +1,34 @@
 package gg.overlab.backend.exception.api;
 
-import gg.overlab.backend.exception.core.BadRequestException;
-import gg.overlab.backend.exception.core.ConflictException;
-import gg.overlab.backend.exception.core.EntityNotFoundException;
-import gg.overlab.backend.exception.core.TooManyRequestsException;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
+import gg.overlab.backend.exception.core.ApiException;
+import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.ErrorResponseException;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
@@ -38,25 +36,12 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiErrorHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFound(EntityNotFoundException exception, HttpServletRequest request) {
-        return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
-    }
+    private static final String NO_STORE = "no-store";
+    private static final Set<String> CONFLICT_SQL_STATES = Set.of("23505", "23503");
 
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ApiError> handleConflict(ConflictException exception, HttpServletRequest request) {
-        return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(TooManyRequestsException.class)
-    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestsException exception,
-                                                          HttpServletRequest request) {
-        return build(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiError> handleBadRequest(BadRequestException exception, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiError> handleApiException(ApiException exception, HttpServletRequest request) {
+        return build(exception.status(), exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -68,8 +53,24 @@ public class ApiErrorHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception,
                                                         HttpServletRequest request) {
-        log.warn("Data integrity violation on {}: {}", request.getRequestURI(), exception.getMostSpecificCause().getMessage());
-        return build(HttpStatus.CONFLICT, "Request conflicts with existing data", request, List.of());
+        if (isConflictWithExistingData(exception)) {
+            log.warn("Data integrity violation on {}: {}", request.getRequestURI(),
+                    exception.getMostSpecificCause().getMessage());
+            return build(HttpStatus.CONFLICT, "Request conflicts with existing data", request, List.of());
+        }
+        log.error("Unexpected data integrity violation on {}", request.getRequestURI(), exception);
+        Sentry.captureException(exception);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request, List.of());
+    }
+
+    private static boolean isConflictWithExistingData(DataIntegrityViolationException exception) {
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sqlException && sqlException.getSQLState() != null
+                    && CONFLICT_SQL_STATES.contains(sqlException.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -80,7 +81,7 @@ public class ApiErrorHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException exception,
                                                        HttpServletRequest request) {
-        ApiError.SubError subError = new ApiError.SubError(exception.getName(), "Invalid value: " + exception.getValue());
+        ApiError.SubError subError = new ApiError.SubError(exception.getName(), "Invalid value");
         return build(HttpStatus.BAD_REQUEST, "Invalid request parameter", request, List.of(subError));
     }
 
@@ -104,7 +105,8 @@ public class ApiErrorHandler {
     public ResponseEntity<ApiError> handleInvalidBody(MethodArgumentNotValidException exception,
                                                       HttpServletRequest request) {
         List<ApiError.SubError> subErrors = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ApiError.SubError(error.getField(), error.getDefaultMessage()))
+                .map(error -> new ApiError.SubError(error.getField(),
+                        error.isBindingFailure() ? "Invalid value" : error.getDefaultMessage()))
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "Validation failed", request, subErrors);
     }
@@ -113,29 +115,6 @@ public class ApiErrorHandler {
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException exception,
                                                          HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "Malformed request body", request, List.of());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException exception,
-                                                             HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(EmailNotVerifiedException.class)
-    public ResponseEntity<ApiError> handleEmailNotVerified(EmailNotVerifiedException exception,
-                                                           HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(EmailAlreadyUsedException.class)
-    public ResponseEntity<ApiError> handleEmailAlreadyUsed(EmailAlreadyUsedException exception,
-                                                           HttpServletRequest request) {
-        return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ApiError> handleInvalidToken(InvalidTokenException exception, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -174,6 +153,7 @@ public class ApiErrorHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception exception, HttpServletRequest request) {
         log.error("Unhandled exception on {}", request.getRequestURI(), exception);
+        Sentry.captureException(exception);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request, List.of());
     }
 
@@ -181,6 +161,14 @@ public class ApiErrorHandler {
                                            List<ApiError.SubError> subErrors) {
         ApiError body = new ApiError(status.getReasonPhrase(), status.value(), Instant.now(), message,
                 request.getRequestURI(), subErrors);
-        return ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, "no-store").body(body);
+        overridePublicCacheHeader();
+        return ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, NO_STORE).body(body);
+    }
+
+    private void overridePublicCacheHeader() {
+        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes
+                && attributes.getResponse() != null) {
+            attributes.getResponse().setHeader(HttpHeaders.CACHE_CONTROL, NO_STORE);
+        }
     }
 }

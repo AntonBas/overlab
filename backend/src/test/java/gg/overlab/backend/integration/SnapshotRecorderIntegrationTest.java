@@ -2,8 +2,8 @@ package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gg.overlab.backend.collector.BlizzardRatesResponse;
-import gg.overlab.backend.collector.SnapshotRecorder;
+import gg.overlab.backend.collector.client.BlizzardRatesResponse;
+import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;

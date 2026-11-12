@@ -25,7 +25,7 @@ public class CollectorMetrics {
     private final SnapshotCheckRepository checkRepository;
 
     @PostConstruct
-    void registerLastSuccessGauges() {
+    void registerMeters() {
         for (String counter : List.of("collector.new.heroes", "collector.new.maps", "collector.role.changes",
                 "collector.outliers", "collector.rejected.snapshots", "collector.unchanged.snapshots")) {
             registry.counter(counter);
@@ -58,11 +58,11 @@ public class CollectorMetrics {
         registry.counter("collector.rejected.snapshots").increment();
     }
 
-    public void recordNewHero(String slug) {
+    public void recordNewHero() {
         registry.counter("collector.new.heroes").increment();
     }
 
-    public void recordNewMap(String slug) {
+    public void recordNewMap() {
         registry.counter("collector.new.maps").increment();
     }
 

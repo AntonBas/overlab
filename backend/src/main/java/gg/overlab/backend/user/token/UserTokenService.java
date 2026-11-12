@@ -1,7 +1,8 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.exception.core.ConcurrentRefreshException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.User;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Issues and consumes single-use tokens. Only a hash of each token is stored. Presenting a used refresh token
+ * again after a 30 second grace period (parallel browser requests are normal) is treated as theft and revokes
+ * every refresh token of that user.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -55,14 +61,26 @@ public class UserTokenService {
                 .orElseThrow(InvalidTokenException::new);
         Instant now = Instant.now();
         if (token.getUsedAt() != null) {
+            if (isRecentlyUsedRefresh(token, now)) {
+                throw new ConcurrentRefreshException();
+            }
             revokeSessionsOnReuse(token, now);
             throw new InvalidTokenException();
         }
         if (token.getExpiresAt().isBefore(now)) {
             throw new InvalidTokenException();
         }
+        if (tokenRepository.markUsed(token.getId(), now) == 0) {
+            throw token.getType() == UserTokenType.REFRESH
+                    ? new ConcurrentRefreshException()
+                    : new InvalidTokenException();
+        }
         token.setUsedAt(now);
         return new ConsumedToken(token.getUser(), token.getType());
+    }
+
+    private boolean isRecentlyUsedRefresh(UserToken token, Instant now) {
+        return token.getType() == UserTokenType.REFRESH && !token.getUsedAt().isBefore(now.minus(REUSE_GRACE));
     }
 
     private void revokeSessionsOnReuse(UserToken token, Instant now) {

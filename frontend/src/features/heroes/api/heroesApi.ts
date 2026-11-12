@@ -7,7 +7,7 @@ import type {
   HeroRelations,
   Perk,
   RelatedHero,
-} from "../../../types/api";
+} from "../../../types/hero";
 
 export async function fetchHeroes(): Promise<Hero[]> {
   const { data } = await api.get<Hero[]>("/heroes");

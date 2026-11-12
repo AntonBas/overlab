@@ -1,5 +1,10 @@
 import { useFetch } from "../../../hooks/useFetch";
-import type { GameQueue, Platform, RankTier, Region } from "../../../types/api";
+import type {
+  GameQueue,
+  Platform,
+  RankTier,
+  Region,
+} from "../../../types/common";
 import { fetchFreshness } from "../api/statsApi";
 import { describeFreshness } from "../utils/freshness";
 

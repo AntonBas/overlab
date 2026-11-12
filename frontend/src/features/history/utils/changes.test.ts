@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HeroChange } from "../../../types/api";
+import type { HeroChange } from "../../../types/stats";
 import { sortChanges } from "./changes";
 
 function change(overrides: Partial<HeroChange>): HeroChange {

@@ -5,6 +5,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
 } from "react";
 
 const VIEWPORT_MARGIN = 8;
@@ -18,6 +20,7 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
   const [style, setStyle] = useState<CSSProperties>({});
 
   const hideTimer = useRef<number | undefined>(undefined);
+  const touchStartedClosed = useRef<boolean | null>(null);
 
   const show = useCallback(() => {
     window.clearTimeout(hideTimer.current);
@@ -33,6 +36,25 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
   }, []);
 
   useEffect(() => () => window.clearTimeout(hideTimer.current), []);
+
+  const onPointerDown = useCallback(
+    (event: PointerEvent) => {
+      touchStartedClosed.current = event.pointerType === "mouse" ? null : !open;
+    },
+    [open],
+  );
+
+  const onClickCapture = useCallback(
+    (event: MouseEvent) => {
+      const firstTouch = touchStartedClosed.current === true;
+      touchStartedClosed.current = null;
+      if (firstTouch) {
+        event.preventDefault();
+        show();
+      }
+    },
+    [show],
+  );
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -72,10 +94,21 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
         setOpen(false);
       }
     }
+    function onOutsidePointerDown(event: globalThis.PointerEvent) {
+      const target = event.target as Node;
+      if (
+        !triggerRef.current?.contains(target) &&
+        !tipRef.current?.contains(target)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onOutsidePointerDown);
     window.addEventListener("scroll", hide, true);
     window.addEventListener("resize", hide);
     window.addEventListener("keydown", onKeyDown);
     return () => {
+      document.removeEventListener("pointerdown", onOutsidePointerDown);
       window.removeEventListener("scroll", hide, true);
       window.removeEventListener("resize", hide);
       window.removeEventListener("keydown", onKeyDown);
@@ -92,6 +125,8 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
       onMouseLeave: hideSoon,
       onFocus: show,
       onBlur: hide,
+      onPointerDown,
+      onClickCapture,
     },
     tipProps: {
       onMouseEnter: show,

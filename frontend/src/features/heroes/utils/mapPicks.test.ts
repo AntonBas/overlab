@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HeroMapStat } from "../../../types/api";
+import type { HeroMapStat } from "../../../types/stats";
 import { mapPicks } from "./mapPicks";
 
 function entry(overrides: Partial<HeroMapStat>): HeroMapStat {

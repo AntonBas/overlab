@@ -2,12 +2,14 @@ package gg.overlab.backend.user.auth;
 
 import gg.overlab.backend.config.security.AuthCookieService;
 import gg.overlab.backend.config.security.AuthenticatedUser;
+import gg.overlab.backend.exception.core.ConcurrentRefreshException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
+import gg.overlab.backend.exception.core.SessionExpiredException;
 import gg.overlab.backend.user.auth.dto.EmailRequest;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
 import gg.overlab.backend.user.auth.dto.ResetPasswordRequest;
 import gg.overlab.backend.user.auth.dto.TokenRequest;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,9 +37,9 @@ public class AuthController {
 
     @Operation(summary = "Register with email and password")
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
     }
 
     @Operation(summary = "Sign in with email and password and set auth cookies")
@@ -52,8 +54,16 @@ public class AuthController {
     @PostMapping("/refresh")
     public UserDto refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.read(request, AuthCookieService.REFRESH_COOKIE)
-                .orElseThrow(InvalidTokenException::new);
-        AuthTokens tokens = authService.refresh(refreshToken);
+                .orElseThrow(SessionExpiredException::new);
+        AuthTokens tokens;
+        try {
+            tokens = authService.refresh(refreshToken);
+        } catch (ConcurrentRefreshException exception) {
+            throw new SessionExpiredException();
+        } catch (InvalidTokenException exception) {
+            cookieService.clearTokens(response);
+            throw new SessionExpiredException();
+        }
         cookieService.writeTokens(response, tokens.accessToken(), tokens.refreshToken());
         return tokens.user();
     }

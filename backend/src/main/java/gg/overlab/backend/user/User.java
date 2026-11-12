@@ -1,6 +1,9 @@
 package gg.overlab.backend.user;
 
 import gg.overlab.backend.common.TimestampedEntity;
+import gg.overlab.backend.config.security.TokenSubject;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.notification.EmailRecipient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +21,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"}))
-public class User extends TimestampedEntity {
+@Table(name = "users")
+public class User extends TimestampedEntity implements TokenSubject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,9 +45,6 @@ public class User extends TimestampedEntity {
     @Column(nullable = false, length = 16)
     private AuthProvider provider = AuthProvider.LOCAL;
 
-    @Column(name = "provider_id", length = 255)
-    private String providerId;
-
     @Column(name = "google_subject", length = 255)
     private String googleSubject;
 
@@ -60,4 +59,8 @@ public class User extends TimestampedEntity {
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
+
+    public EmailRecipient toEmailRecipient() {
+        return new EmailRecipient(email, displayName);
+    }
 }

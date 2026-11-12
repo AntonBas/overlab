@@ -1,5 +1,6 @@
 package gg.overlab.backend.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,14 +39,61 @@ class LoginAttemptLimiterTest {
     void storesOnlyAHashOfTheEmail() {
         limiter.recordFailure("ana@overlab.gg");
 
-        verify(counter).increment(org.mockito.ArgumentMatchers.argThat(key ->
+        verify(counter, org.mockito.Mockito.times(2)).increment(org.mockito.ArgumentMatchers.argThat(key ->
                 key.startsWith("overlab:login-failures:") && !key.contains("ana")), any(Duration.class));
     }
 
     @Test
-    void resetClearsTheCounter() {
+    void blocksOnlyTheAddressAtTenFailuresAndEveryoneAtFifty() {
+        when(counter.current(anyString())).thenReturn(10L, 0L);
+
+        assertThatThrownBy(() -> limiter.requireAllowed("ana@overlab.gg"))
+                .isInstanceOf(TooManyRequestsException.class);
+
+        when(counter.current(anyString())).thenReturn(0L, 50L);
+
+        assertThatThrownBy(() -> limiter.requireAllowed("ana@overlab.gg"))
+                .isInstanceOf(TooManyRequestsException.class);
+    }
+
+    @Test
+    void resetClearsTheAddressAndTheEmailCounters() {
         limiter.reset("ana@overlab.gg");
 
-        verify(counter).reset(org.mockito.ArgumentMatchers.argThat(key -> key.startsWith("overlab:login-failures:")));
+        verify(counter, org.mockito.Mockito.times(2)).reset(org.mockito.ArgumentMatchers.argThat(key -> key.startsWith("overlab:login-failures:")));
+    }
+
+    @Test
+    void mailCooldownIsPerAddressSoAStrangerCannotSilenceTheOwner() {
+        when(counter.increment(anyString(), any())).thenReturn(1L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isFalse();
+    }
+
+    @Test
+    void rejectedMailAttemptsDoNotUseUpTheHourlyAllowanceOfTheOwner() {
+        when(counter.increment(org.mockito.ArgumentMatchers.contains(":password-reset:"), any())).thenReturn(2L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+
+        verify(counter, org.mockito.Mockito.never())
+                .increment(org.mockito.ArgumentMatchers.contains(":hourly:"), any());
+    }
+
+    @Test
+    void hourlyCapStopsMailOnlyAfterTenMailsWereAllowed() {
+        when(counter.increment(anyString(), any())).thenReturn(1L);
+        when(counter.current(org.mockito.ArgumentMatchers.contains(":hourly:"))).thenReturn(10L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+    }
+
+    @Test
+    void mailIsThrottledWhenTheSameAddressRepeatsOrTheHourlyCapIsReached() {
+        when(counter.increment(anyString(), any())).thenReturn(2L);
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+
+        when(counter.increment(anyString(), any())).thenReturn(11L);
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
     }
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
-import { useAuth } from "../../auth/context/useAuth";
+import { useAuth } from "../../auth";
 import { NotFoundPage } from "../../../pages/NotFoundPage";
 
 export function RequireAdmin({ children }: { children: ReactNode }) {

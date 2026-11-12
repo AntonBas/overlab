@@ -35,7 +35,7 @@ public class AuditService {
     }
 
     public void logUserEvent(AuditAction action, Long userId, String role) {
-        submit(action, "User", userId, null, new Actor(userId, role));
+        submit(action, AuditEntityType.USER, userId, null, new Actor(userId, role));
     }
 
     private void submit(AuditAction action, String entityType, Object entityId, Map<String, Object> changes,

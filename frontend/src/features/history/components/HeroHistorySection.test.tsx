@@ -19,7 +19,7 @@ vi.mock("../../patches/api/patchesApi", () => ({
   fetchPatches: vi.fn(() => Promise.resolve([])),
 }));
 
-import { fetchHeroHistory } from "../../stats/api/statsApi";
+import { fetchHeroHistory } from "../../stats";
 import { HeroHistorySection } from "./HeroHistorySection";
 
 describe("HeroHistorySection", () => {

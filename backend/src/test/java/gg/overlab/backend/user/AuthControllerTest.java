@@ -9,12 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.AuthCookieService;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.api.ApiErrorHandler;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
 import gg.overlab.backend.user.auth.AuthController;
 import gg.overlab.backend.user.auth.AuthService;
 import gg.overlab.backend.user.auth.AuthTokens;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
 import gg.overlab.backend.user.dto.UserDto;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
@@ -40,13 +40,10 @@ class AuthControllerTest {
     }
 
     @Test
-    void registerReturnsCreatedUser() throws Exception {
-        when(authService.register(any())).thenReturn(userDto());
-
+    void registerIsAccepted() throws Exception {
         mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\",\"displayName\":\"Ana\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("ana@overlab.gg"));
+                .andExpect(status().isAccepted());
     }
 
     @Test
@@ -58,12 +55,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void registerDuplicateEmailReturnsConflict() throws Exception {
-        when(authService.register(any())).thenThrow(new EmailAlreadyUsedException());
-
-        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\",\"displayName\":\"Ana\"}"))
-                .andExpect(status().isConflict());
+    void registerRejectsDisplayNamesWithEdgeSpacesOrControlCharacters() throws Exception {
+        for (String displayName : new String[] {" a ", "Ana ", "An\\u0007a"}) {
+            mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\","
+                                    + "\"displayName\":\"" + displayName + "\"}"))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
@@ -94,8 +92,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshWithoutCookieReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isBadRequest());
+    void refreshWithoutCookieReturnsUnauthorized() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
     }
 
     @Test

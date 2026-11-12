@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { FavoriteButton } from "../../personal/components/FavoriteButton";
+import { FavoriteButton } from "../../personal";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import type { GameMap } from "../../../types/api";
+import type { GameMap } from "../../../types/map";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 

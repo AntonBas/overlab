@@ -4,25 +4,25 @@ import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.EmailNotVerifiedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserMapper;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    public static final String REGISTRATION_NOTICE = "registration-notice";
+    private static final String RESEND_VERIFICATION = "resend-verification";
+    private static final String PASSWORD_RESET = "password-reset";
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -46,21 +50,25 @@ public class AuthService {
     private volatile String dummyPasswordHash;
 
     @Transactional
-    public UserDto register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         String email = normalize(request.email());
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new EmailAlreadyUsedException();
+        String passwordHash = passwordEncoder.encode(request.password());
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            if (!loginAttemptLimiter.isMailThrottled(REGISTRATION_NOTICE, email)) {
+                emailService.sendRegistrationAttemptNotice(existing.get().toEmailRecipient());
+            }
+            return;
         }
         User user = new User();
         user.setEmail(email);
         user.setDisplayName(request.displayName().trim());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setPasswordHash(passwordHash);
         user.setRole(UserRole.USER);
         user.setProvider(AuthProvider.LOCAL);
         user = userRepository.save(user);
         sendVerification(user);
         auditService.logUserEvent(AuditAction.CREATE, user.getId(), user.getRole().name());
-        return userMapper.toDto(user);
     }
 
     @Transactional
@@ -85,6 +93,8 @@ public class AuthService {
         if (!user.isEnabled()) {
             throw new InvalidCredentialsException();
         }
+        user.setLastLoginAt(Instant.now());
+        userRepository.save(user);
         AuthTokens tokens = issueTokens(user);
         auditService.logUserEvent(AuditAction.LOGIN, user.getId(), user.getRole().name());
         return tokens;
@@ -101,8 +111,6 @@ public class AuthService {
 
     @Transactional
     public AuthTokens issueTokens(User user) {
-        user.setLastLoginAt(Instant.now());
-        userRepository.save(user);
         String refreshToken = tokenService.issue(user, UserTokenType.REFRESH, properties.refreshTokenTtl());
         return new AuthTokens(jwtTokenProvider.createAccessToken(user), refreshToken, userMapper.toDto(user));
     }
@@ -145,6 +153,9 @@ public class AuthService {
 
     @Transactional
     public void resendVerification(String email) {
+        if (loginAttemptLimiter.isMailThrottled(RESEND_VERIFICATION, normalize(email))) {
+            return;
+        }
         userRepository.findByEmailIgnoreCase(normalize(email))
                 .filter(user -> !user.isEmailVerified() && user.getProvider() == AuthProvider.LOCAL)
                 .ifPresent(this::sendVerification);
@@ -152,16 +163,19 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(String email) {
+        if (loginAttemptLimiter.isMailThrottled(PASSWORD_RESET, normalize(email))) {
+            return;
+        }
         userRepository.findByEmailIgnoreCase(normalize(email))
                 .filter(User::isEnabled)
                 .ifPresent(user -> {
                     if (user.getProvider() != AuthProvider.LOCAL) {
-                        emailService.sendGoogleSignInNotice(user);
+                        emailService.sendGoogleSignInNotice(user.toEmailRecipient());
                         return;
                     }
                     tokenService.revokeAll(user, UserTokenType.PASSWORD_RESET);
                     String token = tokenService.issue(user, UserTokenType.PASSWORD_RESET, properties.resetTokenTtl());
-                    emailService.sendPasswordReset(user, token);
+                    emailService.sendPasswordReset(user.toEmailRecipient(), token);
                 });
     }
 
@@ -177,7 +191,7 @@ public class AuthService {
     private void sendVerification(User user) {
         tokenService.revokeAll(user, UserTokenType.EMAIL_VERIFICATION);
         String token = tokenService.issue(user, UserTokenType.EMAIL_VERIFICATION, properties.verificationTokenTtl());
-        emailService.sendVerification(user, token);
+        emailService.sendVerification(user.toEmailRecipient(), token);
     }
 
     private String hashFor(User user) {

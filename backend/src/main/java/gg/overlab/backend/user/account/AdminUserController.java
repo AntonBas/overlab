@@ -2,8 +2,8 @@ package gg.overlab.backend.user.account;
 
 import gg.overlab.backend.common.PageResponse;
 import gg.overlab.backend.config.security.AuthenticatedUser;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthProvider;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.account.dto.AdminUserDto;
 import gg.overlab.backend.user.account.dto.AdminUserFilter;
 import gg.overlab.backend.user.account.dto.SetEnabledRequest;

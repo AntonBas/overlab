@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class EntityNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class EntityNotFoundException extends ApiException {
 
     public EntityNotFoundException(String entityName, Object identifier) {
-        super(entityName + " not found: " + identifier);
+        super(HttpStatus.NOT_FOUND, entityName + " not found: " + identifier);
     }
 }

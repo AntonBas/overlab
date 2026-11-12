@@ -3,17 +3,22 @@ package gg.overlab.backend.stats;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.function.Function;
 
 public enum StatsSort {
-    PICK_RATE(Comparator.comparing(HeroStatDto::pickRate, Comparator.nullsFirst(Comparator.<BigDecimal>naturalOrder()))),
-    WIN_RATE(Comparator.comparing(HeroStatDto::winRate, Comparator.nullsFirst(Comparator.<BigDecimal>naturalOrder()))),
-    BAN_RATE(Comparator.comparing(HeroStatDto::banRate, Comparator.nullsFirst(Comparator.<BigDecimal>naturalOrder()))),
+    PICK_RATE(byRate(HeroStatDto::pickRate)),
+    WIN_RATE(byRate(HeroStatDto::winRate)),
+    BAN_RATE(byRate(HeroStatDto::banRate)),
     NAME(Comparator.comparing(HeroStatDto::heroName, String.CASE_INSENSITIVE_ORDER));
 
     private final Comparator<HeroStatDto> comparator;
 
     StatsSort(Comparator<HeroStatDto> comparator) {
         this.comparator = comparator;
+    }
+
+    private static Comparator<HeroStatDto> byRate(Function<HeroStatDto, BigDecimal> rate) {
+        return Comparator.comparing(rate, Comparator.nullsFirst(Comparator.<BigDecimal>naturalOrder()));
     }
 
     public Comparator<HeroStatDto> comparator(boolean descending) {
