@@ -8,13 +8,11 @@ import static org.mockito.Mockito.when;
 
 import gg.overlab.backend.audit.AuditLogRepository;
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.ConflictException;
-import gg.overlab.backend.feedback.FeedbackService;
-import gg.overlab.backend.hero.relation.feedback.RelationFeedbackService;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.account.AccountService;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
-import gg.overlab.backend.user.personal.PersonalService;
 import gg.overlab.backend.user.token.UserTokenService;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +24,7 @@ class AccountServiceDeleteTest {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final AccountService service = new AccountService(userRepository, new UserMapper(),
             mock(PasswordEncoder.class), mock(UserTokenService.class), mock(EmailService.class),
-            AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class),
-            mock(PersonalService.class), mock(RelationFeedbackService.class), mock(FeedbackService.class));
+            AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class));
 
     private User admin(long id, boolean enabled) {
         User user = AuthFixtures.user(id, "admin" + id + "@overlab.gg", UserRole.ADMIN, true);

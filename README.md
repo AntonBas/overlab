@@ -103,7 +103,7 @@ docker/     Prometheus and Grafana configuration
 - Controllers are thin: they validate input, call one service and return a DTO. Business logic and transactions belong in services, and controllers never use repositories. Mappers are explicit classes (no MapStruct), because most DTOs compute fields such as media URLs.
 - Errors use one `ApiError` format produced by `ApiErrorHandler`; new exception types are added there. Filters that must answer with an error (for example the rate limiter) hand the exception to the same handler.
 - Configuration uses constructor injection only; no code comments except Javadoc on public APIs (Checkstyle enforces it).
-- Tests mirror the main packages. Unit tests use Mockito; `integration/` tests start PostgreSQL and Redis with Testcontainers. `architecture/ArchitectureTest` (ArchUnit) guards the layering above and freezes the existing package cycles in `src/test/resources/archunit_store`; do not add new cycles.
+- Tests mirror the main packages. Unit tests use Mockito; `integration/` tests start PostgreSQL and Redis with Testcontainers. `architecture/ArchitectureTest` (ArchUnit) guards the layering above and requires the top-level packages to be free of cycles: `config/` and `exception/` are base layers that never depend on a domain, and a domain reaches into `config/` only through small interfaces it implements itself (for example `AdminAccessChecker`, `TokenSubject`, `FeedbackAuthors`). `collector/` is split into `client/` (Blizzard HTTP clients), `parser/`, `imports/` (perks, abilities, patches, maps), `media/` (image downloads) and `snapshot/` (validation and storage of statistics); public and admin endpoints of a domain live in separate `*Controller` and `*AdminController` classes.
 
 ## Running locally
 

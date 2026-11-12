@@ -2,9 +2,9 @@ package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gg.overlab.backend.collector.AbilityImportWriter;
-import gg.overlab.backend.collector.ParsedAbility;
-import gg.overlab.backend.collector.PerkImportWriter;
+import gg.overlab.backend.collector.imports.AbilityImportWriter;
+import gg.overlab.backend.collector.imports.ImportCounts;
+import gg.overlab.backend.collector.parser.ParsedAbility;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
@@ -46,7 +46,7 @@ class AbilityImportWriterIntegrationTest {
         writer.write("ability-test", List.of(parsed("old-gun", "Old Gun", 0), parsed("dash", "Dash", 1)),
                 url -> Optional.empty());
 
-        PerkImportWriter.Counts counts = writer.write("ability-test",
+        ImportCounts counts = writer.write("ability-test",
                 List.of(parsed("dash", "Dash", 0), parsed("new-gun", "New Gun", 1)), url -> Optional.empty());
 
         assertThat(counts.removed()).isEqualTo(1);
@@ -70,7 +70,7 @@ class AbilityImportWriterIntegrationTest {
     void removesNothingWhenThePageYieldedNoAbilities() {
         writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
 
-        PerkImportWriter.Counts counts = writer.write("ability-test", List.of(), url -> Optional.empty());
+        ImportCounts counts = writer.write("ability-test", List.of(), url -> Optional.empty());
 
         assertThat(counts.removed()).isZero();
         assertThat(abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test")).hasSize(1);

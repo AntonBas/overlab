@@ -11,14 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
-import java.time.Duration;
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -326,7 +326,7 @@ class AccountIntegrationTest {
         if (provider == AuthProvider.LOCAL) {
             account.setPasswordHash(passwordEncoder.encode(PASSWORD));
         } else {
-            account.setProviderId("google-" + email);
+            account.setGoogleSubject("google-" + email);
         }
         return userRepository.saveAndFlush(account);
     }

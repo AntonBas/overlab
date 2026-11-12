@@ -1,10 +1,10 @@
 package gg.overlab.backend.user.auth;
 
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,6 @@ public class OAuthUserService {
         user.setDisplayName(displayNameFor(name, normalizedEmail));
         user.setRole(UserRole.USER);
         user.setProvider(AuthProvider.GOOGLE);
-        user.setProviderId(googleSubject);
         user.setGoogleSubject(googleSubject);
         user.setEmailVerified(true);
         return userRepository.save(user);

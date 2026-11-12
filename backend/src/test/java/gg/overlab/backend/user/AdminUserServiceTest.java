@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.user.account.AdminUserService;
 import gg.overlab.backend.user.token.UserTokenService;

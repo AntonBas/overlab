@@ -3,6 +3,7 @@ package gg.overlab.backend.feedback;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,9 +12,13 @@ import static org.mockito.Mockito.when;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.feedback.dto.BusinessMessageRequest;
+import gg.overlab.backend.feedback.dto.FeedbackAdminDto;
 import gg.overlab.backend.feedback.dto.FeedbackRequest;
 import gg.overlab.backend.notification.EmailService;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -21,7 +26,8 @@ class FeedbackServiceTest {
 
     private final SiteFeedbackRepository repository = mock(SiteFeedbackRepository.class);
     private final EmailService emailService = mock(EmailService.class);
-    private final FeedbackService service = new FeedbackService(repository, emailService);
+    private final FeedbackAuthors feedbackAuthors = mock(FeedbackAuthors.class);
+    private final FeedbackService service = new FeedbackService(repository, emailService, feedbackAuthors);
 
     @Test
     void storesTrimmedFeedbackWithSafePagePath() {
@@ -102,5 +108,24 @@ class FeedbackServiceTest {
         ArgumentCaptor<SiteFeedback> captor = ArgumentCaptor.forClass(SiteFeedback.class);
         verify(repository).save(captor.capture());
         return captor.getValue();
+    }
+
+    @Test
+    void adminListShowsTheContactNameOrTheAccountName() {
+        SiteFeedback business = new SiteFeedback();
+        business.setType(FeedbackType.BUSINESS);
+        business.setMessage("Let's talk");
+        business.setContactName("Partner");
+        SiteFeedback fromUser = new SiteFeedback();
+        fromUser.setType(FeedbackType.BUG);
+        fromUser.setMessage("Broken chart");
+        fromUser.setUserId(7L);
+        when(repository.findByStatusOrderByCreatedAtDesc(eq(FeedbackStatus.NEW), any()))
+                .thenReturn(List.of(business, fromUser));
+        when(feedbackAuthors.displayNames(Set.of(7L))).thenReturn(Map.of(7L, "Ana"));
+
+        List<FeedbackAdminDto> result = service.findForAdmin(FeedbackStatus.NEW);
+
+        assertThat(result).extracting(FeedbackAdminDto::authorName).containsExactly("Partner", "Ana");
     }
 }

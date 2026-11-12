@@ -1,10 +1,10 @@
 package gg.overlab.backend.user.auth;
 
 import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

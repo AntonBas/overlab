@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
 
     private final AccountService accountService;
+    private final AccountExportService exportService;
     private final AuthService authService;
     private final AuthCookieService cookieService;
 
@@ -71,7 +72,7 @@ public class AccountController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"overlab-account.json\"")
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(accountService.export(user.id()));
+                .body(exportService.export(user.id()));
     }
 
     @Operation(summary = "Delete the account permanently")

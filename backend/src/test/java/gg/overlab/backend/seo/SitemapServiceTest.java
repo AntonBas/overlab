@@ -4,38 +4,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gg.overlab.backend.gamemap.GameMap;
-import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.guide.Guide;
-import gg.overlab.backend.guide.GuideRepository;
-import gg.overlab.backend.hero.Hero;
-import gg.overlab.backend.hero.HeroRepository;
+import gg.overlab.backend.gamemap.MapService;
+import gg.overlab.backend.gamemap.dto.MapDto;
+import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.guide.dto.GuideDto;
+import gg.overlab.backend.hero.HeroService;
+import gg.overlab.backend.hero.dto.HeroDto;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class SitemapServiceTest {
 
-    private final HeroRepository heroRepository = mock(HeroRepository.class);
-    private final GameMapRepository mapRepository = mock(GameMapRepository.class);
-    private final GuideRepository guideRepository = mock(GuideRepository.class);
+    private final HeroService heroService = mock(HeroService.class);
+    private final MapService mapService = mock(MapService.class);
+    private final GuideService guideService = mock(GuideService.class);
 
     @Test
-    void listsStaticPagesActiveHeroesAndMapsWithAbsoluteUrls() {
-        Hero hero = new Hero();
-        hero.setSlug("ana");
-        GameMap map = new GameMap();
-        map.setSlug("busan");
-        when(heroRepository.findAllByActiveTrueOrderByNameAsc()).thenReturn(List.of(hero));
-        Guide guide = new Guide();
-        guide.setSlug("sleep-dart");
-        when(mapRepository.findAllByOrderByNameAsc()).thenReturn(List.of(map));
-        when(guideRepository.findAllByPublishedTrueOrderBySortOrderAscIdAsc()).thenReturn(List.of(guide));
+    void listsStaticPagesHeroesMapsAndGuidesWithAbsoluteUrls() {
+        HeroDto hero = new HeroDto("ana", "Ana", null, null, null, null, null, null, false);
+        MapDto map = new MapDto("busan", "Busan", null, null);
+        GuideDto guide = new GuideDto(7L, "sleep-dart", "7-sleep-dart", "ana", "Ana", null, null, "Sleep dart",
+                "abc123", 0, null, null, null, null, null, null, 0, true, null);
+        when(heroService.findAll()).thenReturn(List.of(hero));
+        when(mapService.findAll()).thenReturn(List.of(map));
+        when(guideService.findPublished(null, null)).thenReturn(List.of(guide));
 
-        String xml = new SitemapService(heroRepository, mapRepository, guideRepository, "https://example.com/").build();
+        String xml = new SitemapService(heroService, mapService, guideService, "https://example.com/").build();
 
         assertThat(xml).contains("<loc>https://example.com/stats</loc>", "<loc>https://example.com/perks</loc>",
-                "<loc>https://example.com/heroes/ana</loc>", "<loc>https://example.com/maps/busan</loc>", "<loc>https://example.com/heroes</loc>",
-                "<loc>https://example.com/counters</loc>", "-sleep-dart</loc>");
+                "<loc>https://example.com/heroes/ana</loc>", "<loc>https://example.com/maps/busan</loc>",
+                "<loc>https://example.com/heroes</loc>", "<loc>https://example.com/counters</loc>",
+                "<loc>https://example.com/guides/7-sleep-dart</loc>");
         assertThat(xml).doesNotContain("//stats");
     }
 }

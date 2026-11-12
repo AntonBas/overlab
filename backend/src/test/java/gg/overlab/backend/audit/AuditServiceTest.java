@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import gg.overlab.backend.config.security.AuthenticatedUser;
-import gg.overlab.backend.user.UserRole;
+import gg.overlab.backend.config.security.UserRole;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

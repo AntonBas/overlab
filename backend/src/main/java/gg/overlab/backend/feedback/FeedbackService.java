@@ -9,6 +9,10 @@ import gg.overlab.backend.feedback.dto.FeedbackRequest;
 import gg.overlab.backend.notification.EmailService;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ public class FeedbackService {
 
     private final SiteFeedbackRepository feedbackRepository;
     private final EmailService emailService;
+    private final FeedbackAuthors feedbackAuthors;
 
     @Transactional
     public void submit(Long userId, FeedbackRequest request) {
@@ -66,7 +71,12 @@ public class FeedbackService {
 
     @Transactional(readOnly = true)
     public List<FeedbackAdminDto> findForAdmin(FeedbackStatus status) {
-        return feedbackRepository.findForAdmin(status, PageRequest.of(0, MAX_ADMIN_ROWS));
+        List<SiteFeedback> rows = feedbackRepository.findByStatusOrderByCreatedAtDesc(status,
+                PageRequest.of(0, MAX_ADMIN_ROWS));
+        Set<Long> userIds = rows.stream().map(SiteFeedback::getUserId).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> names = userIds.isEmpty() ? Map.of() : feedbackAuthors.displayNames(userIds);
+        return rows.stream().map(row -> toAdminDto(row, names)).toList();
     }
 
     @Transactional
@@ -75,6 +85,14 @@ public class FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback", id));
         feedback.setStatus(status);
         feedback.setResolvedAt(status == FeedbackStatus.NEW ? null : Instant.now());
+    }
+
+    private FeedbackAdminDto toAdminDto(SiteFeedback feedback, Map<Long, String> names) {
+        String author = feedback.getContactName() != null ? feedback.getContactName()
+                : names.get(feedback.getUserId());
+        return new FeedbackAdminDto(feedback.getId(), feedback.getType(), feedback.getMessage(),
+                feedback.getPagePath(), author, feedback.getContactEmail(), feedback.getStatus(),
+                feedback.getCreatedAt(), feedback.getResolvedAt());
     }
 
     private String normalizePath(String path) {

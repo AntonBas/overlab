@@ -1,5 +1,6 @@
 package gg.overlab.backend.user;
 
+import gg.overlab.backend.config.security.UserRole;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;

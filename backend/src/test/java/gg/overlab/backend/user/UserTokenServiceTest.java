@@ -9,7 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.token.UserToken;
 import gg.overlab.backend.user.token.UserTokenRepository;
 import gg.overlab.backend.user.token.UserTokenService;

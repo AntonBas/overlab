@@ -1,10 +1,18 @@
 package gg.overlab.backend.collector;
 
+import gg.overlab.backend.collector.client.BlizzardRatesClient;
+import gg.overlab.backend.collector.client.BlizzardRatesResponse;
+import gg.overlab.backend.collector.client.RatesFetch;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
+import gg.overlab.backend.collector.imports.MapDiscoveryService;
+import gg.overlab.backend.collector.media.HeroAssetService;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
+import gg.overlab.backend.collector.snapshot.RatesValidator;
+import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
@@ -102,7 +110,7 @@ public class RatesCollectorService {
         }
     }
 
-    boolean runInline(String jobName, CollectorTrigger trigger) {
+    public boolean runInline(String jobName, CollectorTrigger trigger) {
         CollectorJob job = findJob(jobName);
         try {
             CollectorRun run = begin(job, trigger);

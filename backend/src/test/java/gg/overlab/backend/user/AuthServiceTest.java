@@ -12,17 +12,19 @@ import static org.mockito.Mockito.when;
 import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
+import gg.overlab.backend.exception.core.EmailNotVerifiedException;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.exception.core.TooManyRequestsException;
+import gg.overlab.backend.notification.EmailRecipient;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.auth.AuthService;
-import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.AuthTokens;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
@@ -77,7 +79,7 @@ class AuthServiceTest {
         assertThat(saved.getValue().getPasswordHash()).isNotEqualTo("password-123");
         assertThat(saved.getValue().getRole()).isEqualTo(UserRole.USER);
         assertThat(result.emailVerified()).isFalse();
-        verify(emailService).sendVerification(any(User.class), eq("raw-token"));
+        verify(emailService).sendVerification(any(EmailRecipient.class), eq("raw-token"));
         verify(auditService).logUserEvent(eq(AuditAction.CREATE), any(), eq("USER"));
     }
 
@@ -193,7 +195,7 @@ class AuthServiceTest {
 
         service.forgotPassword("ana@overlab.gg");
 
-        verify(emailService).sendPasswordReset(existingUser, "raw-token");
+        verify(emailService).sendPasswordReset(existingUser.toEmailRecipient(), "raw-token");
     }
 
     @Test

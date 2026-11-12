@@ -2,12 +2,12 @@ package gg.overlab.backend.user.auth;
 
 import gg.overlab.backend.config.security.AuthCookieService;
 import gg.overlab.backend.config.security.AuthenticatedUser;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.auth.dto.EmailRequest;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
 import gg.overlab.backend.user.auth.dto.ResetPasswordRequest;
 import gg.overlab.backend.user.auth.dto.TokenRequest;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

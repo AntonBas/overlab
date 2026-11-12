@@ -4,25 +4,21 @@ import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditLogRepository;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserMapper;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
-import gg.overlab.backend.user.account.dto.AccountExportDto;
 import gg.overlab.backend.user.account.dto.ChangeEmailRequest;
 import gg.overlab.backend.user.account.dto.ChangePasswordRequest;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
 import gg.overlab.backend.user.account.dto.UpdateProfileRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import gg.overlab.backend.user.dto.UserDto;
-import gg.overlab.backend.feedback.FeedbackService;
-import gg.overlab.backend.hero.relation.feedback.RelationFeedbackService;
-import gg.overlab.backend.user.personal.PersonalService;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.util.Locale;
@@ -45,9 +41,6 @@ public class AccountService {
     private final AuthProperties properties;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
-    private final PersonalService personalService;
-    private final RelationFeedbackService relationFeedbackService;
-    private final FeedbackService feedbackService;
 
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
@@ -78,7 +71,7 @@ public class AccountService {
         user.setPendingEmail(newEmail);
         tokenService.revokeAll(user, UserTokenType.EMAIL_CHANGE);
         String token = tokenService.issue(user, UserTokenType.EMAIL_CHANGE, properties.verificationTokenTtl());
-        emailService.sendEmailChange(user, newEmail, token);
+        emailService.sendEmailChange(user.toEmailRecipient(), newEmail, token);
     }
 
     @Transactional
@@ -93,16 +86,6 @@ public class AccountService {
         auditLogRepository.anonymizeActor(user.getId());
         auditLogRepository.anonymizeUserEntity(String.valueOf(user.getId()));
         userRepository.delete(user);
-    }
-
-    @Transactional(readOnly = true)
-    public AccountExportDto export(Long userId) {
-        User user = load(userId);
-        return new AccountExportDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole(),
-                user.getProvider(), user.isEmailVerified(), user.getCreatedAt(), user.getLastLoginAt(),
-                personalService.favorites(userId), relationFeedbackService.votes(userId),
-                feedbackService.export(userId),
-                personalService.preferences(userId));
     }
 
     private boolean isLastActiveAdmin(User user) {

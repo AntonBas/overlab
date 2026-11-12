@@ -1,6 +1,7 @@
 package gg.overlab.backend.user;
 
 import gg.overlab.backend.config.security.AuthProperties;
+import gg.overlab.backend.config.security.UserRole;
 import java.time.Duration;
 
 public final class AuthFixtures {

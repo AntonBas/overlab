@@ -2,7 +2,6 @@ package gg.overlab.backend.notification;
 
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.security.AuthProperties;
-import gg.overlab.backend.user.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
@@ -39,10 +38,10 @@ public class EmailService {
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
-    public void sendVerification(User user, String rawToken) {
-        deliver(user.getEmail(), null, new EmailTemplate(
+    public void sendVerification(EmailRecipient recipient, String rawToken) {
+        deliver(recipient.email(), null, new EmailTemplate(
                 "Confirm your Overlab email",
-                "Hi " + user.getDisplayName() + ",",
+                "Hi " + recipient.displayName() + ",",
                 List.of("Confirm your email address to finish creating your account. The link works for "
                         + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm email",
@@ -51,10 +50,10 @@ public class EmailService {
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
-    public void sendPasswordReset(User user, String rawToken) {
-        deliver(user.getEmail(), null, new EmailTemplate(
+    public void sendPasswordReset(EmailRecipient recipient, String rawToken) {
+        deliver(recipient.email(), null, new EmailTemplate(
                 "Reset your Overlab password",
-                "Hi " + user.getDisplayName() + ",",
+                "Hi " + recipient.displayName() + ",",
                 List.of("Someone asked to set a new password for your account. The link works for "
                         + describe(authProperties.resetTokenTtl()) + "."),
                 "Set a new password",
@@ -63,10 +62,10 @@ public class EmailService {
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
-    public void sendEmailChange(User user, String newEmail, String rawToken) {
+    public void sendEmailChange(EmailRecipient recipient, String newEmail, String rawToken) {
         deliver(newEmail, null, new EmailTemplate(
                 "Confirm your new Overlab email",
-                "Hi " + user.getDisplayName() + ",",
+                "Hi " + recipient.displayName() + ",",
                 List.of("Confirm this address as the new email of your Overlab account. The link works for "
                         + describe(authProperties.verificationTokenTtl()) + "."),
                 "Confirm new email",
@@ -75,10 +74,10 @@ public class EmailService {
     }
 
     @Async(AsyncConfig.MAIL_EXECUTOR)
-    public void sendGoogleSignInNotice(User user) {
-        deliver(user.getEmail(), null, new EmailTemplate(
+    public void sendGoogleSignInNotice(EmailRecipient recipient) {
+        deliver(recipient.email(), null, new EmailTemplate(
                 "Your Overlab account uses Google sign-in",
-                "Hi " + user.getDisplayName() + ",",
+                "Hi " + recipient.displayName() + ",",
                 List.of("Someone asked to reset the password for this address, but your account signs in with "
                         + "Google and has no password."),
                 "Sign in with Google",

@@ -9,12 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import gg.overlab.backend.config.security.AuthCookieService;
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.api.ApiErrorHandler;
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
 import gg.overlab.backend.user.auth.AuthController;
 import gg.overlab.backend.user.auth.AuthService;
 import gg.overlab.backend.user.auth.AuthTokens;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
 import gg.overlab.backend.user.dto.UserDto;
 import jakarta.servlet.http.Cookie;
 import java.util.List;

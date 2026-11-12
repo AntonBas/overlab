@@ -6,12 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import gg.overlab.backend.user.User;
-import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import jakarta.servlet.FilterChain;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -22,9 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 class AdminSessionFilterTest {
 
-    private final UserRepository userRepository = mock(UserRepository.class);
+    private final AdminAccessChecker accessChecker = mock(AdminAccessChecker.class);
     private final FilterChain chain = mock(FilterChain.class);
-    private final AdminSessionFilter filter = new AdminSessionFilter(userRepository);
+    private final AdminSessionFilter filter = new AdminSessionFilter(accessChecker);
 
     @AfterEach
     void clearContext() {
@@ -39,13 +35,13 @@ class AdminSessionFilterTest {
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
-        verifyNoInteractions(userRepository);
+        verifyNoInteractions(accessChecker);
     }
 
     @Test
-    void letsAnEnabledAdminThrough() throws Exception {
+    void letsAnActiveAdminThrough() throws Exception {
         authenticate(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user(UserRole.ADMIN, true)));
+        when(accessChecker.isActiveAdmin(1L)).thenReturn(true);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin/users");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -57,7 +53,7 @@ class AdminSessionFilterTest {
     @Test
     void alsoProtectsTheApiDocumentation() throws Exception {
         authenticate(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user(UserRole.USER, true)));
+        when(accessChecker.isActiveAdmin(1L)).thenReturn(false);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(new MockHttpServletRequest("GET", "/v3/api-docs"), response, chain);
@@ -76,27 +72,13 @@ class AdminSessionFilterTest {
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
-        verifyNoInteractions(userRepository);
+        verifyNoInteractions(accessChecker);
     }
 
     @Test
-    void rejectsADisabledAdmin() throws Exception {
-        assertRejected(Optional.of(user(UserRole.ADMIN, false)));
-    }
-
-    @Test
-    void rejectsAnAdminDemotedAfterTheTokenWasIssued() throws Exception {
-        assertRejected(Optional.of(user(UserRole.USER, true)));
-    }
-
-    @Test
-    void rejectsADeletedAdmin() throws Exception {
-        assertRejected(Optional.empty());
-    }
-
-    private void assertRejected(Optional<User> stored) throws Exception {
+    void rejectsAnAdminWhoIsNoLongerActive() throws Exception {
         authenticate(1L);
-        when(userRepository.findById(1L)).thenReturn(stored);
+        when(accessChecker.isActiveAdmin(1L)).thenReturn(false);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin/users");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -111,12 +93,5 @@ class AdminSessionFilterTest {
         AuthenticatedUser principal = new AuthenticatedUser(userId, "admin@overlab.gg", UserRole.ADMIN);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,
                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
-    }
-
-    private User user(UserRole role, boolean enabled) {
-        User user = new User();
-        user.setRole(role);
-        user.setEnabled(enabled);
-        return user;
     }
 }

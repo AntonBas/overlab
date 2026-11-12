@@ -27,7 +27,7 @@ public class StatsService {
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
     private final StatsMapper statsMapper;
-    private final SnapshotChecks snapshotChecks;
+    private final SnapshotCheckService snapshotCheckService;
 
     public StatsSnapshotDto getStats(StatsFilter filter, HeroRole role, StatsSort sort, boolean descending) {
         StatsSnapshotDto snapshot = snapshotProvider.getSnapshot(filter);
@@ -52,7 +52,7 @@ public class StatsService {
         }
 
         HeroStat overallStat = stats.stream().filter(stat -> stat.getMap() == null).findFirst().orElse(null);
-        Map<String, Instant> checkedAt = snapshotChecks.lastCheckedByMap(queue, platform, region, effectiveTier);
+        Map<String, Instant> checkedAt = snapshotCheckService.lastCheckedByMap(queue, platform, region, effectiveTier);
         HeroMapStatDto overall = overallStat == null
                 ? null
                 : checkedAt(statsMapper.toMapDto(overallStat, null), StatsFilter.ALL_MAPS, checkedAt);

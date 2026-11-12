@@ -1,11 +1,12 @@
 package gg.overlab.backend.seo;
 
-import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.guide.Guide;
+import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.gamemap.MapService;
+import gg.overlab.backend.gamemap.dto.MapDto;
 import gg.overlab.backend.guide.GuidePath;
-import gg.overlab.backend.guide.GuideRepository;
-import gg.overlab.backend.hero.Hero;
-import gg.overlab.backend.hero.HeroRepository;
+import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.guide.dto.GuideDto;
+import gg.overlab.backend.hero.HeroService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SeoPageResolver {
@@ -53,16 +53,16 @@ public class SeoPageResolver {
             Map.entry("/business", new String[] {"Sponsorship and business",
                     "Contact Overlab about sponsorship and partnerships.", "Sponsorship and business"}));
 
-    private final HeroRepository heroRepository;
-    private final GameMapRepository mapRepository;
-    private final GuideRepository guideRepository;
+    private final HeroService heroService;
+    private final MapService mapService;
+    private final GuideService guideService;
     private final String baseUrl;
 
-    public SeoPageResolver(HeroRepository heroRepository, GameMapRepository mapRepository,
-                           GuideRepository guideRepository, @Value("${app.frontend-url}") String frontendUrl) {
-        this.heroRepository = heroRepository;
-        this.mapRepository = mapRepository;
-        this.guideRepository = guideRepository;
+    public SeoPageResolver(HeroService heroService, MapService mapService, GuideService guideService,
+                           @Value("${app.frontend-url}") String frontendUrl) {
+        this.heroService = heroService;
+        this.mapService = mapService;
+        this.guideService = guideService;
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
@@ -75,7 +75,6 @@ public class SeoPageResolver {
         return path;
     }
 
-    @Transactional(readOnly = true)
     public Optional<SeoPage> resolve(String requestedPath) {
         String path = normalize(requestedPath);
         String[] fixed = STATIC_PAGES.get(path);
@@ -109,42 +108,48 @@ public class SeoPageResolver {
     }
 
     private Optional<SeoPage> heroPage(String slug) {
-        return heroRepository.findBySlug(slug).filter(Hero::isActive).map(hero -> {
-            String path = "/heroes/" + hero.getSlug();
-            String lead = hero.getName() + " Overwatch stats: win, pick and ban rates, perks, counters"
+        return heroService.findAll().stream().filter(hero -> hero.slug().equals(slug)).findFirst().map(hero -> {
+            String path = "/heroes/" + hero.slug();
+            String lead = hero.name() + " Overwatch stats: win, pick and ban rates, perks, counters"
                     + " and best maps.";
-            String detail = hero.getDescription() == null || hero.getDescription().isBlank()
-                    ? lead : lead + " " + hero.getDescription();
-            return new SeoPage(path, hero.getName() + " stats, perks, counters and best maps", plain(detail),
-                    "website", hero.getName(),
-                    List.of(breadcrumbs(path, hero.getName(), "/heroes", "Heroes")));
+            String detail = hero.description() == null || hero.description().isBlank()
+                    ? lead : lead + " " + hero.description();
+            return new SeoPage(path, hero.name() + " stats, perks, counters and best maps", plain(detail),
+                    "website", hero.name(),
+                    List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")));
         });
     }
 
     private Optional<SeoPage> mapPage(String slug) {
-        return mapRepository.findBySlug(slug).map(map -> {
-            String path = "/maps/" + map.getSlug();
-            String description = map.getName() + ": win, pick and ban rates of every Overwatch hero on this map.";
-            return new SeoPage(path, map.getName(), description, "website", map.getName(),
-                    List.of(breadcrumbs(path, map.getName(), "/maps", "Maps")));
-        });
+        try {
+            MapDto map = mapService.getBySlug(slug);
+            String path = "/maps/" + map.slug();
+            String description = map.name() + ": win, pick and ban rates of every Overwatch hero on this map.";
+            return Optional.of(new SeoPage(path, map.name(), description, "website", map.name(),
+                    List.of(breadcrumbs(path, map.name(), "/maps", "Maps"))));
+        } catch (EntityNotFoundException exception) {
+            return Optional.empty();
+        }
     }
 
     private Optional<SeoPage> guidePage(String key) {
-        return GuidePath.parseId(key)
-                .flatMap(guideRepository::findWithDetailsById)
-                .filter(Guide::isPublished)
-                .map(this::toGuidePage);
+        if (GuidePath.parseId(key).isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(toGuidePage(guideService.getPublishedByPath(key)));
+        } catch (EntityNotFoundException exception) {
+            return Optional.empty();
+        }
     }
 
-    private SeoPage toGuidePage(Guide guide) {
-        String path = "/guides/" + GuidePath.of(guide.getId(), guide.getSlug());
-        String mapPart = guide.getMap() == null ? "" : " for " + guide.getMap().getName();
-        String description = plain(guide.getTitle() + ": a short " + guide.getHero().getName()
-                + " video guide" + mapPart + ".");
-        return new SeoPage(path, guide.getTitle(), description, "video.other", guide.getTitle(),
-                List.of(breadcrumbs(path, guide.getTitle(), "/heroes/" + guide.getHero().getSlug(),
-                        guide.getHero().getName()), videoData(guide, path, description)));
+    private SeoPage toGuidePage(GuideDto guide) {
+        String path = "/guides/" + guide.path();
+        String mapPart = guide.mapName() == null ? "" : " for " + guide.mapName();
+        String description = plain(guide.title() + ": a short " + guide.heroName() + " video guide" + mapPart + ".");
+        return new SeoPage(path, guide.title(), description, "video.other", guide.title(),
+                List.of(breadcrumbs(path, guide.title(), "/heroes/" + guide.heroSlug(), guide.heroName()),
+                        videoData(guide, path, description)));
     }
 
     String plain(String text) {
@@ -182,17 +187,17 @@ public class SeoPageResolver {
                 + items + "]}";
     }
 
-    private String videoData(Guide guide, String path, String description) {
+    private String videoData(GuideDto guide, String path, String description) {
         StringBuilder json = new StringBuilder("{\"@context\":\"https://schema.org\",\"@type\":\"VideoObject\"")
-                .append(",\"name\":").append(JsonText.quote(guide.getTitle()))
+                .append(",\"name\":").append(JsonText.quote(guide.title()))
                 .append(",\"description\":").append(JsonText.quote(description))
                 .append(",\"thumbnailUrl\":").append(JsonText.quote(
-                        "https://i.ytimg.com/vi/" + guide.getYoutubeId() + "/hqdefault.jpg"))
+                        "https://i.ytimg.com/vi/" + guide.youtubeId() + "/hqdefault.jpg"))
                 .append(",\"embedUrl\":").append(JsonText.quote(
-                        "https://www.youtube-nocookie.com/embed/" + guide.getYoutubeId()))
+                        "https://www.youtube-nocookie.com/embed/" + guide.youtubeId()))
                 .append(",\"url\":").append(JsonText.quote(baseUrl + path));
-        if (guide.getCreatedAt() != null) {
-            json.append(",\"uploadDate\":").append(JsonText.quote(guide.getCreatedAt().toString()));
+        if (guide.createdAt() != null) {
+            json.append(",\"uploadDate\":").append(JsonText.quote(guide.createdAt().toString()));
         }
         return json.append('}').toString();
     }

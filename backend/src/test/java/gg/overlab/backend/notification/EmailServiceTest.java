@@ -7,9 +7,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.user.AuthFixtures;
 import gg.overlab.backend.user.User;
-import gg.overlab.backend.user.UserRole;
 import jakarta.mail.Message;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -38,7 +38,7 @@ class EmailServiceTest {
 
     @Test
     void verificationEmailGoesToTheUserWithATokenLinkAndTheConfiguredLifetime() throws Exception {
-        service.sendVerification(user, "raw-token");
+        service.sendVerification(user.toEmailRecipient(), "raw-token");
 
         MimeMessage sent = sentMessage();
         assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("ana@overlab.gg");
@@ -50,7 +50,7 @@ class EmailServiceTest {
 
     @Test
     void passwordResetUsesTheResetLinkAndOneHourLifetime() throws Exception {
-        service.sendPasswordReset(user, "reset-token");
+        service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
 
         MimeMessage sent = sentMessage();
         assertThat(sent.getSubject()).isEqualTo("Reset your Overlab password");
@@ -60,7 +60,7 @@ class EmailServiceTest {
 
     @Test
     void emailChangeIsSentToTheNewAddress() throws Exception {
-        service.sendEmailChange(user, "new@overlab.gg", "change-token");
+        service.sendEmailChange(user.toEmailRecipient(), "new@overlab.gg", "change-token");
 
         assertThat(sentMessage().getRecipients(Message.RecipientType.TO)[0].toString()).isEqualTo("new@overlab.gg");
     }

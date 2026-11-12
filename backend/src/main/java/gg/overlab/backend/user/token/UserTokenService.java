@@ -1,7 +1,7 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.User;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -2,8 +2,9 @@ package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gg.overlab.backend.collector.ParsedPerk;
-import gg.overlab.backend.collector.PerkImportWriter;
+import gg.overlab.backend.collector.imports.ImportCounts;
+import gg.overlab.backend.collector.imports.PerkImportWriter;
+import gg.overlab.backend.collector.parser.ParsedPerk;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
@@ -47,11 +48,11 @@ class PerkImportWriterIntegrationTest {
 
     @Test
     void createsNewPerksWithAnIconAndANeutralRecommendation() {
-        PerkImportWriter.Counts counts = writer.write("import-test", List.of(
+        ImportCounts counts = writer.write("import-test", List.of(
                 new ParsedPerk(PerkSlot.MINOR, PerkPosition.RIGHT, "Quick Dart", "Fires faster.", "https://cdn.example/q.png")),
                 url -> Optional.of(PNG));
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(1, 0));
+        assertThat(counts).isEqualTo(new ImportCounts(1, 0));
         Perk perk = perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "quick dart").orElseThrow();
         assertThat(perk.getSlot()).isEqualTo(PerkSlot.MINOR);
         assertThat(perk.getPosition()).isEqualTo(PerkPosition.RIGHT);
@@ -71,10 +72,10 @@ class PerkImportWriterIntegrationTest {
         existing.setDescription("Own text");
         perkRepository.saveAndFlush(existing);
 
-        PerkImportWriter.Counts counts = writer.write("import-test", List.of(
+        ImportCounts counts = writer.write("import-test", List.of(
                 new ParsedPerk(PerkSlot.MINOR, PerkPosition.RIGHT, "Quick Dart", "Blizzard text", null)), url -> Optional.empty());
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 0));
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0));
         Perk reloaded = perkRepository.findById(existing.getId()).orElseThrow();
         assertThat(reloaded.getRecommendation()).isEqualTo(PerkRecommendation.RECOMMENDED);
         assertThat(reloaded.getRecommendationNote()).isEqualTo("Always take it");
@@ -91,11 +92,11 @@ class PerkImportWriterIntegrationTest {
         existing.setRecommendation(PerkRecommendation.OPTIONAL);
         perkRepository.saveAndFlush(existing);
 
-        PerkImportWriter.Counts counts = writer.write("import-test", List.of(
+        ImportCounts counts = writer.write("import-test", List.of(
                 new ParsedPerk(PerkSlot.MINOR, PerkPosition.RIGHT, "Quick Dart", "Fires faster.", "https://cdn.example/q.png")),
                 url -> Optional.of(PNG));
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 1));
+        assertThat(counts).isEqualTo(new ImportCounts(0, 1));
         Perk reloaded = perkRepository.findById(existing.getId()).orElseThrow();
         assertThat(reloaded.getDescription()).isEqualTo("Fires faster.");
         assertThat(reloaded.getIconUrl()).isNotNull();
@@ -162,10 +163,10 @@ class PerkImportWriterIntegrationTest {
     void updatesTheTextOfAnImportedPerkWhenBlizzardChangesIt() {
         Perk existing = importedPerk("Quick Dart", "Old text");
 
-        PerkImportWriter.Counts counts = writer.write("import-test",
+        ImportCounts counts = writer.write("import-test",
                 List.of(parsed(PerkSlot.MINOR, "Quick Dart", "New text")), url -> Optional.empty());
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 1));
+        assertThat(counts).isEqualTo(new ImportCounts(0, 1));
         Perk reloaded = perkRepository.findById(existing.getId()).orElseThrow();
         assertThat(reloaded.getDescription()).isEqualTo("New text");
         assertThat(reloaded.getImportedDescription()).isEqualTo("New text");
@@ -206,10 +207,10 @@ class PerkImportWriterIntegrationTest {
         manual.setRecommendation(PerkRecommendation.OPTIONAL);
         perkRepository.saveAndFlush(manual);
 
-        PerkImportWriter.Counts counts = writer.write("import-test",
+        ImportCounts counts = writer.write("import-test",
                 List.of(parsed(PerkSlot.MINOR, "Quick Dart", "Text")), url -> Optional.empty());
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 0, 1));
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0, 1));
         assertThat(perkRepository.findById(gone.getId())).isEmpty();
         assertThat(perkRepository.findById(manual.getId())).isPresent();
     }
@@ -218,9 +219,9 @@ class PerkImportWriterIntegrationTest {
     void removesNothingWhenThePageYieldedNoPerks() {
         Perk existing = importedPerk("Quick Dart", "Text");
 
-        PerkImportWriter.Counts counts = writer.write("import-test", List.of(), url -> Optional.empty());
+        ImportCounts counts = writer.write("import-test", List.of(), url -> Optional.empty());
 
-        assertThat(counts).isEqualTo(new PerkImportWriter.Counts(0, 0, 0));
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0, 0));
         assertThat(perkRepository.findById(existing.getId())).isPresent();
     }
 }

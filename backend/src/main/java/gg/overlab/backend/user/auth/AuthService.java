@@ -4,19 +4,19 @@ import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.JwtTokenProvider;
+import gg.overlab.backend.config.security.UserRole;
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
+import gg.overlab.backend.exception.core.EmailNotVerifiedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.exception.core.InvalidCredentialsException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserMapper;
 import gg.overlab.backend.user.UserRepository;
-import gg.overlab.backend.user.UserRole;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
-import gg.overlab.backend.user.auth.exception.EmailNotVerifiedException;
-import gg.overlab.backend.user.auth.exception.InvalidCredentialsException;
-import gg.overlab.backend.user.auth.exception.InvalidTokenException;
 import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
@@ -156,12 +156,12 @@ public class AuthService {
                 .filter(User::isEnabled)
                 .ifPresent(user -> {
                     if (user.getProvider() != AuthProvider.LOCAL) {
-                        emailService.sendGoogleSignInNotice(user);
+                        emailService.sendGoogleSignInNotice(user.toEmailRecipient());
                         return;
                     }
                     tokenService.revokeAll(user, UserTokenType.PASSWORD_RESET);
                     String token = tokenService.issue(user, UserTokenType.PASSWORD_RESET, properties.resetTokenTtl());
-                    emailService.sendPasswordReset(user, token);
+                    emailService.sendPasswordReset(user.toEmailRecipient(), token);
                 });
     }
 
@@ -177,7 +177,7 @@ public class AuthService {
     private void sendVerification(User user) {
         tokenService.revokeAll(user, UserTokenType.EMAIL_VERIFICATION);
         String token = tokenService.issue(user, UserTokenType.EMAIL_VERIFICATION, properties.verificationTokenTtl());
-        emailService.sendVerification(user, token);
+        emailService.sendVerification(user.toEmailRecipient(), token);
     }
 
     private String hashFor(User user) {

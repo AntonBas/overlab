@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.user.auth.OAuthUserService;
-import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

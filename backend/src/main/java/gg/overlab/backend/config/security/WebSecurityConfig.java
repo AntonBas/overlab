@@ -1,6 +1,5 @@
 package gg.overlab.backend.config.security;
 
-import gg.overlab.backend.user.UserRepository;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,7 +31,7 @@ public class WebSecurityConfig {
                                                    JwtTokenProvider tokenProvider,
                                                    AuthCookieService cookieService,
                                                    RateLimitCounter rateLimitCounter,
-                                                   UserRepository userRepository,
+                                                   AdminAccessChecker adminAccessChecker,
                                                    @Qualifier("handlerExceptionResolver")
                                                    HandlerExceptionResolver exceptionResolver,
                                                    AuthProperties authProperties,
@@ -42,7 +41,7 @@ public class WebSecurityConfig {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, cookieService);
         RateLimitFilter rateLimitFilter = new RateLimitFilter(rateLimitCounter, authProperties, rateLimitProperties,
                 exceptionResolver);
-        AdminSessionFilter adminSessionFilter = new AdminSessionFilter(userRepository);
+        AdminSessionFilter adminSessionFilter = new AdminSessionFilter(adminAccessChecker);
 
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())

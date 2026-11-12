@@ -16,8 +16,8 @@ final class StatsFixtures {
     private StatsFixtures() {
     }
 
-    static SnapshotChecks noChecks() {
-        return new SnapshotChecks(org.mockito.Mockito.mock(SnapshotCheckRepository.class));
+    static SnapshotCheckService noChecks() {
+        return new SnapshotCheckService(org.mockito.Mockito.mock(SnapshotCheckRepository.class));
     }
 
     static StatsMapper statsMapper() {

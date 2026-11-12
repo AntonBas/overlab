@@ -20,7 +20,7 @@ public class StatsSnapshotProvider {
 
     private final HeroStatRepository heroStatRepository;
     private final StatsMapper statsMapper;
-    private final SnapshotChecks snapshotChecks;
+    private final SnapshotCheckService snapshotCheckService;
 
     @Cacheable(value = CacheNames.STATS, key = "'snapshot:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
@@ -38,7 +38,7 @@ public class StatsSnapshotProvider {
         List<HeroStatDto> heroes = stats.stream()
                 .map(stat -> statsMapper.toDto(stat, baselineByHero.get(stat.getHero().getId())))
                 .toList();
-        Instant checkedAt = SnapshotChecks.latest(stats.get(0).getCapturedAt(), snapshotChecks.lastChecked(
+        Instant checkedAt = SnapshotCheckService.latest(stats.get(0).getCapturedAt(), snapshotCheckService.lastChecked(
                 filter.queue(), filter.platform(), filter.region(), filter.tier(), filter.mapSlug()));
         return new StatsSnapshotDto(checkedAt, filter.queue(), filter.tier(), filter.mapSlug(),
                 filter.platform(), filter.region(), heroes);

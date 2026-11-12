@@ -24,7 +24,7 @@ public class StatsFreshnessService {
     private static final int MAX_SNAPSHOTS = 30;
 
     private final HeroStatRepository heroStatRepository;
-    private final SnapshotChecks snapshotChecks;
+    private final SnapshotCheckService snapshotCheckService;
 
     @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
@@ -49,7 +49,7 @@ public class StatsFreshnessService {
                 break;
             }
         }
-        Instant checkedAt = SnapshotChecks.latest(times.get(0), snapshotChecks.lastChecked(filter.queue(),
+        Instant checkedAt = SnapshotCheckService.latest(times.get(0), snapshotCheckService.lastChecked(filter.queue(),
                 filter.platform(), filter.region(), filter.tier(), StatsFilter.ALL_MAPS));
         return new DataFreshnessDto(times.get(0), checkedAt, valuesSince, times.size(), changeObserved);
     }
