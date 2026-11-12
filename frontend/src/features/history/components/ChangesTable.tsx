@@ -166,10 +166,10 @@ export function ChangesTable({
                       name={change.heroName}
                       url={portraits[change.heroSlug] ?? null}
                     />
+                    <RoleBadge role={change.role} compact />
                     <Link to={`/heroes/${change.heroSlug}`}>
                       {change.heroName}
                     </Link>
-                    <RoleBadge role={change.role} compact />
                     {change.roleChange && (
                       <span
                         className="table__flag"

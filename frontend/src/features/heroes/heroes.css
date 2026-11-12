@@ -721,6 +721,11 @@
   text-decoration: none;
 }
 
+.matchup__identity .portrait {
+  border-radius: 50%;
+  border: 2px solid var(--role-color);
+}
+
 .matchup__identity:hover strong {
   color: var(--accent-text);
 }
@@ -817,7 +822,7 @@
 .relation-avatar__image {
   display: inline-flex;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--column-color, var(--role-color, var(--border)));
+  box-shadow: 0 0 0 2px var(--role-color, var(--border));
 }
 
 .relation-avatar__image .portrait {
