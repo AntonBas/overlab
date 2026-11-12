@@ -2,6 +2,7 @@ package gg.overlab.backend.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -47,5 +48,17 @@ class SlugServiceTest {
 
         assertThat(slugService.generateUnique("Pylons", taken::contains)).isEqualTo("pylons-2");
         assertThat(slugService.generateUnique("Other", taken::contains)).isEqualTo("other");
+    }
+
+    @Test
+    void keepsSlugWithinMaxLengthIncludingCounter() {
+        String longText = "word ".repeat(30);
+        Set<String> taken = new HashSet<>();
+        String first = slugService.generateUnique(longText, 20, taken::contains);
+        taken.add(first);
+        String second = slugService.generateUnique(longText, 20, taken::contains);
+
+        assertThat(first).hasSizeLessThanOrEqualTo(20);
+        assertThat(second).hasSizeLessThanOrEqualTo(20).endsWith("-1").isNotEqualTo(first);
     }
 }

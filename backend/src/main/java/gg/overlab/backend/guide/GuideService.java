@@ -24,6 +24,8 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class GuideService {
 
+    private static final int MAX_SLUG_LENGTH = 200;
+
     private final GuideRepository guideRepository;
     private final HeroRepository heroRepository;
     private final GameMapRepository gameMapRepository;
@@ -71,7 +73,7 @@ public class GuideService {
         Guide guide = new Guide();
         guide.setSlug(StringUtils.hasText(request.slug())
                 ? requireFreeSlug(request.slug(), null)
-                : slugService.generateUnique(request.title(), guideRepository::existsBySlug));
+                : slugService.generateUnique(request.title(), MAX_SLUG_LENGTH, guideRepository::existsBySlug));
         apply(guide, request);
         GuideDto created = guideMapper.toDto(guideRepository.save(guide));
         auditService.logCreate(AuditEntityType.GUIDE, created.id(), created);

@@ -23,6 +23,8 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class PatchService {
 
+    public static final int MAX_SLUG_LENGTH = 64;
+
     private final PatchRepository patchRepository;
     private final PatchMapper patchMapper;
     private final SlugService slugService;
@@ -65,7 +67,7 @@ public class PatchService {
         patchMapper.apply(request, patch);
         patch.setSlug(StringUtils.hasText(request.slug())
                 ? requireFreeSlug(request.slug(), null)
-                : slugService.generateUnique(request.version(), patchRepository::existsBySlug));
+                : slugService.generateUnique(request.version(), MAX_SLUG_LENGTH, patchRepository::existsBySlug));
         PatchDto created = toDto(patchRepository.save(patch));
         auditService.logCreate(AuditEntityType.PATCH, created.id(), created);
         return created;

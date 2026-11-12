@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RatesCollectorService {
 
+    private static final int MAX_CONSECUTIVE_FAILURES = 5;
     private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
 
     private final CollectorProperties properties;
@@ -176,11 +177,13 @@ public class RatesCollectorService {
         RunErrors errors = new RunErrors();
         List<SnapshotRequest> requests = SnapshotRequest.plan(job, mapSlugResolver.resolve(job));
         log.info("Collector job '{}' started ({})", job.name(), run.getTrigger());
+        int consecutiveFailures = 0;
         for (SnapshotRequest request : requests) {
             run.setRequestsTotal(run.getRequestsTotal() + 1);
             try {
                 run.setRowsSaved(run.getRowsSaved() + snapshotCollector.collect(capturedAt, request));
                 metrics.recordRequest(job.name(), true);
+                consecutiveFailures = 0;
             } catch (RuntimeException exception) {
                 run.setRequestsFailed(run.getRequestsFailed() + 1);
                 metrics.recordRequest(job.name(), false);
@@ -188,7 +191,15 @@ public class RatesCollectorService {
                     metrics.recordRejectedSnapshot();
                 }
                 errors.add(request, exception);
+                consecutiveFailures++;
                 log.warn("Collector request failed: {}", request.describe(exception));
+            }
+            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                log.error("Collector job '{}' stopped after {} failed requests in a row", job.name(),
+                        consecutiveFailures);
+                errors.add(request, new IllegalStateException("Stopped after " + consecutiveFailures
+                        + " failed requests in a row"));
+                break;
             }
             if (!Pause.sleep(properties.pause())) {
                 log.warn("Collector job '{}' was interrupted, remaining requests were skipped", job.name());

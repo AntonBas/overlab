@@ -10,6 +10,7 @@ import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.UpstreamUnavailableException;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
+import gg.overlab.backend.patch.PatchService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -71,7 +72,8 @@ public class PatchImportService {
             }
             Patch patch = new Patch();
             patch.setVersion(version);
-            patch.setSlug(slugService.generateUnique(version, patchRepository::existsBySlug));
+            patch.setSlug(slugService.generateUnique(version, PatchService.MAX_SLUG_LENGTH,
+                    patchRepository::existsBySlug));
             patch.setTitle(entry.title());
             patch.setReleasedAt(dayStart);
             patch.setNotes(properties.baseUrl() + PatchNotesClient.PATCH_NOTES_PATH + "#patch-" + entry.date());

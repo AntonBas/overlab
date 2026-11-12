@@ -85,7 +85,8 @@ public class FeedbackService {
     public List<FeedbackDto> export(Long userId) {
         return feedbackRepository.findAllByUserIdOrderByIdAsc(userId).stream()
                 .map(feedback -> new FeedbackDto(feedback.getType(), feedback.getMessage(), feedback.getPagePath(),
-                        feedback.getStatus(), feedback.getCreatedAt()))
+                        feedback.getStatus(), feedback.getCreatedAt(), feedback.getContactName(),
+                        feedback.getContactEmail()))
                 .toList();
     }
 

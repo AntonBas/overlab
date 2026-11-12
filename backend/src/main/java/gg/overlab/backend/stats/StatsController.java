@@ -51,7 +51,7 @@ public class StatsController {
     @GetMapping("/hero/{slug}")
     public HeroMapStatsDto getHeroByMaps(
             @PathVariable String slug, @ModelAttribute StatsQuery query) {
-        return statsService.getHeroByMaps(slug, query.getQueue(), query.getTier(), query.getPlatform(),
+        return statsService.getHeroByMaps(slug, query.getQueue(), query.filter().tier(), query.getPlatform(),
                 query.getRegion());
     }
 
