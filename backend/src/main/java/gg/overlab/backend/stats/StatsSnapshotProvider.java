@@ -39,6 +39,7 @@ public class StatsSnapshotProvider {
 
         Map<Long, HeroStat> baselineByHero = filter.isAllMaps() ? Map.of() : loadBaseline(filter);
         List<HeroStatDto> heroes = stats.stream()
+                .filter(stat -> stat.getHero().isActive())
                 .map(stat -> statsMapper.toDto(stat, baselineByHero.get(stat.getHero().getId())))
                 .toList();
         Instant checkedAt = SnapshotCheckService.latest(stats.get(0).getCapturedAt(), snapshotCheckService.lastChecked(

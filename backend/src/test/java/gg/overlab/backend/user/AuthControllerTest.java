@@ -95,8 +95,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshWithoutCookieReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isBadRequest());
+    void refreshWithoutCookieReturnsUnauthorized() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -39,6 +39,7 @@ public class StatsComparisonProvider {
                         statsMapper.toRoleChangeDto(change)));
 
         List<HeroChangeDto> heroes = loadSnapshot(filter, afterCapturedAt).stream()
+                .filter(stat -> stat.getHero().isActive())
                 .filter(stat -> beforeByHero.containsKey(stat.getHero().getId()))
                 .map(stat -> statsMapper.toChangeDto(beforeByHero.get(stat.getHero().getId()), stat,
                         roleChanges.get(stat.getHero().getId())))

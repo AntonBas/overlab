@@ -93,10 +93,10 @@ class AuthFlowIntegrationTest {
         Cookie newRefresh = refreshed.getResponse().getCookie("refresh_token");
         assertThat(newRefresh.getValue()).isNotEqualTo(refresh.getValue());
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(refresh)).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/auth/refresh").cookie(refresh)).andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/logout").cookie(newRefresh)).andExpect(status().isNoContent());
-        mockMvc.perform(post("/api/auth/refresh").cookie(newRefresh)).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/auth/refresh").cookie(newRefresh)).andExpect(status().isUnauthorized());
     }
 
     @Test

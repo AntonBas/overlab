@@ -3,6 +3,7 @@ package gg.overlab.backend.user.auth;
 import gg.overlab.backend.config.security.AuthCookieService;
 import gg.overlab.backend.config.security.AuthenticatedUser;
 import gg.overlab.backend.exception.core.InvalidTokenException;
+import gg.overlab.backend.exception.core.SessionExpiredException;
 import gg.overlab.backend.user.auth.dto.EmailRequest;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
@@ -52,8 +53,14 @@ public class AuthController {
     @PostMapping("/refresh")
     public UserDto refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.read(request, AuthCookieService.REFRESH_COOKIE)
-                .orElseThrow(InvalidTokenException::new);
-        AuthTokens tokens = authService.refresh(refreshToken);
+                .orElseThrow(SessionExpiredException::new);
+        AuthTokens tokens;
+        try {
+            tokens = authService.refresh(refreshToken);
+        } catch (InvalidTokenException exception) {
+            cookieService.clearTokens(response);
+            throw new SessionExpiredException();
+        }
         cookieService.writeTokens(response, tokens.accessToken(), tokens.refreshToken());
         return tokens.user();
     }

@@ -44,11 +44,13 @@ public class HeroRelationService {
     public HeroCountersDto getCounters(String heroSlug) {
         requireHero(heroSlug);
         List<RelatedHeroDto> counters = relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getRelatedHero(), relation))
+                .stream().filter(relation -> relation.getRelatedHero().isActive())
+                .map(relation -> related(relation.getRelatedHero(), relation))
                 .sorted(BY_ROLE_THEN_NAME).toList();
         List<RelatedHeroDto> counteredBy = relationRepository
                 .findAllByRelatedHeroSlugAndType(heroSlug, RelationType.COUNTER)
-                .stream().map(relation -> related(relation.getHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();
+                .stream().filter(relation -> relation.getHero().isActive())
+                .map(relation -> related(relation.getHero(), relation)).sorted(BY_ROLE_THEN_NAME).toList();
         return new HeroCountersDto(counters, counteredBy);
     }
 
@@ -57,9 +59,11 @@ public class HeroRelationService {
     public List<RelatedHeroDto> getSynergies(String heroSlug) {
         requireHero(heroSlug);
         Map<String, RelatedHeroDto> bySlug = new LinkedHashMap<>();
-        relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.SYNERGY)
+        relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.SYNERGY).stream()
+                .filter(relation -> relation.getRelatedHero().isActive())
                 .forEach(relation -> keepFirst(bySlug, related(relation.getRelatedHero(), relation)));
-        relationRepository.findAllByRelatedHeroSlugAndType(heroSlug, RelationType.SYNERGY)
+        relationRepository.findAllByRelatedHeroSlugAndType(heroSlug, RelationType.SYNERGY).stream()
+                .filter(relation -> relation.getHero().isActive())
                 .forEach(relation -> keepFirst(bySlug, related(relation.getHero(), relation)));
         return bySlug.values().stream().sorted(BY_ROLE_THEN_NAME).toList();
     }
@@ -73,6 +77,9 @@ public class HeroRelationService {
         for (HeroRelation relation : relationRepository.findAllByOrderByIdAsc()) {
             Hero hero = relation.getHero();
             Hero relatedHero = relation.getRelatedHero();
+            if (!hero.isActive() || !relatedHero.isActive()) {
+                continue;
+            }
             if (relation.getType() == RelationType.COUNTER) {
                 counters.computeIfAbsent(hero.getSlug(), slug -> new ArrayList<>()).add(related(relatedHero, relation));
                 counteredBy.computeIfAbsent(relatedHero.getSlug(), slug -> new ArrayList<>())
