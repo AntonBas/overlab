@@ -1,6 +1,7 @@
 package gg.overlab.backend.gamemap;
 
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.dto.MapDto;
@@ -18,14 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MapService {
 
-    public static final String CACHE_NAME = "maps";
-
     private final GameMapRepository gameMapRepository;
     private final MapMapper mapMapper;
     private final AuditService auditService;
     private final ImageStore imageStore;
 
-    @Cacheable(value = CACHE_NAME, key = "'all'")
+    @Cacheable(value = CacheNames.MAPS, key = "'all'")
     @Transactional(readOnly = true)
     public List<MapDto> findAll() {
         return gameMapRepository.findAllByOrderByNameAsc().stream()
@@ -33,7 +32,7 @@ public class MapService {
                 .toList();
     }
 
-    @Cacheable(value = CACHE_NAME, key = "#slug")
+    @Cacheable(value = CacheNames.MAPS, key = "#slug")
     @Transactional(readOnly = true)
     public MapDto getBySlug(String slug) {
         GameMap map = gameMapRepository.findBySlug(slug)

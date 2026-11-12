@@ -1,10 +1,12 @@
 package gg.overlab.backend.media;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,5 +54,15 @@ class WebpConverterTest {
     @Test
     void returnsNothingWhenTheCommandIsMissing() {
         assertThat(new WebpConverter("definitely-not-installed-cwebp").fromPng(PNG)).isEmpty();
+    }
+
+    @Test
+    void stopsAHangingCommandAfterTheTimeout() throws IOException {
+        Path file = directory.resolve("hanging-cwebp");
+        Files.writeString(file, "#!/bin/sh\nsleep 30\n");
+        file.toFile().setExecutable(true);
+        WebpConverter converter = new WebpConverter(file.toString(), Duration.ofMillis(300));
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> assertThat(converter.fromPng(PNG)).isEmpty());
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> assertThat(converter.isAvailable()).isFalse());
     }
 }

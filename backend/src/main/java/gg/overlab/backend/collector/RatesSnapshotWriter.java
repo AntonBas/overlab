@@ -38,8 +38,6 @@ public class RatesSnapshotWriter {
     private final HeroStatRepository heroStatRepository;
     private final SnapshotQualityChecker qualityChecker;
     private final CollectorMetrics metrics;
-    private final HeroPortraitDownloader portraitDownloader;
-    private final RoleIconDownloader roleIconDownloader;
 
     @Transactional
     public int save(Instant capturedAt, GameQueue queue, GameFormat gameFormat, Platform platform, Region region,
@@ -82,8 +80,6 @@ public class RatesSnapshotWriter {
         }
         hero.setRole(role);
         hero.setSubrole(rate.hero().subrole());
-        portraitDownloader.ensurePortrait(hero, rate.hero().portrait());
-        roleIconDownloader.ensureRoleIcon(rate.hero().role(), rate.hero().roleIcon());
     }
 
     private void recordRoleChange(Hero hero, HeroRole newRole, Instant capturedAt) {

@@ -85,6 +85,8 @@ public class AuthService {
         if (!user.isEnabled()) {
             throw new InvalidCredentialsException();
         }
+        user.setLastLoginAt(Instant.now());
+        userRepository.save(user);
         AuthTokens tokens = issueTokens(user);
         auditService.logUserEvent(AuditAction.LOGIN, user.getId(), user.getRole().name());
         return tokens;
@@ -101,8 +103,6 @@ public class AuthService {
 
     @Transactional
     public AuthTokens issueTokens(User user) {
-        user.setLastLoginAt(Instant.now());
-        userRepository.save(user);
         String refreshToken = tokenService.issue(user, UserTokenType.REFRESH, properties.refreshTokenTtl());
         return new AuthTokens(jwtTokenProvider.createAccessToken(user), refreshToken, userMapper.toDto(user));
     }

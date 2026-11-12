@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
@@ -25,7 +26,6 @@ import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
 import gg.overlab.backend.stats.StatsHistoryService;
-import gg.overlab.backend.stats.StatsSnapshotProvider;
 import gg.overlab.backend.stats.StatsService;
 import gg.overlab.backend.stats.StatsSort;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
@@ -110,7 +110,7 @@ class StatsQueriesIntegrationTest {
     }
 
     private void clearCaches() {
-        cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).clear();
+        cacheManager.getCache(CacheNames.STATS).clear();
         cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
     }
 
@@ -120,11 +120,11 @@ class StatsQueriesIntegrationTest {
         String key = "history:ana-test:" + filter.cacheKey();
 
         historyService.getHeroHistory("ana-test", filter, OLD.minus(Duration.ofDays(1)), NEW.plus(Duration.ofDays(1)));
-        assertThat(cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).get(key)).isNull();
+        assertThat(cacheManager.getCache(CacheNames.STATS).get(key)).isNull();
 
         historyService.getHeroHistory("ana-test", filter, null, null);
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
-                assertThat(cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME).get(key)).isNotNull());
+                assertThat(cacheManager.getCache(CacheNames.STATS).get(key)).isNotNull());
     }
 
     @Test
@@ -137,7 +137,7 @@ class StatsQueriesIntegrationTest {
                 NEW.plus(Duration.ofHours(9)));
 
         assertThat(second).isEqualTo(first);
-        var cache = cacheManager.getCache(StatsSnapshotProvider.CACHE_NAME);
+        var cache = cacheManager.getCache(CacheNames.STATS);
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
                 assertThat(cache.get("compare:" + filter.cacheKey() + ":" + OLD + ":" + NEW)).isNotNull());
         assertThat(cache.get("compare:" + filter.cacheKey() + ":" + OLD.plus(Duration.ofHours(1)) + ":"

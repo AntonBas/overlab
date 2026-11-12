@@ -104,6 +104,15 @@ class AuthServiceTest {
     }
 
     @Test
+    void refreshDoesNotCountAsALogin() {
+        when(tokenService.consume("old-refresh", UserTokenType.REFRESH)).thenReturn(existingUser);
+
+        service.refresh("old-refresh");
+
+        assertThat(existingUser.getLastLoginAt()).isNull();
+    }
+
+    @Test
     void loginRejectsWrongPassword() {
         when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
 

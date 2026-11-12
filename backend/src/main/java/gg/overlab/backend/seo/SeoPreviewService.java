@@ -16,7 +16,9 @@ public class SeoPreviewService {
         this.renderer = renderer;
     }
 
-    @Cacheable(value = CacheNames.CONTENT, key = "'seo:' + #path", unless = "#result == null")
+    @Cacheable(value = CacheNames.CONTENT,
+            key = "'seo:' + T(gg.overlab.backend.seo.SeoPageResolver).cacheKey(#path)",
+            unless = "#result == null")
     public String renderPreview(String path) {
         Optional<SeoPage> page = resolver.resolve(path);
         return page.map(renderer::render).orElse(null);

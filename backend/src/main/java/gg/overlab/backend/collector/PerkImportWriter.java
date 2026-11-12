@@ -34,6 +34,19 @@ public class PerkImportWriter {
         }
     }
 
+    @Transactional(readOnly = true)
+    public Set<String> missingIconUrls(String heroSlug, List<ParsedPerk> parsedPerks) {
+        Hero hero = heroRepository.findBySlug(heroSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        return parsedPerks.stream()
+                .filter(parsed -> parsed.iconUrl() != null)
+                .filter(parsed -> perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), parsed.name())
+                        .map(perk -> perk.getIconUrl() == null)
+                        .orElse(true))
+                .map(ParsedPerk::iconUrl)
+                .collect(Collectors.toSet());
+    }
+
     @Transactional
     public Counts write(String heroSlug, List<ParsedPerk> parsedPerks,
                         Function<String, Optional<byte[]>> iconLoader) {

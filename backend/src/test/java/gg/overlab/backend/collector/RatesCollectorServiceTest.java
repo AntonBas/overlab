@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
@@ -33,7 +34,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 
@@ -59,7 +59,7 @@ class RatesCollectorServiceTest {
         metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
         metrics.registerLastSuccessGauges();
         service = new RatesCollectorService(properties, client, validator, recorder, mock(GameMapRepository.class),
-                mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, deferredExecutor);
+                mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class), runRepository, metrics, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {
@@ -209,7 +209,7 @@ class RatesCollectorServiceTest {
             throw new TaskRejectedException("queue is full");
         };
         RatesCollectorService rejecting = new RatesCollectorService(
-                CollectorFixtures.properties(1, job), client, validator, recorder, mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class),
+                CollectorFixtures.properties(1, job), client, validator, recorder, mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class),
                 runRepository, metrics, rejectingExecutor);
 
         assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))

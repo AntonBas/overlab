@@ -1,6 +1,6 @@
 package gg.overlab.backend.collector;
 
-import gg.overlab.backend.config.cache.ContentCacheReset;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.media.MediaFolder;
@@ -22,14 +22,14 @@ public class HeroPortraitOptimizer {
     private final HeroRepository heroRepository;
     private final MediaStorage mediaStorage;
     private final WebpConverter webpConverter;
-    private final ContentCacheReset contentCacheReset;
+    private final CacheEviction cacheEviction;
 
     public HeroPortraitOptimizer(HeroRepository heroRepository, MediaStorage mediaStorage,
-                                 WebpConverter webpConverter, ContentCacheReset contentCacheReset) {
+                                 WebpConverter webpConverter, CacheEviction cacheEviction) {
         this.heroRepository = heroRepository;
         this.mediaStorage = mediaStorage;
         this.webpConverter = webpConverter;
-        this.contentCacheReset = contentCacheReset;
+        this.cacheEviction = cacheEviction;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -49,7 +49,7 @@ public class HeroPortraitOptimizer {
             }
         }
         if (converted > 0) {
-            contentCacheReset.clearContentCache();
+            cacheEviction.evictAll();
             log.info("Converted {} hero portraits to WebP", converted);
         }
     }

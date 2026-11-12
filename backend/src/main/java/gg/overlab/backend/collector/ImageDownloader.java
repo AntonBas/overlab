@@ -3,8 +3,9 @@ package gg.overlab.backend.collector;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,20 @@ public class ImageDownloader {
 
     private final RestClient restClient;
 
+    private final ImageSourceProperties sources;
+
     @Autowired
-    public ImageDownloader(CollectorProperties properties) {
-        this(requestFactoryBuilder(properties), properties.userAgent());
+    public ImageDownloader(CollectorProperties properties, ImageSourceProperties sources) {
+        this(requestFactoryBuilder(properties), properties.userAgent(), sources);
     }
 
     ImageDownloader(RestClient.Builder builder, String userAgent) {
+        this(builder, userAgent, new ImageSourceProperties(List.of()));
+    }
+
+    ImageDownloader(RestClient.Builder builder, String userAgent, ImageSourceProperties sources) {
         this.restClient = builder.defaultHeader(HttpHeaders.USER_AGENT, userAgent).build();
+        this.sources = sources;
     }
 
     public Optional<byte[]> downloadPng(String sourceUrl) {
@@ -55,12 +63,25 @@ public class ImageDownloader {
         if (sourceUrl == null || !sourceUrl.startsWith("https://")) {
             return Optional.empty();
         }
+        if (!isAllowedHost(sourceUrl)) {
+            log.warn("{} is not on the allowed image host list, skipped", sourceUrl);
+            return Optional.empty();
+        }
         try {
             return Optional.ofNullable(restClient.get().uri(URI.create(sourceUrl))
                     .exchange((request, response) -> readLimited(response, maxBytes)));
         } catch (RuntimeException exception) {
             log.warn("Could not download {}: {}", sourceUrl, exception.getMessage());
             return Optional.empty();
+        }
+    }
+
+    private boolean isAllowedHost(String sourceUrl) {
+        try {
+            String host = URI.create(sourceUrl).getHost();
+            return host != null && sources.allows(host);
+        } catch (IllegalArgumentException exception) {
+            return false;
         }
     }
 

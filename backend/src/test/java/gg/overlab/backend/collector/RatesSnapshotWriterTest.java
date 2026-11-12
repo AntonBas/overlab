@@ -33,7 +33,7 @@ class RatesSnapshotWriterTest {
     private final CollectorMetrics metrics = mock(CollectorMetrics.class);
     private final RatesSnapshotWriter writer = new RatesSnapshotWriter(heroRepository,
             roleChangeRepository, mock(GameMapRepository.class), mock(HeroStatRepository.class), mock(SnapshotQualityChecker.class),
-            metrics, mock(HeroPortraitDownloader.class), mock(RoleIconDownloader.class));
+            metrics);
 
     @Test
     void recordsARoleChangeWhenBlizzardMovesAHeroToAnotherRole() {

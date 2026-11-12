@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroRole;
 import gg.overlab.backend.hero.HeroService;
@@ -38,7 +39,7 @@ public class StatsService {
                 snapshot.platform(), snapshot.region(), heroes);
     }
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
+    @Cacheable(value = CacheNames.STATS,
             key = "'hero:' + #heroSlug + ':' + #queue + ':' + #tier + ':' + #platform + ':' + #region")
     @Transactional(readOnly = true)
     public HeroMapStatsDto getHeroByMaps(String heroSlug, GameQueue queue, RankTier tier, Platform platform,

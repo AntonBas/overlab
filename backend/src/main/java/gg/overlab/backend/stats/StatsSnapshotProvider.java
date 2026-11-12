@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
@@ -17,13 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StatsSnapshotProvider {
 
-    public static final String CACHE_NAME = "stats";
-
     private final HeroStatRepository heroStatRepository;
     private final StatsMapper statsMapper;
     private final SnapshotChecks snapshotChecks;
 
-    @Cacheable(value = CACHE_NAME, key = "'snapshot:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'snapshot:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public StatsSnapshotDto getSnapshot(StatsFilter filter) {
         List<HeroStat> stats = filter.isAllMaps()

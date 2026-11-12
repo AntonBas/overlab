@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.HeroService;
@@ -37,7 +38,7 @@ public class StatsHistoryService {
     private final StatsComparisonProvider comparisonProvider;
     private final StatsMapper statsMapper;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
+    @Cacheable(value = CacheNames.STATS,
             key = "'history:' + #heroSlug + ':' + #filter.cacheKey()",
             condition = "#from == null && #to == null")
     @Transactional(readOnly = true)
@@ -86,7 +87,7 @@ public class StatsHistoryService {
         return buildComparison(filter, patch.releasedAt(), comparisonEnd);
     }
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = "'history-start:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'history-start:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public HistoryStartDto historyStart(StatsFilter filter) {
         return new HistoryStartDto(heroStatRepository.findFirstCaptureForAllMaps(filter.queue(), filter.platform(),

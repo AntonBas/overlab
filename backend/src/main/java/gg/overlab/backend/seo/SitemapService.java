@@ -4,6 +4,7 @@ import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.guide.Guide;
+import gg.overlab.backend.guide.GuidePath;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
@@ -49,7 +50,7 @@ public class SitemapService {
             appendUrl(xml, "/maps/" + map.getSlug(), lastModified(map));
         }
         for (Guide guide : guideRepository.findAllByPublishedTrueOrderBySortOrderAscIdAsc()) {
-            appendUrl(xml, "/guides/" + guide.getId() + "-" + guide.getSlug(), lastModified(guide.getUpdatedAt()));
+            appendUrl(xml, "/guides/" + GuidePath.of(guide.getId(), guide.getSlug()), lastModified(guide.getUpdatedAt()));
         }
         return xml.append("</urlset>\n").toString();
     }

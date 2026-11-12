@@ -87,7 +87,7 @@ public class AccountService {
         if (user.getProvider() == AuthProvider.LOCAL) {
             requirePassword(user, request.password());
         }
-        if (user.getRole() == UserRole.ADMIN && userRepository.countByRole(UserRole.ADMIN) <= 1) {
+        if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
             throw new ConflictException("The last administrator cannot be deleted");
         }
         auditLogRepository.anonymizeActor(user.getId());
@@ -103,6 +103,11 @@ public class AccountService {
                 personalService.favorites(userId), relationFeedbackService.votes(userId),
                 feedbackService.export(userId),
                 personalService.preferences(userId));
+    }
+
+    private boolean isLastActiveAdmin(User user) {
+        return userRepository.lockEnabledByRole(UserRole.ADMIN).stream()
+                .noneMatch(admin -> !admin.getId().equals(user.getId()));
     }
 
     private User load(Long userId) {

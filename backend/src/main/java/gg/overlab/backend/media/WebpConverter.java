@@ -3,6 +3,7 @@ package gg.overlab.backend.media;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -15,23 +16,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebpConverter {
 
-    private static final int TIMEOUT_SECONDS = 20;
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(20);
     private static final String QUALITY = "85";
     private static final String ALPHA_QUALITY = "90";
     private static final String EFFORT = "6";
 
     private final String command;
+    private final Duration timeout;
 
     @Autowired
     public WebpConverter(@Value("${app.media.webp-command:cwebp}") String command) {
+        this(command, DEFAULT_TIMEOUT);
+    }
+
+    WebpConverter(String command, Duration timeout) {
         this.command = command;
+        this.timeout = timeout;
     }
 
     public boolean isAvailable() {
         try {
-            Process process = new ProcessBuilder(command, "-version").redirectErrorStream(true).start();
-            process.getInputStream().readAllBytes();
-            return process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS) && process.exitValue() == 0;
+            Process process = silentProcess(List.of(command, "-version"));
+            if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                process.destroyForcibly();
+                return false;
+            }
+            return process.exitValue() == 0;
         } catch (IOException exception) {
             return false;
         } catch (InterruptedException exception) {
@@ -49,11 +59,10 @@ public class WebpConverter {
             Files.write(source, png);
             List<String> arguments = List.of(command, "-quiet", "-q", QUALITY, "-alpha_q", ALPHA_QUALITY,
                     "-m", EFFORT, source.toString(), "-o", target.toString());
-            Process process = new ProcessBuilder(arguments).redirectErrorStream(true).start();
-            process.getInputStream().readAllBytes();
-            if (!process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            Process process = silentProcess(arguments);
+            if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 process.destroyForcibly();
-                log.warn("{} did not finish within {} seconds", command, TIMEOUT_SECONDS);
+                log.warn("{} did not finish within {}", command, timeout);
                 return Optional.empty();
             }
             if (process.exitValue() != 0) {
@@ -72,6 +81,13 @@ public class WebpConverter {
             deleteQuietly(source);
             deleteQuietly(target);
         }
+    }
+
+    private Process silentProcess(List<String> arguments) throws IOException {
+        return new ProcessBuilder(arguments)
+                .redirectErrorStream(true)
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                .start();
     }
 
     private void deleteQuietly(Path path) {

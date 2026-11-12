@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
@@ -25,7 +26,7 @@ public class StatsFreshnessService {
     private final HeroStatRepository heroStatRepository;
     private final SnapshotChecks snapshotChecks;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = "'freshness:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()")
     @Transactional(readOnly = true)
     public DataFreshnessDto freshness(StatsFilter filter) {
         List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), filter.platform(),

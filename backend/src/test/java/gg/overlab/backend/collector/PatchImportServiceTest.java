@@ -17,6 +17,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class PatchImportServiceTest {
 
@@ -27,7 +29,8 @@ class PatchImportServiceTest {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, false, null, null, 3, null, List.of());
         return new PatchImportService(properties, client, new PatchNotesParser(), patchRepository,
-                new SlugService(), mock(ApplicationEventPublisher.class));
+                new SlugService(), mock(ApplicationEventPublisher.class),
+                new TransactionTemplate(mock(PlatformTransactionManager.class)));
     }
 
     @Test

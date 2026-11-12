@@ -26,6 +26,19 @@ public class AbilityImportWriter {
     private final HeroAbilityRepository abilityRepository;
     private final ImageStore imageStore;
 
+    @Transactional(readOnly = true)
+    public Set<String> missingIconUrls(String heroSlug, List<ParsedAbility> parsedAbilities) {
+        Hero hero = heroRepository.findBySlug(heroSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        return parsedAbilities.stream()
+                .filter(parsed -> parsed.iconUrl() != null)
+                .filter(parsed -> abilityRepository.findByHeroIdAndSlug(hero.getId(), parsed.slug())
+                        .map(ability -> ability.getIconUrl() == null)
+                        .orElse(true))
+                .map(ParsedAbility::iconUrl)
+                .collect(Collectors.toSet());
+    }
+
     @Transactional
     public PerkImportWriter.Counts write(String heroSlug, List<ParsedAbility> parsedAbilities,
                                          Function<String, Optional<byte[]>> iconLoader) {

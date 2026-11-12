@@ -6,16 +6,14 @@ import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
 import gg.overlab.backend.config.async.AsyncConfig;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.gamemap.MapService;
-import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
-import gg.overlab.backend.stats.StatsSnapshotProvider;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,8 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
@@ -47,7 +43,8 @@ public class RatesCollectorService {
     private final SnapshotRecorder recorder;
     private final GameMapRepository gameMapRepository;
     private final MapDiscoveryService mapDiscovery;
-    private final CacheManager cacheManager;
+    private final HeroAssetService heroAssets;
+    private final CacheEviction cacheEviction;
     private final CollectorRunRepository runRepository;
     private final CollectorMetrics metrics;
     private final TaskExecutor executor;
@@ -57,7 +54,8 @@ public class RatesCollectorService {
     public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
                                  RatesValidator validator, SnapshotRecorder recorder,
                                  GameMapRepository gameMapRepository, MapDiscoveryService mapDiscovery,
-                                 CacheManager cacheManager,
+                                 HeroAssetService heroAssets,
+                                 CacheEviction cacheEviction,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
                                  @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
@@ -66,7 +64,8 @@ public class RatesCollectorService {
         this.recorder = recorder;
         this.gameMapRepository = gameMapRepository;
         this.mapDiscovery = mapDiscovery;
-        this.cacheManager = cacheManager;
+        this.heroAssets = heroAssets;
+        this.cacheEviction = cacheEviction;
         this.runRepository = runRepository;
         this.metrics = metrics;
         this.executor = executor;
@@ -246,7 +245,7 @@ public class RatesCollectorService {
         }
         run.setStatus(statusOf(run));
         run.setErrorSummary(errors.isEmpty() ? null : truncate(String.join("; ", errors)));
-        evictCaches();
+        cacheEviction.evictAll();
         log.info("Collector job '{}' finished: {} rows saved, {} of {} requests failed", job.name(),
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
     }
@@ -273,7 +272,9 @@ public class RatesCollectorService {
         validator.validateBanRates(queue, heroesWithData);
         SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
                 region, tier, mapSlug, heroesWithData, usable.etag());
-        if (!outcome.changed()) {
+        if (outcome.changed()) {
+            heroAssets.ensureAssets(heroesWithData);
+        } else {
             metrics.recordUnchangedSnapshot();
         }
         return outcome.rowsSaved();
@@ -297,15 +298,6 @@ public class RatesCollectorService {
             mapDiscovery.discover();
         } catch (RuntimeException exception) {
             log.warn("Map discovery failed: {}", exception.getMessage());
-        }
-    }
-
-    private void evictCaches() {
-        for (String cacheName : List.of(StatsSnapshotProvider.CACHE_NAME, HeroService.CACHE_NAME, MapService.CACHE_NAME)) {
-            Cache cache = cacheManager.getCache(cacheName);
-            if (cache != null) {
-                cache.clear();
-            }
         }
     }
 

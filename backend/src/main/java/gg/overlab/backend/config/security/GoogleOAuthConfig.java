@@ -4,6 +4,7 @@ import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.auth.AuthService;
 import gg.overlab.backend.user.auth.AuthTokens;
 import gg.overlab.backend.user.auth.OAuthUserService;
+import gg.overlab.backend.user.auth.exception.EmailAlreadyUsedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +55,12 @@ public class GoogleOAuthConfig {
                         AuthTokens tokens = authService.loginAs(user);
                         cookieService.writeTokens(response, tokens.accessToken(), tokens.refreshToken());
                         response.sendRedirect(frontendUrl + "/");
-                    } catch (RuntimeException exception) {
+                    } catch (EmailAlreadyUsedException exception) {
                         log.warn("Google sign-in rejected: {}", exception.getMessage());
                         response.sendRedirect(frontendUrl + "/login?error=email_in_use");
+                    } catch (RuntimeException exception) {
+                        log.error("Google sign-in failed", exception);
+                        response.sendRedirect(frontendUrl + "/login?error=oauth");
                     }
                 },
                 (request, response, exception) -> {

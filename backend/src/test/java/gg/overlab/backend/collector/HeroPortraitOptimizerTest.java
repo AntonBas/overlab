@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gg.overlab.backend.config.cache.ContentCacheReset;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.media.MediaFolder;
@@ -31,10 +31,10 @@ class HeroPortraitOptimizerTest {
 
     private final HeroRepository heroRepository = mock(HeroRepository.class);
     private final WebpConverter webpConverter = mock(WebpConverter.class);
-    private final ContentCacheReset contentCacheReset = mock(ContentCacheReset.class);
+    private final CacheEviction cacheEviction = mock(CacheEviction.class);
 
     private HeroPortraitOptimizer optimizer(MediaStorage storage) {
-        return new HeroPortraitOptimizer(heroRepository, storage, webpConverter, contentCacheReset);
+        return new HeroPortraitOptimizer(heroRepository, storage, webpConverter, cacheEviction);
     }
 
     private MediaStorage storage() {
@@ -63,7 +63,7 @@ class HeroPortraitOptimizerTest {
         assertThat(Files.exists(directory.resolve("heroes/ana.webp"))).isTrue();
         assertThat(Files.exists(directory.resolve("heroes/ana.png"))).isFalse();
         verify(heroRepository).save(hero);
-        verify(contentCacheReset).clearContentCache();
+        verify(cacheEviction).evictAll();
     }
 
     @Test
@@ -80,7 +80,7 @@ class HeroPortraitOptimizerTest {
         assertThat(hero.getPortraitUrl()).isEqualTo("heroes/ana.png");
         assertThat(Files.exists(directory.resolve("heroes/ana.png"))).isTrue();
         verify(heroRepository, never()).save(any());
-        verify(contentCacheReset, never()).clearContentCache();
+        verify(cacheEviction, never()).evictAll();
     }
 
     @Test

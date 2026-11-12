@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.hero.HeroRoleChangeRepository;
 import gg.overlab.backend.stats.dto.HeroChangeDto;
 import gg.overlab.backend.stats.dto.HeroRoleChangeDto;
@@ -23,7 +24,7 @@ public class StatsComparisonProvider {
     private final HeroRoleChangeRepository roleChangeRepository;
     private final StatsMapper statsMapper;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME,
+    @Cacheable(value = CacheNames.STATS,
             key = "'compare:' + #filter.cacheKey() + ':' + #beforeCapturedAt + ':' + #afterCapturedAt")
     @Transactional(readOnly = true)
     public StatsComparisonDto compareCaptures(StatsFilter filter, Instant beforeCapturedAt, Instant afterCapturedAt) {

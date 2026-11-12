@@ -9,6 +9,7 @@ import gg.overlab.backend.media.MediaProperties;
 import gg.overlab.backend.media.MediaStorage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.http.MediaType;
@@ -97,5 +98,14 @@ class RoleIconDownloaderTest {
                 MediaType.valueOf("image/svg+xml")));
 
         assertThat(new ImageDownloader(builder, "test-agent").downloadSvg(SOURCE)).isPresent();
+    }
+
+    @Test
+    void skipsHostsThatAreNotOnTheAllowedList() {
+        ImageDownloader downloader = new ImageDownloader(builder, "test-agent",
+                new ImageSourceProperties(List.of("other.example")));
+
+        assertThat(downloader.downloadSvg(SOURCE)).isEmpty();
+        server.verify();
     }
 }

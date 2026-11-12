@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.cache.CacheManager;
 
 class PerkImportServiceTest {
 
@@ -37,7 +37,7 @@ class PerkImportServiceTest {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, enabled, null, null, 3, null, List.of());
         return new PerkImportService(properties, heroRepository, pageClient, parser, new HeroAbilityParser(),
-                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheManager.class), Runnable::run);
+                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), Runnable::run);
     }
 
     private Hero hero(String slug, boolean active) {

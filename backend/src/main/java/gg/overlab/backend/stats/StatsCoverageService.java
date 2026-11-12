@@ -1,5 +1,6 @@
 package gg.overlab.backend.stats;
 
+import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.stats.dto.CoverageDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
 import java.util.Comparator;
@@ -21,7 +22,7 @@ public class StatsCoverageService {
 
     private final SnapshotCheckRepository snapshotCheckRepository;
 
-    @Cacheable(value = StatsSnapshotProvider.CACHE_NAME, key = CACHE_KEY)
+    @Cacheable(value = CacheNames.STATS, key = CACHE_KEY)
     @Transactional(readOnly = true)
     public List<CoverageDto> coverage() {
         Map<String, CoverageBuilder> builders = new LinkedHashMap<>();

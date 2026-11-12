@@ -15,8 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     boolean existsByEmailIgnoreCase(String email);
 
-    long countByRole(UserRole role);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.role = :role and u.enabled = true")
     List<User> lockEnabledByRole(@Param("role") UserRole role);

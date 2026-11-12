@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @Service
@@ -25,11 +25,16 @@ public class PatchImportService {
     private final PatchRepository patchRepository;
     private final SlugService slugService;
     private final ApplicationEventPublisher eventPublisher;
+    private final TransactionTemplate transactionTemplate;
 
     @EvictContentCaches
-    @Transactional
     public int importNew() {
         List<ParsedPatch> parsed = parser.parse(client.fetch());
+        Integer created = transactionTemplate.execute(status -> saveNew(parsed));
+        return created == null ? 0 : created;
+    }
+
+    private int saveNew(List<ParsedPatch> parsed) {
         List<Instant> createdReleases = new ArrayList<>();
         for (ParsedPatch entry : parsed) {
             String version = entry.date().toString();

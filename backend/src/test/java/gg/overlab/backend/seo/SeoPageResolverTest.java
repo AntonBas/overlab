@@ -104,4 +104,12 @@ class SeoPageResolverTest {
     void truncatesLongDescriptions() {
         assertThat(resolver.plain("word ".repeat(100))).hasSizeLessThanOrEqualTo(160).endsWith("…");
     }
+
+    @Test
+    void cacheKeyIgnoresTheGuideSlugAndTrailingSlash() {
+        assertThat(SeoPageResolver.cacheKey("/guides/12-first-title")).isEqualTo("/guides/12");
+        assertThat(SeoPageResolver.cacheKey("/guides/12-another/")).isEqualTo("/guides/12");
+        assertThat(SeoPageResolver.cacheKey("/heroes/ana/")).isEqualTo("/heroes/ana");
+        assertThat(SeoPageResolver.cacheKey(null)).isEqualTo("/");
+    }
 }

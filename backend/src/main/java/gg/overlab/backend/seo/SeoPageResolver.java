@@ -2,6 +2,7 @@ package gg.overlab.backend.seo;
 
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.guide.Guide;
+import gg.overlab.backend.guide.GuidePath;
 import gg.overlab.backend.guide.GuideRepository;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
@@ -23,7 +24,6 @@ public class SeoPageResolver {
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
-    private static final Pattern GUIDE_PATH = Pattern.compile("^(\\d+)(?:-.*)?$");
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
@@ -66,6 +66,15 @@ public class SeoPageResolver {
         this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
     }
 
+    public static String cacheKey(String requestedPath) {
+        String path = normalize(requestedPath);
+        Matcher matcher = PAGE_PATH.matcher(path);
+        if (matcher.matches() && "guides".equals(matcher.group(1))) {
+            return GuidePath.parseId(matcher.group(2)).map(id -> "/guides/" + id).orElse(path);
+        }
+        return path;
+    }
+
     @Transactional(readOnly = true)
     public Optional<SeoPage> resolve(String requestedPath) {
         String path = normalize(requestedPath);
@@ -86,7 +95,7 @@ public class SeoPageResolver {
         };
     }
 
-    private String normalize(String path) {
+    static String normalize(String path) {
         if (path == null || path.isBlank()) {
             return "/";
         }
@@ -122,17 +131,14 @@ public class SeoPageResolver {
     }
 
     private Optional<SeoPage> guidePage(String key) {
-        Matcher matcher = GUIDE_PATH.matcher(key);
-        if (!matcher.matches()) {
-            return Optional.empty();
-        }
-        return guideRepository.findWithDetailsById(Long.valueOf(matcher.group(1)))
+        return GuidePath.parseId(key)
+                .flatMap(guideRepository::findWithDetailsById)
                 .filter(Guide::isPublished)
                 .map(this::toGuidePage);
     }
 
     private SeoPage toGuidePage(Guide guide) {
-        String path = "/guides/" + guide.getId() + "-" + guide.getSlug();
+        String path = "/guides/" + GuidePath.of(guide.getId(), guide.getSlug());
         String mapPart = guide.getMap() == null ? "" : " for " + guide.getMap().getName();
         String description = plain(guide.getTitle() + ": a short " + guide.getHero().getName()
                 + " video guide" + mapPart + ".");

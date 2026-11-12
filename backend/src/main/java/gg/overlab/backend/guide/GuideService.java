@@ -14,8 +14,6 @@ import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -27,7 +25,6 @@ import org.springframework.util.StringUtils;
 public class GuideService {
 
     private static final String AUDIT_TYPE = "Guide";
-    private static final Pattern PATH_PATTERN = Pattern.compile("^(\\d+)(?:-.*)?$");
 
     private final GuideRepository guideRepository;
     private final HeroRepository heroRepository;
@@ -36,7 +33,8 @@ public class GuideService {
     private final SlugService slugService;
     private final AuditService auditService;
 
-    @Cacheable(value = CacheNames.CONTENT, key = "'guides:' + #heroSlug + ':' + #mapSlug")
+    @Cacheable(value = CacheNames.CONTENT, key = "'guides:' + #heroSlug + ':' + #mapSlug",
+            unless = "#result.isEmpty()")
     @Transactional(readOnly = true)
     public List<GuideDto> findPublished(String heroSlug, String mapSlug) {
         List<Guide> guides;
@@ -52,14 +50,11 @@ public class GuideService {
         return guides.stream().map(guideMapper::toDto).toList();
     }
 
-    @Cacheable(value = CacheNames.CONTENT, key = "'guide:' + #path")
+    @Cacheable(value = CacheNames.CONTENT,
+            key = "'guide:' + T(gg.overlab.backend.guide.GuidePath).idOf(#path)")
     @Transactional(readOnly = true)
     public GuideDto getPublishedByPath(String path) {
-        Matcher matcher = PATH_PATTERN.matcher(path);
-        if (!matcher.matches()) {
-            throw new EntityNotFoundException("Guide", path);
-        }
-        Long id = Long.valueOf(matcher.group(1));
+        Long id = GuidePath.idOf(path);
         return guideRepository.findWithDetailsById(id)
                 .filter(Guide::isPublished)
                 .map(guideMapper::toDto)

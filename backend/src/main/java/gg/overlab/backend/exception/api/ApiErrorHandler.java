@@ -80,7 +80,7 @@ public class ApiErrorHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException exception,
                                                        HttpServletRequest request) {
-        ApiError.SubError subError = new ApiError.SubError(exception.getName(), "Invalid value: " + exception.getValue());
+        ApiError.SubError subError = new ApiError.SubError(exception.getName(), "Invalid value");
         return build(HttpStatus.BAD_REQUEST, "Invalid request parameter", request, List.of(subError));
     }
 

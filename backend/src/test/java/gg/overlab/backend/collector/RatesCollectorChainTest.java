@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.cache.CacheManager;
 
 class RatesCollectorChainTest {
 
@@ -43,7 +43,7 @@ class RatesCollectorChainTest {
                 mock(SnapshotCheckRepository.class));
         metrics.registerLastSuccessGauges();
         service = new RatesCollectorService(properties, client, mock(RatesValidator.class), recorder,
-                mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(CacheManager.class), runRepository, metrics, Runnable::run);
+                mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class), runRepository, metrics, Runnable::run);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(client.fetch(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag", false));
