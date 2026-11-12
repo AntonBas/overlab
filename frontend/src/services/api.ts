@@ -1,5 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
-import type { ApiErrorBody } from "../types/api";
+import type { ApiErrorBody } from "../types/common";
 
 export interface RequestFailure {
   status: number;

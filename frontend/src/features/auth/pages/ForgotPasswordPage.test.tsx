@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "vitest-axe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 
@@ -14,6 +15,12 @@ describe("ForgotPasswordPage", () => {
   beforeEach(() => {
     vi.mocked(forgotPassword).mockReset();
     vi.mocked(forgotPassword).mockResolvedValue();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderWithRouter(<ForgotPasswordPage />);
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("requests a reset link and shows the neutral confirmation", async () => {

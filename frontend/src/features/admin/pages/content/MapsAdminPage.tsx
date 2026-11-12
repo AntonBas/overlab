@@ -1,26 +1,26 @@
 import { useState, type FormEvent } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { matchesName } from "../../../utils/search";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import { MAP_MODE_LABELS } from "../../../utils/format";
-import type { GameMap, MapMode } from "../../../types/api";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { Thumbnail } from "../../../../components/ui/Thumbnail";
+import { matchesName } from "../../../../utils/search";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import { MAP_MODE_LABELS } from "../../../../utils/format";
+import type { GameMap, MapMode } from "../../../../types/map";
 import {
   fetchAdminMaps,
   removeMapImage,
   updateMap,
   uploadMapImage,
-} from "../api/adminApi";
-import { DataTable } from "../components/ui/DataTable";
-import { Drawer } from "../components/ui/Drawer";
-import { SelectField } from "../components/ui/Fields";
-import { ImageUploadField } from "../components/forms/ImageUploadField";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useSave } from "../components/forms/useSave";
-import { useUnsavedChanges } from "../components/forms/unsavedChanges";
+} from "../../api/adminApi";
+import { DataTable } from "../../components/ui/DataTable";
+import { Drawer } from "../../components/ui/Drawer";
+import { SelectField } from "../../components/ui/Fields";
+import { ImageUploadField } from "../../components/forms/ImageUploadField";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useSave } from "../../components/forms/useSave";
+import { useUnsavedChanges } from "../../components/forms/unsavedChanges";
 
 const MODES: MapMode[] = [
   "CONTROL",

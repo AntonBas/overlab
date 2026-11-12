@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import type { Guide } from "../../../types/api";
+import type { Guide } from "../../../types/guide";
 import { SpotsSection } from "./SpotsSection";
 
 function guide(overrides: Partial<Guide>): Guide {

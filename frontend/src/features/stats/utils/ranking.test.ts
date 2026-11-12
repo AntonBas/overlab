@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { heroStat } from "../../../test/fixtures";
+import { heroStat } from "../../../test/fixtures/stats";
 import { adjustedWinRate, rankPicks, weightedGain } from "./ranking";
 
 describe("adjustedWinRate", () => {

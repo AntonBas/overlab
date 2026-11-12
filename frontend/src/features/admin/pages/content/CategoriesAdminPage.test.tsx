@@ -1,9 +1,9 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/render";
+import { renderWithRouter } from "../../../../test/render";
 
-vi.mock("../api/adminApi", () => ({
+vi.mock("../../api/adminApi", () => ({
   fetchAdminHeroes: vi.fn(() =>
     Promise.resolve([
       {
@@ -60,7 +60,7 @@ vi.mock("../api/adminApi", () => ({
   deleteCategoryMatchup: vi.fn(),
 }));
 
-import { createCategory } from "../api/adminApi";
+import { createCategory } from "../../api/adminApi";
 import { CategoriesAdminPage } from "./CategoriesAdminPage";
 
 describe("CategoriesAdminPage", () => {

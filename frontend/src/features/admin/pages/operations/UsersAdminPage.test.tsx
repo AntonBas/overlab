@@ -1,15 +1,15 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/render";
-import type { AdminUser } from "../types";
+import { renderWithRouter } from "../../../../test/render";
+import type { AdminUser } from "../../types";
 
-vi.mock("../api/adminApi", () => ({
+vi.mock("../../api/adminApi", () => ({
   fetchAdminUsers: vi.fn(),
   setUserEnabled: vi.fn(),
   setUserRole: vi.fn(),
 }));
-vi.mock("../../auth/context/useAuth", () => ({
+vi.mock("../../../auth/context/useAuth", () => ({
   useAuth: () => ({
     user: { id: 1, email: "admin@overlab.gg" },
     loading: false,
@@ -19,7 +19,11 @@ vi.mock("../../auth/context/useAuth", () => ({
   }),
 }));
 
-import { fetchAdminUsers, setUserEnabled, setUserRole } from "../api/adminApi";
+import {
+  fetchAdminUsers,
+  setUserEnabled,
+  setUserRole,
+} from "../../api/adminApi";
 import { UsersAdminPage } from "./UsersAdminPage";
 
 function user(overrides: Partial<AdminUser>): AdminUser {

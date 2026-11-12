@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { toFailure } from "../../../services/api";
-import { EmailLink } from "../../legal/components/EmailLink";
-import { contactEmail } from "../../legal/contact";
+import { EmailLink } from "../../legal";
+import { contactEmail } from "../../legal";
 import { sendBusinessMessage } from "../api/businessApi";
 
 const MIN_LENGTH = 10;

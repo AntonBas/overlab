@@ -5,7 +5,7 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
-import { useRegion } from "../../stats/context/useRegion";
+import { useRegion } from "../../stats";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -16,11 +16,11 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { HeroMapPicks } from "../components/profile/HeroMapPicks";
-import { HeroHistorySection } from "../../history/components/HeroHistorySection";
-import { fetchGuides } from "../../guides/api/guidesApi";
-import { SpotsSection } from "../../guides/components/SpotsSection";
-import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { fetchHeroMapStats } from "../../stats/api/statsApi";
+import { HeroHistorySection } from "../../history";
+import { fetchGuides } from "../../guides";
+import { SpotsSection } from "../../guides";
+import { FavoriteButton } from "../../personal";
+import { fetchHeroMapStats } from "../../stats";
 import {
   fetchCounters,
   fetchHero,

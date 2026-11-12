@@ -1,17 +1,17 @@
 import { useState, type FormEvent } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import { humanize } from "../../../utils/format";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { Thumbnail } from "../../../../components/ui/Thumbnail";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import { humanize } from "../../../../utils/format";
 import type {
   Perk,
   PerkPosition,
   PerkRecommendation,
   PerkSlot,
-} from "../../../types/api";
+} from "../../../../types/hero";
 import {
   createPerk,
   deletePerk,
@@ -20,18 +20,18 @@ import {
   removePerkIcon,
   updatePerk,
   uploadPerkIcon,
-} from "../api/adminApi";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { DataTable } from "../components/ui/DataTable";
-import { Drawer } from "../components/ui/Drawer";
-import { SelectField, TextAreaField } from "../components/ui/Fields";
-import { HeroSelect } from "../components/hero/HeroSelect";
-import { ImageUploadField } from "../components/forms/ImageUploadField";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useHeroOptions } from "../components/hero/useHeroOptions";
-import { useSave } from "../components/forms/useSave";
-import { useUnsavedChanges } from "../components/forms/unsavedChanges";
-import { FormField } from "../../../components/ui/FormField";
+} from "../../api/adminApi";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { DataTable } from "../../components/ui/DataTable";
+import { Drawer } from "../../components/ui/Drawer";
+import { SelectField, TextAreaField } from "../../components/ui/Fields";
+import { HeroSelect } from "../../components/hero/HeroSelect";
+import { ImageUploadField } from "../../components/forms/ImageUploadField";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useHeroOptions } from "../../components/hero/useHeroOptions";
+import { useSave } from "../../components/forms/useSave";
+import { useUnsavedChanges } from "../../components/forms/unsavedChanges";
+import { FormField } from "../../../../components/ui/FormField";
 
 const RECOMMENDATIONS: PerkRecommendation[] = [
   "RECOMMENDED",

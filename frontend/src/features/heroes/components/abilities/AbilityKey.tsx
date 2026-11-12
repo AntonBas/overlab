@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { AbilityControl } from "../../../../types/api";
+import type { AbilityControl } from "../../../../types/hero";
 import {
   CONTROL_KEYS,
   CONTROL_SCHEME_LABELS,

@@ -1,27 +1,24 @@
 import { useState, type ChangeEvent } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import type { AbilityControl } from "../../../types/api";
-import { CONTROL_KEYS } from "../../heroes/context/controlSchemeContext";
-import {
-  ABILITY_CONTROLS,
-  ABILITY_CONTROL_LABELS,
-} from "../../heroes/utils/abilityControls";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { Thumbnail } from "../../../../components/ui/Thumbnail";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import type { AbilityControl } from "../../../../types/hero";
+import { CONTROL_KEYS } from "../../../heroes";
+import { ABILITY_CONTROLS, ABILITY_CONTROL_LABELS } from "../../../heroes";
 import {
   fetchAdminAbilities,
   fetchAdminHeroes,
   updateAbilityControl,
-} from "../api/adminApi";
-import { DataTable } from "../components/ui/DataTable";
-import { SelectField } from "../components/ui/Fields";
-import { HeroSelect } from "../components/hero/HeroSelect";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useSave } from "../components/forms/useSave";
-import type { AdminAbility } from "../types";
+} from "../../api/adminApi";
+import { DataTable } from "../../components/ui/DataTable";
+import { SelectField } from "../../components/ui/Fields";
+import { HeroSelect } from "../../components/hero/HeroSelect";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useSave } from "../../components/forms/useSave";
+import type { AdminAbility } from "../../types";
 
 function optionLabel(control: AbilityControl): string {
   const key = CONTROL_KEYS.PC[control];

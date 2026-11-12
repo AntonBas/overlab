@@ -16,20 +16,20 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import type { Patch } from "../../../types/api";
+import type { Patch } from "../../../types/patch";
 import {
   formatDate,
   formatDateTime,
   formatPatchDate,
 } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import { fetchHeroes } from "../../heroes/api/heroesApi";
-import { fetchPatches } from "../../patches/api/patchesApi";
-import { fetchComparison, fetchHistoryStart } from "../../stats/api/statsApi";
-import { StatsFilters } from "../../stats/components/StatsFilters";
-import { isQuickPlay, toSearchParams } from "../../stats/filters";
-import { useRegion } from "../../stats/context/useRegion";
-import { useFilterState } from "../../stats/hooks/useFilterState";
+import { fetchHeroes } from "../../heroes";
+import { fetchPatches } from "../../patches";
+import { fetchComparison, fetchHistoryStart } from "../../stats";
+import { StatsFilters } from "../../stats";
+import { isQuickPlay, toSearchParams } from "../../stats";
+import { useRegion } from "../../stats";
+import { useFilterState } from "../../stats";
 import { ChangesTable } from "../components/ChangesTable";
 import { periodRange } from "../utils/chart";
 

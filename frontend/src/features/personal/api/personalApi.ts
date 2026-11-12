@@ -1,5 +1,5 @@
 import { api } from "../../../services/api";
-import type { Favorites, Preferences } from "../../../types/api";
+import type { Favorites, Preferences } from "../../../types/user";
 
 export async function fetchFavorites(): Promise<Favorites> {
   const { data } = await api.get<Favorites>("/me/favorites");

@@ -1,9 +1,9 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/render";
+import { renderWithRouter } from "../../../../test/render";
 
-vi.mock("../api/adminApi", () => ({
+vi.mock("../../api/adminApi", () => ({
   fetchAdminHeroes: vi.fn(() => Promise.resolve([])),
   fetchPerks: vi.fn(() => Promise.resolve([])),
   importPerks: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock("../api/adminApi", () => ({
   removePerkIcon: vi.fn(),
 }));
 
-import { importPerks } from "../api/adminApi";
+import { importPerks } from "../../api/adminApi";
 import { PerksAdminPage } from "./PerksAdminPage";
 
 describe("PerksAdminPage", () => {

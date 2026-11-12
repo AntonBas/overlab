@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Ability } from "../../../types/api";
+import type { Ability } from "../../../types/hero";
 
 export type AbilityIndex = ReadonlyMap<string, Ability>;
 

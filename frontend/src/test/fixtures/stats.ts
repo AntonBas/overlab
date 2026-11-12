@@ -1,4 +1,4 @@
-import type { HeroStat, StatsSnapshot } from "../types/api";
+import type { HeroStat, StatsSnapshot } from "../../types/stats";
 
 export function heroStat(overrides: Partial<HeroStat> = {}): HeroStat {
   return {

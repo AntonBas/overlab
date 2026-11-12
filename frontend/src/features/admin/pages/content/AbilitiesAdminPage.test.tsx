@@ -1,9 +1,9 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/render";
+import { renderWithRouter } from "../../../../test/render";
 
-vi.mock("../api/adminApi", () => ({
+vi.mock("../../api/adminApi", () => ({
   fetchAdminHeroes: vi.fn(() =>
     Promise.resolve([
       {
@@ -40,7 +40,7 @@ vi.mock("../api/adminApi", () => ({
   updateAbilityControl: vi.fn(),
 }));
 
-import { updateAbilityControl } from "../api/adminApi";
+import { updateAbilityControl } from "../../api/adminApi";
 import { AbilitiesAdminPage } from "./AbilitiesAdminPage";
 
 describe("AbilitiesAdminPage", () => {

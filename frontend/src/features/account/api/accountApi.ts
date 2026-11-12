@@ -1,5 +1,5 @@
 import { api } from "../../../services/api";
-import type { User } from "../../../types/api";
+import type { User } from "../../../types/user";
 
 export async function updateProfile(displayName: string): Promise<User> {
   const { data } = await api.put<User>("/me/profile", { displayName });

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Region } from "../../../types/api";
+import type { Region } from "../../../types/common";
 
 export interface RegionValue {
   region: Region;

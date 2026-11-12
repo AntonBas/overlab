@@ -1,4 +1,4 @@
-import type { Hero } from "../types/api";
+import type { Hero } from "../types/hero";
 
 function normalize(value: string): string {
   return value

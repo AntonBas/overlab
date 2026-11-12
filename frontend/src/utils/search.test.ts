@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hero } from "../types/api";
+import type { Hero } from "../types/hero";
 import { matchHeroes } from "./search";
 
 function hero(slug: string, name: string): Hero {

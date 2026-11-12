@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import type { HeroChange } from "../../../types/api";
+import type { HeroChange } from "../../../types/stats";
 import { renderWithRouter } from "../../../test/render";
 import { ChangesTable } from "./ChangesTable";
 

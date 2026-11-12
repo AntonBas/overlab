@@ -1,21 +1,25 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import type { Guide } from "../../../types/api";
-import { deleteGuide, fetchAdminGuides, fetchAdminMaps } from "../api/adminApi";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { DataTable } from "../components/ui/DataTable";
-import { Drawer } from "../components/ui/Drawer";
-import { HeroLabel } from "../components/hero/HeroLabel";
-import { HeroSelect } from "../components/hero/HeroSelect";
-import { GuideForm } from "../components/forms/GuideForm";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useHeroOptions } from "../components/hero/useHeroOptions";
-import { useSave } from "../components/forms/useSave";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import type { Guide } from "../../../../types/guide";
+import {
+  deleteGuide,
+  fetchAdminGuides,
+  fetchAdminMaps,
+} from "../../api/adminApi";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { DataTable } from "../../components/ui/DataTable";
+import { Drawer } from "../../components/ui/Drawer";
+import { HeroLabel } from "../../components/hero/HeroLabel";
+import { HeroSelect } from "../../components/hero/HeroSelect";
+import { GuideForm } from "../../components/forms/GuideForm";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useHeroOptions } from "../../components/hero/useHeroOptions";
+import { useSave } from "../../components/forms/useSave";
 
 export function GuidesAdminPage() {
   usePageTitle("Admin: guides");

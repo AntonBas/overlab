@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GameMap } from "../../../types/api";
+import type { GameMap } from "../../../types/map";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MapCard } from "./MapCard";
 

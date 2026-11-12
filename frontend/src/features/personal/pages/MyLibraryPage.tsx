@@ -10,11 +10,11 @@ import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useNoIndex } from "../../../hooks/useNoIndex";
-import { useAuth } from "../../auth/context/useAuth";
-import { AccountHeader } from "../../account/components/AccountHeader";
-import { SettingsSection } from "../../account/components/SettingsSection";
+import { useAuth } from "../../auth";
+import { AccountHeader } from "../../account";
+import { SettingsSection } from "../../account";
 import { fetchFavorites } from "../api/personalApi";
-import { sortHeroesByRoleThenName } from "../../heroes/utils/sortHeroes";
+import { sortHeroesByRoleThenName } from "../../heroes";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { usePersonalData } from "../context/usePersonalData";
 

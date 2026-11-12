@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import { toFailure } from "../../../services/api";
-import { SettingsSection } from "../../account/components/SettingsSection";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import { toFailure } from "../../../../services/api";
+import { SettingsSection } from "../../../account";
 import {
   changeFeedbackStatus,
   fetchFeedback,
   fetchRelationVoteSummary,
-} from "../api/adminApi";
-import { DataTable } from "../components/ui/DataTable";
-import { StatusMessage } from "../components/ui/StatusMessage";
+} from "../../api/adminApi";
+import { DataTable } from "../../components/ui/DataTable";
+import { StatusMessage } from "../../components/ui/StatusMessage";
 import type {
   FeedbackMessage,
   FeedbackStatus,
   FeedbackType,
   RelationType,
-} from "../types";
-import { formatDateTime } from "../../../utils/format";
+} from "../../types";
+import { formatDateTime } from "../../../../utils/format";
 
 const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 

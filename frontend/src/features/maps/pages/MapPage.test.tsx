@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { heroStat, snapshot } from "../../../test/fixtures";
+import { heroStat, snapshot } from "../../../test/fixtures/stats";
 import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../../stats/api/statsApi", () => ({ fetchStats: vi.fn() }));
@@ -32,7 +32,7 @@ vi.mock("../../personal/components/FavoriteButton", () => ({
   FavoriteButton: () => null,
 }));
 
-import { fetchStats } from "../../stats/api/statsApi";
+import { fetchStats } from "../../stats";
 import { MapPage } from "./MapPage";
 
 const fetchStatsMock = vi.mocked(fetchStats);

@@ -16,13 +16,13 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import type { CategoryMatchup, HeroRole } from "../../../types/api";
+import type { CategoryMatchup, HeroRole } from "../../../types/hero";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import { FavoriteButton } from "../../personal/components/FavoriteButton";
-import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
-import { usePersonalData } from "../../personal/context/usePersonalData";
-import { ROLES } from "../../stats/filters";
+import { FavoriteButton } from "../../personal";
+import { FavoritesFilterButton } from "../../personal";
+import { usePersonalData } from "../../personal";
+import { ROLES } from "../../stats";
 import {
   fetchAllRelations,
   fetchHeroCategories,

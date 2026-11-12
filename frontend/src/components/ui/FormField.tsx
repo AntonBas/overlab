@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type InputHTMLAttributes } from "react";
+import { FieldShell } from "./FieldShell";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -28,8 +29,7 @@ export function FormField({
     />
   );
   return (
-    <div className="form-field">
-      <label htmlFor={fieldId}>{label}</label>
+    <FieldShell id={fieldId} label={label} error={error} hint={hint}>
       {isPassword ? (
         <div className="form-field__control">
           {inputElement}
@@ -50,12 +50,6 @@ export function FormField({
       ) : (
         inputElement
       )}
-      {hint && !error && <span className="muted">{hint}</span>}
-      {error && (
-        <span id={`${fieldId}-error`} className="form-field__error">
-          {error}
-        </span>
-      )}
-    </div>
+    </FieldShell>
   );
 }

@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
-import { AnalyticsLoader } from "../../features/legal/components/AnalyticsLoader";
-import { CookieBanner } from "../../features/legal/components/CookieBanner";
+import { AnalyticsLoader } from "../../features/legal";
+import { CookieBanner } from "../../features/legal";
 import { Spinner } from "../ui/Spinner";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { Footer } from "./Footer";

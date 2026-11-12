@@ -1,5 +1,5 @@
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { useRequireLogin } from "../../../personal/hooks/useRequireLogin";
+import { useRequireLogin } from "../../../personal";
 import type {
   RelationKind,
   RelationVoteValue,

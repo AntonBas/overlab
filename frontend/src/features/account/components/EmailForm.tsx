@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../components/ui/FormField";
-import { StatusMessage } from "../../admin/components/ui/StatusMessage";
-import { useSave } from "../../admin/components/forms/useSave";
+import { StatusMessage } from "../../admin";
+import { useSave } from "../../admin";
 import { requestEmailChange } from "../api/accountApi";
 
 export function EmailForm({ currentEmail }: { currentEmail: string }) {

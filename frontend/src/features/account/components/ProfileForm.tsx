@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../components/ui/FormField";
-import { StatusMessage } from "../../admin/components/ui/StatusMessage";
-import { useSave } from "../../admin/components/forms/useSave";
-import { useAuth } from "../../auth/context/useAuth";
+import { StatusMessage } from "../../admin";
+import { useSave } from "../../admin";
+import { useAuth } from "../../auth";
 import { updateProfile } from "../api/accountApi";
 
 export function ProfileForm() {

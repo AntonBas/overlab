@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import { axe } from "vitest-axe";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 
@@ -11,6 +12,16 @@ import { PrivacyPage } from "./PrivacyPage";
 import { TermsPage } from "./TermsPage";
 
 describe("legal pages", () => {
+  it.each([
+    ["cookies", <CookiesPage key="cookies" />],
+    ["privacy", <PrivacyPage key="privacy" />],
+    ["terms", <TermsPage key="terms" />],
+  ])("%s page has no accessibility violations", async (_name, page) => {
+    const { container } = renderWithRouter(page, "/legal");
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("renders the cookie policy with the cookie settings", () => {
     renderWithRouter(<CookiesPage />, "/cookies");
 

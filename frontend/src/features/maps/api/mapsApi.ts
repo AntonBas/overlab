@@ -1,5 +1,5 @@
 import { api } from "../../../services/api";
-import type { GameMap } from "../../../types/api";
+import type { GameMap } from "../../../types/map";
 
 export async function fetchMaps(): Promise<GameMap[]> {
   const { data } = await api.get<GameMap[]>("/maps");

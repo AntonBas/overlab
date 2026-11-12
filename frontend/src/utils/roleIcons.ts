@@ -1,4 +1,4 @@
-import type { HeroRole } from "../types/api";
+import type { HeroRole } from "../types/hero";
 
 const availability = new Map<HeroRole, Promise<boolean>>();
 

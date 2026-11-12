@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { StatsSort } from "../../../types/api";
-import { usePersonalData } from "../../personal/context/usePersonalData";
+import type { StatsSort } from "../../../types/common";
+import { usePersonalData } from "../../personal";
 import { useCoverage } from "../context/useCoverage";
 import { useRegion } from "../context/useRegion";
 import {

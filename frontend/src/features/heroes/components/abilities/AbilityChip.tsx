@@ -3,7 +3,7 @@ import { useId } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingTip } from "../../../../hooks/useFloatingTip";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
-import type { Ability } from "../../../../types/api";
+import type { Ability } from "../../../../types/hero";
 import { formatAbilityDescription } from "../../utils/abilityDescription";
 import { AbilityKey } from "./AbilityKey";
 

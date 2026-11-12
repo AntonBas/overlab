@@ -1,11 +1,6 @@
-import type {
-  GameQueue,
-  HeroRole,
-  MapMode,
-  Platform,
-  RankTier,
-  Region,
-} from "../types/api";
+import type { GameQueue, Platform, RankTier, Region } from "../types/common";
+import type { HeroRole } from "../types/hero";
+import type { MapMode } from "../types/map";
 
 export function formatPercent(value: number | null | undefined): string {
   return value === null || value === undefined ? "-" : `${value.toFixed(1)}%`;

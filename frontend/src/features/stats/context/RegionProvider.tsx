@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
-import type { Region } from "../../../types/api";
-import { usePersonalData } from "../../personal/context/usePersonalData";
-import { savePreferences } from "../../personal/api/personalApi";
+import type { Region } from "../../../types/common";
+import { usePersonalData } from "../../personal";
+import { savePreferences } from "../../personal";
 import { detectRegion, readStoredRegion, writeStoredRegion } from "../region";
 import { RegionContext } from "./regionContext";
 

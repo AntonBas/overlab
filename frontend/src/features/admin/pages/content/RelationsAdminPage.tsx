@@ -1,28 +1,28 @@
 import { useState, type FormEvent } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import { humanize } from "../../../utils/format";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import { humanize } from "../../../../utils/format";
 import {
   createRelation,
   deleteRelation,
   fetchRelations,
   updateRelation,
-} from "../api/adminApi";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { DataTable } from "../components/ui/DataTable";
-import { Drawer } from "../components/ui/Drawer";
-import { SelectField, TextAreaField } from "../components/ui/Fields";
-import { HeroLabel } from "../components/hero/HeroLabel";
-import { HeroSelect } from "../components/hero/HeroSelect";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useHeroOptions } from "../components/hero/useHeroOptions";
-import { useSave } from "../components/forms/useSave";
-import { useUnsavedChanges } from "../components/forms/unsavedChanges";
-import type { AdminHero, HeroRelation, RelationType } from "../types";
-import { describeRelationConflict } from "../utils/relations";
+} from "../../api/adminApi";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { DataTable } from "../../components/ui/DataTable";
+import { Drawer } from "../../components/ui/Drawer";
+import { SelectField, TextAreaField } from "../../components/ui/Fields";
+import { HeroLabel } from "../../components/hero/HeroLabel";
+import { HeroSelect } from "../../components/hero/HeroSelect";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useHeroOptions } from "../../components/hero/useHeroOptions";
+import { useSave } from "../../components/forms/useSave";
+import { useUnsavedChanges } from "../../components/forms/unsavedChanges";
+import type { AdminHero, HeroRelation, RelationType } from "../../types";
+import { describeRelationConflict } from "../../utils/relations";
 
 interface RelationFormProps {
   relation: HeroRelation | null;

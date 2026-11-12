@@ -1,4 +1,4 @@
-import type { AbilityControl } from "../../../types/api";
+import type { AbilityControl } from "../../../types/hero";
 
 export const ABILITY_CONTROLS: readonly AbilityControl[] = [
   "PRIMARY_FIRE",

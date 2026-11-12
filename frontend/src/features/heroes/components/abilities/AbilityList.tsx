@@ -1,6 +1,6 @@
 import { NewBadge } from "../../../../components/ui/NewBadge";
 import { Thumbnail } from "../../../../components/ui/Thumbnail";
-import type { Ability } from "../../../../types/api";
+import type { Ability } from "../../../../types/hero";
 import { formatAbilityDescription } from "../../utils/abilityDescription";
 import { AbilityKey } from "./AbilityKey";
 

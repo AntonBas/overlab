@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Preferences } from "../../../types/api";
+import type { Preferences } from "../../../types/user";
 import { RegionProvider } from "./RegionProvider";
 import { useRegion } from "./useRegion";
 

@@ -1,5 +1,5 @@
 import { api } from "../../../services/api";
-import type { Guide } from "../../../types/api";
+import type { Guide } from "../../../types/guide";
 
 export interface GuideQuery {
   hero?: string;

@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapVisual } from "../../../hooks/useCatalog";
-import type { Guide } from "../../../types/api";
+import type { Guide } from "../../../types/guide";
 import { SpotCard } from "./SpotCard";
 
 interface SpotRailProps {

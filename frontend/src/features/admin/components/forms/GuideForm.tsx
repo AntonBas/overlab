@@ -1,19 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../../components/ui/FormField";
 import { useFetch } from "../../../../hooks/useFetch";
-import type {
-  GameMap,
-  Guide,
-  GuideKind,
-  GuideSide,
-} from "../../../../types/api";
-import { fetchHeroAbilities } from "../../../heroes/api/heroesApi";
+import type { Guide, GuideKind, GuideSide } from "../../../../types/guide";
+import type { GameMap } from "../../../../types/map";
+import { fetchHeroAbilities } from "../../../heroes";
 import {
   GUIDE_KIND_LABELS,
   GUIDE_KINDS,
   GUIDE_SIDE_LABELS,
   GUIDE_SIDES,
-} from "../../../guides/labels";
+} from "../../../guides";
 import { createGuide, updateGuide } from "../../api/adminApi";
 import type { AdminHero } from "../../types";
 import {

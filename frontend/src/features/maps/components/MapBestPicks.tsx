@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import type { HeroStat } from "../../../types/api";
+import type { HeroStat } from "../../../types/stats";
 import { formatPercent } from "../../../utils/format";
 import { picksByRole } from "../utils/bestPicks";
 

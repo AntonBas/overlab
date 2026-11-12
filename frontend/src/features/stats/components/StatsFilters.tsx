@@ -10,7 +10,8 @@ import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import type { GameMap, HeroRole } from "../../../types/api";
+import type { HeroRole } from "../../../types/hero";
+import type { GameMap } from "../../../types/map";
 import { PLATFORM_OPTIONS, REGION_OPTIONS } from "../filterOptions";
 import { useCoverage } from "../context/useCoverage";
 import {

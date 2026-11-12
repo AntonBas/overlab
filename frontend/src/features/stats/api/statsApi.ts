@@ -1,16 +1,18 @@
 import { api } from "../../../services/api";
 import type {
-  DataFreshness,
   GameQueue,
-  HeroHistory,
-  HeroMapStats,
-  HistoryStart,
   Platform,
   RankTier,
   Region,
+} from "../../../types/common";
+import type {
+  DataFreshness,
+  HeroHistory,
+  HeroMapStats,
+  HistoryStart,
   StatsComparison,
   StatsSnapshot,
-} from "../../../types/api";
+} from "../../../types/stats";
 import type { CoverageEntry, StatsFilters } from "../filters";
 
 export async function fetchFreshness(

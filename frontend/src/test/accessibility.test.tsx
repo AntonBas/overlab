@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { describe, expect, it, vi } from "vitest";
-import { heroStat } from "./fixtures";
+import { heroStat } from "./fixtures/stats";
 
 vi.mock("../features/auth/context/useAuth", () => ({
   useAuth: () => ({
@@ -18,11 +18,11 @@ vi.mock("../features/heroes/api/heroesApi", () => ({
 
 import { Header } from "../components/layout/Header";
 import { RoleBadge } from "../components/ui/RoleBadge";
-import { PerkList } from "../features/heroes/components/profile/PerkList";
-import { RelatedHeroes } from "../features/heroes/components/relations/RelatedHeroes";
-import { ChangesTable } from "../features/history/components/ChangesTable";
-import { LineChart } from "../features/history/components/LineChart";
-import { StatsTable } from "../features/stats/components/StatsTable";
+import { PerkList } from "../features/heroes";
+import { RelatedHeroes } from "../features/heroes";
+import { ChangesTable } from "../features/history";
+import { LineChart } from "../features/history";
+import { StatsTable } from "../features/stats";
 
 function inRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../../components/ui/RoleBadge";
 import { useFloatingTip } from "../../../../hooks/useFloatingTip";
-import type { RelatedHero } from "../../../../types/api";
+import type { RelatedHero } from "../../../../types/hero";
 import type { RelationKind } from "../../api/relationFeedbackApi";
 import type { RelationFeedback } from "../../hooks/useRelationFeedback";
 import { AbilityText } from "../abilities/AbilityText";

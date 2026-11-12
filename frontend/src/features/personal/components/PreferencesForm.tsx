@@ -2,12 +2,12 @@ import { useState, type FormEvent } from "react";
 import type {
   GameQueue,
   Platform,
-  Preferences,
   RankTier,
   Region,
-} from "../../../types/api";
-import { StatusMessage } from "../../admin/components/ui/StatusMessage";
-import { useSave } from "../../admin/components/forms/useSave";
+} from "../../../types/common";
+import type { Preferences } from "../../../types/user";
+import { StatusMessage } from "../../admin";
+import { useSave } from "../../admin";
 import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
 import {
   IconSelect,
@@ -18,7 +18,7 @@ import {
   QUEUE_OPTIONS,
   RANK_OPTIONS,
   REGION_OPTIONS,
-} from "../../stats/filterOptions";
+} from "../../stats";
 import { savePreferences } from "../api/personalApi";
 import { usePersonalData } from "../context/usePersonalData";
 

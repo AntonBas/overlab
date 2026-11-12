@@ -1,8 +1,8 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/render";
+import { renderWithRouter } from "../../../../test/render";
 
-vi.mock("../api/adminApi", () => ({
+vi.mock("../../api/adminApi", () => ({
   fetchAdminHeroes: vi.fn(() =>
     Promise.resolve([
       {

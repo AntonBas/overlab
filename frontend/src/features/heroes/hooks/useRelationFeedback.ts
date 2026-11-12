@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toFailure } from "../../../services/api";
-import { useAuth } from "../../auth/context/useAuth";
+import { useAuth } from "../../auth";
 import {
   fetchRelationVotes,
   removeRelationVote,

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { GameQueue } from "../../types/api";
+import type { GameQueue } from "../../types/common";
 import { QUEUE_LABELS } from "../../utils/format";
 
 const QUEUES: readonly GameQueue[] = ["QUICK_PLAY", "COMPETITIVE"];

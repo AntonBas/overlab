@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
 import { useFloatingTip } from "../../../../hooks/useFloatingTip";
-import type { CategoryMatchup, HeroCategory } from "../../../../types/api";
+import type { CategoryMatchup, HeroCategory } from "../../../../types/hero";
 import { AbilityText } from "../abilities/AbilityText";
 
 interface CategoryChipProps {

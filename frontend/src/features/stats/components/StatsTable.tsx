@@ -6,7 +6,8 @@ import { RateBar } from "../../../components/ui/RateBar";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import type { HeroStat, SortDirection, StatsSort } from "../../../types/api";
+import type { SortDirection, StatsSort } from "../../../types/common";
+import type { HeroStat } from "../../../types/stats";
 
 interface StatsTableProps {
   heroes: HeroStat[];

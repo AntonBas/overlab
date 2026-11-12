@@ -1,4 +1,4 @@
-import type { HeroChange } from "../../../types/api";
+import type { HeroChange } from "../../../types/stats";
 
 export type ChangeSort = "WIN_CHANGE" | "PICK_CHANGE" | "BAN_CHANGE" | "NAME";
 

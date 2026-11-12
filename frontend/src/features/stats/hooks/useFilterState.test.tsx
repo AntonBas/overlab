@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
-import type { Preferences } from "../../../types/api";
+import type { Preferences } from "../../../types/user";
 
 let preferences: Preferences | null = null;
 vi.mock("../../personal/context/usePersonalData", () => ({

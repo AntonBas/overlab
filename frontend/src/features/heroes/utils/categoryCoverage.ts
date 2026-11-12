@@ -2,7 +2,7 @@ import type {
   CategoryMatchup,
   HeroCategory,
   RelatedHero,
-} from "../../../types/api";
+} from "../../../types/hero";
 
 export function withoutCoveredHeroes(
   related: RelatedHero[],

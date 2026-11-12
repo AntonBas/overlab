@@ -1,5 +1,6 @@
-import type { HeroRole, HeroStat } from "../../../types/api";
-import { rankPicks } from "../../stats/utils/ranking";
+import type { HeroRole } from "../../../types/hero";
+import type { HeroStat } from "../../../types/stats";
+import { rankPicks } from "../../stats";
 
 export interface RolePicks {
   role: HeroRole;

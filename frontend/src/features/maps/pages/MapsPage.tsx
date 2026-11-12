@@ -11,11 +11,11 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import type { GameMap, MapMode } from "../../../types/api";
+import type { GameMap, MapMode } from "../../../types/map";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import { FavoritesFilterButton } from "../../personal/components/FavoritesFilterButton";
-import { usePersonalData } from "../../personal/context/usePersonalData";
+import { FavoritesFilterButton } from "../../personal";
+import { usePersonalData } from "../../personal";
 import { fetchMaps } from "../api/mapsApi";
 import { MapCard } from "../components/MapCard";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";

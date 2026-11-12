@@ -12,6 +12,13 @@ Unofficial fan site with Overwatch hero statistics: win rate, pick rate and ban 
 
 React 19 and TypeScript with Vite. Plain CSS (dark theme only), `react-router-dom`, `axios`. Code lives in `src/features/<domain>/` (`stats`, `heroes`, `maps`, `guides`, `auth`). Styles are split per domain: shared tokens, base styles and classes used by several domains are in `src/index.css`, the rest in `src/features/<domain>/<domain>.css` and `src/components/<group>/<group>.css`. `src/styles.css` imports them all in a fixed order (`index.css` first), because the cascade depends on that order; add a new CSS file there instead of importing it from a component. Keep a modifier rule (`.card--active`) in the same file as its base rule (`.card`) and after it, otherwise a later file can override it.
 
+Frontend conventions:
+
+- A feature exposes its public API through `src/features/<domain>/index.ts`. Code outside the feature imports from that file (`from "../stats"`), never from its inner folders. The only exception is lazy route pages in `src/routes/AppRoutes.tsx`, which are imported by their full path so Vite can split them into separate chunks.
+- A helper used by one domain stays in `src/features/<domain>/utils/`; once a second domain needs it, move it to `src/utils/`. Hooks, components and types follow the same rule (`src/hooks`, `src/components`, `src/types`).
+- Context providers belong to the domain they serve (`features/auth/context`, `features/stats/context`, ...). `src/providers/AppProviders.tsx` is the one place that stacks them, so the order is visible in a single file.
+- API types are split by domain in `src/types/` (`hero.ts`, `stats.ts`, `map.ts`, `guide.ts`, `patch.ts`, `user.ts`, `common.ts`). Test data factories live in `src/test/fixtures/<domain>.ts`.
+
 | Address | Page |
 |---|---|
 | `/stats?queue=&tier=&map=&platform=&region=&role=&sort=&direction=` | Hero statistics; filters live in the address, so every view can be shared |

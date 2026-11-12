@@ -3,7 +3,7 @@ import type {
   CategoryMatchup,
   HeroCategory,
   RelatedHero,
-} from "../../../types/api";
+} from "../../../types/hero";
 import { withoutCoveredHeroes } from "./categoryCoverage";
 
 function related(slug: string): RelatedHero {

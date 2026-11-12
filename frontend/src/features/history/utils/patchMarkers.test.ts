@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Patch } from "../../../types/api";
+import type { Patch } from "../../../types/patch";
 import { buildPatchMarkers, buildSeasonLookup } from "./patchMarkers";
 
 function patch(version: string, title: string | null): Patch {

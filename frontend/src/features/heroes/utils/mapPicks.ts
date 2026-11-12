@@ -1,5 +1,5 @@
-import type { HeroMapStat } from "../../../types/api";
-import { rankRelative, weightedGain } from "../../stats/utils/ranking";
+import type { HeroMapStat } from "../../../types/stats";
+import { rankRelative, weightedGain } from "../../stats";
 
 const LIST_SIZE = 5;
 

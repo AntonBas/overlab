@@ -13,7 +13,7 @@ import {
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { matchesName } from "../../../utils/search";
-import { fetchMaps } from "../../maps/api/mapsApi";
+import { fetchMaps } from "../../maps";
 import { fetchStats } from "../api/statsApi";
 import { DataFreshness } from "../components/DataFreshness";
 import { StatsFilters } from "../components/StatsFilters";

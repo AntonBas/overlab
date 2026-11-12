@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { FormField } from "../../../components/ui/FormField";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { FormField } from "../../../../components/ui/FormField";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
 import {
   createCategory,
   createCategoryMatchup,
@@ -14,25 +14,25 @@ import {
   fetchCategoryMatchups,
   updateCategory,
   updateCategoryMatchup,
-} from "../api/adminApi";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { DataTable } from "../components/ui/DataTable";
-import { Drawer } from "../components/ui/Drawer";
+} from "../../api/adminApi";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { DataTable } from "../../components/ui/DataTable";
+import { Drawer } from "../../components/ui/Drawer";
 import {
   CheckboxField,
   SelectField,
   TextAreaField,
-} from "../components/ui/Fields";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useHeroOptions } from "../components/hero/useHeroOptions";
-import { useSave } from "../components/forms/useSave";
-import { useUnsavedChanges } from "../components/forms/unsavedChanges";
+} from "../../components/ui/Fields";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useHeroOptions } from "../../components/hero/useHeroOptions";
+import { useSave } from "../../components/forms/useSave";
+import { useUnsavedChanges } from "../../components/forms/unsavedChanges";
 import type {
   AdminCategory,
   AdminCategoryMatchup,
   AdminHero,
   CategoryMatchupType,
-} from "../types";
+} from "../../types";
 
 const MATCHUP_LABELS: Record<CategoryMatchupType, string> = {
   STRONG_AGAINST: "Strong against",

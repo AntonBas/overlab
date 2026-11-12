@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
-import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
-import { useFetch } from "../../../hooks/useFetch";
-import { usePageTitle } from "../../../hooks/usePageTitle";
-import { formatDateTime, humanize } from "../../../utils/format";
+import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
+import { PageHeader } from "../../../../components/ui/PageHeader";
+import { Spinner } from "../../../../components/ui/Spinner";
+import { useFetch } from "../../../../hooks/useFetch";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
+import { formatDateTime, humanize } from "../../../../utils/format";
 import {
   fetchCollectorJobs,
   fetchCollectorRuns,
   runCollectorJob,
-} from "../api/adminApi";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { DataTable } from "../components/ui/DataTable";
-import { StatusBadge } from "../components/ui/StatusBadge";
-import { StatusMessage } from "../components/ui/StatusMessage";
-import { useSave } from "../components/forms/useSave";
-import type { CollectorJob, CollectorRunStatus } from "../types";
-import { describeCron, describeInterval } from "../utils/cron";
-import { splitWords } from "../utils/audit";
+} from "../../api/adminApi";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { DataTable } from "../../components/ui/DataTable";
+import { StatusBadge } from "../../components/ui/StatusBadge";
+import { StatusMessage } from "../../components/ui/StatusMessage";
+import { useSave } from "../../components/forms/useSave";
+import type { CollectorJob, CollectorRunStatus } from "../../types";
+import { describeCron, describeInterval } from "../../utils/cron";
+import { splitWords } from "../../utils/audit";
 
 const POLL_INTERVAL_MS = 3000;
 
