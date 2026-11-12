@@ -95,6 +95,26 @@ class UserTokenServiceTest {
     }
 
     @Test
+    void secondUseWithinTheGraceWindowIsReportedAsConcurrent() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(2));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
+    }
+
+    @Test
+    void anOldReuseIsNotReportedAsConcurrent() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), Instant.now().minusSeconds(120));
+        token.setType(UserTokenType.REFRESH);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isNotInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
+    }
+
+    @Test
     void rejectsExpiredToken() {
         UserToken token = storedToken(Instant.now().minusSeconds(1), null);
         when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));

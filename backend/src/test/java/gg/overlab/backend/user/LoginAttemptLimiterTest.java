@@ -38,8 +38,21 @@ class LoginAttemptLimiterTest {
     void storesOnlyAHashOfTheEmail() {
         limiter.recordFailure("ana@overlab.gg");
 
-        verify(counter).increment(org.mockito.ArgumentMatchers.argThat(key ->
+        verify(counter, org.mockito.Mockito.times(2)).increment(org.mockito.ArgumentMatchers.argThat(key ->
                 key.startsWith("overlab:login-failures:") && !key.contains("ana")), any(Duration.class));
+    }
+
+    @Test
+    void blocksOnlyTheAddressAtTenFailuresAndEveryoneAtFifty() {
+        when(counter.current(anyString())).thenReturn(10L, 0L);
+
+        assertThatThrownBy(() -> limiter.requireAllowed("ana@overlab.gg"))
+                .isInstanceOf(TooManyRequestsException.class);
+
+        when(counter.current(anyString())).thenReturn(0L, 50L);
+
+        assertThatThrownBy(() -> limiter.requireAllowed("ana@overlab.gg"))
+                .isInstanceOf(TooManyRequestsException.class);
     }
 
     @Test

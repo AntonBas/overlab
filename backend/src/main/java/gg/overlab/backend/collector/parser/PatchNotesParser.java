@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class PatchNotesParser {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMMM d, uuuu", Locale.ENGLISH);
+    private static final int MAX_TITLE_LENGTH = 128;
     private static final String BALANCE_SECTIONS = ".PatchNotes-section-hero_update, .PatchNotes-section-map_update";
 
     public List<ParsedPatch> parse(String html) {
@@ -52,9 +53,10 @@ public class PatchNotesParser {
                 .map(String::trim)
                 .filter(title -> !title.isEmpty())
                 .toList();
-        return sectionTitles.stream()
-                .filter(title -> title.contains("Season"))
+        String title = sectionTitles.stream()
+                .filter(candidate -> candidate.contains("Season"))
                 .findFirst()
                 .orElseGet(() -> sectionTitles.isEmpty() ? null : sectionTitles.get(0));
+        return ImportLimits.truncate(title, MAX_TITLE_LENGTH);
     }
 }

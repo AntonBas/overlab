@@ -2,6 +2,7 @@ package gg.overlab.backend.feedback;
 
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.exception.core.TooManyRequestsException;
 import gg.overlab.backend.feedback.dto.BusinessMessageRequest;
 import gg.overlab.backend.feedback.dto.FeedbackAdminDto;
 import gg.overlab.backend.feedback.dto.FeedbackDto;
@@ -24,6 +25,8 @@ public class FeedbackService {
 
     public static final int MAX_OPEN_PER_USER = 20;
     public static final int MAX_ADMIN_ROWS = 500;
+    public static final int MAX_OPEN_ANONYMOUS = 200;
+    public static final int MAX_OPEN_PER_CONTACT = 5;
 
     private final SiteFeedbackRepository feedbackRepository;
     private final EmailService emailService;
@@ -39,6 +42,7 @@ public class FeedbackService {
             throw new BadRequestException("You already have " + MAX_OPEN_PER_USER
                     + " messages waiting for review, please wait until some are processed");
         }
+        requireAnonymousCapacity(userId);
         SiteFeedback feedback = new SiteFeedback();
         feedback.setType(request.type());
         feedback.setMessage(request.message().trim());
@@ -49,6 +53,12 @@ public class FeedbackService {
 
     @Transactional
     public void submitBusiness(Long userId, BusinessMessageRequest request) {
+        requireAnonymousCapacity(userId);
+        if (feedbackRepository.countByContactEmailIgnoreCaseAndStatus(request.email().trim(), FeedbackStatus.NEW)
+                >= MAX_OPEN_PER_CONTACT) {
+            throw new BadRequestException("You already have " + MAX_OPEN_PER_CONTACT
+                    + " messages waiting for review, please wait for an answer");
+        }
         SiteFeedback feedback = new SiteFeedback();
         feedback.setType(FeedbackType.BUSINESS);
         feedback.setMessage(request.message().trim());
@@ -90,6 +100,13 @@ public class FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback", id));
         feedback.setStatus(status);
         feedback.setResolvedAt(status == FeedbackStatus.NEW ? null : Instant.now());
+    }
+
+    private void requireAnonymousCapacity(Long userId) {
+        if (userId == null
+                && feedbackRepository.countByUserIdIsNullAndStatus(FeedbackStatus.NEW) >= MAX_OPEN_ANONYMOUS) {
+            throw new TooManyRequestsException("Too many messages are waiting for review, try again later");
+        }
     }
 
     private FeedbackAdminDto toAdminDto(SiteFeedback feedback, Map<Long, String> names) {

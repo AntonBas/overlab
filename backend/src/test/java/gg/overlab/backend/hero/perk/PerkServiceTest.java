@@ -46,6 +46,7 @@ class PerkServiceTest {
         ana.setSlug("ana");
         ana.setName("Ana");
         when(heroRepository.findBySlug("ana")).thenReturn(Optional.of(ana));
+        when(heroRepository.findBySlugAndActiveTrue("ana")).thenReturn(Optional.of(ana));
         when(perkRepository.save(any(Perk.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 

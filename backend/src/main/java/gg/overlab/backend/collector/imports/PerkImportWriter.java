@@ -5,6 +5,7 @@ import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.perk.Perk;
+import gg.overlab.backend.hero.perk.PerkPosition;
 import gg.overlab.backend.hero.perk.PerkRecommendation;
 import gg.overlab.backend.hero.perk.PerkRepository;
 import gg.overlab.backend.media.ImageStore;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +56,11 @@ public class PerkImportWriter {
             boolean isNew = perk == null;
             boolean changed = false;
             if (isNew) {
-                perk = newPerk(hero, parsed, heroHadPerks);
+                Optional<PerkPosition> position = freePosition(hero, parsed);
+                if (position.isEmpty()) {
+                    continue;
+                }
+                perk = newPerk(hero, parsed, position.get(), heroHadPerks);
             } else if (perk.isImported()) {
                 changed = refreshImported(perk, parsed);
             } else if (isBlank(perk.getDescription()) && parsed.description() != null) {
@@ -80,12 +86,20 @@ public class PerkImportWriter {
         return new ImportCounts(created, updated, removed);
     }
 
-    private Perk newPerk(Hero hero, ParsedPerk parsed, boolean heroHadPerks) {
+    private Optional<PerkPosition> freePosition(Hero hero, ParsedPerk parsed) {
+        PerkPosition other = parsed.position() == PerkPosition.LEFT ? PerkPosition.RIGHT : PerkPosition.LEFT;
+        return Stream.of(parsed.position(), other)
+                .filter(position -> !perkRepository.existsByHeroIdAndSlotAndPosition(hero.getId(), parsed.slot(),
+                        position))
+                .findFirst();
+    }
+
+    private Perk newPerk(Hero hero, ParsedPerk parsed, PerkPosition position, boolean heroHadPerks) {
         Perk perk = new Perk();
         perk.setHero(hero);
         perk.setName(parsed.name());
         perk.setSlot(parsed.slot());
-        perk.setPosition(parsed.position());
+        perk.setPosition(position);
         perk.setRecommendation(PerkRecommendation.OPTIONAL);
         perk.setDescription(parsed.description());
         perk.setImported(true);

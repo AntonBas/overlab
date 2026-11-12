@@ -21,7 +21,7 @@ public class MapListParser {
             for (Element option : group.select("option")) {
                 String slug = option.attr("value").trim();
                 String name = option.text().trim();
-                if (!slug.isEmpty() && !StatsFilter.ALL_MAPS.equals(slug) && !name.isEmpty()) {
+                if (ImportLimits.isSlug(slug) && !StatsFilter.ALL_MAPS.equals(slug) && ImportLimits.isName(name)) {
                     maps.add(new ParsedMap(slug, name, mode));
                 }
             }

@@ -31,7 +31,7 @@ public class HeroAbilityParser {
         List<ParsedAbility> abilities = new ArrayList<>();
         for (Element control : section.select("blz-tab-control[id]")) {
             String name = control.attr("label").trim();
-            if (name.isEmpty()) {
+            if (!ImportLimits.isName(name) || !ImportLimits.isSlug(control.id())) {
                 continue;
             }
             Element icon = control.selectFirst("blz-image[slot=icon]");

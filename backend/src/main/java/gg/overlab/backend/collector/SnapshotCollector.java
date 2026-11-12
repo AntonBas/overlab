@@ -9,8 +9,10 @@ import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SnapshotCollector {
@@ -44,10 +46,18 @@ public class SnapshotCollector {
                 request.platform(), request.region(), request.tier(), request.mapSlug(), heroesWithData,
                 usable.etag());
         if (outcome.changed()) {
-            heroAssets.ensureAssets(heroesWithData);
+            ensureAssets(heroesWithData);
         } else {
             metrics.recordUnchangedSnapshot();
         }
         return outcome.rowsSaved();
+    }
+
+    private void ensureAssets(List<BlizzardRatesResponse.HeroRate> heroesWithData) {
+        try {
+            heroAssets.ensureAssets(heroesWithData);
+        } catch (RuntimeException exception) {
+            log.warn("Hero images could not be stored, the snapshot is kept: {}", exception.getMessage());
+        }
     }
 }

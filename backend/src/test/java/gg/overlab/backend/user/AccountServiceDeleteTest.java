@@ -36,6 +36,28 @@ class AccountServiceDeleteTest {
     }
 
     @Test
+    void aLocalAccountWithoutAPasswordCanBeDeletedWithoutOne() {
+        User linked = AuthFixtures.user(7, "linked@overlab.gg", UserRole.USER, true);
+        linked.setProvider(AuthProvider.LOCAL);
+        linked.setPasswordHash(null);
+        when(userRepository.findById(7L)).thenReturn(Optional.of(linked));
+
+        assertThatCode(() -> service.deleteAccount(7L, new DeleteAccountRequest(null))).doesNotThrowAnyException();
+
+        verify(userRepository).delete(linked);
+    }
+
+    @Test
+    void anAccountWithAPasswordStillNeedsIt() {
+        User local = AuthFixtures.user(8, "local@overlab.gg", UserRole.USER, true);
+        local.setPasswordHash("hash");
+        when(userRepository.findById(8L)).thenReturn(Optional.of(local));
+
+        assertThatThrownBy(() -> service.deleteAccount(8L, new DeleteAccountRequest(null)))
+                .isInstanceOf(gg.overlab.backend.exception.core.BadRequestException.class);
+    }
+
+    @Test
     void theOnlyActiveAdministratorCannotDeleteTheAccount() {
         User last = admin(1, true);
         when(userRepository.findById(1L)).thenReturn(Optional.of(last));

@@ -8,12 +8,14 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "collector.images")
 public record ImageSourceProperties(@DefaultValue List<String> allowedHosts) {
 
+    public static final String ANY_HOST = "*";
+
     public static ImageSourceProperties unrestricted() {
-        return new ImageSourceProperties(List.of());
+        return new ImageSourceProperties(List.of(ANY_HOST));
     }
 
     public boolean allows(String host) {
-        if (allowedHosts.isEmpty()) {
+        if (allowedHosts.contains(ANY_HOST)) {
             return true;
         }
         String lowerCaseHost = host.toLowerCase(Locale.ROOT);

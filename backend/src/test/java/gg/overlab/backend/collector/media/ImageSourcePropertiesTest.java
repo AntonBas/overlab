@@ -8,8 +8,13 @@ import org.junit.jupiter.api.Test;
 class ImageSourcePropertiesTest {
 
     @Test
-    void anEmptyListAllowsEveryHost() {
-        assertThat(new ImageSourceProperties(List.of()).allows("anything.example")).isTrue();
+    void anEmptyListAllowsNoHost() {
+        assertThat(new ImageSourceProperties(List.of()).allows("anything.example")).isFalse();
+    }
+
+    @Test
+    void theWildcardAllowsEveryHost() {
+        assertThat(ImageSourceProperties.unrestricted().allows("anything.example")).isTrue();
     }
 
     @Test

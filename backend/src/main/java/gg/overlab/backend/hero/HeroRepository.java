@@ -9,6 +9,8 @@ public interface HeroRepository extends JpaRepository<Hero, Long> {
 
     Optional<Hero> findBySlug(String slug);
 
+    Optional<Hero> findBySlugAndActiveTrue(String slug);
+
     List<Hero> findAllByActiveTrueOrderByNameAsc();
 
     List<Hero> findAllBySlugIn(Collection<String> slugs);

@@ -54,8 +54,8 @@ class HeroServiceTest {
 
     @Test
     void returnsOneHeroOrFailsWhenTheSlugIsUnknown() {
-        when(heroRepository.findBySlug("ana")).thenReturn(Optional.of(hero("ana", "Ana", true)));
-        when(heroRepository.findBySlug("nobody")).thenReturn(Optional.empty());
+        when(heroRepository.findBySlugAndActiveTrue("ana")).thenReturn(Optional.of(hero("ana", "Ana", true)));
+        when(heroRepository.findBySlugAndActiveTrue("nobody")).thenReturn(Optional.empty());
 
         assertThat(service.getBySlug("ana").name()).isEqualTo("Ana");
         assertThatThrownBy(() -> service.getBySlug("nobody")).isInstanceOf(EntityNotFoundException.class);

@@ -1,5 +1,6 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.exception.core.ConcurrentRefreshException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.User;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +61,9 @@ public class UserTokenService {
                 .orElseThrow(InvalidTokenException::new);
         Instant now = Instant.now();
         if (token.getUsedAt() != null) {
+            if (isRecentlyUsedRefresh(token, now)) {
+                throw new ConcurrentRefreshException();
+            }
             revokeSessionsOnReuse(token, now);
             throw new InvalidTokenException();
         }
@@ -71,6 +75,10 @@ public class UserTokenService {
         }
         token.setUsedAt(now);
         return new ConsumedToken(token.getUser(), token.getType());
+    }
+
+    private boolean isRecentlyUsedRefresh(UserToken token, Instant now) {
+        return token.getType() == UserTokenType.REFRESH && !token.getUsedAt().isBefore(now.minus(REUSE_GRACE));
     }
 
     private void revokeSessionsOnReuse(UserToken token, Instant now) {

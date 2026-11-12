@@ -13,8 +13,9 @@ import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.HeroRelationsDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
 import gg.overlab.backend.hero.relation.dto.RelationDto;
-import gg.overlab.backend.media.MediaUrlResolver;
 import gg.overlab.backend.hero.relation.dto.RelationRequest;
+import gg.overlab.backend.hero.relation.feedback.RelationVoteRepository;
+import gg.overlab.backend.media.MediaUrlResolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,6 +36,7 @@ public class HeroRelationService {
             Comparator.comparing(RelatedHeroDto::role).thenComparing(RelatedHeroDto::name);
 
     private final HeroRelationRepository relationRepository;
+    private final RelationVoteRepository voteRepository;
     private final HeroRepository heroRepository;
     private final AuditService auditService;
     private final MediaUrlResolver mediaUrlResolver;
@@ -42,7 +44,7 @@ public class HeroRelationService {
     @Cacheable(value = CacheNames.CONTENT, key = "'counters:' + #heroSlug")
     @Transactional(readOnly = true)
     public HeroCountersDto getCounters(String heroSlug) {
-        requireHero(heroSlug);
+        requireActiveHero(heroSlug);
         List<RelatedHeroDto> counters = relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.COUNTER)
                 .stream().filter(relation -> relation.getRelatedHero().isActive())
                 .map(relation -> related(relation.getRelatedHero(), relation))
@@ -57,7 +59,7 @@ public class HeroRelationService {
     @Cacheable(value = CacheNames.CONTENT, key = "'synergies:' + #heroSlug")
     @Transactional(readOnly = true)
     public List<RelatedHeroDto> getSynergies(String heroSlug) {
-        requireHero(heroSlug);
+        requireActiveHero(heroSlug);
         Map<String, RelatedHeroDto> bySlug = new LinkedHashMap<>();
         relationRepository.findAllByHeroSlugAndType(heroSlug, RelationType.SYNERGY).stream()
                 .filter(relation -> relation.getRelatedHero().isActive())
@@ -129,6 +131,9 @@ public class HeroRelationService {
         RelationDto before = toDto(relation);
         apply(relation, request, id);
         RelationDto after = toDto(relation);
+        if (!sameRelation(before, after)) {
+            voteRepository.deleteAllByRelationId(id);
+        }
         auditService.logUpdate(AuditEntityType.HERO_RELATION, id, before, after);
         return after;
     }
@@ -159,6 +164,12 @@ public class HeroRelationService {
         relation.setNote(request.note());
     }
 
+    private boolean sameRelation(RelationDto before, RelationDto after) {
+        return before.heroSlug().equals(after.heroSlug())
+                && before.relatedHeroSlug().equals(after.relatedHeroSlug())
+                && before.type() == after.type();
+    }
+
     private boolean relationExists(Long heroId, Long relatedHeroId, RelationType type, Long excludedId) {
         return excludedId == null
                 ? relationRepository.existsByHeroIdAndRelatedHeroIdAndType(heroId, relatedHeroId, type)
@@ -178,6 +189,11 @@ public class HeroRelationService {
     private RelationDto toDto(HeroRelation relation) {
         return new RelationDto(relation.getId(), relation.getHero().getSlug(), relation.getRelatedHero().getSlug(),
                 relation.getType(), relation.getNote());
+    }
+
+    private Hero requireActiveHero(String slug) {
+        return heroRepository.findBySlugAndActiveTrue(slug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
     }
 
     private Hero requireHero(String slug) {

@@ -2,6 +2,7 @@ package gg.overlab.backend.user.auth;
 
 import gg.overlab.backend.config.security.AuthCookieService;
 import gg.overlab.backend.config.security.AuthenticatedUser;
+import gg.overlab.backend.exception.core.ConcurrentRefreshException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.exception.core.SessionExpiredException;
 import gg.overlab.backend.user.auth.dto.EmailRequest;
@@ -57,6 +58,8 @@ public class AuthController {
         AuthTokens tokens;
         try {
             tokens = authService.refresh(refreshToken);
+        } catch (ConcurrentRefreshException exception) {
+            throw new SessionExpiredException();
         } catch (InvalidTokenException exception) {
             cookieService.clearTokens(response);
             throw new SessionExpiredException();

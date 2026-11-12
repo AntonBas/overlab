@@ -11,7 +11,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @Service
@@ -22,8 +22,8 @@ public class MapDiscoveryService {
     private final MapListParser parser;
     private final GameMapRepository gameMapRepository;
     private final CollectorMetrics metrics;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
     public int discover() {
         Optional<String> page = pageClient.fetch();
         if (page.isEmpty()) {
@@ -35,6 +35,11 @@ public class MapDiscoveryService {
             log.warn("No maps found on the Blizzard rates page, its markup may have changed");
             return 0;
         }
+        Integer created = transactionTemplate.execute(status -> saveNew(parsed));
+        return created == null ? 0 : created;
+    }
+
+    private int saveNew(List<ParsedMap> parsed) {
         int created = 0;
         for (ParsedMap map : parsed) {
             Optional<GameMap> existing = gameMapRepository.findBySlug(map.slug());

@@ -150,11 +150,14 @@ public class RatesCollectorService {
             run.setStatus(CollectorRunStatus.FAILED);
             run.setErrorSummary(RunErrors.truncate(String.valueOf(exception.getMessage())));
         } finally {
-            run.setFinishedAt(Instant.now());
-            runRepository.save(run);
-            metrics.recordRun(job.name(), run.getStatus(), run.getRowsSaved(),
-                    Duration.between(run.getStartedAt(), run.getFinishedAt()));
-            runningJobs.remove(job.name());
+            try {
+                run.setFinishedAt(Instant.now());
+                runRepository.save(run);
+                metrics.recordRun(job.name(), run.getStatus(), run.getRowsSaved(),
+                        Duration.between(run.getStartedAt(), run.getFinishedAt()));
+            } finally {
+                runningJobs.remove(job.name());
+            }
         }
     }
 

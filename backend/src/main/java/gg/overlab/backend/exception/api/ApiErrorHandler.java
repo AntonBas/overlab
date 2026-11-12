@@ -82,7 +82,8 @@ public class ApiErrorHandler {
     public ResponseEntity<ApiError> handleInvalidBody(MethodArgumentNotValidException exception,
                                                       HttpServletRequest request) {
         List<ApiError.SubError> subErrors = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ApiError.SubError(error.getField(), error.getDefaultMessage()))
+                .map(error -> new ApiError.SubError(error.getField(),
+                        error.isBindingFailure() ? "Invalid value" : error.getDefaultMessage()))
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "Validation failed", request, subErrors);
     }

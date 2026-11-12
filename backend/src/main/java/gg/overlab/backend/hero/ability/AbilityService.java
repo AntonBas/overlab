@@ -27,7 +27,8 @@ public class AbilityService {
     @Cacheable(value = CacheNames.CONTENT, key = "'abilities:all'")
     @Transactional(readOnly = true)
     public List<AbilityDto> findAll() {
-        return abilityRepository.findAllByOrderByHeroNameAscSortOrderAsc().stream()
+        return abilityRepository.findAllByHeroActiveTrueOrderByHeroNameAscSortOrderAsc()
+                .stream()
                 .map(abilityMapper::toDto)
                 .toList();
     }
@@ -35,7 +36,8 @@ public class AbilityService {
     @Cacheable(value = CacheNames.CONTENT, key = "'abilities:' + #heroSlug")
     @Transactional(readOnly = true)
     public List<AbilityDto> findByHero(String heroSlug) {
-        heroRepository.findBySlug(heroSlug).orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
+        heroRepository.findBySlugAndActiveTrue(heroSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
         return abilityRepository.findAllByHeroSlugOrderBySortOrderAsc(heroSlug).stream()
                 .map(abilityMapper::toDto)
                 .toList();

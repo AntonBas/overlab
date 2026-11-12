@@ -55,6 +55,28 @@ class FeedbackServiceTest {
     }
 
     @Test
+    void limitsTheNumberOfOpenAnonymousMessages() {
+        when(repository.countByUserIdIsNullAndStatus(FeedbackStatus.NEW))
+                .thenReturn((long) FeedbackService.MAX_OPEN_ANONYMOUS);
+
+        assertThatThrownBy(() -> service.submit(null,
+                new FeedbackRequest(FeedbackType.BUG, "something is broken here", "/")))
+                .isInstanceOf(gg.overlab.backend.exception.core.TooManyRequestsException.class);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void limitsOpenBusinessMessagesPerContactEmail() {
+        when(repository.countByContactEmailIgnoreCaseAndStatus("ceo@example.com", FeedbackStatus.NEW))
+                .thenReturn((long) FeedbackService.MAX_OPEN_PER_CONTACT);
+
+        assertThatThrownBy(() -> service.submitBusiness(null,
+                new BusinessMessageRequest("Ceo", "ceo@example.com", "a sponsorship offer here")))
+                .isInstanceOf(BadRequestException.class);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void limitsTheNumberOfOpenMessagesPerUser() {
         when(repository.countByUserIdAndStatus(1L, FeedbackStatus.NEW)).thenReturn((long) FeedbackService.MAX_OPEN_PER_USER);
 

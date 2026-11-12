@@ -47,6 +47,7 @@ public class HeroCategoryService {
         List<HeroCategoryDto> categories = categoryRepository.findAllByOrderByNameAsc().stream()
                 .map(this::toDto).toList();
         List<CategoryMatchupDto> matchups = relationRepository.findAllByOrderByIdAsc().stream()
+                .filter(relation -> relation.getHero().isActive())
                 .map(relation -> new CategoryMatchupDto(relation.getHero().getSlug(), relation.getCategory().getSlug(),
                         relation.getType(), relation.getNote()))
                 .toList();

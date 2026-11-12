@@ -11,7 +11,6 @@ import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
-import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserMapper;
 import gg.overlab.backend.user.UserRepository;
@@ -80,7 +79,7 @@ public class AccountService {
     @Transactional
     public void deleteAccount(Long userId, DeleteAccountRequest request) {
         User user = load(userId);
-        if (user.getProvider() == AuthProvider.LOCAL) {
+        if (user.getPasswordHash() != null) {
             requirePassword(user, request.password());
         }
         if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
@@ -103,9 +102,9 @@ public class AccountService {
 
     private User loadLocal(Long userId) {
         User user = load(userId);
-        if (user.getProvider() != AuthProvider.LOCAL || user.getPasswordHash() == null) {
-            throw new BadRequestException("This account signs in with " + user.getProvider()
-                    + " and has no password");
+        if (user.getPasswordHash() == null) {
+            throw new BadRequestException("This account has no password, it signs in with " + user.getProvider()
+                    + ". Use the password reset to create one");
         }
         return user;
     }

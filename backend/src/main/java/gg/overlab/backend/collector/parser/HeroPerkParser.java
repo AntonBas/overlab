@@ -22,7 +22,7 @@ public class HeroPerkParser {
             }
             for (Element details : category.select(".perk-details")) {
                 String name = textOf(details.selectFirst("h3[slot=subheading]"));
-                if (name == null) {
+                if (!ImportLimits.isName(name)) {
                     continue;
                 }
                 Element icon = details.selectFirst(".perk-details-icon img");

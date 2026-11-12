@@ -34,7 +34,7 @@ public class HeroService {
     @Cacheable(value = CacheNames.HEROES, key = "'slug:' + #slug")
     @Transactional(readOnly = true)
     public HeroDto getBySlug(String slug) {
-        Hero hero = heroRepository.findBySlug(slug)
+        Hero hero = heroRepository.findBySlugAndActiveTrue(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Hero", slug));
         return heroMapper.toDto(hero);
     }

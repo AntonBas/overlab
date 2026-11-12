@@ -32,7 +32,7 @@ public class PerkService {
     @Cacheable(value = CacheNames.CONTENT, key = "'perks:all'")
     @Transactional(readOnly = true)
     public List<PerkDto> findAll() {
-        return perkRepository.findAllByOrderByHeroNameAscSlotAscPositionAsc().stream()
+        return perkRepository.findAllByHeroActiveTrueOrderByHeroNameAscSlotAscPositionAsc().stream()
                 .map(perkMapper::toDto)
                 .toList();
     }
@@ -40,7 +40,8 @@ public class PerkService {
     @Cacheable(value = CacheNames.CONTENT, key = "'perks:' + #heroSlug")
     @Transactional(readOnly = true)
     public List<PerkDto> findByHero(String heroSlug) {
-        findHero(heroSlug);
+        heroRepository.findBySlugAndActiveTrue(heroSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Hero", heroSlug));
         return perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(heroSlug).stream()
                 .map(perkMapper::toDto)
                 .toList();

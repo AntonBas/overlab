@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class MapDiscoveryServiceTest {
 
@@ -25,7 +27,8 @@ class MapDiscoveryServiceTest {
     private final MapListParser parser = mock(MapListParser.class);
     private final GameMapRepository repository = mock(GameMapRepository.class);
     private final CollectorMetrics metrics = mock(CollectorMetrics.class);
-    private final MapDiscoveryService service = new MapDiscoveryService(pageClient, parser, repository, metrics);
+    private final MapDiscoveryService service = new MapDiscoveryService(pageClient, parser, repository, metrics,
+            new TransactionTemplate(mock(PlatformTransactionManager.class)));
 
     @Test
     void createsAMapThatIsNotKnownYetWithItsModeAndName() {

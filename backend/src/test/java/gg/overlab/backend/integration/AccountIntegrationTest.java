@@ -119,23 +119,25 @@ class AccountIntegrationTest {
     }
 
     @Test
-    void loginIsLockedAfterRepeatedFailures() throws Exception {
-        String body = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+    void loginIsLockedForAnAddressAfterRepeatedFailuresButNotForTheOwner() throws Exception {
+        String wrong = "{\"email\":\"" + EMAIL + "\",\"password\":\"wrong-password-1\"}";
+        String correct = "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}";
         for (int attempt = 0; attempt < 10; attempt++) {
-            String address = "10.9.8." + (attempt + 1);
-            mockMvc.perform(json(post("/api/auth/login"), body).with(request -> {
-                request.setRemoteAddr(address);
-                return request;
-            })).andExpect(status().isUnauthorized());
+            mockMvc.perform(json(post("/api/auth/login"), wrong).with(fromAddress("10.9.8.1")))
+                    .andExpect(status().isUnauthorized());
         }
 
-        mockMvc.perform(json(post("/api/auth/login"),
-                        "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD + "\"}")
-                        .with(request -> {
-                            request.setRemoteAddr("10.9.9.9");
-                            return request;
-                        }))
+        mockMvc.perform(json(post("/api/auth/login"), correct).with(fromAddress("10.9.8.1")))
                 .andExpect(status().isTooManyRequests());
+        mockMvc.perform(json(post("/api/auth/login"), correct).with(fromAddress("10.9.9.9")))
+                .andExpect(status().isOk());
+    }
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor fromAddress(String address) {
+        return request -> {
+            request.setRemoteAddr(address);
+            return request;
+        };
     }
 
     @Test
