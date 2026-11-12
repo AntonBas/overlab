@@ -8,5 +8,6 @@ public record SeoPage(
         String description,
         String openGraphType,
         String heading,
-        List<String> structuredData) {
+        List<String> structuredData,
+        List<SeoSection> sections) {
 }
