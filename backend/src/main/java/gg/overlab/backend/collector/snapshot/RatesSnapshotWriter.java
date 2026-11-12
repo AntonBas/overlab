@@ -128,6 +128,9 @@ public class RatesSnapshotWriter {
     private String humanReadable(String slug) {
         StringBuilder name = new StringBuilder();
         for (String part : slug.split("-")) {
+            if (part.isEmpty()) {
+                continue;
+            }
             if (!name.isEmpty()) {
                 name.append(' ');
             }

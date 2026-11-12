@@ -66,6 +66,9 @@ public class UserTokenService {
         if (token.getExpiresAt().isBefore(now)) {
             throw new InvalidTokenException();
         }
+        if (tokenRepository.markUsed(token.getId(), now) == 0) {
+            throw new InvalidTokenException();
+        }
         token.setUsedAt(now);
         return new ConsumedToken(token.getUser(), token.getType());
     }

@@ -93,7 +93,10 @@ public class HeroContentImportService {
                     failed++;
                     log.warn("Perk import failed for {}: {}", slug, exception.getMessage());
                 }
-                Pause.sleep(properties.pause());
+                if (!Pause.sleep(properties.pause())) {
+                    log.warn("Perk and ability import was interrupted, remaining heroes were skipped");
+                    break;
+                }
             }
             cacheEviction.evictAll();
             log.info("Perk and ability import finished: {} created, {} updated, {} removed, {} of {} heroes failed",

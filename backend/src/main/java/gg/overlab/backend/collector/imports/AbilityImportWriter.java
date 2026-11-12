@@ -89,7 +89,11 @@ public class AbilityImportWriter {
             return 0;
         }
         Set<String> currentSlugs = parsedAbilities.stream().map(ParsedAbility::slug).collect(Collectors.toSet());
-        List<HeroAbility> stale = abilityRepository.findAllByHeroSlugOrderBySortOrderAsc(heroSlug).stream()
+        List<HeroAbility> existing = abilityRepository.findAllByHeroSlugOrderBySortOrderAsc(heroSlug);
+        if (parsedAbilities.size() * 2 < existing.size()) {
+            return 0;
+        }
+        List<HeroAbility> stale = existing.stream()
                 .filter(ability -> !currentSlugs.contains(ability.getSlug()))
                 .toList();
         stale.forEach(ability -> imageStore.remove(ability.getIconUrl()));

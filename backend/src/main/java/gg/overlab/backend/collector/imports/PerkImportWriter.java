@@ -121,8 +121,12 @@ public class PerkImportWriter {
         Set<String> currentNames = parsedPerks.stream()
                 .map(parsed -> parsed.name().toLowerCase(Locale.ROOT))
                 .collect(Collectors.toSet());
-        List<Perk> stale = perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(hero.getSlug()).stream()
-                .filter(Perk::isImported)
+        List<Perk> imported = perkRepository.findAllByHeroSlugOrderBySlotAscPositionAscNameAsc(hero.getSlug())
+                .stream().filter(Perk::isImported).toList();
+        if (parsedPerks.size() * 2 < imported.size()) {
+            return 0;
+        }
+        List<Perk> stale = imported.stream()
                 .filter(perk -> !currentNames.contains(perk.getName().toLowerCase(Locale.ROOT)))
                 .toList();
         stale.forEach(perk -> imageStore.remove(perk.getIconUrl()));

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,8 @@ public class RatesValidator {
 
     private static final BigDecimal MAX_PERCENT = new BigDecimal("100");
     private static final BigDecimal NO_DATA_MARKER = BigDecimal.valueOf(-1);
+
+    private static final Pattern HERO_SLUG = Pattern.compile("^[a-z0-9]+(-[a-z0-9]+)*$");
 
     private final CollectorProperties properties;
 
@@ -45,6 +48,13 @@ public class RatesValidator {
         return rates.stream().filter(rate -> !hasNoData(rate)).toList();
     }
 
+    public void validateEnoughWithData(List<BlizzardRatesResponse.HeroRate> heroesWithData) {
+        if (heroesWithData.size() < properties.minHeroes()) {
+            throw new InvalidSnapshotException("Expected at least " + properties.minHeroes()
+                    + " heroes with data but got " + heroesWithData.size());
+        }
+    }
+
     public void validateBanRates(GameQueue queue, List<BlizzardRatesResponse.HeroRate> rates) {
         if (queue != GameQueue.COMPETITIVE) {
             return;
@@ -65,6 +75,9 @@ public class RatesValidator {
         if (rate == null || rate.id() == null || rate.id().isBlank() || rate.cells() == null || rate.hero() == null
                 || rate.hero().name() == null || rate.hero().name().isBlank()) {
             throw new InvalidSnapshotException("Hero entry is missing required fields");
+        }
+        if (!HERO_SLUG.matcher(rate.id()).matches()) {
+            throw new InvalidSnapshotException("Unexpected hero id: " + rate.id());
         }
         try {
             HeroRole.valueOf(String.valueOf(rate.hero().role()).toUpperCase(Locale.ROOT));

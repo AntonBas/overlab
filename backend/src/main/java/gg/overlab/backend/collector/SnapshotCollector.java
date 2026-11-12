@@ -38,6 +38,7 @@ public class SnapshotCollector {
                 : fetched;
         validator.validate(usable.rates());
         List<BlizzardRatesResponse.HeroRate> heroesWithData = validator.withoutEmptyEntries(usable.rates());
+        validator.validateEnoughWithData(heroesWithData);
         validator.validateBanRates(request.queue(), heroesWithData);
         SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, request.queue(), properties.gameFormat(),
                 request.platform(), request.region(), request.tier(), request.mapSlug(), heroesWithData,

@@ -187,7 +187,10 @@ public class RatesCollectorService {
                 errors.add(request, exception);
                 log.warn("Collector request failed: {}", request.describe(exception));
             }
-            Pause.sleep(properties.pause());
+            if (!Pause.sleep(properties.pause())) {
+                log.warn("Collector job '{}' was interrupted, remaining requests were skipped", job.name());
+                break;
+            }
         }
         run.setStatus(statusOf(run));
         run.setErrorSummary(errors.summary());

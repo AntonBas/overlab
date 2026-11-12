@@ -43,11 +43,22 @@ class UserTokenServiceTest {
     void consumesValidTokenOnce() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), null);
         when(repository.findByHashAndTypeIn(any(), eq(List.of(UserTokenType.PASSWORD_RESET)))).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(1);
 
         User result = service.consume("raw", UserTokenType.PASSWORD_RESET);
 
         assertThat(result).isSameAs(user);
         assertThat(token.getUsedAt()).isNotNull();
+    }
+
+    @Test
+    void rejectsATokenThatAConcurrentRequestAlreadyConsumed() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), null);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(0);
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
+                .isInstanceOf(InvalidTokenException.class);
     }
 
     @Test

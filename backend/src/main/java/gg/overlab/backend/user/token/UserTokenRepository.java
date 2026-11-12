@@ -22,6 +22,10 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     void deleteAllByUserAndType(@Param("userId") Long userId, @Param("type") UserTokenType type);
 
     @Modifying
+    @Query("update UserToken t set t.usedAt = :usedAt where t.id = :id and t.usedAt is null")
+    int markUsed(@Param("id") Long id, @Param("usedAt") Instant usedAt);
+
+    @Modifying
     @Query("delete from UserToken t where t.tokenHash = :hash and t.type = :type")
     void deleteByHashAndType(@Param("hash") String hash, @Param("type") UserTokenType type);
 

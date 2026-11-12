@@ -54,6 +54,15 @@ class AdminBootstrapTest {
     }
 
     @Test
+    void doesNotCreateAnotherAdministratorWhenOneExists() {
+        when(userRepository.existsByRole(UserRole.ADMIN)).thenReturn(true);
+
+        run(AuthFixtures.propertiesWithAdmin("renamed@overlab.gg", "long-enough-password"));
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void keepsAnExistingAccount() {
         when(userRepository.existsByEmailIgnoreCase("admin@overlab.gg")).thenReturn(true);
 

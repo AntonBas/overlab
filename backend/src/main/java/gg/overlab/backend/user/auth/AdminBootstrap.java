@@ -36,7 +36,7 @@ public class AdminBootstrap implements ApplicationRunner {
             return;
         }
         String email = properties.adminEmail().trim().toLowerCase(Locale.ROOT);
-        if (userRepository.existsByEmailIgnoreCase(email)) {
+        if (userRepository.existsByRole(UserRole.ADMIN) || userRepository.existsByEmailIgnoreCase(email)) {
             return;
         }
         User admin = new User();

@@ -68,7 +68,9 @@ public class BlizzardRatesClient {
                 Duration delay = retry.backoff().multipliedBy(attempt);
                 log.warn("Blizzard request failed (attempt {}/{}), retrying in {}: {}", attempt, retry.maxAttempts(),
                         delay, exception.getMessage());
-                Pause.sleep(delay);
+                if (!Pause.sleep(delay)) {
+                    throw exception;
+                }
             }
         }
     }
@@ -97,7 +99,9 @@ public class BlizzardRatesClient {
                 return new RatesFetch(heroes(response), etagOf(entity), false);
             }
             log.warn("Queue {} returned no ban rate column, trying the next Competitive queue", candidate);
-            Pause.sleep(pause);
+            if (!Pause.sleep(pause)) {
+                throw new InvalidSnapshotException("Interrupted while looking for the Competitive queue");
+            }
         }
         throw new InvalidSnapshotException("No Blizzard queue returned Competitive statistics with ban rates");
     }
