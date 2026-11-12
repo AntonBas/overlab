@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebpConverter {
 
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(20);
     private static final String QUALITY = "85";
     private static final String ALPHA_QUALITY = "90";
     private static final String EFFORT = "6";
@@ -24,12 +22,8 @@ public class WebpConverter {
     private final String command;
     private final Duration timeout;
 
-    @Autowired
-    public WebpConverter(@Value("${app.media.webp-command:cwebp}") String command) {
-        this(command, DEFAULT_TIMEOUT);
-    }
-
-    WebpConverter(String command, Duration timeout) {
+    public WebpConverter(@Value("${app.media.webp-command:cwebp}") String command,
+                         @Value("${app.media.webp-timeout:20s}") Duration timeout) {
         this.command = command;
         this.timeout = timeout;
     }

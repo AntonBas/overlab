@@ -22,6 +22,7 @@ import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -99,7 +100,7 @@ class RatesSnapshotWriterTest {
         save("support");
 
         verify(metrics, never()).recordRoleChange();
-        verify(metrics).recordNewHero("sombra");
+        verify(metrics).recordNewHero();
     }
 
     private void stubExistingHero(HeroRole role) {
@@ -117,6 +118,6 @@ class RatesSnapshotWriterTest {
                         new BigDecimal("5")),
                 new BlizzardRatesResponse.HeroInfo("Sombra", role, null, null, null));
         writer.save(Instant.parse("2026-11-07T10:00:00Z"), GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE,
-                Platform.PC, Region.EUROPE, RankTier.ALL, RatesSnapshotWriter.ALL_MAPS, List.of(rate));
+                Platform.PC, Region.EUROPE, RankTier.ALL, StatsFilter.ALL_MAPS, List.of(rate));
     }
 }

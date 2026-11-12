@@ -29,7 +29,7 @@ class SitemapServiceTest {
         when(mapService.findAll()).thenReturn(List.of(map));
         when(guideService.findPublished(null, null)).thenReturn(List.of(guide));
 
-        String xml = new SitemapService(heroService, mapService, guideService, "https://example.com/").build();
+        String xml = new SitemapService(heroService, mapService, guideService, new SiteUrl("https://example.com/")).build();
 
         assertThat(xml).contains("<loc>https://example.com/stats</loc>", "<loc>https://example.com/perks</loc>",
                 "<loc>https://example.com/heroes/ana</loc>", "<loc>https://example.com/maps/busan</loc>",

@@ -13,6 +13,7 @@ import gg.overlab.backend.collector.run.CollectorTrigger;
 import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
 import gg.overlab.backend.collector.snapshot.RatesValidator;
 import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
+import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
@@ -218,38 +219,25 @@ public class RatesCollectorService {
     private void execute(CollectorJob job, CollectorRun run) {
         Instant capturedAt = Instant.now();
         Set<String> errors = new LinkedHashSet<>();
-        List<String> mapSlugs = resolveMapSlugs(job);
+        List<SnapshotRequest> requests = SnapshotRequest.plan(job, resolveMapSlugs(job));
         log.info("Collector job '{}' started ({})", job.name(), run.getTrigger());
-        for (GameQueue queue : job.queues()) {
-            for (Platform platform : job.platforms()) {
-                for (Region region : job.regions()) {
-                    for (RankTier tier : job.tiers()) {
-                        if (queue == GameQueue.QUICK_PLAY && tier != RankTier.ALL) {
-                            continue;
-                        }
-                        for (String mapSlug : mapSlugs) {
-                            run.setRequestsTotal(run.getRequestsTotal() + 1);
-                            try {
-                                run.setRowsSaved(run.getRowsSaved()
-                                        + collectOne(capturedAt, queue, platform, region, tier, mapSlug));
-                                metrics.recordRequest(job.name(), true);
-                            } catch (RuntimeException exception) {
-                                run.setRequestsFailed(run.getRequestsFailed() + 1);
-                                metrics.recordRequest(job.name(), false);
-                                if (exception instanceof InvalidSnapshotException) {
-                                    metrics.recordRejectedSnapshot();
-                                }
-                                if (errors.size() < MAX_DISTINCT_ERRORS) {
-                                    errors.add(describe(queue, platform, region, tier, mapSlug, exception));
-                                }
-                                log.warn("Collector request failed: {}",
-                                        describe(queue, platform, region, tier, mapSlug, exception));
-                            }
-                            pause();
-                        }
-                    }
+        for (SnapshotRequest request : requests) {
+            run.setRequestsTotal(run.getRequestsTotal() + 1);
+            try {
+                run.setRowsSaved(run.getRowsSaved() + collectOne(capturedAt, request));
+                metrics.recordRequest(job.name(), true);
+            } catch (RuntimeException exception) {
+                run.setRequestsFailed(run.getRequestsFailed() + 1);
+                metrics.recordRequest(job.name(), false);
+                if (exception instanceof InvalidSnapshotException) {
+                    metrics.recordRejectedSnapshot();
                 }
+                if (errors.size() < MAX_DISTINCT_ERRORS) {
+                    errors.add(request.describe(exception));
+                }
+                log.warn("Collector request failed: {}", request.describe(exception));
             }
+            Pause.sleep(properties.pause());
         }
         run.setStatus(statusOf(run));
         run.setErrorSummary(errors.isEmpty() ? null : truncate(String.join("; ", errors)));
@@ -265,8 +253,12 @@ public class RatesCollectorService {
         return run.getRowsSaved() > 0 ? CollectorRunStatus.PARTIAL : CollectorRunStatus.FAILED;
     }
 
-    private int collectOne(Instant capturedAt, GameQueue queue, Platform platform, Region region, RankTier tier,
-                           String mapSlug) {
+    private int collectOne(Instant capturedAt, SnapshotRequest request) {
+        GameQueue queue = request.queue();
+        Platform platform = request.platform();
+        Region region = request.region();
+        RankTier tier = request.tier();
+        String mapSlug = request.mapSlug();
         String knownEtag = recorder.knownEtag(queue, platform, region, tier, mapSlug).orElse(null);
         RatesFetch fetched = client.fetch(queue, platform, region, tier, mapSlug, knownEtag);
         if (fetched.notModified()
@@ -309,20 +301,7 @@ public class RatesCollectorService {
         }
     }
 
-    private String describe(GameQueue queue, Platform platform, Region region, RankTier tier, String mapSlug,
-                            RuntimeException exception) {
-        return queue + "/" + platform + "/" + region + "/" + tier + "/" + mapSlug + ": " + exception.getMessage();
-    }
-
     private String truncate(String text) {
         return text.length() > MAX_ERROR_SUMMARY_LENGTH ? text.substring(0, MAX_ERROR_SUMMARY_LENGTH) : text;
-    }
-
-    private void pause() {
-        try {
-            Thread.sleep(properties.pause());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

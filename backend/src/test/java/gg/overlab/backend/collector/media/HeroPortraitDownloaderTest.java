@@ -40,7 +40,7 @@ class HeroPortraitDownloaderTest {
     private final WebpConverter webpConverter = mock(WebpConverter.class);
 
     private HeroPortraitDownloader downloader(MediaStorage storage) {
-        return new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent"), storage, webpConverter, true);
+        return new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted()), storage, webpConverter, true);
     }
 
     private Hero hero(String portraitUrl) {
@@ -81,7 +81,7 @@ class HeroPortraitDownloaderTest {
     void doesNothingWhileDownloadsAreDisabled() {
         Hero hero = hero(null);
 
-        new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent"), storage(), webpConverter, false).ensurePortrait(hero, SOURCE);
+        new HeroPortraitDownloader(new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted()), storage(), webpConverter, false).ensurePortrait(hero, SOURCE);
 
         assertThat(hero.getPortraitUrl()).isNull();
         server.verify();

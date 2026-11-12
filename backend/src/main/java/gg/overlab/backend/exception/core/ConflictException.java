@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class ConflictException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ConflictException extends ApiException {
 
     public ConflictException(String message) {
-        super(message);
+        super(HttpStatus.CONFLICT, message);
     }
 }

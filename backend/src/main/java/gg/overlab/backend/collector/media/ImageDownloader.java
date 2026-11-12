@@ -1,17 +1,15 @@
 package gg.overlab.backend.collector.media;
 
-import gg.overlab.backend.collector.CollectorProperties;
+import gg.overlab.backend.collector.client.CollectorHttpConfig;
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -27,16 +25,8 @@ public class ImageDownloader {
 
     private final ImageSourceProperties sources;
 
-    @Autowired
-    public ImageDownloader(CollectorProperties properties, ImageSourceProperties sources) {
-        this(requestFactoryBuilder(properties), properties.userAgent(), sources);
-    }
-
-    ImageDownloader(RestClient.Builder builder, String userAgent) {
-        this(builder, userAgent, new ImageSourceProperties(List.of()));
-    }
-
-    ImageDownloader(RestClient.Builder builder, String userAgent, ImageSourceProperties sources) {
+    public ImageDownloader(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder,
+                           @Value("${collector.user-agent}") String userAgent, ImageSourceProperties sources) {
         this.restClient = builder.defaultHeader(HttpHeaders.USER_AGENT, userAgent).build();
         this.sources = sources;
     }
@@ -102,12 +92,5 @@ public class ImageDownloader {
     private boolean isAcceptablePng(byte[] content) {
         return content.length > PNG_SIGNATURE.length
                 && Arrays.equals(Arrays.copyOf(content, PNG_SIGNATURE.length), PNG_SIGNATURE);
-    }
-
-    private static RestClient.Builder requestFactoryBuilder(CollectorProperties properties) {
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(properties.timeouts().connect()).build();
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(properties.timeouts().read());
-        return RestClient.builder().requestFactory(requestFactory);
     }
 }

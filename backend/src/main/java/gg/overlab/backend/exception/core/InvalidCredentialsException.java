@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class InvalidCredentialsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InvalidCredentialsException extends ApiException {
 
     public InvalidCredentialsException() {
-        super("Invalid email or password");
+        super(HttpStatus.UNAUTHORIZED, "Invalid email or password");
     }
 }

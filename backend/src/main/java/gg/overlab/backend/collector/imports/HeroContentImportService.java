@@ -7,13 +7,13 @@ import gg.overlab.backend.collector.parser.HeroAbilityParser;
 import gg.overlab.backend.collector.parser.HeroPerkParser;
 import gg.overlab.backend.collector.parser.ParsedAbility;
 import gg.overlab.backend.collector.parser.ParsedPerk;
+import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -93,7 +93,7 @@ public class HeroContentImportService {
                     failed++;
                     log.warn("Perk import failed for {}: {}", slug, exception.getMessage());
                 }
-                sleep(properties.pause());
+                Pause.sleep(properties.pause());
             }
             cacheEviction.evictAll();
             log.info("Perk and ability import finished: {} created, {} updated, {} removed, {} of {} heroes failed",
@@ -126,13 +126,5 @@ public class HeroContentImportService {
         Map<String, Optional<byte[]>> icons = new HashMap<>();
         urls.forEach(url -> icons.put(url, imageDownloader.downloadPng(url)));
         return icons;
-    }
-
-    private void sleep(Duration delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

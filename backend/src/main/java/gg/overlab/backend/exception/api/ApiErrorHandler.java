@@ -1,13 +1,6 @@
 package gg.overlab.backend.exception.api;
 
-import gg.overlab.backend.exception.core.BadRequestException;
-import gg.overlab.backend.exception.core.ConflictException;
-import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
-import gg.overlab.backend.exception.core.EmailNotVerifiedException;
-import gg.overlab.backend.exception.core.EntityNotFoundException;
-import gg.overlab.backend.exception.core.InvalidCredentialsException;
-import gg.overlab.backend.exception.core.InvalidTokenException;
-import gg.overlab.backend.exception.core.TooManyRequestsException;
+import gg.overlab.backend.exception.core.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -38,25 +31,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiErrorHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFound(EntityNotFoundException exception, HttpServletRequest request) {
-        return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ApiError> handleConflict(ConflictException exception, HttpServletRequest request) {
-        return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(TooManyRequestsException.class)
-    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestsException exception,
-                                                          HttpServletRequest request) {
-        return build(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiError> handleBadRequest(BadRequestException exception, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiError> handleApiException(ApiException exception, HttpServletRequest request) {
+        return build(exception.status(), exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -113,29 +90,6 @@ public class ApiErrorHandler {
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException exception,
                                                          HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "Malformed request body", request, List.of());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException exception,
-                                                             HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(EmailNotVerifiedException.class)
-    public ResponseEntity<ApiError> handleEmailNotVerified(EmailNotVerifiedException exception,
-                                                           HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(EmailAlreadyUsedException.class)
-    public ResponseEntity<ApiError> handleEmailAlreadyUsed(EmailAlreadyUsedException exception,
-                                                           HttpServletRequest request) {
-        return build(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ApiError> handleInvalidToken(InvalidTokenException exception, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

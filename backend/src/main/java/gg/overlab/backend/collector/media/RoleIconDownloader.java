@@ -1,10 +1,9 @@
 package gg.overlab.backend.collector.media;
 
-import gg.overlab.backend.collector.CollectorProperties;
 import gg.overlab.backend.media.MediaFolder;
 import gg.overlab.backend.media.MediaStorage;
 import java.util.Locale;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,13 +13,7 @@ public class RoleIconDownloader {
     private final MediaStorage mediaStorage;
     private final boolean enabled;
 
-    @Autowired
-    public RoleIconDownloader(CollectorProperties properties, ImageDownloader imageDownloader,
-                              MediaStorage mediaStorage) {
-        this(imageDownloader, mediaStorage, properties.downloadPortraits());
-    }
-
-    RoleIconDownloader(ImageDownloader imageDownloader, MediaStorage mediaStorage, boolean enabled) {
+    public RoleIconDownloader(ImageDownloader imageDownloader, MediaStorage mediaStorage, @Value("${collector.download-portraits:false}") boolean enabled) {
         this.imageDownloader = imageDownloader;
         this.mediaStorage = mediaStorage;
         this.enabled = enabled;

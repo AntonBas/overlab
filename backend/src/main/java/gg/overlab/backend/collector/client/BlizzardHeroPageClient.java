@@ -1,11 +1,9 @@
 package gg.overlab.backend.collector.client;
 
 import gg.overlab.backend.collector.CollectorProperties;
-import java.net.http.HttpClient;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -17,12 +15,7 @@ public class BlizzardHeroPageClient {
 
     private final RestClient restClient;
 
-    @Autowired
-    public BlizzardHeroPageClient(CollectorProperties properties) {
-        this(requestFactoryBuilder(properties), properties);
-    }
-
-    BlizzardHeroPageClient(RestClient.Builder builder, CollectorProperties properties) {
+    public BlizzardHeroPageClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
         this.restClient = builder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.USER_AGENT, properties.userAgent())
@@ -35,12 +28,5 @@ public class BlizzardHeroPageClient {
         } catch (HttpClientErrorException.NotFound exception) {
             return Optional.empty();
         }
-    }
-
-    private static RestClient.Builder requestFactoryBuilder(CollectorProperties properties) {
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(properties.timeouts().connect()).build();
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(properties.timeouts().read());
-        return RestClient.builder().requestFactory(requestFactory);
     }
 }

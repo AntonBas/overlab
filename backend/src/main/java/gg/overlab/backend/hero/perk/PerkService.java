@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.perk;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -21,8 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class PerkService {
-
-    private static final String AUDIT_TYPE = "Perk";
 
     private final PerkRepository perkRepository;
     private final HeroRepository heroRepository;
@@ -61,7 +60,7 @@ public class PerkService {
         perk.setHero(hero);
         perkMapper.apply(request, perk);
         PerkDto created = perkMapper.toDto(perkRepository.save(perk));
-        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        auditService.logCreate(AuditEntityType.PERK, created.id(), created);
         return created;
     }
 
@@ -81,7 +80,7 @@ public class PerkService {
         perk.setHero(hero);
         perkMapper.apply(request, perk);
         PerkDto after = perkMapper.toDto(perk);
-        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.PERK, id, before, after);
         return after;
     }
 
@@ -89,7 +88,7 @@ public class PerkService {
     @Transactional
     public void delete(Long id) {
         Perk perk = perkRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Perk", id));
-        auditService.logDelete(AUDIT_TYPE, id, perkMapper.toDto(perk));
+        auditService.logDelete(AuditEntityType.PERK, id, perkMapper.toDto(perk));
         perkRepository.delete(perk);
         imageStore.remove(perk.getIconUrl());
     }
@@ -101,7 +100,7 @@ public class PerkService {
         PerkDto before = perkMapper.toDto(perk);
         perk.setIconUrl(imageStore.replace(MediaFolder.PERKS, "perk-" + id, perk.getIconUrl(), file));
         PerkDto after = perkMapper.toDto(perk);
-        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.PERK, id, before, after);
         return after;
     }
 
@@ -113,7 +112,7 @@ public class PerkService {
         imageStore.remove(perk.getIconUrl());
         perk.setIconUrl(null);
         PerkDto after = perkMapper.toDto(perk);
-        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.PERK, id, before, after);
         return after;
     }
 

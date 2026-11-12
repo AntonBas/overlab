@@ -8,6 +8,10 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "collector.images")
 public record ImageSourceProperties(@DefaultValue List<String> allowedHosts) {
 
+    public static ImageSourceProperties unrestricted() {
+        return new ImageSourceProperties(List.of());
+    }
+
     public boolean allows(String host) {
         if (allowedHosts.isEmpty()) {
             return true;

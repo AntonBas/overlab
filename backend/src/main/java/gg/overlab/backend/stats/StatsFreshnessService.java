@@ -4,9 +4,7 @@ import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.stats.dto.DataFreshnessDto;
 import gg.overlab.backend.stats.dto.StatsFilter;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,14 +53,9 @@ public class StatsFreshnessService {
     }
 
     private static String signatureOf(List<RateRow> rows) {
-        return rows.stream()
-                .sorted(Comparator.comparing(RateRow::heroId))
-                .map(row -> row.heroId() + ":" + plain(row.winRate()) + ":" + plain(row.pickRate()) + ":"
-                        + plain(row.banRate()))
-                .collect(Collectors.joining(","));
-    }
-
-    private static String plain(BigDecimal value) {
-        return value == null ? "-" : value.stripTrailingZeros().toPlainString();
+        return SnapshotSignature.of(rows.stream()
+                .map(row -> new SnapshotSignature.Entry(String.valueOf(row.heroId()), row.winRate(), row.pickRate(),
+                        row.banRate()))
+                .toList());
     }
 }

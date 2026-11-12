@@ -8,62 +8,32 @@ import gg.overlab.backend.guide.GuideService;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.hero.HeroService;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SeoPageResolver {
 
-    static final String SITE_NAME = "Overlab";
-    static final String HOME_DESCRIPTION = "Overwatch hero statistics by map and rank: win, pick and ban rates, "
-            + "perks, counters and video guides. Unofficial fan site.";
+    static final String SITE_NAME = StaticSeoPage.SITE_NAME;
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
-    private static final Map<String, String[]> STATIC_PAGES = Map.ofEntries(
-            Map.entry("/", new String[] {SITE_NAME, HOME_DESCRIPTION, SITE_NAME}),
-            Map.entry("/stats", new String[] {"Overwatch hero win, pick and ban rates",
-                    "Overwatch hero win, pick and ban rates by rank, map, region and platform, "
-                            + "updated from Blizzard public data.", "Hero statistics"}),
-            Map.entry("/heroes", new String[] {"All Overwatch heroes: roles, abilities, perks",
-                    "All Overwatch heroes with roles, abilities, perks, counters and synergies.", "Heroes"}),
-            Map.entry("/counters", new String[] {"Overwatch counters and synergies for every hero",
-                    "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
-                    "Counters"}),
-            Map.entry("/perks", new String[] {"Overwatch hero perks: every Minor and Major perk",
-                    "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
-                    "Perks"}),
-            Map.entry("/changes", new String[] {"Overwatch hero win rate changes by patch",
-                    "See which Overwatch heroes gained or lost win and pick rate between patches "
-                            + "and over the last weeks.", "What changed"}),
-            Map.entry("/maps", new String[] {"Overwatch maps: hero win rates by map",
-                    "Overwatch maps by game mode, with hero win, pick and ban rates on each map.", "Maps"}),
-            Map.entry("/privacy", new String[] {"Privacy policy", "How Overlab handles your data.",
-                    "Privacy policy"}),
-            Map.entry("/terms", new String[] {"Terms of use", "The rules for using Overlab.", "Terms of use"}),
-            Map.entry("/cookies", new String[] {"Cookie policy", "Which cookies and local storage Overlab uses.",
-                    "Cookie policy"}),
-            Map.entry("/business", new String[] {"Sponsorship and business",
-                    "Contact Overlab about sponsorship and partnerships.", "Sponsorship and business"}));
-
     private final HeroService heroService;
     private final MapService mapService;
     private final GuideService guideService;
-    private final String baseUrl;
+    private final SiteUrl siteUrl;
 
     public SeoPageResolver(HeroService heroService, MapService mapService, GuideService guideService,
-                           @Value("${app.frontend-url}") String frontendUrl) {
+                           SiteUrl siteUrl) {
         this.heroService = heroService;
         this.mapService = mapService;
         this.guideService = guideService;
-        this.baseUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        this.siteUrl = siteUrl;
     }
 
     public static String cacheKey(String requestedPath) {
@@ -77,9 +47,9 @@ public class SeoPageResolver {
 
     public Optional<SeoPage> resolve(String requestedPath) {
         String path = normalize(requestedPath);
-        String[] fixed = STATIC_PAGES.get(path);
-        if (fixed != null) {
-            return Optional.of(staticPage(path, fixed[0], fixed[1], fixed[2]));
+        Optional<StaticSeoPage> fixed = StaticSeoPage.find(path);
+        if (fixed.isPresent()) {
+            return fixed.map(this::staticPage);
         }
         Matcher matcher = PAGE_PATH.matcher(path);
         if (!matcher.matches()) {
@@ -102,9 +72,10 @@ public class SeoPageResolver {
         return trimmed.startsWith("/") ? trimmed : "/" + trimmed;
     }
 
-    private SeoPage staticPage(String path, String title, String description, String heading) {
-        List<String> data = "/".equals(path) ? List.of(websiteData()) : List.of(breadcrumbs(path, heading));
-        return new SeoPage(path, title, description, "website", heading, data);
+    private SeoPage staticPage(StaticSeoPage page) {
+        List<String> data = "/".equals(page.path()) ? List.of(websiteData())
+                : List.of(breadcrumbs(page.path(), page.heading()));
+        return new SeoPage(page.path(), page.title(), page.description(), "website", page.heading(), data);
     }
 
     private Optional<SeoPage> heroPage(String slug) {
@@ -161,7 +132,7 @@ public class SeoPageResolver {
 
     private String websiteData() {
         return "{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":" + JsonText.quote(SITE_NAME)
-                + ",\"url\":" + JsonText.quote(baseUrl + "/") + "}";
+                + ",\"url\":" + JsonText.quote(siteUrl.absolute("/")) + "}";
     }
 
     private String breadcrumbs(String path, String title) {
@@ -181,7 +152,7 @@ public class SeoPageResolver {
             }
             items.append("{\"@type\":\"ListItem\",\"position\":").append(index + 1)
                     .append(",\"name\":").append(JsonText.quote(trail.get(index)[0]))
-                    .append(",\"item\":").append(JsonText.quote(baseUrl + trail.get(index)[1])).append('}');
+                    .append(",\"item\":").append(JsonText.quote(siteUrl.absolute(trail.get(index)[1]))).append('}');
         }
         return "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":["
                 + items + "]}";
@@ -195,7 +166,7 @@ public class SeoPageResolver {
                         "https://i.ytimg.com/vi/" + guide.youtubeId() + "/hqdefault.jpg"))
                 .append(",\"embedUrl\":").append(JsonText.quote(
                         "https://www.youtube-nocookie.com/embed/" + guide.youtubeId()))
-                .append(",\"url\":").append(JsonText.quote(baseUrl + path));
+                .append(",\"url\":").append(JsonText.quote(siteUrl.absolute(path)));
         if (guide.createdAt() != null) {
             json.append(",\"uploadDate\":").append(JsonText.quote(guide.createdAt().toString()));
         }

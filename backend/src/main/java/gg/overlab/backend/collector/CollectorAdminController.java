@@ -1,7 +1,11 @@
 package gg.overlab.backend.collector;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.collector.dto.CollectorJobDto;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
+import gg.overlab.backend.collector.dto.HeroContentImportStartedDto;
+import gg.overlab.backend.collector.dto.PatchImportResultDto;
 import gg.overlab.backend.collector.imports.PatchImportService;
 import gg.overlab.backend.collector.imports.HeroContentImportService;
 import gg.overlab.backend.collector.run.CollectorTrigger;
@@ -48,7 +52,7 @@ public class CollectorAdminController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CollectorRunDto run(@PathVariable String name) {
         CollectorRunDto run = collectorService.startAsync(name, CollectorTrigger.MANUAL);
-        auditService.logCreate("CollectorRun", run.id(), run);
+        auditService.logCreate(AuditEntityType.COLLECTOR_RUN, run.id(), run);
         return run;
     }
 
@@ -63,14 +67,5 @@ public class CollectorAdminController {
     @PostMapping("/patches/import")
     public PatchImportResultDto importPatches() {
         return new PatchImportResultDto(patchImportService.importNew());
-    }
-
-    public record PatchImportResultDto(int created) {
-    }
-
-    public record HeroContentImportStartedDto(int heroes) {
-    }
-
-    public record CollectorJobDto(String name, String cron, boolean enabled, String after, String minInterval) {
     }
 }

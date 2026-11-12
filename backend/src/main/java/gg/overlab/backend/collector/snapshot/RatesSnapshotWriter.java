@@ -16,6 +16,7 @@ import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class RatesSnapshotWriter {
-
-    public static final String ALL_MAPS = "all-maps";
 
     private final HeroRepository heroRepository;
     private final HeroRoleChangeRepository roleChangeRepository;
@@ -55,8 +54,10 @@ public class RatesSnapshotWriter {
             Hero hero = heroesBySlug.computeIfAbsent(rate.id(),
                     slug -> newHero(slug, heroesKnownBefore ? capturedAt : null));
             applyHeroDetails(hero, rate, capturedAt);
-            hero = heroRepository.save(hero);
-            heroesBySlug.put(rate.id(), hero);
+            if (hero.getId() == null) {
+                hero = heroRepository.save(hero);
+                heroesBySlug.put(rate.id(), hero);
+            }
             stats.add(toStat(hero, map, queue, gameFormat, platform, region, tier, capturedAt, rate));
         }
         heroStatRepository.saveAll(stats);
@@ -65,7 +66,7 @@ public class RatesSnapshotWriter {
 
     private Hero newHero(String slug, Instant introducedAt) {
         log.warn("New hero discovered: {}", slug);
-        metrics.recordNewHero(slug);
+        metrics.recordNewHero();
         Hero hero = new Hero();
         hero.setIntroducedAt(introducedAt);
         return hero;
@@ -111,12 +112,12 @@ public class RatesSnapshotWriter {
     }
 
     private GameMap resolveMap(String mapSlug) {
-        if (ALL_MAPS.equals(mapSlug)) {
+        if (StatsFilter.ALL_MAPS.equals(mapSlug)) {
             return null;
         }
         return gameMapRepository.findBySlug(mapSlug).orElseGet(() -> {
             log.warn("New map discovered: {}, set its mode and image in the admin panel", mapSlug);
-            metrics.recordNewMap(mapSlug);
+            metrics.recordNewMap();
             GameMap map = new GameMap();
             map.setSlug(mapSlug);
             map.setName(humanReadable(mapSlug));

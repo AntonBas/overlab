@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero.ability;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -56,7 +57,7 @@ public class AbilityService {
         AbilityAdminDto before = abilityMapper.toAdminDto(ability);
         ability.setControl(request.control());
         AbilityAdminDto after = abilityMapper.toAdminDto(ability);
-        auditService.logUpdate("HeroAbility", id, before, after);
+        auditService.logUpdate(AuditEntityType.ABILITY, id, before, after);
         return after;
     }
 }

@@ -9,5 +9,7 @@ public interface HeroCategoryRelationRepository extends JpaRepository<HeroCatego
     @EntityGraph(attributePaths = {"hero", "category"})
     List<HeroCategoryRelation> findAllByOrderByIdAsc();
 
+    boolean existsByHeroIdAndCategoryId(Long heroId, Long categoryId);
+
     boolean existsByHeroIdAndCategoryIdAndIdNot(Long heroId, Long categoryId, Long id);
 }

@@ -121,7 +121,7 @@ class HeroRelationServiceTest {
 
     @Test
     void rejectsDuplicateInEitherDirection() {
-        when(relationRepository.existsByHeroIdAndRelatedHeroIdAndTypeAndIdNot(2L, 1L, RelationType.SYNERGY, -1L))
+        when(relationRepository.existsByHeroIdAndRelatedHeroIdAndType(2L, 1L, RelationType.SYNERGY))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> service.create(new RelationRequest("ana", "genji", RelationType.SYNERGY, null)))

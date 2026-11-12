@@ -17,6 +17,10 @@ class WebpConverterTest {
     @TempDir
     Path directory;
 
+    private WebpConverter converterFor(String command) {
+        return new WebpConverter(command, Duration.ofSeconds(20));
+    }
+
     private String script(String webpContent) throws IOException {
         Path file = directory.resolve("fake-cwebp");
         Files.writeString(file, """
@@ -33,27 +37,27 @@ class WebpConverterTest {
 
     @Test
     void returnsTheConvertedImageWhenItIsSmaller() throws IOException {
-        WebpConverter converter = new WebpConverter(script("WEBP"));
+        WebpConverter converter = converterFor(script("WEBP"));
 
         assertThat(converter.fromPng(PNG)).hasValue("WEBP".getBytes());
     }
 
     @Test
     void keepsTheOriginalWhenTheConversionIsNotSmaller() throws IOException {
-        WebpConverter converter = new WebpConverter(script("A-WEBP-LARGER-THAN-THE-PNG"));
+        WebpConverter converter = converterFor(script("A-WEBP-LARGER-THAN-THE-PNG"));
 
         assertThat(converter.fromPng(PNG)).isEmpty();
     }
 
     @Test
     void reportsAvailabilityOfTheCommand() throws IOException {
-        assertThat(new WebpConverter(script("WEBP")).isAvailable()).isTrue();
-        assertThat(new WebpConverter("definitely-not-installed-cwebp").isAvailable()).isFalse();
+        assertThat(converterFor(script("WEBP")).isAvailable()).isTrue();
+        assertThat(converterFor("definitely-not-installed-cwebp").isAvailable()).isFalse();
     }
 
     @Test
     void returnsNothingWhenTheCommandIsMissing() {
-        assertThat(new WebpConverter("definitely-not-installed-cwebp").fromPng(PNG)).isEmpty();
+        assertThat(converterFor("definitely-not-installed-cwebp").fromPng(PNG)).isEmpty();
     }
 
     @Test

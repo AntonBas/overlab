@@ -1,5 +1,6 @@
 package gg.overlab.backend.patch;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.cache.CacheNames;
@@ -21,8 +22,6 @@ import org.springframework.util.StringUtils;
 @Service
 @RequiredArgsConstructor
 public class PatchService {
-
-    private static final String AUDIT_TYPE = "Patch";
 
     private final PatchRepository patchRepository;
     private final PatchMapper patchMapper;
@@ -68,7 +67,7 @@ public class PatchService {
                 ? requireFreeSlug(request.slug(), null)
                 : slugService.generateUnique(request.version(), patchRepository::existsBySlug));
         PatchDto created = toDto(patchRepository.save(patch));
-        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        auditService.logCreate(AuditEntityType.PATCH, created.id(), created);
         return created;
     }
 
@@ -85,7 +84,7 @@ public class PatchService {
             patch.setSlug(requireFreeSlug(request.slug(), id));
         }
         PatchDto after = toDto(patch);
-        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        auditService.logUpdate(AuditEntityType.PATCH, id, before, after);
         return after;
     }
 
@@ -93,7 +92,7 @@ public class PatchService {
     @Transactional
     public void delete(Long id) {
         Patch patch = patchRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patch", id));
-        auditService.logDelete(AUDIT_TYPE, id, toDto(patch));
+        auditService.logDelete(AuditEntityType.PATCH, id, toDto(patch));
         patchRepository.delete(patch);
     }
 
@@ -103,12 +102,8 @@ public class PatchService {
     }
 
     private String requireFreeSlug(String slug, Long excludedId) {
-        boolean taken = excludedId == null
-                ? patchRepository.existsBySlug(slug)
-                : patchRepository.existsBySlugAndIdNot(slug, excludedId);
-        if (taken) {
-            throw new ConflictException("Slug is already used: " + slug);
-        }
-        return slug;
+        return slugService.requireFree(slug, candidate -> excludedId == null
+                ? patchRepository.existsBySlug(candidate)
+                : patchRepository.existsBySlugAndIdNot(candidate, excludedId));
     }
 }

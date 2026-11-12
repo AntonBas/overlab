@@ -21,6 +21,8 @@ public interface HeroRelationRepository extends JpaRepository<HeroRelation, Long
     @EntityGraph(attributePaths = {"hero", "relatedHero"})
     List<HeroRelation> findAllByOrderByIdAsc();
 
+    boolean existsByHeroIdAndRelatedHeroIdAndType(Long heroId, Long relatedHeroId, RelationType type);
+
     boolean existsByHeroIdAndRelatedHeroIdAndTypeAndIdNot(Long heroId, Long relatedHeroId, RelationType type, Long id);
 
     @EntityGraph(attributePaths = {"hero", "relatedHero"})

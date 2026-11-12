@@ -51,7 +51,7 @@ public class MapDiscoveryService {
 
     private void create(ParsedMap parsed) {
         log.warn("New map discovered: {} ({}), set its image in the admin panel", parsed.slug(), parsed.mode());
-        metrics.recordNewMap(parsed.slug());
+        metrics.recordNewMap();
         GameMap map = new GameMap();
         map.setSlug(parsed.slug());
         map.setName(parsed.name());

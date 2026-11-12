@@ -1,11 +1,11 @@
 package gg.overlab.backend.guide;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
 import gg.overlab.backend.exception.core.BadRequestException;
-import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
 import gg.overlab.backend.gamemap.GameMapRepository;
@@ -23,8 +23,6 @@ import org.springframework.util.StringUtils;
 @Service
 @RequiredArgsConstructor
 public class GuideService {
-
-    private static final String AUDIT_TYPE = "Guide";
 
     private final GuideRepository guideRepository;
     private final HeroRepository heroRepository;
@@ -74,8 +72,8 @@ public class GuideService {
                 ? requireFreeSlug(request.slug(), null)
                 : slugService.generateUnique(request.title(), guideRepository::existsBySlug));
         apply(guide, request);
-        GuideDto created = toDto(guideRepository.save(guide));
-        auditService.logCreate(AUDIT_TYPE, created.id(), created);
+        GuideDto created = guideMapper.toDto(guideRepository.save(guide));
+        auditService.logCreate(AuditEntityType.GUIDE, created.id(), created);
         return created;
     }
 
@@ -84,13 +82,13 @@ public class GuideService {
     public GuideDto update(Long id, GuideRequest request) {
         Guide guide = guideRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Guide", id));
-        GuideDto before = toDto(guide);
+        GuideDto before = guideMapper.toDto(guide);
         if (StringUtils.hasText(request.slug()) && !request.slug().equals(guide.getSlug())) {
             guide.setSlug(requireFreeSlug(request.slug(), id));
         }
         apply(guide, request);
-        GuideDto after = toDto(guide);
-        auditService.logUpdate(AUDIT_TYPE, id, before, after);
+        GuideDto after = guideMapper.toDto(guide);
+        auditService.logUpdate(AuditEntityType.GUIDE, id, before, after);
         return after;
     }
 
@@ -98,7 +96,7 @@ public class GuideService {
     @Transactional
     public void delete(Long id) {
         Guide guide = guideRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Guide", id));
-        auditService.logDelete(AUDIT_TYPE, id, guideMapper.toDto(guide));
+        auditService.logDelete(AuditEntityType.GUIDE, id, guideMapper.toDto(guide));
         guideRepository.delete(guide);
     }
 
@@ -127,16 +125,8 @@ public class GuideService {
     }
 
     private String requireFreeSlug(String slug, Long excludedId) {
-        boolean taken = excludedId == null
-                ? guideRepository.existsBySlug(slug)
-                : guideRepository.existsBySlugAndIdNot(slug, excludedId);
-        if (taken) {
-            throw new ConflictException("Slug is already used: " + slug);
-        }
-        return slug;
-    }
-
-    private GuideDto toDto(Guide guide) {
-        return guideMapper.toDto(guide);
+        return slugService.requireFree(slug, candidate -> excludedId == null
+                ? guideRepository.existsBySlug(candidate)
+                : guideRepository.existsBySlugAndIdNot(candidate, excludedId));
     }
 }

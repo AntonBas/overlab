@@ -20,7 +20,7 @@ class SeoPageResolverTest {
     private final MapService mapService = mock(MapService.class);
     private final GuideService guideService = mock(GuideService.class);
     private final SeoPageResolver resolver =
-            new SeoPageResolver(heroService, mapService, guideService, "https://example.com/");
+            new SeoPageResolver(heroService, mapService, guideService, new SiteUrl("https://example.com/"));
 
     private HeroDto hero(String slug, String name, String description) {
         return new HeroDto(slug, name, null, null, description, null, null, null, false);

@@ -1,5 +1,6 @@
 package gg.overlab.backend.common;
 
+import gg.overlab.backend.exception.core.ConflictException;
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
@@ -44,6 +45,13 @@ public class SlugService {
             counter++;
         }
         return candidate;
+    }
+
+    public String requireFree(String slug, Predicate<String> isTaken) {
+        if (isTaken.test(slug)) {
+            throw new ConflictException("Slug is already used: " + slug);
+        }
+        return slug;
     }
 
     private String transliterate(String text) {

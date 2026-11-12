@@ -9,6 +9,7 @@ import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -19,6 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Flags suspicious snapshots without rejecting them: pick rates that do not add up to 100% of the players in the
+ * game format (500 for 5v5, 600 for 6v6, 3% tolerance) and heroes whose win or pick rate jumped by more than
+ * 5 or 8 points since the previous snapshot. Findings are logged and counted in metrics.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,7 +42,7 @@ public class SnapshotQualityChecker {
     public void inspect(Instant capturedAt, GameQueue queue, GameFormat gameFormat, Platform platform, Region region,
                         RankTier tier, String mapSlug, List<BlizzardRatesResponse.HeroRate> rates) {
         checkPickRateSum(queue, gameFormat, tier, mapSlug, rates);
-        List<HeroStat> previous = RatesSnapshotWriter.ALL_MAPS.equals(mapSlug)
+        List<HeroStat> previous = StatsFilter.ALL_MAPS.equals(mapSlug)
                 ? heroStatRepository.findPreviousForAllMaps(queue, gameFormat, platform, region, tier, capturedAt)
                 : heroStatRepository.findPreviousForMap(mapSlug, queue, gameFormat, platform, region, tier,
                         capturedAt);

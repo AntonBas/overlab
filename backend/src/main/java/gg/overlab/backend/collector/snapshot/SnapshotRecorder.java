@@ -11,6 +11,7 @@ import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.stats.SnapshotCheck;
 import gg.overlab.backend.stats.SnapshotCheckRepository;
 import gg.overlab.backend.stats.SnapshotSignature;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +73,7 @@ public class SnapshotRecorder {
 
     private SnapshotCheck newCheck(GameQueue queue, Platform platform, Region region, RankTier tier,
                                    String mapSlug, String incomingSignature, Instant capturedAt) {
-        List<HeroStat> latest = RatesSnapshotWriter.ALL_MAPS.equals(mapSlug)
+        List<HeroStat> latest = StatsFilter.ALL_MAPS.equals(mapSlug)
                 ? heroStatRepository.findLatestForAllMaps(queue, platform, region, tier)
                 : heroStatRepository.findLatestForMap(mapSlug, queue, platform, region, tier);
         SnapshotCheck check = new SnapshotCheck();

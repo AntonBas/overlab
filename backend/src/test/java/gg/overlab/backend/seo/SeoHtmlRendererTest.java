@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class SeoHtmlRendererTest {
 
-    private final SeoHtmlRenderer renderer = new SeoHtmlRenderer("https://example.com/");
+    private final SeoHtmlRenderer renderer = new SeoHtmlRenderer(new SiteUrl("https://example.com/"));
 
     @Test
     void rendersMetadataCanonicalAndStructuredData() {

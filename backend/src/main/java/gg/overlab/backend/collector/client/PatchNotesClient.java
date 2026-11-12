@@ -1,10 +1,8 @@
 package gg.overlab.backend.collector.client;
 
 import gg.overlab.backend.collector.CollectorProperties;
-import java.net.http.HttpClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -15,12 +13,7 @@ public class PatchNotesClient {
 
     private final RestClient restClient;
 
-    @Autowired
-    public PatchNotesClient(CollectorProperties properties) {
-        this(requestFactoryBuilder(properties), properties);
-    }
-
-    PatchNotesClient(RestClient.Builder builder, CollectorProperties properties) {
+    public PatchNotesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
         this.restClient = builder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.USER_AGENT, properties.userAgent())
@@ -29,12 +22,5 @@ public class PatchNotesClient {
 
     public String fetch() {
         return restClient.get().uri(PATCH_NOTES_PATH).retrieve().body(String.class);
-    }
-
-    private static RestClient.Builder requestFactoryBuilder(CollectorProperties properties) {
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(properties.timeouts().connect()).build();
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(properties.timeouts().read());
-        return RestClient.builder().requestFactory(requestFactory);
     }
 }

@@ -14,7 +14,7 @@ final class JsonText {
                 case '\n' -> out.append("\\n");
                 case '\r' -> out.append("\\r");
                 case '\t' -> out.append("\\t");
-                case '<', '>', '&', ' ', ' ' -> out.append(String.format("\\u%04x", (int) character));
+                case '<', '>', '&', '\u2028', '\u2029' -> out.append(String.format("\\u%04x", (int) character));
                 default -> {
                     if (character < 0x20) {
                         out.append(String.format("\\u%04x", (int) character));

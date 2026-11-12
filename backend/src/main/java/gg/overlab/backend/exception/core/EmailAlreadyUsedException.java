@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class EmailAlreadyUsedException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class EmailAlreadyUsedException extends ApiException {
 
     public EmailAlreadyUsedException() {
-        super("Email is already registered");
+        super(HttpStatus.CONFLICT, "Email is already registered");
     }
 }

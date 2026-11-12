@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class InvalidTokenException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InvalidTokenException extends ApiException {
 
     public InvalidTokenException() {
-        super("Token is invalid or has expired");
+        super(HttpStatus.BAD_REQUEST, "Token is invalid or has expired");
     }
 }

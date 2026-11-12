@@ -1,5 +1,6 @@
 package gg.overlab.backend.hero;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -30,7 +31,7 @@ public class HeroService {
                 .toList();
     }
 
-    @Cacheable(value = CacheNames.HEROES, key = "#slug")
+    @Cacheable(value = CacheNames.HEROES, key = "'slug:' + #slug")
     @Transactional(readOnly = true)
     public HeroDto getBySlug(String slug) {
         Hero hero = heroRepository.findBySlug(slug)
@@ -54,7 +55,7 @@ public class HeroService {
         hero.setWeaknesses(request.weaknesses());
         hero.setActive(request.active());
         HeroAdminDto after = heroMapper.toAdminDto(hero);
-        auditService.logUpdate("Hero", slug, before, after);
+        auditService.logUpdate(AuditEntityType.HERO, slug, before, after);
         return after;
     }
 }

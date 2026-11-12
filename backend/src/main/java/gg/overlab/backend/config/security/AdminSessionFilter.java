@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class AdminSessionFilter extends OncePerRequestFilter {
 
-    private static final List<String> ADMIN_PREFIXES = List.of("/api/admin/", "/v3/api-docs", "/swagger-ui");
+    private static final List<String> ADMIN_PREFIXES = List.of(PublicApiPaths.ADMIN_PREFIX, "/v3/api-docs", "/swagger-ui");
 
     private final AdminAccessChecker accessChecker;
 

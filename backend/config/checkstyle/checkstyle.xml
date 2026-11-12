@@ -11,7 +11,7 @@
     </module>
 
     <module name="RegexpSingleline">
-        <property name="format" value="(^\s*(//|/\*))|([;{}(),]\s*(//|/\*))"/>
+        <property name="format" value="(^\s*(//|/\*(?!\*)))|([;{}(),]\s*(//|/\*))"/>
         <property name="message" value="Code comments are not allowed"/>
         <property name="fileExtensions" value="java"/>
     </module>

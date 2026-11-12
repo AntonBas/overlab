@@ -1,5 +1,6 @@
 package gg.overlab.backend.notification;
 
+import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.security.AuthProperties;
 import jakarta.mail.MessagingException;
@@ -108,7 +109,7 @@ public class EmailService {
             } catch (MailException | MessagingException exception) {
                 log.warn("Sending '{}' failed (attempt {}/{}): {}", template.subject(), attempt, MAX_ATTEMPTS,
                         exception.getMessage());
-                if (attempt == MAX_ATTEMPTS || !pause()) {
+                if (attempt == MAX_ATTEMPTS || !Pause.sleep(RETRY_DELAY)) {
                     log.error("Giving up on '{}'", template.subject());
                     return;
                 }
@@ -137,15 +138,5 @@ public class EmailService {
         }
         long minutes = Math.max(1, duration.toMinutes());
         return minutes + (minutes == 1 ? " minute" : " minutes");
-    }
-
-    private boolean pause() {
-        try {
-            Thread.sleep(RETRY_DELAY);
-            return true;
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            return false;
-        }
     }
 }

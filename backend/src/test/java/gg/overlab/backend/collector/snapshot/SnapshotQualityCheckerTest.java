@@ -18,6 +18,7 @@ import gg.overlab.backend.stats.HeroStatRepository;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ class SnapshotQualityCheckerTest {
 
     private void inspect(List<BlizzardRatesResponse.HeroRate> rates) {
         checker.inspect(now, GameQueue.COMPETITIVE, GameFormat.FIVE_VS_FIVE, Platform.PC, Region.EUROPE,
-                RankTier.ALL, RatesSnapshotWriter.ALL_MAPS, rates);
+                RankTier.ALL, StatsFilter.ALL_MAPS, rates);
     }
 
     private List<BlizzardRatesResponse.HeroRate> ratesSummingTo(String total) {

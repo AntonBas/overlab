@@ -18,6 +18,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Issues and consumes single-use tokens. Only a hash of each token is stored. Presenting a used refresh token
+ * again after a 30 second grace period (parallel browser requests are normal) is treated as theft and revokes
+ * every refresh token of that user.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

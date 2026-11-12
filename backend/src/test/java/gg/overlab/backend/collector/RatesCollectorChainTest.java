@@ -47,7 +47,7 @@ class RatesCollectorChainTest {
         CollectorProperties properties = CollectorFixtures.properties(1, parent, child);
         CollectorMetrics metrics = new CollectorMetrics(new SimpleMeterRegistry(), runRepository, properties,
                 mock(SnapshotCheckRepository.class));
-        metrics.registerLastSuccessGauges();
+        metrics.registerMeters();
         service = new RatesCollectorService(properties, client, mock(RatesValidator.class), recorder,
                 mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class), runRepository, metrics, Runnable::run);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));

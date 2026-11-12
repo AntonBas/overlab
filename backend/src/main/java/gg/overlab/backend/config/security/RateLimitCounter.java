@@ -11,6 +11,10 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
+/**
+ * Fixed-window counter kept in Redis by an atomic script, so a key never stays without an expiry. If Redis is
+ * unavailable the counter falls back to a per-instance in-memory window instead of switching limits off.
+ */
 @Slf4j
 @Component
 public class RateLimitCounter {

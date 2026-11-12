@@ -1,5 +1,6 @@
 package gg.overlab.backend.gamemap;
 
+import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.config.cache.EvictContentCaches;
@@ -32,7 +33,7 @@ public class MapService {
                 .toList();
     }
 
-    @Cacheable(value = CacheNames.MAPS, key = "#slug")
+    @Cacheable(value = CacheNames.MAPS, key = "'slug:' + #slug")
     @Transactional(readOnly = true)
     public MapDto getBySlug(String slug) {
         GameMap map = gameMapRepository.findBySlug(slug)
@@ -48,7 +49,7 @@ public class MapService {
         MapDto before = mapMapper.toDto(map);
         map.setMode(request.mode());
         MapDto after = mapMapper.toDto(map);
-        auditService.logUpdate("Map", slug, before, after);
+        auditService.logUpdate(AuditEntityType.MAP, slug, before, after);
         return after;
     }
 
@@ -60,7 +61,7 @@ public class MapService {
         MapDto before = mapMapper.toDto(map);
         map.setImageUrl(imageStore.replace(MediaFolder.MAPS, slug, map.getImageUrl(), file));
         MapDto after = mapMapper.toDto(map);
-        auditService.logUpdate("Map", slug, before, after);
+        auditService.logUpdate(AuditEntityType.MAP, slug, before, after);
         return after;
     }
 
@@ -73,7 +74,7 @@ public class MapService {
         imageStore.remove(map.getImageUrl());
         map.setImageUrl(null);
         MapDto after = mapMapper.toDto(map);
-        auditService.logUpdate("Map", slug, before, after);
+        auditService.logUpdate(AuditEntityType.MAP, slug, before, after);
         return after;
     }
 }

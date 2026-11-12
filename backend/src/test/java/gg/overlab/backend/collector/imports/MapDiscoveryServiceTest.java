@@ -41,7 +41,7 @@ class MapDiscoveryServiceTest {
         assertThat(saved.getValue().getSlug()).isEqualTo("new-map");
         assertThat(saved.getValue().getName()).isEqualTo("New Map");
         assertThat(saved.getValue().getMode()).isEqualTo(MapMode.CLASH);
-        verify(metrics).recordNewMap("new-map");
+        verify(metrics).recordNewMap();
     }
 
     @Test

@@ -32,7 +32,7 @@ class RoleIconDownloaderTest {
     }
 
     private RoleIconDownloader downloader(boolean enabled) {
-        return new RoleIconDownloader(new ImageDownloader(builder, "test-agent"), storage(), enabled);
+        return new RoleIconDownloader(new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted()), storage(), enabled);
     }
 
     @Test
@@ -67,7 +67,7 @@ class RoleIconDownloaderTest {
         server.expect(requestTo(SOURCE)).andRespond(withSuccess("<svg>" + "x".repeat(70_000) + "</svg>",
                 MediaType.valueOf("image/svg+xml")));
         server.expect(requestTo(SOURCE)).andRespond(withServerError());
-        ImageDownloader downloader = new ImageDownloader(builder, "test-agent");
+        ImageDownloader downloader = new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted());
 
         assertThat(downloader.downloadSvg(SOURCE)).isEmpty();
         assertThat(downloader.downloadSvg(SOURCE)).isEmpty();
@@ -85,7 +85,7 @@ class RoleIconDownloaderTest {
         for (String body : unsafe) {
             server.expect(requestTo(SOURCE)).andRespond(withSuccess(body, MediaType.valueOf("image/svg+xml")));
         }
-        ImageDownloader imageDownloader = new ImageDownloader(builder, "test-agent");
+        ImageDownloader imageDownloader = new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted());
 
         for (String body : unsafe) {
             assertThat(imageDownloader.downloadSvg(SOURCE)).as(body).isEmpty();
@@ -97,7 +97,7 @@ class RoleIconDownloaderTest {
         server.expect(requestTo(SOURCE)).andRespond(withSuccess("<?xml version=\"1.0\"?>" + SVG,
                 MediaType.valueOf("image/svg+xml")));
 
-        assertThat(new ImageDownloader(builder, "test-agent").downloadSvg(SOURCE)).isPresent();
+        assertThat(new ImageDownloader(builder, "test-agent", ImageSourceProperties.unrestricted()).downloadSvg(SOURCE)).isPresent();
     }
 
     @Test

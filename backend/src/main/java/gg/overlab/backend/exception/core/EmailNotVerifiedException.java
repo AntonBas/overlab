@@ -1,8 +1,10 @@
 package gg.overlab.backend.exception.core;
 
-public class EmailNotVerifiedException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class EmailNotVerifiedException extends ApiException {
 
     public EmailNotVerifiedException() {
-        super("Email is not verified");
+        super(HttpStatus.FORBIDDEN, "Email is not verified");
     }
 }

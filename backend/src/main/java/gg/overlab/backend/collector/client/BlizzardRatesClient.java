@@ -2,27 +2,31 @@ package gg.overlab.backend.collector.client;
 
 import gg.overlab.backend.collector.CollectorProperties;
 import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
+import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
-import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
+/**
+ * Reads the undocumented Blizzard rates endpoint. Competitive Role Queue is the only queue with ban rates, but
+ * Blizzard has swapped its code between 1 and 2 more than once, so the client tries the last working code first
+ * and falls back to the other one when the response has no ban rate column.
+ */
 @Slf4j
 @Component
 public class BlizzardRatesClient {
@@ -37,12 +41,7 @@ public class BlizzardRatesClient {
     private final Duration pause;
     private volatile int competitiveQueue = COMPETITIVE_QUEUES.get(0);
 
-    @Autowired
-    public BlizzardRatesClient(CollectorProperties properties) {
-        this(requestFactoryBuilder(properties), properties);
-    }
-
-    BlizzardRatesClient(RestClient.Builder builder, CollectorProperties properties) {
+    public BlizzardRatesClient(@Qualifier(CollectorHttpConfig.REST_CLIENT_BUILDER) RestClient.Builder builder, CollectorProperties properties) {
         this.retry = properties.retry();
         this.pause = properties.pause();
         this.restClient = builder
@@ -68,7 +67,7 @@ public class BlizzardRatesClient {
                 Duration delay = retry.backoff().multipliedBy(attempt);
                 log.warn("Blizzard request failed (attempt {}/{}), retrying in {}: {}", attempt, retry.maxAttempts(),
                         delay, exception.getMessage());
-                sleep(delay);
+                Pause.sleep(delay);
             }
         }
     }
@@ -97,7 +96,7 @@ public class BlizzardRatesClient {
                 return new RatesFetch(heroes(response), etagOf(entity), false);
             }
             log.warn("Queue {} returned no ban rate column, trying the next Competitive queue", candidate);
-            sleep(pause);
+            Pause.sleep(pause);
         }
         throw new InvalidSnapshotException("No Blizzard queue returned Competitive statistics with ban rates");
     }
@@ -140,21 +139,6 @@ public class BlizzardRatesClient {
     private boolean hasBanRateColumn(BlizzardRatesResponse response) {
         return response.columns() != null
                 && response.columns().stream().anyMatch(column -> BAN_RATE_COLUMN.equals(column.id()));
-    }
-
-    private static RestClient.Builder requestFactoryBuilder(CollectorProperties properties) {
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(properties.timeouts().connect()).build();
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(properties.timeouts().read());
-        return RestClient.builder().requestFactory(requestFactory);
-    }
-
-    private void sleep(Duration delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     private String platformParameter(Platform platform) {
