@@ -90,6 +90,17 @@ public class EmailService {
                 "If this was not you, change your password."));
     }
 
+    public void sendRegistrationAttemptNotice(EmailRecipient recipient) {
+        deliver(recipient.email(), null, new EmailTemplate(
+                "Someone tried to register with your Overlab email",
+                "Hi " + recipient.displayName() + ",",
+                List.of("Someone tried to create an Overlab account with this address, but you already have one. "
+                        + "Nothing was changed."),
+                "Sign in",
+                frontendUrl + "/login",
+                "If this was you and you forgot the password, use the password reset on the sign-in page."));
+    }
+
     public void sendGoogleSignInNotice(EmailRecipient recipient) {
         deliver(recipient.email(), null, new EmailTemplate(
                 "Your Overlab account uses Google sign-in",

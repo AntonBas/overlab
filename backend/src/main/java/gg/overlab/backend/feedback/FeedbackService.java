@@ -1,5 +1,6 @@
 package gg.overlab.backend.feedback;
 
+import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.exception.core.TooManyRequestsException;
@@ -8,6 +9,7 @@ import gg.overlab.backend.feedback.dto.FeedbackAdminDto;
 import gg.overlab.backend.feedback.dto.FeedbackDto;
 import gg.overlab.backend.feedback.dto.FeedbackRequest;
 import gg.overlab.backend.notification.EmailService;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +31,14 @@ public class FeedbackService {
     public static final int MAX_ADMIN_ROWS = 500;
     public static final int MAX_OPEN_ANONYMOUS = 200;
     public static final int MAX_OPEN_PER_CONTACT = 5;
+    public static final int MAX_ANONYMOUS_PER_ADDRESS_PER_HOUR = 5;
+    private static final Duration ANONYMOUS_WINDOW = Duration.ofHours(1);
+    private static final String ANONYMOUS_KEY_PREFIX = "overlab:anonymous-feedback:";
 
     private final SiteFeedbackRepository feedbackRepository;
     private final EmailService emailService;
     private final FeedbackAuthors feedbackAuthors;
+    private final RateLimitCounter rateLimitCounter;
 
     @Transactional
     public void submit(Long userId, FeedbackRequest request) {
@@ -103,6 +111,9 @@ public class FeedbackService {
     }
 
     private void requireAnonymousCapacity(Long userId) {
+        if (userId == null && anonymousAddressExceeded()) {
+            throw new TooManyRequestsException("Too many messages from your address, try again later");
+        }
         if (userId == null
                 && feedbackRepository.countByUserIdIsNullAndStatus(FeedbackStatus.NEW) >= MAX_OPEN_ANONYMOUS) {
             throw new TooManyRequestsException("Too many messages are waiting for review, try again later");
@@ -126,5 +137,13 @@ public class FeedbackService {
             return null;
         }
         return trimmed;
+    }
+
+    private boolean anonymousAddressExceeded() {
+        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
+            String key = ANONYMOUS_KEY_PREFIX + attributes.getRequest().getRemoteAddr();
+            return rateLimitCounter.increment(key, ANONYMOUS_WINDOW) > MAX_ANONYMOUS_PER_ADDRESS_PER_HOUR;
+        }
+        return false;
     }
 }

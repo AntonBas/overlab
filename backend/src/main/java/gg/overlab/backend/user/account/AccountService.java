@@ -7,7 +7,6 @@ import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
-import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
@@ -22,6 +21,7 @@ import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -66,8 +66,10 @@ public class AccountService {
         User user = loadLocal(userId);
         requirePassword(user, request.currentPassword());
         String newEmail = request.newEmail().trim().toLowerCase(Locale.ROOT);
-        if (userRepository.existsByEmailIgnoreCase(newEmail)) {
-            throw new EmailAlreadyUsedException();
+        Optional<User> owner = userRepository.findByEmailIgnoreCase(newEmail);
+        if (owner.isPresent()) {
+            emailService.sendRegistrationAttemptNotice(owner.get().toEmailRecipient());
+            return;
         }
         user.setPendingEmail(newEmail);
         tokenService.revokeAll(user, UserTokenType.EMAIL_CHANGE);

@@ -37,9 +37,9 @@ public class AuthController {
 
     @Operation(summary = "Register with email and password")
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
     }
 
     @Operation(summary = "Sign in with email and password and set auth cookies")

@@ -10,6 +10,7 @@ import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.hero.dto.HeroUpdateRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class HeroService {
     }
 
     @EvictContentCaches
+    @CacheEvict(value = CacheNames.STATS, allEntries = true)
     @Transactional
     public HeroAdminDto update(String slug, HeroUpdateRequest request) {
         Hero hero = heroRepository.findBySlug(slug)

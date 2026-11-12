@@ -54,11 +54,23 @@ class UserTokenServiceTest {
     @Test
     void rejectsATokenThatAConcurrentRequestAlreadyConsumed() {
         UserToken token = storedToken(Instant.now().plusSeconds(60), null);
+        token.setType(UserTokenType.REFRESH);
         when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
         when(repository.markUsed(any(), any())).thenReturn(0);
 
         assertThatThrownBy(() -> service.consume("raw", UserTokenType.REFRESH))
-                .isInstanceOf(InvalidTokenException.class);
+                .isInstanceOf(gg.overlab.backend.exception.core.ConcurrentRefreshException.class);
+    }
+
+    @Test
+    void rejectsAOneTimeTokenThatAConcurrentRequestAlreadyConsumed() {
+        UserToken token = storedToken(Instant.now().plusSeconds(60), null);
+        token.setType(UserTokenType.PASSWORD_RESET);
+        when(repository.findByHashAndTypeIn(any(), any())).thenReturn(Optional.of(token));
+        when(repository.markUsed(any(), any())).thenReturn(0);
+
+        assertThatThrownBy(() -> service.consume("raw", UserTokenType.PASSWORD_RESET))
+                .isExactlyInstanceOf(InvalidTokenException.class);
     }
 
     @Test

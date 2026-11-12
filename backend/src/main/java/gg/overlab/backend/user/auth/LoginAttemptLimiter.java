@@ -25,6 +25,8 @@ public class LoginAttemptLimiter {
     private static final int MAX_FAILURES_PER_EMAIL = 50;
     private static final Duration WINDOW = Duration.ofMinutes(15);
     private static final String KEY_PREFIX = "overlab:login-failures:";
+    private static final Duration MAIL_COOLDOWN = Duration.ofMinutes(1);
+    private static final String MAIL_KEY_PREFIX = "overlab:mail-cooldown:";
     private static final String UNKNOWN_ADDRESS = "unknown";
 
     private final RateLimitCounter counter;
@@ -39,6 +41,10 @@ public class LoginAttemptLimiter {
     public void recordFailure(String normalizedEmail) {
         counter.increment(addressKey(normalizedEmail), WINDOW);
         counter.increment(emailKey(normalizedEmail), WINDOW);
+    }
+
+    public boolean isMailThrottled(String normalizedEmail) {
+        return counter.increment(MAIL_KEY_PREFIX + hash(normalizedEmail), MAIL_COOLDOWN) > 1;
     }
 
     public void reset(String normalizedEmail) {

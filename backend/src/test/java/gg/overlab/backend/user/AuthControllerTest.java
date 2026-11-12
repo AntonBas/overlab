@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import gg.overlab.backend.config.security.AuthCookieService;
 import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.api.ApiErrorHandler;
-import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.InvalidCredentialsException;
 import gg.overlab.backend.user.auth.AuthController;
 import gg.overlab.backend.user.auth.AuthService;
@@ -41,13 +40,10 @@ class AuthControllerTest {
     }
 
     @Test
-    void registerReturnsCreatedUser() throws Exception {
-        when(authService.register(any())).thenReturn(userDto());
-
+    void registerIsAccepted() throws Exception {
         mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\",\"displayName\":\"Ana\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("ana@overlab.gg"));
+                .andExpect(status().isAccepted());
     }
 
     @Test
@@ -56,15 +52,6 @@ class AuthControllerTest {
                         .content("{\"email\":\"bad\",\"password\":\"short\",\"displayName\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.subErrors.length()").value(org.hamcrest.Matchers.greaterThanOrEqualTo(3)));
-    }
-
-    @Test
-    void registerDuplicateEmailReturnsConflict() throws Exception {
-        when(authService.register(any())).thenThrow(new EmailAlreadyUsedException());
-
-        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\",\"displayName\":\"Ana\"}"))
-                .andExpect(status().isConflict());
     }
 
     @Test

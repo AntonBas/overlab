@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.feedback.dto.BusinessMessageRequest;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.mockito.ArgumentCaptor;
 
 class FeedbackServiceTest {
@@ -27,7 +31,9 @@ class FeedbackServiceTest {
     private final SiteFeedbackRepository repository = mock(SiteFeedbackRepository.class);
     private final EmailService emailService = mock(EmailService.class);
     private final FeedbackAuthors feedbackAuthors = mock(FeedbackAuthors.class);
-    private final FeedbackService service = new FeedbackService(repository, emailService, feedbackAuthors);
+    private final RateLimitCounter rateLimitCounter = mock(RateLimitCounter.class);
+    private final FeedbackService service =
+            new FeedbackService(repository, emailService, feedbackAuthors, rateLimitCounter);
 
     @Test
     void storesTrimmedFeedbackWithSafePagePath() {
@@ -63,6 +69,24 @@ class FeedbackServiceTest {
                 new FeedbackRequest(FeedbackType.BUG, "something is broken here", "/")))
                 .isInstanceOf(gg.overlab.backend.exception.core.TooManyRequestsException.class);
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void limitsAnonymousMessagesPerAddress() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("203.0.113.9");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        try {
+            when(rateLimitCounter.increment(any(), any()))
+                    .thenReturn((long) FeedbackService.MAX_ANONYMOUS_PER_ADDRESS_PER_HOUR + 1);
+
+            assertThatThrownBy(() -> service.submit(null,
+                    new FeedbackRequest(FeedbackType.BUG, "something is broken here", "/")))
+                    .isInstanceOf(gg.overlab.backend.exception.core.TooManyRequestsException.class);
+            verify(repository, never()).save(any());
+        } finally {
+            RequestContextHolder.resetRequestAttributes();
+        }
     }
 
     @Test

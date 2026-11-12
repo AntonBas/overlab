@@ -12,6 +12,11 @@ public class UserAdminAccessChecker implements AdminAccessChecker {
     private final UserRepository userRepository;
 
     @Override
+    public boolean isActiveUser(Long userId) {
+        return userRepository.findById(userId).filter(User::isEnabled).isPresent();
+    }
+
+    @Override
     public boolean isActiveAdmin(Long userId) {
         return userRepository.findById(userId)
                 .filter(User::isEnabled)

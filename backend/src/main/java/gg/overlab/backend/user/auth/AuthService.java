@@ -5,7 +5,6 @@ import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.AuthProperties;
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.config.security.UserRole;
-import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EmailNotVerifiedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.exception.core.InvalidCredentialsException;
@@ -23,6 +22,7 @@ import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,21 +46,23 @@ public class AuthService {
     private volatile String dummyPasswordHash;
 
     @Transactional
-    public UserDto register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         String email = normalize(request.email());
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new EmailAlreadyUsedException();
+        String passwordHash = passwordEncoder.encode(request.password());
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            emailService.sendRegistrationAttemptNotice(existing.get().toEmailRecipient());
+            return;
         }
         User user = new User();
         user.setEmail(email);
         user.setDisplayName(request.displayName().trim());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setPasswordHash(passwordHash);
         user.setRole(UserRole.USER);
         user.setProvider(AuthProvider.LOCAL);
         user = userRepository.save(user);
         sendVerification(user);
         auditService.logUserEvent(AuditAction.CREATE, user.getId(), user.getRole().name());
-        return userMapper.toDto(user);
     }
 
     @Transactional
@@ -145,6 +147,9 @@ public class AuthService {
 
     @Transactional
     public void resendVerification(String email) {
+        if (loginAttemptLimiter.isMailThrottled(normalize(email))) {
+            return;
+        }
         userRepository.findByEmailIgnoreCase(normalize(email))
                 .filter(user -> !user.isEmailVerified() && user.getProvider() == AuthProvider.LOCAL)
                 .ifPresent(this::sendVerification);
@@ -152,6 +157,9 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(String email) {
+        if (loginAttemptLimiter.isMailThrottled(normalize(email))) {
+            return;
+        }
         userRepository.findByEmailIgnoreCase(normalize(email))
                 .filter(User::isEnabled)
                 .ifPresent(user -> {

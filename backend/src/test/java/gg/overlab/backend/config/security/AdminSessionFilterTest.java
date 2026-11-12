@@ -76,6 +76,20 @@ class AdminSessionFilterTest {
     }
 
     @Test
+    void rejectsADisabledUserOnPersonalEndpoints() throws Exception {
+        AuthenticatedUser principal = new AuthenticatedUser(3L, "user@overlab.gg", UserRole.USER);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        when(accessChecker.isActiveUser(3L)).thenReturn(false);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(new MockHttpServletRequest("GET", "/api/me/favorites"), response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verifyNoInteractions(chain);
+    }
+
+    @Test
     void rejectsAnAdminWhoIsNoLongerActive() throws Exception {
         authenticate(1L);
         when(accessChecker.isActiveAdmin(1L)).thenReturn(false);

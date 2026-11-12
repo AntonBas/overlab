@@ -13,7 +13,6 @@ import gg.overlab.backend.audit.AuditAction;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.JwtTokenProvider;
 import gg.overlab.backend.config.security.UserRole;
-import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EmailNotVerifiedException;
 import gg.overlab.backend.exception.core.InvalidCredentialsException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
@@ -25,7 +24,6 @@ import gg.overlab.backend.user.auth.AuthTokens;
 import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.auth.dto.LoginRequest;
 import gg.overlab.backend.user.auth.dto.RegisterRequest;
-import gg.overlab.backend.user.dto.UserDto;
 import gg.overlab.backend.user.token.ConsumedToken;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
@@ -68,9 +66,7 @@ class AuthServiceTest {
 
     @Test
     void registerCreatesUnverifiedUserAndSendsVerification() {
-        when(userRepository.existsByEmailIgnoreCase("new@overlab.gg")).thenReturn(false);
-
-        UserDto result = service.register(new RegisterRequest("  New@Overlab.gg ", "password-123", " Newbie "));
+        service.register(new RegisterRequest("  New@Overlab.gg ", "password-123", " Newbie "));
 
         ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(saved.capture());
@@ -78,18 +74,20 @@ class AuthServiceTest {
         assertThat(saved.getValue().getDisplayName()).isEqualTo("Newbie");
         assertThat(saved.getValue().getPasswordHash()).isNotEqualTo("password-123");
         assertThat(saved.getValue().getRole()).isEqualTo(UserRole.USER);
-        assertThat(result.emailVerified()).isFalse();
+        assertThat(saved.getValue().isEmailVerified()).isFalse();
         verify(emailService).sendVerification(any(EmailRecipient.class), eq("raw-token"));
         verify(auditService).logUserEvent(eq(AuditAction.CREATE), any(), eq("USER"));
     }
 
     @Test
-    void registerRejectsDuplicateEmail() {
-        when(userRepository.existsByEmailIgnoreCase("ana@overlab.gg")).thenReturn(true);
+    void registerForAnExistingEmailOnlyNotifiesTheOwner() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
 
-        assertThatThrownBy(() -> service.register(new RegisterRequest("ana@overlab.gg", "password-123", "Ana")))
-                .isInstanceOf(EmailAlreadyUsedException.class);
+        service.register(new RegisterRequest("ana@overlab.gg", "password-123", "Ana"));
+
+        verify(emailService).sendRegistrationAttemptNotice(existingUser.toEmailRecipient());
         verify(userRepository, never()).save(any());
+        verify(emailService, never()).sendVerification(any(), any());
     }
 
     @Test
@@ -187,6 +185,16 @@ class AuthServiceTest {
         service.forgotPassword("ghost@overlab.gg");
 
         verify(emailService, never()).sendPasswordReset(any(), any());
+    }
+
+    @Test
+    void forgotPasswordIsSkippedWhileTheMailCooldownIsActive() {
+        when(loginAttemptLimiter.isMailThrottled("ana@overlab.gg")).thenReturn(true);
+
+        service.forgotPassword("ana@overlab.gg");
+
+        verify(emailService, never()).sendPasswordReset(any(), any());
+        verify(tokenService, never()).revokeAll(any(), any());
     }
 
     @Test

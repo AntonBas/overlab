@@ -17,6 +17,8 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +32,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiErrorHandler {
+
+    private static final String NO_STORE = "no-store";
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException exception, HttpServletRequest request) {
@@ -137,6 +141,14 @@ public class ApiErrorHandler {
                                            List<ApiError.SubError> subErrors) {
         ApiError body = new ApiError(status.getReasonPhrase(), status.value(), Instant.now(), message,
                 request.getRequestURI(), subErrors);
-        return ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, "no-store").body(body);
+        overridePublicCacheHeader();
+        return ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, NO_STORE).body(body);
+    }
+
+    private void overridePublicCacheHeader() {
+        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes
+                && attributes.getResponse() != null) {
+            attributes.getResponse().setHeader(HttpHeaders.CACHE_CONTROL, NO_STORE);
+        }
     }
 }

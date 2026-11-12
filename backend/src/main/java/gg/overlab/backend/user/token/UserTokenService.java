@@ -71,7 +71,9 @@ public class UserTokenService {
             throw new InvalidTokenException();
         }
         if (tokenRepository.markUsed(token.getId(), now) == 0) {
-            throw new InvalidTokenException();
+            throw token.getType() == UserTokenType.REFRESH
+                    ? new ConcurrentRefreshException()
+                    : new InvalidTokenException();
         }
         token.setUsedAt(now);
         return new ConsumedToken(token.getUser(), token.getType());

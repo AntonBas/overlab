@@ -56,15 +56,14 @@ class AuthFlowIntegrationTest {
     void registerVerifyLoginRefreshAndLogout() throws Exception {
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD
                         + "\",\"displayName\":\"Flow Test\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.emailVerified").value(false));
+                .andExpect(status().isAccepted());
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> assertThat(mailSender.sent())
                 .singleElement()
                 .satisfies(message -> assertThat(message.getSubject()).isEqualTo("Confirm your Overlab email")));
 
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL.toUpperCase() + "\",\"password\":\""
                         + PASSWORD + "\",\"displayName\":\"Flow Test\"}"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isAccepted());
 
         mockMvc.perform(json(post("/api/auth/login"), credentials())).andExpect(status().isForbidden());
 
@@ -102,7 +101,7 @@ class AuthFlowIntegrationTest {
     @Test
     void wrongPasswordAndUnknownUserGetTheSameAnswer() throws Exception {
         mockMvc.perform(json(post("/api/auth/register"), "{\"email\":\"" + EMAIL + "\",\"password\":\"" + PASSWORD
-                + "\",\"displayName\":\"Flow Test\"}")).andExpect(status().isCreated());
+                + "\",\"displayName\":\"Flow Test\"}")).andExpect(status().isAccepted());
         User user = userRepository.findByEmailIgnoreCase(EMAIL).orElseThrow();
         user.setEmailVerified(true);
         userRepository.saveAndFlush(user);

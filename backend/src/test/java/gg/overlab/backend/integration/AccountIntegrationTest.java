@@ -173,7 +173,8 @@ class AccountIntegrationTest {
         mockMvc.perform(json(post("/api/me/email"),
                         "{\"newEmail\":\"" + OTHER_EMAIL + "\",\"currentPassword\":\"" + PASSWORD + "\"}")
                         .cookie(userCookie))
-                .andExpect(status().isConflict());
+                .andExpect(status().isNoContent());
+        assertThat(userRepository.findById(user.getId()).orElseThrow().getPendingEmail()).isNull();
 
         mockMvc.perform(json(post("/api/me/email"),
                         "{\"newEmail\":\"Account-New@overlab.test\",\"currentPassword\":\"" + PASSWORD + "\"}")

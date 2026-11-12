@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AdminSessionFilter extends OncePerRequestFilter {
 
     private static final List<String> ADMIN_PREFIXES =
-            List.of(PublicApiPaths.ADMIN_PREFIX, "/v3/api-docs", "/swagger-ui");
+            List.of(PublicApiPaths.ADMIN_PREFIX, "/v3/api-docs", "/swagger-ui", PublicApiPaths.PERSONAL_PREFIX);
 
     private final AdminAccessChecker accessChecker;
 
@@ -31,11 +31,18 @@ public class AdminSessionFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedUser sessionUser
-                && sessionUser.role() == UserRole.ADMIN && !accessChecker.isActiveAdmin(sessionUser.id())) {
+                && !isStillActive(sessionUser, request.getRequestURI())) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isStillActive(AuthenticatedUser sessionUser, String path) {
+        if (sessionUser.role() == UserRole.ADMIN) {
+            return accessChecker.isActiveAdmin(sessionUser.id());
+        }
+        return !path.startsWith(PublicApiPaths.PERSONAL_PREFIX) || accessChecker.isActiveUser(sessionUser.id());
     }
 }

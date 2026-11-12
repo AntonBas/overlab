@@ -110,8 +110,7 @@ class StatsQueriesIntegrationTest {
     }
 
     private void clearCaches() {
-        cacheManager.getCache(CacheNames.STATS).clear();
-        cacheManager.getCacheNames().forEach(name -> cacheManager.getCache(name).clear());
+        CacheTestSupport.clearAll(cacheManager);
     }
 
     @Test
