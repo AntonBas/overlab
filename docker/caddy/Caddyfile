@@ -33,6 +33,7 @@
 		respond <<ROBOTS
 			User-agent: *
 			Disallow: /admin
+			Disallow: /feedback
 			Sitemap: {scheme}://{hostport}/sitemap.xml
 			ROBOTS 200
 	}
