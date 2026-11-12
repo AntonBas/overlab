@@ -78,6 +78,9 @@ public class PerkService {
             throw new ConflictException(positionTakenMessage(request));
         }
         PerkDto before = perkMapper.toDto(perk);
+        if (perk.isImported() && !perk.getName().equalsIgnoreCase(request.name().trim())) {
+            perk.setImported(false);
+        }
         perk.setHero(hero);
         perkMapper.apply(request, perk);
         PerkDto after = perkMapper.toDto(perk);

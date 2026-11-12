@@ -12,6 +12,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import java.sql.SQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -64,11 +65,21 @@ class ApiErrorHandlerTest {
     @Test
     void dataIntegrityViolationIsAConflictWithoutDatabaseDetails() {
         DataIntegrityViolationException exception = new DataIntegrityViolationException("duplicate key value",
-                new IllegalStateException("constraint uq_x"));
+                new SQLException("constraint uq_x", "23505"));
 
         ResponseEntity<ApiError> response = handler.handleDataIntegrity(exception, request);
 
         assertError(response, HttpStatus.CONFLICT, "Request conflicts with existing data");
+    }
+
+    @Test
+    void otherDataIntegrityViolationsAreServerErrors() {
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("value too long",
+                new SQLException("value too long", "22001"));
+
+        ResponseEntity<ApiError> response = handler.handleDataIntegrity(exception, request);
+
+        assertError(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
     }
 
     @Test

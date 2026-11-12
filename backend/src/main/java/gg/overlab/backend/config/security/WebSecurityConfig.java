@@ -62,6 +62,7 @@ public class WebSecurityConfig {
                                 "/swagger-ui.html")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(adminSessionFilter, JwtAuthenticationFilter.class)

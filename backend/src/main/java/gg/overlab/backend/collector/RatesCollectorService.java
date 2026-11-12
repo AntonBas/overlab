@@ -101,6 +101,11 @@ public class RatesCollectorService {
 
     private void runDependents(CollectorJob parent, CollectorRun parentRun) {
         for (CollectorJob dependent : jobChain.dependentsToRun(parent, parentRun)) {
+            if (Thread.currentThread().isInterrupted()) {
+                log.warn("Collector job '{}' was not started after '{}': the thread was interrupted",
+                        dependent.name(), parent.name());
+                return;
+            }
             log.info("Collector job '{}' starts because '{}' saved {} rows", dependent.name(), parent.name(),
                     parentRun.getRowsSaved());
             try {
@@ -178,6 +183,7 @@ public class RatesCollectorService {
         List<SnapshotRequest> requests = SnapshotRequest.plan(job, mapSlugResolver.resolve(job));
         log.info("Collector job '{}' started ({})", job.name(), run.getTrigger());
         int consecutiveFailures = 0;
+        boolean interrupted = false;
         for (SnapshotRequest request : requests) {
             run.setRequestsTotal(run.getRequestsTotal() + 1);
             try {
@@ -203,10 +209,12 @@ public class RatesCollectorService {
             }
             if (!Pause.sleep(properties.pause())) {
                 log.warn("Collector job '{}' was interrupted, remaining requests were skipped", job.name());
+                errors.add(request, new IllegalStateException("Interrupted, remaining requests were skipped"));
+                interrupted = true;
                 break;
             }
         }
-        run.setStatus(statusOf(run));
+        run.setStatus(statusOf(run, interrupted));
         run.setErrorSummary(errors.summary());
         if (run.getRowsSaved() > 0) {
             cacheEviction.evictAll();
@@ -215,8 +223,8 @@ public class RatesCollectorService {
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
     }
 
-    private CollectorRunStatus statusOf(CollectorRun run) {
-        if (run.getRequestsFailed() == 0) {
+    private CollectorRunStatus statusOf(CollectorRun run, boolean interrupted) {
+        if (run.getRequestsFailed() == 0 && !interrupted) {
             return CollectorRunStatus.SUCCESS;
         }
         return run.getRowsSaved() > 0 ? CollectorRunStatus.PARTIAL : CollectorRunStatus.FAILED;

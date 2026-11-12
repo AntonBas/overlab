@@ -4,8 +4,10 @@ import gg.overlab.backend.exception.core.ApiException;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -35,6 +37,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class ApiErrorHandler {
 
     private static final String NO_STORE = "no-store";
+    private static final Set<String> CONFLICT_SQL_STATES = Set.of("23505", "23503");
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException exception, HttpServletRequest request) {
@@ -50,9 +53,24 @@ public class ApiErrorHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception,
                                                         HttpServletRequest request) {
-        log.warn("Data integrity violation on {}: {}", request.getRequestURI(),
-                exception.getMostSpecificCause().getMessage());
-        return build(HttpStatus.CONFLICT, "Request conflicts with existing data", request, List.of());
+        if (isConflictWithExistingData(exception)) {
+            log.warn("Data integrity violation on {}: {}", request.getRequestURI(),
+                    exception.getMostSpecificCause().getMessage());
+            return build(HttpStatus.CONFLICT, "Request conflicts with existing data", request, List.of());
+        }
+        log.error("Unexpected data integrity violation on {}", request.getRequestURI(), exception);
+        Sentry.captureException(exception);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request, List.of());
+    }
+
+    private static boolean isConflictWithExistingData(DataIntegrityViolationException exception) {
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sqlException && sqlException.getSQLState() != null
+                    && CONFLICT_SQL_STATES.contains(sqlException.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

@@ -55,6 +55,16 @@ class AuthControllerTest {
     }
 
     @Test
+    void registerRejectsDisplayNamesWithEdgeSpacesOrControlCharacters() throws Exception {
+        for (String displayName : new String[] {" a ", "Ana ", "An\\u0007a"}) {
+            mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"ana@overlab.gg\",\"password\":\"password-123\","
+                                    + "\"displayName\":\"" + displayName + "\"}"))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
     void loginSetsHttpOnlyCookies() throws Exception {
         when(authService.login(any())).thenReturn(new AuthTokens("access-jwt", "refresh-raw", userDto()));
 

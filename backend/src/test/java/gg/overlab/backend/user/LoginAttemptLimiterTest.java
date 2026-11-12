@@ -71,6 +71,24 @@ class LoginAttemptLimiterTest {
     }
 
     @Test
+    void rejectedMailAttemptsDoNotUseUpTheHourlyAllowanceOfTheOwner() {
+        when(counter.increment(org.mockito.ArgumentMatchers.contains(":password-reset:"), any())).thenReturn(2L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+
+        verify(counter, org.mockito.Mockito.never())
+                .increment(org.mockito.ArgumentMatchers.contains(":hourly:"), any());
+    }
+
+    @Test
+    void hourlyCapStopsMailOnlyAfterTenMailsWereAllowed() {
+        when(counter.increment(anyString(), any())).thenReturn(1L);
+        when(counter.current(org.mockito.ArgumentMatchers.contains(":hourly:"))).thenReturn(10L);
+
+        assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();
+    }
+
+    @Test
     void mailIsThrottledWhenTheSameAddressRepeatsOrTheHourlyCapIsReached() {
         when(counter.increment(anyString(), any())).thenReturn(2L);
         assertThat(limiter.isMailThrottled("password-reset", "owner@overlab.gg")).isTrue();

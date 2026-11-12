@@ -143,7 +143,7 @@ public class FeedbackService {
             return null;
         }
         String trimmed = path.trim();
-        if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
+        if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.indexOf('\\') >= 0) {
             return null;
         }
         return trimmed;

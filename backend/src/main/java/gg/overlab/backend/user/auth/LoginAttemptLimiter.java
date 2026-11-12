@@ -48,10 +48,15 @@ public class LoginAttemptLimiter {
     public boolean isMailThrottled(String purpose, String normalizedEmail) {
         boolean addressCooldown = counter.increment(
                 MAIL_KEY_PREFIX + purpose + ":" + hash(normalizedEmail + "|" + clientAddress()), MAIL_COOLDOWN) > 1;
-        boolean emailHourlyCapReached = counter.increment(
-                MAIL_KEY_PREFIX + purpose + ":hourly:" + hash(normalizedEmail), MAIL_HOURLY_WINDOW)
-                > MAX_MAILS_PER_EMAIL_PER_HOUR;
-        return addressCooldown || emailHourlyCapReached;
+        if (addressCooldown) {
+            return true;
+        }
+        String hourlyKey = MAIL_KEY_PREFIX + purpose + ":hourly:" + hash(normalizedEmail);
+        if (counter.current(hourlyKey) >= MAX_MAILS_PER_EMAIL_PER_HOUR) {
+            return true;
+        }
+        counter.increment(hourlyKey, MAIL_HOURLY_WINDOW);
+        return false;
     }
 
     public void reset(String normalizedEmail) {
