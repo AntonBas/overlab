@@ -9,6 +9,7 @@ import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EmailAlreadyUsedException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
@@ -41,6 +42,7 @@ public class AccountService {
     private final AuthProperties properties;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
+    private final FeedbackService feedbackService;
 
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
@@ -72,6 +74,7 @@ public class AccountService {
         tokenService.revokeAll(user, UserTokenType.EMAIL_CHANGE);
         String token = tokenService.issue(user, UserTokenType.EMAIL_CHANGE, properties.verificationTokenTtl());
         emailService.sendEmailChange(user.toEmailRecipient(), newEmail, token);
+        emailService.sendEmailChangeNotice(user.toEmailRecipient(), newEmail);
     }
 
     @Transactional
@@ -83,6 +86,7 @@ public class AccountService {
         if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
             throw new ConflictException("The last administrator cannot be deleted");
         }
+        feedbackService.clearContactDetails(user.getId());
         auditLogRepository.anonymizeActor(user.getId());
         auditLogRepository.anonymizeUserEntity(String.valueOf(user.getId()));
         userRepository.delete(user);

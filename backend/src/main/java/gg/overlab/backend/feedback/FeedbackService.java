@@ -61,6 +61,11 @@ public class FeedbackService {
                 feedback.getMessage());
     }
 
+    @Transactional
+    public void clearContactDetails(Long userId) {
+        feedbackRepository.clearContactDetails(userId);
+    }
+
     @Transactional(readOnly = true)
     public List<FeedbackDto> export(Long userId) {
         return feedbackRepository.findAllByUserIdOrderByIdAsc(userId).stream()

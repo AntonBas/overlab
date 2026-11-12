@@ -79,6 +79,17 @@ public class EmailService {
                 "If you did not request this, you can ignore this message."));
     }
 
+    public void sendEmailChangeNotice(EmailRecipient recipient, String newEmail) {
+        deliver(recipient.email(), null, new EmailTemplate(
+                "Email change requested for your Overlab account",
+                "Hi " + recipient.displayName() + ",",
+                List.of("Someone asked to change the email of your account to " + newEmail
+                        + ". Nothing changes until the new address is confirmed."),
+                "Review your account",
+                frontendUrl + "/login",
+                "If this was not you, change your password."));
+    }
+
     public void sendGoogleSignInNotice(EmailRecipient recipient) {
         deliver(recipient.email(), null, new EmailTemplate(
                 "Your Overlab account uses Google sign-in",

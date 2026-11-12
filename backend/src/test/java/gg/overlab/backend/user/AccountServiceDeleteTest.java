@@ -10,6 +10,7 @@ import gg.overlab.backend.audit.AuditLogRepository;
 import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.ConflictException;
+import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.account.AccountService;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
@@ -24,7 +25,8 @@ class AccountServiceDeleteTest {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final AccountService service = new AccountService(userRepository, new UserMapper(),
             mock(PasswordEncoder.class), mock(UserTokenService.class), mock(EmailService.class),
-            AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class));
+            AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class),
+            mock(FeedbackService.class));
 
     private User admin(long id, boolean enabled) {
         User user = AuthFixtures.user(id, "admin" + id + "@overlab.gg", UserRole.ADMIN, true);
