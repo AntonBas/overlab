@@ -1,32 +1,18 @@
 package gg.overlab.backend.collector;
 
-import gg.overlab.backend.collector.client.BlizzardRatesClient;
-import gg.overlab.backend.collector.client.BlizzardRatesResponse;
-import gg.overlab.backend.collector.client.RatesFetch;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
-import gg.overlab.backend.collector.imports.MapDiscoveryService;
-import gg.overlab.backend.collector.media.HeroAssetService;
 import gg.overlab.backend.collector.run.CollectorRun;
 import gg.overlab.backend.collector.run.CollectorRunRepository;
 import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
 import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
-import gg.overlab.backend.collector.snapshot.RatesValidator;
-import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
 import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
-import gg.overlab.backend.gamemap.GameMapRepository;
-import gg.overlab.backend.stats.GameQueue;
-import gg.overlab.backend.stats.Platform;
-import gg.overlab.backend.stats.RankTier;
-import gg.overlab.backend.stats.Region;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,18 +27,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RatesCollectorService {
 
-    private static final String EACH_MAP = "EACH";
     private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
-    private static final int MAX_ERROR_SUMMARY_LENGTH = 1000;
-    private static final int MAX_DISTINCT_ERRORS = 3;
 
     private final CollectorProperties properties;
-    private final BlizzardRatesClient client;
-    private final RatesValidator validator;
-    private final SnapshotRecorder recorder;
-    private final GameMapRepository gameMapRepository;
-    private final MapDiscoveryService mapDiscovery;
-    private final HeroAssetService heroAssets;
+    private final SnapshotCollector snapshotCollector;
+    private final MapSlugResolver mapSlugResolver;
+    private final JobChain jobChain;
     private final CacheEviction cacheEviction;
     private final CollectorRunRepository runRepository;
     private final CollectorMetrics metrics;
@@ -60,20 +40,14 @@ public class RatesCollectorService {
     private final Set<String> runningJobs = ConcurrentHashMap.newKeySet();
     private final ReentrantLock requestsLock = new ReentrantLock();
 
-    public RatesCollectorService(CollectorProperties properties, BlizzardRatesClient client,
-                                 RatesValidator validator, SnapshotRecorder recorder,
-                                 GameMapRepository gameMapRepository, MapDiscoveryService mapDiscovery,
-                                 HeroAssetService heroAssets,
-                                 CacheEviction cacheEviction,
+    public RatesCollectorService(CollectorProperties properties, SnapshotCollector snapshotCollector,
+                                 MapSlugResolver mapSlugResolver, JobChain jobChain, CacheEviction cacheEviction,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
                                  @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
-        this.client = client;
-        this.validator = validator;
-        this.recorder = recorder;
-        this.gameMapRepository = gameMapRepository;
-        this.mapDiscovery = mapDiscovery;
-        this.heroAssets = heroAssets;
+        this.snapshotCollector = snapshotCollector;
+        this.mapSlugResolver = mapSlugResolver;
+        this.jobChain = jobChain;
         this.cacheEviction = cacheEviction;
         this.runRepository = runRepository;
         this.metrics = metrics;
@@ -125,19 +99,7 @@ public class RatesCollectorService {
     }
 
     private void runDependents(CollectorJob parent, CollectorRun parentRun) {
-        if (parentRun.getTrigger() == CollectorTrigger.PATCH || parentRun.getRowsSaved() == 0
-                || parentRun.getStatus() == CollectorRunStatus.FAILED) {
-            return;
-        }
-        for (CollectorJob dependent : properties.jobs()) {
-            if (!dependent.enabled() || !parent.name().equals(dependent.after())) {
-                continue;
-            }
-            if (!intervalElapsed(dependent)) {
-                log.info("Collector job '{}' skipped: it ran less than {} ago", dependent.name(),
-                        dependent.minInterval());
-                continue;
-            }
+        for (CollectorJob dependent : jobChain.dependentsToRun(parent, parentRun)) {
             log.info("Collector job '{}' starts because '{}' saved {} rows", dependent.name(), parent.name(),
                     parentRun.getRowsSaved());
             try {
@@ -146,16 +108,6 @@ public class RatesCollectorService {
                 log.error("Collector job '{}' failed after '{}'", dependent.name(), parent.name(), exception);
             }
         }
-    }
-
-    private boolean intervalElapsed(CollectorJob job) {
-        if (job.minInterval() == null) {
-            return true;
-        }
-        return runRepository.findFirstByJobNameAndStatusOrderByFinishedAtDesc(job.name(), CollectorRunStatus.SUCCESS)
-                .map(CollectorRun::getFinishedAt)
-                .map(finishedAt -> !finishedAt.plus(job.minInterval()).isAfter(Instant.now()))
-                .orElse(true);
     }
 
     private CollectorJob findJob(String jobName) {
@@ -196,7 +148,7 @@ public class RatesCollectorService {
         } catch (RuntimeException exception) {
             log.error("Collector job '{}' crashed", job.name(), exception);
             run.setStatus(CollectorRunStatus.FAILED);
-            run.setErrorSummary(truncate(String.valueOf(exception.getMessage())));
+            run.setErrorSummary(RunErrors.truncate(String.valueOf(exception.getMessage())));
         } finally {
             run.setFinishedAt(Instant.now());
             runRepository.save(run);
@@ -218,13 +170,13 @@ public class RatesCollectorService {
 
     private void execute(CollectorJob job, CollectorRun run) {
         Instant capturedAt = Instant.now();
-        Set<String> errors = new LinkedHashSet<>();
-        List<SnapshotRequest> requests = SnapshotRequest.plan(job, resolveMapSlugs(job));
+        RunErrors errors = new RunErrors();
+        List<SnapshotRequest> requests = SnapshotRequest.plan(job, mapSlugResolver.resolve(job));
         log.info("Collector job '{}' started ({})", job.name(), run.getTrigger());
         for (SnapshotRequest request : requests) {
             run.setRequestsTotal(run.getRequestsTotal() + 1);
             try {
-                run.setRowsSaved(run.getRowsSaved() + collectOne(capturedAt, request));
+                run.setRowsSaved(run.getRowsSaved() + snapshotCollector.collect(capturedAt, request));
                 metrics.recordRequest(job.name(), true);
             } catch (RuntimeException exception) {
                 run.setRequestsFailed(run.getRequestsFailed() + 1);
@@ -232,15 +184,13 @@ public class RatesCollectorService {
                 if (exception instanceof InvalidSnapshotException) {
                     metrics.recordRejectedSnapshot();
                 }
-                if (errors.size() < MAX_DISTINCT_ERRORS) {
-                    errors.add(request.describe(exception));
-                }
+                errors.add(request, exception);
                 log.warn("Collector request failed: {}", request.describe(exception));
             }
             Pause.sleep(properties.pause());
         }
         run.setStatus(statusOf(run));
-        run.setErrorSummary(errors.isEmpty() ? null : truncate(String.join("; ", errors)));
+        run.setErrorSummary(errors.summary());
         cacheEviction.evictAll();
         log.info("Collector job '{}' finished: {} rows saved, {} of {} requests failed", job.name(),
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
@@ -251,57 +201,5 @@ public class RatesCollectorService {
             return CollectorRunStatus.SUCCESS;
         }
         return run.getRowsSaved() > 0 ? CollectorRunStatus.PARTIAL : CollectorRunStatus.FAILED;
-    }
-
-    private int collectOne(Instant capturedAt, SnapshotRequest request) {
-        GameQueue queue = request.queue();
-        Platform platform = request.platform();
-        Region region = request.region();
-        RankTier tier = request.tier();
-        String mapSlug = request.mapSlug();
-        String knownEtag = recorder.knownEtag(queue, platform, region, tier, mapSlug).orElse(null);
-        RatesFetch fetched = client.fetch(queue, platform, region, tier, mapSlug, knownEtag);
-        if (fetched.notModified()
-                && recorder.markUnchanged(capturedAt, queue, platform, region, tier, mapSlug)) {
-            metrics.recordUnchangedSnapshot();
-            return 0;
-        }
-        RatesFetch usable = fetched.notModified() ? client.fetch(queue, platform, region, tier, mapSlug) : fetched;
-        validator.validate(usable.rates());
-        List<BlizzardRatesResponse.HeroRate> heroesWithData = validator.withoutEmptyEntries(usable.rates());
-        validator.validateBanRates(queue, heroesWithData);
-        SnapshotRecorder.Outcome outcome = recorder.record(capturedAt, queue, properties.gameFormat(), platform,
-                region, tier, mapSlug, heroesWithData, usable.etag());
-        if (outcome.changed()) {
-            heroAssets.ensureAssets(heroesWithData);
-        } else {
-            metrics.recordUnchangedSnapshot();
-        }
-        return outcome.rowsSaved();
-    }
-
-    private List<String> resolveMapSlugs(CollectorJob job) {
-        List<String> slugs = new ArrayList<>();
-        for (String map : job.maps()) {
-            if (EACH_MAP.equals(map)) {
-                discoverMaps();
-                gameMapRepository.findAll().forEach(gameMap -> slugs.add(gameMap.getSlug()));
-            } else {
-                slugs.add(map);
-            }
-        }
-        return slugs;
-    }
-
-    private void discoverMaps() {
-        try {
-            mapDiscovery.discover();
-        } catch (RuntimeException exception) {
-            log.warn("Map discovery failed: {}", exception.getMessage());
-        }
-    }
-
-    private String truncate(String text) {
-        return text.length() > MAX_ERROR_SUMMARY_LENGTH ? text.substring(0, MAX_ERROR_SUMMARY_LENGTH) : text;
     }
 }

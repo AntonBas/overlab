@@ -48,8 +48,13 @@ class RatesCollectorChainTest {
         CollectorMetrics metrics = new CollectorMetrics(new SimpleMeterRegistry(), runRepository, properties,
                 mock(SnapshotCheckRepository.class));
         metrics.registerMeters();
-        service = new RatesCollectorService(properties, client, mock(RatesValidator.class), recorder,
-                mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class), runRepository, metrics, Runnable::run);
+        SnapshotCollector snapshotCollector = new SnapshotCollector(properties, client, mock(RatesValidator.class),
+                recorder, mock(HeroAssetService.class), metrics);
+        MapSlugResolver mapSlugResolver = new MapSlugResolver(mock(GameMapRepository.class),
+                mock(MapDiscoveryService.class));
+        service = new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
+                new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
+                Runnable::run);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(client.fetch(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag", false));

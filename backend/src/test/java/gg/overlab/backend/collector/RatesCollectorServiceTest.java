@@ -65,8 +65,7 @@ class RatesCollectorServiceTest {
         CollectorProperties properties = CollectorFixtures.properties(1, job);
         metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
         metrics.registerMeters();
-        service = new RatesCollectorService(properties, client, validator, recorder, mock(GameMapRepository.class),
-                mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class), runRepository, metrics, deferredExecutor);
+        service = serviceWith(properties, deferredExecutor);
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {
@@ -78,6 +77,16 @@ class RatesCollectorServiceTest {
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag-1", false));
         when(recorder.record(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new SnapshotRecorder.Outcome(5, true));
+    }
+
+    private RatesCollectorService serviceWith(CollectorProperties properties, TaskExecutor taskExecutor) {
+        SnapshotCollector snapshotCollector = new SnapshotCollector(properties, client, validator, recorder,
+                mock(HeroAssetService.class), metrics);
+        MapSlugResolver mapSlugResolver = new MapSlugResolver(mock(GameMapRepository.class),
+                mock(MapDiscoveryService.class));
+        return new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
+                new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
+                taskExecutor);
     }
 
     @Test
@@ -215,9 +224,7 @@ class RatesCollectorServiceTest {
         TaskExecutor rejectingExecutor = task -> {
             throw new TaskRejectedException("queue is full");
         };
-        RatesCollectorService rejecting = new RatesCollectorService(
-                CollectorFixtures.properties(1, job), client, validator, recorder, mock(GameMapRepository.class), mock(MapDiscoveryService.class), mock(HeroAssetService.class), mock(CacheEviction.class),
-                runRepository, metrics, rejectingExecutor);
+        RatesCollectorService rejecting = serviceWith(CollectorFixtures.properties(1, job), rejectingExecutor);
 
         assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
                 .isInstanceOf(ConflictException.class);
