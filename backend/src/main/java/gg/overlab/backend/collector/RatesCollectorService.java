@@ -197,7 +197,9 @@ public class RatesCollectorService {
         }
         run.setStatus(statusOf(run));
         run.setErrorSummary(errors.summary());
-        cacheEviction.evictAll();
+        if (run.getRowsSaved() > 0) {
+            cacheEviction.evictAll();
+        }
         log.info("Collector job '{}' finished: {} rows saved, {} of {} requests failed", job.name(),
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
     }

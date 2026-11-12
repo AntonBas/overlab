@@ -3,6 +3,7 @@ package gg.overlab.backend.stats;
 import gg.overlab.backend.config.cache.CacheNames;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.gamemap.MapService;
 import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.dto.HeroDto;
 import gg.overlab.backend.patch.PatchService;
@@ -36,6 +37,7 @@ public class StatsHistoryService {
     private final CurrentGameFormat currentGameFormat;
     private final HeroStatRepository heroStatRepository;
     private final HeroService heroService;
+    private final MapService mapService;
     private final PatchService patchService;
     private final StatsComparisonProvider comparisonProvider;
     private final StatsMapper statsMapper;
@@ -55,6 +57,9 @@ public class StatsHistoryService {
                     + " days");
         }
         HeroDto hero = heroService.getBySlug(heroSlug);
+        if (!filter.isAllMaps()) {
+            mapService.getBySlug(filter.mapSlug());
+        }
         GameFormat format = currentGameFormat.get();
         List<HeroStat> stats = filter.isAllMaps()
                 ? heroStatRepository.findHistoryForAllMaps(heroSlug, filter.queue(), format, filter.platform(),

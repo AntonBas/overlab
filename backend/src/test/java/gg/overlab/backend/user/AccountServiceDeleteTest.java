@@ -14,6 +14,7 @@ import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.account.AccountService;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.token.UserTokenService;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ class AccountServiceDeleteTest {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final AccountService service = new AccountService(userRepository, new UserMapper(),
             mock(PasswordEncoder.class), mock(UserTokenService.class), mock(EmailService.class),
-            AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class),
+            mock(LoginAttemptLimiter.class), AuthFixtures.properties(), mock(AuditService.class), mock(AuditLogRepository.class),
             mock(FeedbackService.class));
 
     private User admin(long id, boolean enabled) {

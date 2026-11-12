@@ -16,14 +16,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AdminSessionFilter extends OncePerRequestFilter {
 
     private static final List<String> ADMIN_PREFIXES =
-            List.of(PublicApiPaths.ADMIN_PREFIX, "/v3/api-docs", "/swagger-ui", PublicApiPaths.PERSONAL_PREFIX);
+            List.of(PublicApiPaths.ADMIN_PREFIX, "/v3/api-docs", "/swagger-ui");
 
     private final AdminAccessChecker accessChecker;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return ADMIN_PREFIXES.stream().noneMatch(path::startsWith);
+        return ADMIN_PREFIXES.stream().noneMatch(path::startsWith) && !PublicApiPaths.isPersonal(path);
     }
 
     @Override
@@ -43,6 +43,6 @@ public class AdminSessionFilter extends OncePerRequestFilter {
         if (sessionUser.role() == UserRole.ADMIN) {
             return accessChecker.isActiveAdmin(sessionUser.id());
         }
-        return !path.startsWith(PublicApiPaths.PERSONAL_PREFIX) || accessChecker.isActiveUser(sessionUser.id());
+        return !PublicApiPaths.isPersonal(path) || accessChecker.isActiveUser(sessionUser.id());
     }
 }

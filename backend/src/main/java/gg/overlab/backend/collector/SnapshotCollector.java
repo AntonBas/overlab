@@ -4,8 +4,10 @@ import gg.overlab.backend.collector.client.BlizzardRatesClient;
 import gg.overlab.backend.collector.client.BlizzardRatesResponse;
 import gg.overlab.backend.collector.client.RatesFetch;
 import gg.overlab.backend.collector.media.HeroAssetService;
+import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
 import gg.overlab.backend.collector.snapshot.RatesValidator;
 import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
+import gg.overlab.backend.common.Pause;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,9 @@ public class SnapshotCollector {
                 request.region(), request.tier(), request.mapSlug())) {
             metrics.recordUnchangedSnapshot();
             return 0;
+        }
+        if (fetched.notModified() && !Pause.sleep(properties.pause())) {
+            throw new InvalidSnapshotException("Interrupted before fetching the full snapshot");
         }
         RatesFetch usable = fetched.notModified()
                 ? client.fetch(request.queue(), request.platform(), request.region(), request.tier(),

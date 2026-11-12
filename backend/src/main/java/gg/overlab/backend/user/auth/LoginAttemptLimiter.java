@@ -43,12 +43,13 @@ public class LoginAttemptLimiter {
         counter.increment(emailKey(normalizedEmail), WINDOW);
     }
 
-    public boolean isMailThrottled(String normalizedEmail) {
-        return counter.increment(MAIL_KEY_PREFIX + hash(normalizedEmail), MAIL_COOLDOWN) > 1;
+    public boolean isMailThrottled(String purpose, String normalizedEmail) {
+        return counter.increment(MAIL_KEY_PREFIX + purpose + ":" + hash(normalizedEmail), MAIL_COOLDOWN) > 1;
     }
 
     public void reset(String normalizedEmail) {
         counter.reset(addressKey(normalizedEmail));
+        counter.reset(emailKey(normalizedEmail));
     }
 
     private String addressKey(String normalizedEmail) {

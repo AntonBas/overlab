@@ -127,7 +127,12 @@ public class HeroContentImportService {
         Set<String> urls = new LinkedHashSet<>(writer.missingIconUrls(slug, perks));
         urls.addAll(abilityWriter.missingIconUrls(slug, abilities));
         Map<String, Optional<byte[]>> icons = new HashMap<>();
-        urls.forEach(url -> icons.put(url, imageDownloader.downloadPng(url)));
+        for (String url : urls) {
+            icons.put(url, imageDownloader.downloadPng(url));
+            if (!Pause.sleep(properties.pause())) {
+                break;
+            }
+        }
         return icons;
     }
 }

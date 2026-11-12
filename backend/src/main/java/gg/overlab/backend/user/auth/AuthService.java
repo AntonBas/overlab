@@ -33,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
+    public static final String REGISTRATION_NOTICE = "registration-notice";
+    private static final String RESEND_VERIFICATION = "resend-verification";
+    private static final String PASSWORD_RESET = "password-reset";
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -51,7 +55,9 @@ public class AuthService {
         String passwordHash = passwordEncoder.encode(request.password());
         Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
         if (existing.isPresent()) {
-            emailService.sendRegistrationAttemptNotice(existing.get().toEmailRecipient());
+            if (!loginAttemptLimiter.isMailThrottled(REGISTRATION_NOTICE, email)) {
+                emailService.sendRegistrationAttemptNotice(existing.get().toEmailRecipient());
+            }
             return;
         }
         User user = new User();
@@ -147,7 +153,7 @@ public class AuthService {
 
     @Transactional
     public void resendVerification(String email) {
-        if (loginAttemptLimiter.isMailThrottled(normalize(email))) {
+        if (loginAttemptLimiter.isMailThrottled(RESEND_VERIFICATION, normalize(email))) {
             return;
         }
         userRepository.findByEmailIgnoreCase(normalize(email))
@@ -157,7 +163,7 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(String email) {
-        if (loginAttemptLimiter.isMailThrottled(normalize(email))) {
+        if (loginAttemptLimiter.isMailThrottled(PASSWORD_RESET, normalize(email))) {
             return;
         }
         userRepository.findByEmailIgnoreCase(normalize(email))

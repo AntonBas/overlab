@@ -112,7 +112,8 @@ public class PerkImportWriter {
 
     private boolean refreshImported(Perk perk, ParsedPerk parsed) {
         boolean changed = false;
-        if (perk.getSlot() != parsed.slot()) {
+        if (perk.getSlot() != parsed.slot() && !perkRepository.existsByHeroIdAndSlotAndPositionAndIdNot(
+                perk.getHero().getId(), parsed.slot(), perk.getPosition(), perk.getId())) {
             perk.setSlot(parsed.slot());
             changed = true;
         }
@@ -142,10 +143,15 @@ public class PerkImportWriter {
         }
         List<Perk> stale = imported.stream()
                 .filter(perk -> !currentNames.contains(perk.getName().toLowerCase(Locale.ROOT)))
+                .filter(perk -> !isCurated(perk))
                 .toList();
         stale.forEach(perk -> imageStore.remove(perk.getIconUrl()));
         perkRepository.deleteAll(stale);
         return stale.size();
+    }
+
+    private static boolean isCurated(Perk perk) {
+        return perk.getRecommendation() != PerkRecommendation.OPTIONAL || !isBlank(perk.getRecommendationNote());
     }
 
     private static boolean isBlank(String value) {

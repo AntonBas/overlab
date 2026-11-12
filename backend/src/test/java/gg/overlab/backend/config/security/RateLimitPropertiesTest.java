@@ -11,7 +11,7 @@ class RateLimitPropertiesTest {
         RateLimitProperties properties = new RateLimitProperties(0, 0);
 
         assertThat(properties.apiPerMinute()).isEqualTo(600);
-        assertThat(properties.statsPerMinute()).isEqualTo(600);
+        assertThat(properties.statsPerMinute()).isEqualTo(1200);
     }
 
     @Test

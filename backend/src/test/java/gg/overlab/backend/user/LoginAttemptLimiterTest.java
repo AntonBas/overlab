@@ -56,9 +56,9 @@ class LoginAttemptLimiterTest {
     }
 
     @Test
-    void resetClearsTheCounter() {
+    void resetClearsTheAddressAndTheEmailCounters() {
         limiter.reset("ana@overlab.gg");
 
-        verify(counter).reset(org.mockito.ArgumentMatchers.argThat(key -> key.startsWith("overlab:login-failures:")));
+        verify(counter, org.mockito.Mockito.times(2)).reset(org.mockito.ArgumentMatchers.argThat(key -> key.startsWith("overlab:login-failures:")));
     }
 }

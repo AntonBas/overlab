@@ -1,6 +1,7 @@
 package gg.overlab.backend.exception.api;
 
 import gg.overlab.backend.exception.core.ApiException;
+import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -134,6 +135,7 @@ public class ApiErrorHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception exception, HttpServletRequest request) {
         log.error("Unhandled exception on {}", request.getRequestURI(), exception);
+        Sentry.captureException(exception);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request, List.of());
     }
 

@@ -189,7 +189,7 @@ class AuthServiceTest {
 
     @Test
     void forgotPasswordIsSkippedWhileTheMailCooldownIsActive() {
-        when(loginAttemptLimiter.isMailThrottled("ana@overlab.gg")).thenReturn(true);
+        when(loginAttemptLimiter.isMailThrottled(eq("password-reset"), eq("ana@overlab.gg"))).thenReturn(true);
 
         service.forgotPassword("ana@overlab.gg");
 

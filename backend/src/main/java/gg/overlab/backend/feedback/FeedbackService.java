@@ -45,11 +45,7 @@ public class FeedbackService {
         if (request.type() == FeedbackType.BUSINESS) {
             throw new BadRequestException("Business messages are sent from the Business page");
         }
-        if (userId != null
-                && feedbackRepository.countByUserIdAndStatus(userId, FeedbackStatus.NEW) >= MAX_OPEN_PER_USER) {
-            throw new BadRequestException("You already have " + MAX_OPEN_PER_USER
-                    + " messages waiting for review, please wait until some are processed");
-        }
+        requireUserCapacity(userId);
         requireAnonymousCapacity(userId);
         SiteFeedback feedback = new SiteFeedback();
         feedback.setType(request.type());
@@ -62,6 +58,7 @@ public class FeedbackService {
     @Transactional
     public void submitBusiness(Long userId, BusinessMessageRequest request) {
         requireAnonymousCapacity(userId);
+        requireUserCapacity(userId);
         if (feedbackRepository.countByContactEmailIgnoreCaseAndStatus(request.email().trim(), FeedbackStatus.NEW)
                 >= MAX_OPEN_PER_CONTACT) {
             throw new BadRequestException("You already have " + MAX_OPEN_PER_CONTACT
@@ -108,6 +105,14 @@ public class FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback", id));
         feedback.setStatus(status);
         feedback.setResolvedAt(status == FeedbackStatus.NEW ? null : Instant.now());
+    }
+
+    private void requireUserCapacity(Long userId) {
+        if (userId != null
+                && feedbackRepository.countByUserIdAndStatus(userId, FeedbackStatus.NEW) >= MAX_OPEN_PER_USER) {
+            throw new BadRequestException("You already have " + MAX_OPEN_PER_USER
+                    + " messages waiting for review, please wait until some are processed");
+        }
     }
 
     private void requireAnonymousCapacity(Long userId) {

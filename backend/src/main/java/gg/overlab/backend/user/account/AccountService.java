@@ -18,6 +18,8 @@ import gg.overlab.backend.user.account.dto.ChangePasswordRequest;
 import gg.overlab.backend.user.account.dto.DeleteAccountRequest;
 import gg.overlab.backend.user.account.dto.UpdateProfileRequest;
 import gg.overlab.backend.user.dto.UserDto;
+import gg.overlab.backend.user.auth.AuthService;
+import gg.overlab.backend.user.auth.LoginAttemptLimiter;
 import gg.overlab.backend.user.token.UserTokenService;
 import gg.overlab.backend.user.token.UserTokenType;
 import java.util.Locale;
@@ -38,6 +40,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final UserTokenService tokenService;
     private final EmailService emailService;
+    private final LoginAttemptLimiter loginAttemptLimiter;
     private final AuthProperties properties;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
@@ -68,7 +71,9 @@ public class AccountService {
         String newEmail = request.newEmail().trim().toLowerCase(Locale.ROOT);
         Optional<User> owner = userRepository.findByEmailIgnoreCase(newEmail);
         if (owner.isPresent()) {
-            emailService.sendRegistrationAttemptNotice(owner.get().toEmailRecipient());
+            if (!loginAttemptLimiter.isMailThrottled(AuthService.REGISTRATION_NOTICE, newEmail)) {
+                emailService.sendRegistrationAttemptNotice(owner.get().toEmailRecipient());
+            }
             return;
         }
         user.setPendingEmail(newEmail);
@@ -112,9 +117,12 @@ public class AccountService {
     }
 
     private void requirePassword(User user, String password) {
+        loginAttemptLimiter.requireAllowed(user.getEmail());
         if (password == null || user.getPasswordHash() == null
                 || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            loginAttemptLimiter.recordFailure(user.getEmail());
             throw new BadRequestException(WRONG_PASSWORD);
         }
+        loginAttemptLimiter.reset(user.getEmail());
     }
 }

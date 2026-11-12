@@ -111,6 +111,16 @@ class FeedbackServiceTest {
     }
 
     @Test
+    void limitsOpenBusinessMessagesPerUser() {
+        when(repository.countByUserIdAndStatus(1L, FeedbackStatus.NEW)).thenReturn((long) FeedbackService.MAX_OPEN_PER_USER);
+
+        assertThatThrownBy(() -> service.submitBusiness(1L,
+                new BusinessMessageRequest("Ceo", "ceo@example.com", "a sponsorship offer here")))
+                .isInstanceOf(BadRequestException.class);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void anonymousUsersAreNotCheckedAgainstTheOpenLimit() {
         service.submit(null, new FeedbackRequest(FeedbackType.BUG, "something is broken here", "/"));
 

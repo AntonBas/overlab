@@ -54,6 +54,13 @@ class AdminBootstrapTest {
     }
 
     @Test
+    void refusesAPasswordLongerThanBcryptAccepts() {
+        run(AuthFixtures.propertiesWithAdmin("admin@overlab.gg", "x".repeat(73)));
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void doesNotCreateAnotherAdministratorWhenOneExists() {
         when(userRepository.existsByRole(UserRole.ADMIN)).thenReturn(true);
 

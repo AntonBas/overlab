@@ -197,8 +197,22 @@ class PerkImportWriterIntegrationTest {
     }
 
     @Test
+    void keepsAnImportedPerkThatBlizzardNoLongerListsWhenAnEditorRatedIt() {
+        Perk rated = importedPerk("Rated Perk", "Text");
+        importedPerk("Quick Dart", "Text");
+
+        ImportCounts counts = writer.write("import-test",
+                List.of(parsed(PerkSlot.MINOR, "Quick Dart", "Text")), url -> Optional.empty());
+
+        assertThat(counts.removed()).isZero();
+        assertThat(perkRepository.findById(rated.getId())).isPresent();
+    }
+
+    @Test
     void removesImportedPerksThatBlizzardNoLongerListsButKeepsManualOnes() {
         Perk gone = importedPerk("Old Perk", "Text");
+        gone.setRecommendation(PerkRecommendation.OPTIONAL);
+        perkRepository.saveAndFlush(gone);
         importedPerk("Quick Dart", "Text");
         Perk manual = new Perk();
         manual.setHero(hero);

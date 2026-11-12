@@ -6,6 +6,8 @@ public final class PublicApiPaths {
 
     public static final String PERSONAL_PREFIX = "/api/me";
 
+    private static final String PERSONAL_PATH_PREFIX = "/api/me/";
+
     private static final String API_PREFIX = "/api/";
 
     private PublicApiPaths() {
@@ -16,6 +18,10 @@ public final class PublicApiPaths {
                 && path.startsWith(API_PREFIX)
                 && !path.startsWith(ADMIN_PREFIX)
                 && !path.startsWith("/api/auth/")
-                && !path.startsWith(PERSONAL_PREFIX);
+                && !isPersonal(path);
+    }
+
+    public static boolean isPersonal(String path) {
+        return PERSONAL_PREFIX.equals(path) || path.startsWith(PERSONAL_PATH_PREFIX);
     }
 }
