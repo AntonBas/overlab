@@ -39,7 +39,9 @@ export function Footer() {
             <Link to="/privacy">Privacy</Link>
             <Link to="/terms">Terms</Link>
             <Link to="/cookies">Cookies</Link>
-            <Link to={feedbackPath}>Send feedback</Link>
+            <Link to={feedbackPath} rel="nofollow">
+              Send feedback
+            </Link>
             <Link to="/business">Sponsorship and business</Link>
           </nav>
         </div>
