@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+read -r ref sha extra <<<"${SSH_ORIGINAL_COMMAND:-}" || true
+if [ -z "${ref:-}" ] || [ -n "${extra:-}" ]; then
+  echo "Usage: <ref> [<commit sha>]" >&2
+  exit 2
+fi
+exec sudo -n /usr/local/bin/overlab-deploy "$ref" "${sha:-}"
