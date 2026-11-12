@@ -79,4 +79,40 @@ class AbilityImportWriterIntegrationTest {
     private ParsedAbility parsed(String slug, String name, int sortOrder) {
         return new ParsedAbility(slug, name, "Text of " + name, null, sortOrder);
     }
+
+    @Test
+    void storesTheIconOfANewAbilityAndSkipsTheDownloadWhenOneExists() {
+        byte[] png = {(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 5, 5, 5};
+        ParsedAbility withIcon = new ParsedAbility("dash", "Dash", "Text", "https://cdn.example/dash.png", 0);
+
+        writer.write("ability-test", List.of(withIcon), url -> Optional.of(png));
+        HeroAbility stored = abilityRepository.findByHeroIdAndSlug(hero.getId(), "dash").orElseThrow();
+        assertThat(stored.getIconUrl()).startsWith("abilities/ability-" + stored.getId() + "-").endsWith(".png");
+
+        writer.write("ability-test", List.of(withIcon), url -> {
+            throw new AssertionError("The icon must not be downloaded again");
+        });
+    }
+
+    @Test
+    void countsAnAbilityWhoseTextChangedAsUpdated() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+
+        ImportCounts counts = writer.write("ability-test",
+                List.of(new ParsedAbility("dash", "Dash", "New text", null, 0)), url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new ImportCounts(0, 1, 0));
+        assertThat(abilityRepository.findByHeroIdAndSlug(hero.getId(), "dash").orElseThrow().getDescription())
+                .isEqualTo("New text");
+    }
+
+    @Test
+    void anUnchangedAbilityIsNotCounted() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+
+        ImportCounts counts = writer.write("ability-test", List.of(parsed("dash", "Dash", 0)),
+                url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0, 0));
+    }
 }

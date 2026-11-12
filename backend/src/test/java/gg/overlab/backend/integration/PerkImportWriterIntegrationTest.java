@@ -241,4 +241,35 @@ class PerkImportWriterIntegrationTest {
         assertThat(counts).isEqualTo(new ImportCounts(0, 0, 0));
         assertThat(perkRepository.findById(existing.getId())).isPresent();
     }
+
+    @Test
+    void putsANewPerkOnTheOtherSideWhenItsPositionIsTaken() {
+        importedPerk("Existing", "Text");
+
+        ImportCounts counts = writer.write("import-test", List.of(parsed(PerkSlot.MINOR, "New One", "Fresh")),
+                url -> Optional.empty());
+
+        assertThat(counts.created()).isEqualTo(1);
+        assertThat(perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "New One").orElseThrow().getPosition())
+                .isEqualTo(PerkPosition.RIGHT);
+    }
+
+    @Test
+    void skipsANewPerkWhenBothPositionsOfTheSlotAreTaken() {
+        importedPerk("Left", "Text");
+        Perk right = new Perk();
+        right.setHero(hero);
+        right.setName("Right");
+        right.setSlot(PerkSlot.MINOR);
+        right.setPosition(PerkPosition.RIGHT);
+        right.setRecommendation(PerkRecommendation.RECOMMENDED);
+        right.setImported(true);
+        perkRepository.saveAndFlush(right);
+
+        ImportCounts counts = writer.write("import-test", List.of(parsed(PerkSlot.MINOR, "Third", "Fresh")),
+                url -> Optional.empty());
+
+        assertThat(counts.created()).isZero();
+        assertThat(perkRepository.findByHeroIdAndNameIgnoreCase(hero.getId(), "Third")).isEmpty();
+    }
 }

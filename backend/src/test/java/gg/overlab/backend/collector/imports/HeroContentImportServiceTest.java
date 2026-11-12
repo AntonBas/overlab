@@ -92,4 +92,42 @@ class HeroContentImportServiceTest {
 
         verify(writer, never()).write(any(), any(), any());
     }
+
+    private HeroContentImportService serviceWith(org.springframework.core.task.TaskExecutor executor) {
+        CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
+                Duration.ZERO, null, null, false, true, null, null, 3, null, List.of());
+        return new HeroContentImportService(properties, heroRepository, pageClient, parser, new HeroAbilityParser(),
+                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), executor);
+    }
+
+    @Test
+    void aSecondImportIsRefusedWhileOneIsRunningAndAllowedAfterItFinishes() {
+        java.util.List<Runnable> queued = new java.util.ArrayList<>();
+        when(pageClient.fetch(any())).thenReturn(Optional.empty());
+        HeroContentImportService service = serviceWith(queued::add);
+
+        service.startAsync();
+
+        assertThatThrownBy(service::startAsync)
+                .isInstanceOf(gg.overlab.backend.exception.core.ConflictException.class);
+        queued.get(0).run();
+        assertThat(service.startAsync()).isEqualTo(2);
+    }
+
+    @Test
+    void aRejectedExecutionFreesTheImportForTheNextAttempt() {
+        java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        when(pageClient.fetch(any())).thenReturn(Optional.empty());
+        HeroContentImportService service = serviceWith(task -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw new org.springframework.core.task.TaskRejectedException("queue is full");
+            }
+            task.run();
+        });
+
+        assertThatThrownBy(service::startAsync)
+                .isInstanceOf(org.springframework.core.task.TaskRejectedException.class);
+
+        assertThat(service.startAsync()).isEqualTo(2);
+    }
 }

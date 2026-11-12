@@ -277,4 +277,40 @@ class AuthServiceTest {
 
         verify(tokenService, never()).revoke(any(), any());
     }
+
+    @Test
+    void resendVerificationSendsANewTokenToAnUnverifiedLocalAccount() {
+        existingUser.setEmailVerified(false);
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+
+        service.resendVerification(" Ana@Overlab.gg ");
+
+        verify(tokenService).revokeAll(existingUser, UserTokenType.EMAIL_VERIFICATION);
+        verify(emailService).sendVerification(existingUser.toEmailRecipient(), "raw-token");
+    }
+
+    @Test
+    void resendVerificationIsSilentForVerifiedGoogleAndUnknownAccounts() {
+        when(userRepository.findByEmailIgnoreCase("ana@overlab.gg")).thenReturn(Optional.of(existingUser));
+        service.resendVerification("ana@overlab.gg");
+
+        existingUser.setEmailVerified(false);
+        existingUser.setProvider(AuthProvider.GOOGLE);
+        service.resendVerification("ana@overlab.gg");
+
+        when(userRepository.findByEmailIgnoreCase("ghost@overlab.gg")).thenReturn(Optional.empty());
+        service.resendVerification("ghost@overlab.gg");
+
+        verify(emailService, never()).sendVerification(any(), any());
+    }
+
+    @Test
+    void resendVerificationIsSkippedWhileTheMailCooldownIsActive() {
+        when(loginAttemptLimiter.isMailThrottled("resend-verification", "ana@overlab.gg")).thenReturn(true);
+
+        service.resendVerification("ana@overlab.gg");
+
+        verify(userRepository, never()).findByEmailIgnoreCase(any());
+        verify(emailService, never()).sendVerification(any(), any());
+    }
 }

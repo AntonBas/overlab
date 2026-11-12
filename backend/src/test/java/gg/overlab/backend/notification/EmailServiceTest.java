@@ -131,4 +131,34 @@ class EmailServiceTest {
             TransactionSynchronizationManager.clearSynchronization();
         }
     }
+
+    @Test
+    void emailChangeNoticeGoesToTheCurrentAddressAndNamesTheRequestedOne() throws Exception {
+        service.sendEmailChangeNotice(user.toEmailRecipient(), "new@overlab.gg");
+
+        MimeMessage sent = sentMessage();
+        assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("ana@overlab.gg");
+        assertThat(sent.getSubject()).isEqualTo("Email change requested for your Overlab account");
+        assertThat(contentOf(sent)).contains("new@overlab.gg");
+    }
+
+    @Test
+    void registrationAttemptNoticeGoesToTheExistingOwner() throws Exception {
+        service.sendRegistrationAttemptNotice(user.toEmailRecipient());
+
+        MimeMessage sent = sentMessage();
+        assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("ana@overlab.gg");
+        assertThat(sent.getSubject()).isEqualTo("Someone tried to register with your Overlab email");
+        assertThat(contentOf(sent)).contains("https://overlabgg.com/login");
+    }
+
+    @Test
+    void googleSignInNoticeExplainsThereIsNoPasswordToReset() throws Exception {
+        service.sendGoogleSignInNotice(user.toEmailRecipient());
+
+        MimeMessage sent = sentMessage();
+        assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("ana@overlab.gg");
+        assertThat(sent.getSubject()).isEqualTo("Your Overlab account uses Google sign-in");
+        assertThat(contentOf(sent)).doesNotContain("reset-password?token");
+    }
 }
