@@ -40,11 +40,28 @@ public class SeoHtmlRenderer {
         page.structuredData().forEach(json -> html.append("<script type=\"application/ld+json\">")
                 .append(json).append("</script>\n"));
         html.append("</head>\n<body>\n<h1>").append(escape(page.heading())).append("</h1>\n")
-                .append("<p>").append(escape(page.description())).append("</p>\n<nav>\n");
+                .append("<p>").append(escape(page.description())).append("</p>\n");
+        page.sections().forEach(section -> appendSection(html, section));
+        html.append("<nav>\n");
         StaticSeoPage.navigationPages().forEach(link -> html.append("<a href=\"")
                 .append(escape(siteUrl.absolute(link.path()))).append("\">")
                 .append(escape(link.heading())).append("</a>\n"));
         return html.append("</nav>\n<p>").append(escape(DISCLAIMER)).append("</p>\n</body>\n</html>\n").toString();
+    }
+
+    private void appendSection(StringBuilder html, SeoSection section) {
+        html.append("<section>\n<h2>").append(escape(section.heading())).append("</h2>\n<ul>\n");
+        section.items().forEach(item -> {
+            html.append("<li>");
+            if (item.path() == null) {
+                html.append(escape(item.text()));
+            } else {
+                html.append("<a href=\"").append(escape(siteUrl.absolute(item.path()))).append("\">")
+                        .append(escape(item.text())).append("</a>");
+            }
+            html.append("</li>\n");
+        });
+        html.append("</ul>\n</section>\n");
     }
 
     public String renderNotFound() {

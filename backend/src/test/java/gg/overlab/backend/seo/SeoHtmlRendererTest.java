@@ -12,7 +12,7 @@ class SeoHtmlRendererTest {
     @Test
     void rendersMetadataCanonicalAndStructuredData() {
         SeoPage page = new SeoPage("/maps/busan", "Busan", "Busan stats", "website", "Busan",
-                List.of("{\"@type\":\"BreadcrumbList\"}"));
+                List.of("{\"@type\":\"BreadcrumbList\"}"), List.of());
 
         String html = renderer.render(page);
 
@@ -26,7 +26,7 @@ class SeoHtmlRendererTest {
 
     @Test
     void homePageKeepsPlainSiteTitleAndRootCanonical() {
-        String html = renderer.render(new SeoPage("/", "Overlab", "d", "website", "Overlab", List.of()));
+        String html = renderer.render(new SeoPage("/", "Overlab", "d", "website", "Overlab", List.of(), List.of()));
 
         assertThat(html).contains("<title>Overlab</title>", "href=\"https://example.com/\"");
     }
@@ -34,7 +34,7 @@ class SeoHtmlRendererTest {
     @Test
     void escapesUntrustedText() {
         SeoPage page = new SeoPage("/heroes/x", "<script>alert(1)</script>", "\"quoted\" & <b>", "website",
-                "<img src=x>", List.of());
+                "<img src=x>", List.of(), List.of());
 
         String html = renderer.render(page);
 
@@ -45,5 +45,18 @@ class SeoHtmlRendererTest {
     @Test
     void notFoundPageIsNotIndexable() {
         assertThat(renderer.renderNotFound()).contains("noindex", "Page not found");
+    }
+
+    @Test
+    void rendersSectionsWithPlainAndLinkedItemsAndEscapesThem() {
+        SeoPage page = new SeoPage("/heroes/ana", "Ana", "d", "website", "Ana", List.of(), List.of(
+                new SeoSection("Abilities", List.of(SeoItem.plain("Sleep Dart: <b>bold</b>"))),
+                new SeoSection("Counters", List.of(SeoItem.link("Reinhardt", "/heroes/reinhardt")))));
+
+        String html = renderer.render(page);
+
+        assertThat(html).contains("<h2>Abilities</h2>", "<li>Sleep Dart: &lt;b&gt;bold&lt;/b&gt;</li>",
+                "<h2>Counters</h2>", "<li><a href=\"https://example.com/heroes/reinhardt\">Reinhardt</a></li>");
+        assertThat(html).doesNotContain("<b>bold</b>");
     }
 }

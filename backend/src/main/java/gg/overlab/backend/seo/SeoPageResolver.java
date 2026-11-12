@@ -27,13 +27,15 @@ public class SeoPageResolver {
     private final MapService mapService;
     private final GuideService guideService;
     private final SiteUrl siteUrl;
+    private final SeoContentBuilder contentBuilder;
 
     public SeoPageResolver(HeroService heroService, MapService mapService, GuideService guideService,
-                           SiteUrl siteUrl) {
+                           SiteUrl siteUrl, SeoContentBuilder contentBuilder) {
         this.heroService = heroService;
         this.mapService = mapService;
         this.guideService = guideService;
         this.siteUrl = siteUrl;
+        this.contentBuilder = contentBuilder;
     }
 
     public static String cacheKey(String requestedPath) {
@@ -75,7 +77,16 @@ public class SeoPageResolver {
     private SeoPage staticPage(StaticSeoPage page) {
         List<String> data = "/".equals(page.path()) ? List.of(websiteData())
                 : List.of(breadcrumbs(page.path(), page.heading()));
-        return new SeoPage(page.path(), page.title(), page.description(), "website", page.heading(), data);
+        return new SeoPage(page.path(), page.title(), page.description(), "website", page.heading(), data,
+                staticSections(page.path()));
+    }
+
+    private List<SeoSection> staticSections(String path) {
+        return switch (path) {
+            case "/maps" -> contentBuilder.mapList();
+            case "/privacy", "/terms", "/cookies", "/business" -> List.of();
+            default -> contentBuilder.heroList();
+        };
     }
 
     private Optional<SeoPage> heroPage(String slug) {
@@ -87,7 +98,7 @@ public class SeoPageResolver {
                     ? lead : lead + " " + hero.description();
             return new SeoPage(path, hero.name() + " stats, perks, counters and best maps", plain(detail),
                     "website", hero.name(),
-                    List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")));
+                    List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")), contentBuilder.heroDetails(hero));
         });
     }
 
@@ -97,7 +108,8 @@ public class SeoPageResolver {
             String path = "/maps/" + map.slug();
             String description = map.name() + ": win, pick and ban rates of every Overwatch hero on this map.";
             return Optional.of(new SeoPage(path, map.name(), description, "website", map.name(),
-                    List.of(breadcrumbs(path, map.name(), "/maps", "Maps"))));
+                    List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
+                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name())));
         } catch (EntityNotFoundException exception) {
             return Optional.empty();
         }
@@ -120,7 +132,10 @@ public class SeoPageResolver {
         String description = plain(guide.title() + ": a short " + guide.heroName() + " video guide" + mapPart + ".");
         return new SeoPage(path, guide.title(), description, "video.other", guide.title(),
                 List.of(breadcrumbs(path, guide.title(), "/heroes/" + guide.heroSlug(), guide.heroName()),
-                        videoData(guide, path, description)));
+                        videoData(guide, path, description)),
+                guide.description() == null || guide.description().isBlank() ? List.of()
+                        : List.of(new SeoSection("About this guide",
+                                List.of(SeoItem.plain(SeoContentBuilder.readable(guide.description()))))));
     }
 
     String plain(String text) {
