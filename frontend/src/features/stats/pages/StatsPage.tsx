@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { HeroHighlights } from "../../../components/ui/HeroHighlights";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -20,6 +21,7 @@ import { StatsFilters } from "../components/StatsFilters";
 import { StatsTable } from "../components/StatsTable";
 import { ALL_MAPS, isQuickPlay } from "../filters";
 import { useFilterState } from "../hooks/useFilterState";
+import { statsHighlights } from "../utils/highlights";
 
 export function StatsPage() {
   usePageTitle("Overwatch hero win, pick and ban rates");
@@ -73,6 +75,14 @@ export function StatsPage() {
           />
         }
       />
+      {snapshot && (
+        <HeroHighlights
+          items={statsHighlights(snapshot.heroes, !isQuickPlay(filters))}
+          heroLinkSuffix={
+            filters.queue === "QUICK_PLAY" ? "?queue=quick_play" : ""
+          }
+        />
+      )}
       <StatsFilters
         filters={filters}
         maps={maps.data ?? []}

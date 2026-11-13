@@ -7,7 +7,12 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue, Region } from "../../../types/common";
-import { REGION_LABELS, formatDateTime } from "../../../utils/format";
+import type { HeroHistoryPoint } from "../../../types/stats";
+import {
+  REGION_LABELS,
+  formatDateTime,
+  formatPercent,
+} from "../../../utils/format";
 import { fetchPatches } from "../../patches";
 import { fetchHeroHistory } from "../../stats";
 import { DataFreshness } from "../../stats";
@@ -32,6 +37,36 @@ const METRICS: MetricDefinition[] = [
   { id: "pick", label: "Pick rate", tone: "pick" },
   { id: "ban", label: "Ban rate", tone: "ban" },
 ];
+
+function metricValue(point: HeroHistoryPoint, metric: Metric): number | null {
+  if (metric === "win") {
+    return point.winRate;
+  }
+  return metric === "pick" ? point.pickRate : point.banRate;
+}
+
+function summarize(points: HeroHistoryPoint[], metric: Metric) {
+  const values = points.flatMap((point) => {
+    const value = metricValue(point, metric);
+    return value === null ? [] : [value];
+  });
+  if (values.length === 0) {
+    return { latest: null, change: null };
+  }
+  const latest = values[values.length - 1];
+  return {
+    latest,
+    change: values.length > 1 ? latest - values[0] : null,
+  };
+}
+
+function changeTone(metric: Metric, change: number): "up" | "down" | "flat" {
+  if (Math.round(change * 10) === 0) {
+    return "flat";
+  }
+  const increased = change > 0;
+  return increased === (metric !== "ban") ? "up" : "down";
+}
 
 const DEFAULT_PERIOD_ID: HistoryPeriodId = "30d";
 
@@ -90,12 +125,7 @@ export function HeroHistorySection({
     ) ?? METRICS[0];
   const points = history.data?.points ?? [];
   const series = points.flatMap((point) => {
-    const value =
-      metric.id === "win"
-        ? point.winRate
-        : metric.id === "pick"
-          ? point.pickRate
-          : point.banRate;
+    const value = metricValue(point, metric.id);
     return value === null
       ? []
       : [{ time: Date.parse(point.capturedAt), value }];
@@ -112,26 +142,44 @@ export function HeroHistorySection({
       </div>
       {children}
       <div className="stat-switch">
-        <div className="segmented" role="group" aria-label="Statistic">
-          {METRICS.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              disabled={!isAvailable(entry)}
-              title={
-                isAvailable(entry)
-                  ? undefined
-                  : `${entry.label} is only tracked in Competitive`
-              }
-              className={clsx("segmented__item", {
-                "segmented__item--active": entry.id === metric.id,
-              })}
-              aria-pressed={entry.id === metric.id}
-              onClick={() => setSelectedMetric(entry.id)}
-            >
-              {entry.label}
-            </button>
-          ))}
+        <div className="kpi-row" role="group" aria-label="Statistic">
+          {METRICS.map((entry) => {
+            const summary = summarize(points, entry.id);
+            const available = isAvailable(entry);
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                disabled={!available}
+                title={
+                  available
+                    ? undefined
+                    : `${entry.label} is only tracked in Competitive`
+                }
+                className={clsx("kpi", `kpi--${entry.tone}`, {
+                  "kpi--active": entry.id === metric.id,
+                })}
+                aria-pressed={entry.id === metric.id}
+                onClick={() => setSelectedMetric(entry.id)}
+              >
+                <span className="kpi__label">{entry.label}</span>
+                <span className="kpi__value">
+                  {formatPercent(available ? summary.latest : null)}
+                  {available && summary.change !== null && (
+                    <span
+                      className={clsx(
+                        "kpi__change",
+                        `kpi__change--${changeTone(entry.id, summary.change)}`,
+                      )}
+                    >
+                      {summary.change > 0 ? "▲" : summary.change < 0 ? "▼" : ""}{" "}
+                      {Math.abs(summary.change).toFixed(1)}
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
         <div
           className="segmented segmented--quiet"

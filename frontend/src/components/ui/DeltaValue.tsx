@@ -5,11 +5,13 @@ interface DeltaValueProps {
   value: number | null;
   inverted?: boolean;
   title?: string;
+  unit?: string;
 }
 
 export function DeltaValue({
   value,
   inverted = false,
+  unit = "",
   title = "Difference from the all-maps value",
 }: DeltaValueProps) {
   if (value === null) {
@@ -27,6 +29,7 @@ export function DeltaValue({
       title={title}
     >
       {formatDelta(value)}
+      {unit}
     </span>
   );
 }

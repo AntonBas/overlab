@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
@@ -18,6 +18,9 @@ interface HeroMapPicksProps {
   linkSuffix: string;
 }
 
+const MAP_DELTA_TITLE =
+  "Win rate on this map minus the hero's all-maps win rate, in percentage points";
+
 type PickView = "best" | "worst";
 
 const VIEW_LABELS: Record<PickView, string> = {
@@ -25,13 +28,44 @@ const VIEW_LABELS: Record<PickView, string> = {
   worst: "Worst maps",
 };
 
+function MapMeta({ entry }: { entry: HeroMapStat }) {
+  return (
+    <>
+      {entry.mode && (
+        <span title={MAP_MODE_LABELS[entry.mode]}>
+          <ModeIcon mode={entry.mode} />
+          <span className="visually-hidden">
+            {MAP_MODE_LABELS[entry.mode]}{" "}
+          </span>
+        </span>
+      )}
+      {entry.mapName}
+    </>
+  );
+}
+
+function MapStats({ entry }: { entry: HeroMapStat }) {
+  return (
+    <>
+      {formatPercent(entry.winRate)} win &middot;{" "}
+      {formatPercent(entry.pickRate)} pick
+    </>
+  );
+}
+
 function MapList({
   title,
+  featuredLabel,
+  worst,
+  expanded,
   entries,
   linkSuffix,
   images,
 }: {
   title: string;
+  featuredLabel: string;
+  worst: boolean;
+  expanded: boolean;
   entries: HeroMapStat[];
   linkSuffix: string;
   images: Record<string, string | null>;
@@ -39,45 +73,87 @@ function MapList({
   if (entries.length === 0) {
     return null;
   }
+  const [featured, ...others] = entries;
+  const rest = expanded ? entries : others;
+  const largestGain = Math.max(
+    ...rest.map((entry) => Math.abs(entry.winRateDelta ?? 0)),
+    0.1,
+  );
+  const featuredImage = images[featured.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL;
   return (
     <>
       <p className="highlight__label muted">{title}</p>
-      <ol className="highlight__list">
-        {entries.map((entry) => (
-          <li key={entry.mapSlug}>
-            <Link
-              className="highlight__hero highlight__hero--map"
-              to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
-            >
-              <span className="highlight__portrait">
-                <Thumbnail
-                  url={images[entry.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL}
-                  width={64}
-                  height={36}
+      <div className={clsx("map-picks", { "map-picks--expanded": expanded })}>
+        {!expanded && (
+          <Link
+            className={clsx("map-featured", { "map-featured--worst": worst })}
+            to={mapPagePath(featured.mapSlug ?? "", linkSuffix)}
+            style={{ backgroundImage: `url(${featuredImage})` }}
+          >
+            <span className="map-featured__label">{featuredLabel}</span>
+            <span className="map-featured__name">
+              <MapMeta entry={featured} />
+            </span>
+            <span className="map-featured__numbers">
+              <span className="map-featured__delta">
+                <DeltaValue
+                  value={featured.winRateDelta}
+                  unit="%"
+                  title={MAP_DELTA_TITLE}
                 />
               </span>
-              <span className="highlight__name">
-                {entry.mode && (
-                  <span title={MAP_MODE_LABELS[entry.mode]}>
-                    <ModeIcon mode={entry.mode} />
-                    <span className="visually-hidden">
-                      {MAP_MODE_LABELS[entry.mode]}{" "}
+              <span className="map-featured__stats">
+                <MapStats entry={featured} />
+              </span>
+            </span>
+          </Link>
+        )}
+        {rest.length > 0 && (
+          <ol className="map-picks__list" start={expanded ? 1 : 2}>
+            {rest.map((entry) => (
+              <li key={entry.mapSlug}>
+                <Link
+                  className={clsx("map-pick", {
+                    "map-pick--down": (entry.winRateDelta ?? 0) < 0,
+                  })}
+                  style={
+                    {
+                      "--delta-width": `${Math.max(
+                        6,
+                        (Math.abs(entry.winRateDelta ?? 0) / largestGain) * 100,
+                      )}%`,
+                    } as CSSProperties
+                  }
+                  to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
+                >
+                  <span className="map-pick__thumbnail">
+                    <Thumbnail
+                      url={images[entry.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL}
+                      width={64}
+                      height={38}
+                    />
+                  </span>
+                  <span className="map-pick__text">
+                    <span className="map-pick__name">
+                      <MapMeta entry={entry} />
+                    </span>
+                    <span className="map-pick__stats muted">
+                      <MapStats entry={entry} />
                     </span>
                   </span>
-                )}
-                {entry.mapName}
-              </span>
-              <span className="highlight__delta">
-                <DeltaValue value={entry.winRateDelta} />
-              </span>
-              <span className="highlight__stats muted">
-                {formatPercent(entry.winRate)} win &middot;{" "}
-                {formatPercent(entry.pickRate)} pick
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ol>
+                  <span className="map-pick__delta">
+                    <DeltaValue
+                      value={entry.winRateDelta}
+                      unit="%"
+                      title={MAP_DELTA_TITLE}
+                    />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </>
   );
 }
@@ -133,6 +209,9 @@ export function HeroMapPicks({
                 ? "Best compared with the hero's average"
                 : "Weakest compared with the hero's average"
             }
+            featuredLabel={best ? "Best map" : "Worst map"}
+            worst={!best}
+            expanded={expanded}
             entries={expanded ? fullList : shortList}
             linkSuffix={linkSuffix}
             images={images}
@@ -142,11 +221,21 @@ export function HeroMapPicks({
       {canExpand && (
         <button
           type="button"
-          className="button button--ghost"
+          className="map-more"
           aria-expanded={expanded}
+          aria-label={
+            expanded ? "Show fewer maps" : `Show all ${fullList.length} maps`
+          }
           onClick={() => setExpanded((current) => !current)}
         >
-          {expanded ? "Show fewer maps" : `Show all ${fullList.length} maps`}
+          {expanded ? (
+            "Show fewer maps"
+          ) : (
+            <>
+              Show all maps
+              <span className="map-more__count">{fullList.length}</span>
+            </>
+          )}
         </button>
       )}
       <p className="muted footnote">

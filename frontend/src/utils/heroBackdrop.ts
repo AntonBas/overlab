@@ -57,11 +57,18 @@ const HEROES_WITH_BACKDROP: ReadonlySet<string> = new Set([
   "zenyatta",
 ]);
 
+export function heroBackdropUrl(slug: string): string | undefined {
+  return HEROES_WITH_BACKDROP.has(slug)
+    ? `/images/backgrounds/${slug}.webp`
+    : undefined;
+}
+
 export function heroBackdropStyle(slug: string): CSSProperties | undefined {
-  if (!HEROES_WITH_BACKDROP.has(slug)) {
+  const url = heroBackdropUrl(slug);
+  if (!url) {
     return undefined;
   }
   return {
-    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.55), rgb(15 18 24 / 0.88)), url(/images/backgrounds/${slug}.webp)`,
+    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.55), rgb(15 18 24 / 0.88)), url(${url})`,
   };
 }

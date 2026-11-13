@@ -60,7 +60,7 @@ export function StatsTable({
   }
 
   return (
-    <div className="table-wrap">
+    <div className="table-wrap table-wrap--ranking">
       <table className="table">
         <thead>
           <tr>
@@ -92,7 +92,7 @@ export function StatsTable({
         </thead>
         <tbody>
           {heroes.map((hero) => (
-            <tr key={hero.heroSlug}>
+            <tr key={hero.heroSlug} data-role={hero.role.toLowerCase()}>
               <th scope="row">
                 <span className="table__hero">
                   <HeroPortrait name={hero.heroName} url={hero.portraitUrl} />

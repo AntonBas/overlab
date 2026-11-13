@@ -26,56 +26,24 @@
   gap: var(--space-12);
 }
 
-.perk-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-12);
-  padding: var(--space-12) var(--space-16);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
 .perk-card--recommended {
-  border-color: var(--good);
-  box-shadow: inset 0 0 0 1px var(--good);
+  --rec-color: var(--good);
 }
 
 .perk-card--optional {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+  --rec-color: var(--accent);
 }
 
 .perk-card--avoid {
-  border-color: var(--bad);
-  box-shadow: inset 0 0 0 1px var(--bad);
+  --rec-color: var(--bad);
 }
 
-.perk-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
-  width: 100%;
+.perk-tile.perk-card--recommended,
+.perk-tile.perk-card--optional,
+.perk-tile.perk-card--avoid {
+  border-color: var(--rec-color);
+  box-shadow: inset 0 0 0 1px var(--rec-color);
 }
-
-.perk-card__side {
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.02em;
-}
-
-.perk-card__main {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-12);
-  width: 100%;
-}
-
-.perk-card__icon {
-  align-self: flex-start;
-}
-
 @media (max-width: 640px) {
   .perk-row {
     grid-template-columns: 1fr;
@@ -182,12 +150,6 @@
   line-height: 1.2;
 }
 
-.perk-card__note {
-  margin-top: var(--space-4);
-  padding-left: var(--space-12);
-  border-left: 2px solid var(--border);
-}
-
 .perk-tile .perk-tile__icon {
   border-radius: 8px;
   background: var(--bg);
@@ -256,4 +218,131 @@
   background-position: 90% 40%;
   background-size: cover;
   border-color: color-mix(in srgb, var(--role-color) 55%, var(--border));
+}
+
+.perk-group--tree .perk-row {
+  position: relative;
+  gap: var(--space-8) var(--space-24);
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--surface), transparent);
+}
+
+.perk-group--tree .perk-row::before {
+  content: "";
+  position: absolute;
+  inset: var(--space-12) auto var(--space-12) 50%;
+  width: 2px;
+  background: linear-gradient(var(--border), transparent);
+}
+
+.perk-group--tree > h3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  margin: var(--space-16) 0 var(--space-8);
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.perk-group--tree > h3::before,
+.perk-group--tree > h3::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border));
+}
+
+.perk-group--tree > h3::after {
+  transform: scaleX(-1);
+}
+
+.perk-group--tree .perk-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-12);
+  row-gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-4);
+}
+
+.perk-group--tree .perk-card--avoid {
+  opacity: 0.7;
+}
+
+.perk-group--tree .perk-card--avoid .perk-card__node {
+  filter: grayscale(0.7);
+  box-shadow: none;
+}
+
+.perk-card__side {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.perk-card__node {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--rec-color);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--rec-color) 30%, var(--bg)),
+    var(--bg)
+  );
+  box-shadow: 0 0 20px -6px var(--rec-color);
+}
+
+.perk-card__node .perk-card__icon {
+  width: 40px;
+  height: 40px;
+}
+
+.perk-group--tree .card__body {
+  align-items: flex-start;
+  gap: var(--space-4);
+  font-size: var(--font-size-md);
+}
+
+.perk-group--tree .card__body strong {
+  font-size: var(--font-size-xl);
+}
+
+.perk-card__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-6) var(--space-12);
+  border-left: 3px solid var(--rec-color);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--rec-color) 10%, transparent);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.perk-card__note-label {
+  color: var(--rec-color);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 640px) {
+  .perk-group--tree .perk-row {
+    padding: var(--space-12);
+  }
+
+  .perk-group--tree .perk-row::before {
+    display: none;
+  }
 }

@@ -42,35 +42,32 @@ function PerkCard({ perk }: { perk: Perk }) {
         `perk-card--${perk.recommendation.toLowerCase()}`,
       )}
     >
-      <span className="perk-card__header">
-        <span className="perk-card__side muted">
-          {POSITION_LABELS[position]}
-        </span>
-        <span
-          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
-        >
-          {RECOMMENDATION_LABELS[perk.recommendation]}
-        </span>
-      </span>
-      <span className="perk-card__main">
+      <span className="perk-card__side muted">{POSITION_LABELS[position]}</span>
+      <span className="perk-card__node">
         <Thumbnail
           url={perk.iconUrl}
           width={56}
           height={56}
           className="perk-card__icon"
         />
-        <span className="card__body">
-          <strong>{perk.name}</strong>
-          {perk.recentlyAdded && <NewBadge />}
-          {perk.description && (
-            <span className="muted">{perk.description}</span>
-          )}
-          {perk.recommendationNote && (
-            <span className="perk-card__note">
+      </span>
+      <span className="card__body">
+        <strong>{perk.name}</strong>
+        {perk.recentlyAdded && <NewBadge />}
+        <span
+          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
+        >
+          {RECOMMENDATION_LABELS[perk.recommendation]}
+        </span>
+        {perk.description && <span className="muted">{perk.description}</span>}
+        {perk.recommendationNote && (
+          <span className="perk-card__note">
+            <span className="perk-card__note-label">Why this rating</span>
+            <span className="perk-card__note-text">
               <AbilityText text={perk.recommendationNote} />
             </span>
-          )}
-        </span>
+          </span>
+        )}
       </span>
     </li>
   );
@@ -189,7 +186,10 @@ export function PerkList({
           return null;
         }
         return (
-          <div key={slot} className="perk-group">
+          <div
+            key={slot}
+            className={clsx("perk-group", { "perk-group--tree": !compact })}
+          >
             <h3>{SLOT_LABELS[slot]}</h3>
             <ul className={clsx("perk-row", { "perk-row--compact": compact })}>
               {group.map((perk) =>

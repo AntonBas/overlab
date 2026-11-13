@@ -576,3 +576,105 @@
     margin-bottom: 0;
   }
 }
+
+.hero-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-12);
+  margin: 0 0 var(--space-16);
+  padding: 0;
+  list-style: none;
+}
+
+.hero-highlight {
+  --highlight-color: var(--border);
+  --highlight-role: var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid
+    color-mix(in srgb, var(--highlight-color) 40%, var(--border));
+  border-top: 3px solid var(--highlight-color);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--highlight-color) 12%, var(--surface)),
+    var(--surface)
+  );
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.hero-highlight:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -16px var(--highlight-color);
+}
+
+.hero-highlight--win {
+  --highlight-color: var(--bar-win);
+}
+
+.hero-highlight--pick {
+  --highlight-color: var(--bar-pick);
+}
+
+.hero-highlight--ban {
+  --highlight-color: var(--bar-ban);
+}
+
+.hero-highlight--up {
+  --highlight-color: var(--good);
+}
+
+.hero-highlight--down {
+  --highlight-color: var(--bad);
+}
+
+.hero-highlight--tank {
+  --highlight-role: var(--tank);
+}
+
+.hero-highlight--damage {
+  --highlight-role: var(--damage);
+}
+
+.hero-highlight--support {
+  --highlight-role: var(--support);
+}
+
+.hero-highlight .portrait {
+  flex: none;
+  border: 2px solid var(--highlight-role);
+  border-radius: 50%;
+}
+
+.hero-highlight__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hero-highlight__label {
+  color: var(--highlight-color);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-highlight__name {
+  overflow: hidden;
+  font-size: var(--font-size-xl);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-highlight__value {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.1;
+}

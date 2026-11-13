@@ -76,42 +76,44 @@ export function Header() {
               )}
             </ul>
           </nav>
-          <HeroSearch />
-          <select
-            className="site-header__region"
-            aria-label="Region"
-            value={region}
-            onChange={(event) => rememberRegion(event.target.value as Region)}
-          >
-            {REGIONS.map((option) => (
-              <option key={option} value={option}>
-                {REGION_LABELS[option]}
-              </option>
-            ))}
-          </select>
-          <div className="site-header__account">
-            {!loading && user && (
-              <>
-                <Link className="nav__link" to="/me" title={user.displayName}>
-                  My Overlab
-                </Link>
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => void signOut()}
+          <div className="site-header__tools">
+            <HeroSearch />
+            <select
+              className="site-header__region"
+              aria-label="Region"
+              value={region}
+              onChange={(event) => rememberRegion(event.target.value as Region)}
+            >
+              {REGIONS.map((option) => (
+                <option key={option} value={option}>
+                  {REGION_LABELS[option]}
+                </option>
+              ))}
+            </select>
+            <div className="site-header__account">
+              {!loading && user && (
+                <>
+                  <Link className="nav__link" to="/me" title={user.displayName}>
+                    My Overlab
+                  </Link>
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => void signOut()}
+                  >
+                    Sign out
+                  </button>
+                </>
+              )}
+              {!loading && !user && (
+                <Link
+                  className="button button--compact site-header__signin"
+                  to="/login"
                 >
-                  Sign out
-                </button>
-              </>
-            )}
-            {!loading && !user && (
-              <Link
-                className="button button--ghost button--compact"
-                to="/login"
-              >
-                Sign in
-              </Link>
-            )}
+                  Sign in
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

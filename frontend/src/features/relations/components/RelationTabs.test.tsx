@@ -93,7 +93,7 @@ describe("RelationTabs", () => {
     ).toHaveAttribute("aria-selected", "true");
   });
 
-  it("shows category chips above the hero cards and counts them", async () => {
+  it("shows a group tile next to the hero tiles and counts it", async () => {
     const flying: HeroCategory = {
       slug: "flying",
       name: "Flying",
@@ -124,7 +124,7 @@ describe("RelationTabs", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens a tab that only has a category chip", () => {
+  it("opens a tab that only has a group tile", () => {
     renderTabs({
       strongAgainst: [],
       counteredBy: [],

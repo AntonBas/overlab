@@ -123,5 +123,10 @@ export function useFilterState(
     [filters.sort, filters.direction, update],
   );
 
-  return { filters, update, changeSort, key: searchParams.toString() };
+  return {
+    filters,
+    update,
+    changeSort,
+    key: `${searchParams.toString()}#${filters.region}`,
+  };
 }

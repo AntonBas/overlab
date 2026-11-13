@@ -4,7 +4,19 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(
+      900px 500px at 15% -5%,
+      color-mix(in srgb, #6d4aff 16%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      800px 500px at 100% 0%,
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      transparent
+    ),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font);
   line-height: 1.5;
@@ -312,6 +324,56 @@ select:disabled {
 .table a:hover {
   color: var(--accent-text);
   text-decoration: underline;
+}
+
+.table-wrap--ranking {
+  border-radius: 16px;
+}
+
+.table-wrap--ranking table {
+  counter-reset: ranking-row;
+}
+
+.table-wrap--ranking thead th {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.table-wrap--ranking tbody tr {
+  --row-role: var(--border);
+  counter-increment: ranking-row;
+}
+
+.table-wrap--ranking tbody tr[data-role="tank"] {
+  --row-role: var(--tank);
+}
+
+.table-wrap--ranking tbody tr[data-role="damage"] {
+  --row-role: var(--damage);
+}
+
+.table-wrap--ranking tbody tr[data-role="support"] {
+  --row-role: var(--support);
+}
+
+.table-wrap--ranking tbody th {
+  box-shadow: inset 4px 0 0 var(--row-role);
+}
+
+.table-wrap--ranking tbody tr:hover {
+  background: color-mix(in srgb, var(--row-role) 8%, transparent);
+}
+
+.table-wrap--ranking .table__hero::before {
+  content: counter(ranking-row);
+  min-width: 1.5em;
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  text-align: right;
 }
 
 .table-toolbar {
@@ -682,6 +744,11 @@ input[type="range"] {
   .table.table--cards tbody tr {
     padding: var(--space-12);
     border-bottom: 1px solid var(--border);
+    border-left: 4px solid var(--row-role, var(--border));
+  }
+
+  .table-wrap--ranking .table--cards tbody th {
+    box-shadow: none;
   }
 
   .table.table--cards tbody tr:last-child {

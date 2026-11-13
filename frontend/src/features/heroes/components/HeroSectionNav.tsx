@@ -48,7 +48,7 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
           setActiveId(first);
         }
       },
-      { rootMargin: "-80px 0px -60% 0px" },
+      { rootMargin: "-120px 0px -60% 0px" },
     );
     sectionKey.split(",").forEach((sectionId) => {
       const element = document.getElementById(sectionId);

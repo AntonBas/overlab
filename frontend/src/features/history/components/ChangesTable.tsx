@@ -113,7 +113,7 @@ export function ChangesTable({
           )}
         </button>
       </div>
-      <div className="table-wrap">
+      <div className="table-wrap table-wrap--ranking">
         <table className="table table--cards">
           <thead>
             <tr>
@@ -159,7 +159,7 @@ export function ChangesTable({
           </thead>
           <tbody>
             {rows.map((change) => (
-              <tr key={change.heroSlug}>
+              <tr key={change.heroSlug} data-role={change.role.toLowerCase()}>
                 <th scope="row">
                   <span className="table__hero">
                     <HeroPortrait

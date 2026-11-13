@@ -6,6 +6,7 @@ import {
   IconSelect,
   type IconSelectOption,
 } from "../../../components/ui/IconSelect";
+import { HeroHighlights } from "../../../components/ui/HeroHighlights";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -31,6 +32,7 @@ import { isQuickPlay, toSearchParams } from "../../stats";
 import { useRegion } from "../../stats";
 import { useFilterState } from "../../stats";
 import { ChangesTable } from "../components/ChangesTable";
+import { changeHighlights } from "../utils/changeHighlights";
 import { periodRange } from "../utils/chart";
 
 const PERIODS: Record<string, { label: string; days: number }> = {
@@ -280,6 +282,16 @@ export function ChangesPage() {
           />
         }
       />
+      {comparisonData && !singleSnapshot && (
+        <HeroHighlights
+          items={changeHighlights(
+            comparisonData.heroes.filter(
+              (change) => filters.role === null || change.role === filters.role,
+            ),
+            portraits,
+          )}
+        />
+      )}
       <StatsFilters
         filters={filters}
         onChange={updateFilters}

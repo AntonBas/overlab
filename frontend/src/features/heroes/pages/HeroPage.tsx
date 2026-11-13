@@ -1,9 +1,9 @@
+import clsx from "clsx";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { NewBadge } from "../../../components/ui/NewBadge";
-import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { useRegion } from "../../stats";
 import { RoleTags } from "../../../components/ui/RoleTags";
@@ -35,7 +35,7 @@ import { AbilityText } from "../../abilities";
 import { ControlSchemeToggle } from "../../abilities";
 import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
-import { heroBackdropStyle } from "../../../utils/heroBackdrop";
+import { heroBackdropUrl } from "../../../utils/heroBackdrop";
 import { PerkList } from "../../perks";
 import { RelationTabs } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
@@ -128,51 +128,53 @@ export function HeroPage() {
     },
   ].filter((section) => section.visible);
 
-  const backdrop = heroBackdropStyle(slug);
+  const art = heroBackdropUrl(slug);
   return (
-    <>
-      <div
-        className={backdrop ? "hero-banner hero-banner--backdrop" : undefined}
-        style={backdrop}
-      >
-        <PageHeader
-          title={hero.data.name}
-          badge={hero.data.recentlyAdded ? <NewBadge /> : null}
-          image={
+    <div className="hero-page" data-role={hero.data.role.toLowerCase()}>
+      <header className={clsx("hero-header", { "hero-header--art": art })}>
+        <div className="hero-header__panel">
+          <div className="hero-header__identity">
             <HeroPortrait
               name={hero.data.name}
               url={hero.data.portraitUrl}
-              size={72}
+              size={88}
             />
-          }
-          subtitle={
-            <span className="hero-tags">
+            <div className="hero-header__title">
+              <h1>
+                {hero.data.name}
+                {hero.data.recentlyAdded ? <NewBadge /> : null}
+              </h1>
               <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
-              <span className="hero-tags__stats">
-                {focus && (
-                  <StatChips
-                    winRate={focus.winRate}
-                    pickRate={focus.pickRate}
-                    banRate={focus.banRate}
-                    showBan={queue === "COMPETITIVE"}
-                  />
-                )}
-              </span>
-            </span>
-          }
-          actions={
-            <>
-              <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
-              <QueueToggle value={queue} onChange={changeQueue} />
-            </>
-          }
-        />
-        {hero.data.description && (
-          <p className="prose">
-            <AbilityText text={hero.data.description} />
-          </p>
+            </div>
+          </div>
+          <div className="hero-tags__stats">
+            {focus && (
+              <StatChips
+                winRate={focus.winRate}
+                pickRate={focus.pickRate}
+                banRate={focus.banRate}
+                showBan={queue === "COMPETITIVE"}
+              />
+            )}
+          </div>
+          {hero.data.description && (
+            <p className="prose">
+              <AbilityText text={hero.data.description} />
+            </p>
+          )}
+          <div className="hero-header__actions">
+            <FavoriteButton kind="hero" slug={slug} name={hero.data.name} />
+            <QueueToggle value={queue} onChange={changeQueue} />
+          </div>
+        </div>
+        {art && (
+          <div
+            className="hero-header__art"
+            style={{ backgroundImage: `url(${art})` }}
+            aria-hidden="true"
+          />
         )}
-      </div>
+      </header>
       <HeroTraits
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
@@ -258,6 +260,6 @@ export function HeroPage() {
           />
         </div>
       )}
-    </>
+    </div>
   );
 }
