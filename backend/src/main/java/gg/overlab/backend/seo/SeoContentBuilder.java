@@ -66,7 +66,7 @@ public class SeoContentBuilder {
         add(sections, "Weaknesses", lines(hero.weaknesses()));
         add(sections, "Abilities", abilityService.findByHero(hero.slug()).stream()
                 .map(ability -> SeoItem.plain(ability.name() + ": " + readable(ability.description()))).toList());
-        add(sections, hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
+        add(sections, "Best " + hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
                 .map(this::perkItem).toList());
         HeroCountersDto counters = relationService.getCounters(hero.slug());
         add(sections, "Heroes " + hero.name() + " is strong against", relatedItems(counters.counters()));

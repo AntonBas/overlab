@@ -72,7 +72,7 @@ class SeoContentBuilderTest {
         List<SeoSection> sections = builder.heroDetails(hero());
 
         assertThat(sections).extracting(SeoSection::heading).containsExactly("Strengths", "Weaknesses", "Abilities",
-                "Ana perks", "Heroes Ana is strong against");
+                "Best Ana perks", "Heroes Ana is strong against");
         assertThat(sections.get(0).items()).extracting(SeoItem::text)
                 .containsExactly("Heals from range", "Strong against doomfist");
         assertThat(sections.get(2).items().getFirst().text()).isEqualTo("Sleep Dart: Puts an reinhardt to sleep");

@@ -229,7 +229,11 @@ export function HeroPage() {
 
       {perks.data && perks.data.length > 0 && (
         <section className="section" id="hero-perks">
-          <h2>{hero.data.name} perks</h2>
+          <h2>Best {hero.data.name} perks</h2>
+          <p className="muted">
+            Perks marked Recommended are the best picks for {hero.data.name};
+            Optional ones are situational.
+          </p>
           <PerkList perks={perks.data} />
         </section>
       )}
