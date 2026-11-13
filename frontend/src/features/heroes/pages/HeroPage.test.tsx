@@ -2,6 +2,8 @@ import { screen } from "@testing-library/react";
 import { AxiosError, AxiosHeaders } from "axios";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
+import { hero as heroFixture } from "../../../test/fixtures/heroes";
 import { renderWithRouter } from "../../../test/render";
 import { HeroPage } from "./HeroPage";
 
@@ -69,16 +71,7 @@ vi.mock("../../guides/components/SpotsSection", () => ({
   SpotsSection: () => <div>spots</div>,
 }));
 
-const hero = {
-  slug: "ana",
-  name: "Ana",
-  role: "SUPPORT",
-  subrole: "tactician",
-  description: "Sniper healer",
-  strengths: null,
-  weaknesses: null,
-  portraitUrl: null,
-};
+const hero = heroFixture();
 
 function failure(status: number) {
   const config = { headers: new AxiosHeaders() };
@@ -113,6 +106,14 @@ describe("HeroPage", () => {
     });
     api.fetchHeroAbilities.mockResolvedValue([]);
     api.fetchGuides.mockResolvedValue([]);
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderPage();
+
+    await screen.findByRole("heading", { name: "Ana", level: 1 });
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("shows the hero name and statistics, hiding sections without data", async () => {

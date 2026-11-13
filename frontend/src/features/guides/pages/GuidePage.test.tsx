@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { guide as fixtureGuide } from "../../../test/fixtures/guides";
 import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../api/guidesApi", () => ({
@@ -17,18 +18,15 @@ vi.mock("../components/GuideEmbed", () => ({
 import { fetchGuide } from "../api/guidesApi";
 import { GuidePage } from "./GuidePage";
 
-const guide = {
+const guide = fixtureGuide({
   path: "ana-nade-spot",
   title: "Ana nade spot",
-  heroSlug: "ana",
-  heroName: "Ana",
   mapSlug: "numbani",
   mapName: "Numbani",
   description: "Throw it from the balcony",
   youtubeId: "abc",
   embedUrl: "https://www.youtube.com/embed/abc",
-  createdAt: "2026-01-01T00:00:00Z",
-};
+});
 
 function renderGuide() {
   return renderWithRouter(

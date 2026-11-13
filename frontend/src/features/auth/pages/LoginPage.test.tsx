@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../api/authApi", () => ({
@@ -24,7 +25,7 @@ function failure(status: number, message: string) {
 }
 
 function renderLogin() {
-  renderWithRouter(
+  return renderWithRouter(
     <Routes>
       <Route path="/" element={<p>home page</p>} />
       <Route path="/login" element={<LoginPage />} />
@@ -43,6 +44,12 @@ describe("LoginPage", () => {
   beforeEach(() => {
     signIn.mockReset();
     vi.mocked(resendVerification).mockClear();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderLogin();
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("signs in and goes to the home page", async () => {

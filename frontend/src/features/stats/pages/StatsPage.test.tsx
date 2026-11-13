@@ -2,6 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 import { snapshot } from "../../../test/fixtures/stats";
 import { renderWithRouter } from "../../../test/render";
 import type { RequestFailure } from "../../../services/api";
@@ -37,7 +38,7 @@ function LocationProbe() {
 }
 
 function renderPage(route = "/stats") {
-  renderWithRouter(
+  return renderWithRouter(
     <>
       <Routes>
         <Route path="/stats" element={<StatsPage />} />
@@ -51,6 +52,16 @@ function renderPage(route = "/stats") {
 describe("StatsPage", () => {
   beforeEach(() => {
     fetchStatsMock.mockReset();
+  });
+
+  it("has no accessibility violations", async () => {
+    fetchStatsMock.mockResolvedValue(snapshot());
+
+    const { container } = renderPage();
+
+    await screen.findByRole("link", { name: "Ana" });
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("requests the default filters and shows the heroes", async () => {
