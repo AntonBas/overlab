@@ -13,7 +13,7 @@
   background: var(--surface);
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .admin {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -223,7 +223,7 @@
 
 .table__error {
   display: block;
-  width: 240px;
+  width: min(240px, 100%);
   overflow-wrap: anywhere;
   color: var(--bad);
   font-size: var(--font-size-md);
@@ -294,7 +294,7 @@
   background-color: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .admin__menu {
     position: static;
   }

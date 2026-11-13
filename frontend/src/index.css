@@ -39,7 +39,7 @@ h3 {
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: clamp(1.375rem, 1rem + 1.5vw, 1.75rem);
 }
 
 h2 {
@@ -58,11 +58,6 @@ ul {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .visually-hidden {
@@ -123,6 +118,12 @@ ul {
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .button {
+    min-height: 44px;
+  }
 }
 
 .button:disabled {
@@ -223,7 +224,14 @@ select:disabled {
 }
 
 .segmented__item {
+  display: inline-flex;
   flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: 40px;
+  line-height: 1.2;
+  white-space: nowrap;
   padding: var(--space-8) var(--space-12);
   background: var(--surface-2);
   color: var(--muted);
@@ -318,7 +326,7 @@ select:disabled {
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 599px) {
+@media (max-width: 640px) {
   .change {
     grid-template-columns: 5.5ch 1ch 5.5ch 4.5ch;
     column-gap: var(--space-2);
@@ -511,6 +519,8 @@ select:disabled {
 }
 
 .highlight h3 {
+  display: flex;
+  align-items: center;
   margin: 0 0 var(--space-8);
   font-size: var(--font-size-lg);
 }
@@ -575,18 +585,13 @@ input[type="range"] {
   font-size: var(--font-size-sm);
 }
 
-.highlight h3 {
-  display: flex;
-  align-items: center;
-}
-
 .section__heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-12);
   flex-wrap: wrap;
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-12);
 }
 
 .section__heading h2 {
@@ -598,34 +603,11 @@ input[type="range"] {
   color: var(--accent-text);
 }
 
-.segmented__item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-6);
-  min-height: 40px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.section__heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
-  margin-bottom: var(--space-12);
-}
-
-.section__heading h2 {
-  margin: 0;
-}
-
 .icon-select__icon .rank-icon {
   object-fit: contain;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .table th,
   .table td {
     padding-inline: var(--space-4);
@@ -660,7 +642,7 @@ input[type="range"] {
   }
 }
 
-@media (min-width: 761px) and (max-width: 900px) {
+@media (min-width: 769px) and (max-width: 900px) {
   .table:not(.table--cards) th,
   .table:not(.table--cards) td {
     padding-inline: 10px;

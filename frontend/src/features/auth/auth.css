@@ -10,6 +10,13 @@
   gap: var(--space-12);
 }
 
+@media (max-width: 480px) {
+  .auth-card {
+    margin-block: var(--space-16);
+    padding: var(--space-16);
+  }
+}
+
 .auth-card__divider {
   display: flex;
   align-items: center;
@@ -30,7 +37,7 @@
   margin: var(--space-4) 0 0;
   text-align: center;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--font-size-lg);
 }
 
 .auth-link {
@@ -46,7 +53,7 @@
 .auth-link--aside {
   align-self: flex-end;
   margin-top: -8px;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
 }
 
@@ -54,7 +61,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  padding: var(--space-12) 14px;
+  padding: var(--space-12) var(--space-16);
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   background: var(--surface-2);
