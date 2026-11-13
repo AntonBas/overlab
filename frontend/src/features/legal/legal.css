@@ -1,3 +1,70 @@
+.legal {
+  display: grid;
+  gap: 16px;
+  line-height: 1.65;
+}
+
+.legal > section {
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.legal h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
+
+.legal p {
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+
+.legal p:last-child,
+.legal ul:last-child {
+  margin-bottom: 0;
+}
+
+.legal ul {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-left: 20px;
+  color: var(--muted);
+  list-style: disc;
+}
+
+.legal li::marker {
+  color: var(--accent);
+}
+
+.legal code {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.85em;
+}
+
+.email-copy {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0.25rem;
+  background: transparent;
+  color: var(--text-muted, inherit);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-copy:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .legal-page {
   max-width: 720px;
   margin-inline: auto;

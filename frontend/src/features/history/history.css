@@ -1,3 +1,53 @@
+.changes strong {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.changes del {
+  color: var(--bad);
+}
+
+.changes ins {
+  text-decoration: none;
+  color: var(--good, inherit);
+}
+
+.patch-notes {
+  white-space: pre-wrap;
+}
+
+.chart__svg--win {
+  --series: var(--bar-win);
+}
+
+.chart__svg--pick {
+  --series: var(--bar-pick);
+}
+
+.chart__svg--ban {
+  --series: var(--bar-ban);
+}
+
+.table-sort {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .table-sort {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+}
+
 .segmented--quiet .segmented__item--active {
   background: var(--surface-2);
   box-shadow: inset 0 -3px 0 var(--accent);

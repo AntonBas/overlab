@@ -1,3 +1,47 @@
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 900px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.tag--kind-setup {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent-text);
+}
+
+.tag--kind-position {
+  background: color-mix(in srgb, var(--tank) 22%, transparent);
+  color: var(--tank);
+}
+
+.tag--kind-ultimate {
+  background: color-mix(in srgb, var(--damage) 22%, transparent);
+  color: var(--damage);
+}
+
+.tag--kind-tip {
+  background: color-mix(in srgb, var(--support) 22%, transparent);
+  color: var(--support);
+}
+
+.tag--side-attack,
+.tag--side-defense {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
 .spot-filters {
   display: flex;
   flex-wrap: wrap;

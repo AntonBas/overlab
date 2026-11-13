@@ -1,3 +1,105 @@
+.perk-card--right {
+  grid-column: 2;
+}
+
+.perk-card--left {
+  grid-column: 1;
+}
+
+@media (max-width: 640px) {
+  .perk-card--right,
+  .perk-card--left {
+    grid-column: auto;
+  }
+}
+
+.glyph--triangle {
+  color: #0f9d78;
+}
+
+.glyph--circle {
+  color: #d6364f;
+}
+
+.glyph--cross {
+  color: #2f6fdb;
+}
+
+.glyph--square {
+  color: #c4488f;
+}
+
+.glyph--xbox-a {
+  color: #52b043;
+}
+
+.glyph--xbox-b {
+  color: #e0443e;
+}
+
+.glyph--xbox-x {
+  color: #3b8de0;
+}
+
+.glyph--xbox-y {
+  color: #ffbf00;
+}
+
+.matchups {
+  margin: 0 0 24px;
+}
+
+.matchup {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--role-color, var(--border));
+  border-radius: 14px;
+}
+
+.matchup--tank {
+  --role-color: var(--tank);
+}
+
+.matchup--damage {
+  --role-color: var(--damage);
+}
+
+.matchup--support {
+  --role-color: var(--support);
+}
+
+.relation-avatar--tank {
+  --role-color: var(--tank);
+}
+
+.relation-avatar--damage {
+  --role-color: var(--damage);
+}
+
+.relation-avatar--support {
+  --role-color: var(--support);
+}
+
+@media (max-width: 900px) {
+  .matchup {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+#hero-statistics,
+#hero-counters,
+#hero-abilities,
+#hero-perks,
+#hero-maps,
+#hero-spots {
+  scroll-margin-top: 56px;
+}
+
 .hero-traits {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
