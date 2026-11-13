@@ -1,7 +1,7 @@
 .admin {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
-  gap: 32px;
+  gap: var(--space-32);
   align-items: start;
 }
 
@@ -14,7 +14,7 @@
 }
 
 .dialog h2 {
-  margin: 0 0 8px;
+  margin: 0 0 var(--space-8);
   font-size: 1.15rem;
 }
 
@@ -34,7 +34,7 @@
   .admin .table.table--cards td:has(> .form__actions) {
     position: static;
     width: 100%;
-    padding-top: 8px;
+    padding-top: var(--space-8);
     background: none;
     justify-content: flex-end;
   }
@@ -47,8 +47,8 @@
 .table-search {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
 }
 
 .table-search input {
@@ -59,7 +59,7 @@
 .admin__menu {
   position: sticky;
   top: 16px;
-  padding: 8px;
+  padding: var(--space-8);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -71,17 +71,17 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-4);
 }
 
 .admin__link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: var(--space-12);
+  padding: var(--space-8) var(--space-12);
   border-radius: 8px;
   color: var(--muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
   transition:
     background-color 0.15s,
@@ -97,7 +97,7 @@
 .admin__link--active:hover {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .admin__link svg {
@@ -109,8 +109,8 @@
 }
 
 .admin__form {
-  margin-top: 24px;
-  padding: 24px;
+  margin-top: var(--space-24);
+  padding: var(--space-24);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -123,17 +123,17 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
-  gap: 16px;
+  gap: var(--space-16);
 }
 
 .admin__card {
   display: grid;
   grid-template-columns: auto 1fr;
-  column-gap: 12px;
-  row-gap: 4px;
+  column-gap: var(--space-12);
+  row-gap: var(--space-4);
   align-items: center;
   height: 100%;
-  padding: 16px;
+  padding: var(--space-16);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -162,17 +162,17 @@
 }
 
 .admin__card-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .admin__card-text {
   grid-column: 2;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }
 
 .admin__content > .hero-select {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-16);
 }
 
 .admin__form .hero-select .icon-select {
@@ -186,11 +186,11 @@
 
 .admin .table th,
 .admin .table td {
-  padding: 12px;
+  padding: var(--space-12);
 }
 
 .admin .table-wrap {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-24);
 }
 
 .admin .table .form__actions {
@@ -199,21 +199,21 @@
 }
 
 .admin .table tbody th {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .breadcrumbs {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--font-size-lg);
 }
 
 .breadcrumbs a {
   color: var(--muted);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
 }
 
@@ -228,14 +228,14 @@
 
 .form__actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-8);
   flex-wrap: wrap;
 }
 
 .form-field--checkbox label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-8);
 }
 
 .form-field--checkbox input {
@@ -247,15 +247,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-  font-size: 0.85rem;
+  gap: var(--space-12);
+  margin-top: var(--space-16);
+  font-size: var(--font-size-md);
 }
 
 .pagination .button {
   min-height: 0;
-  padding: 4px 12px;
-  font-size: 0.85rem;
+  padding: var(--space-4) var(--space-12);
+  font-size: var(--font-size-md);
 }
 
 .dialog__backdrop {
@@ -277,7 +277,7 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
-  padding: 24px;
+  padding: var(--space-24);
   max-width: 440px;
   width: calc(100% - 32px);
 }
@@ -285,7 +285,7 @@
 .dialog__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-8);
 }
 
 .table__error {
@@ -293,18 +293,18 @@
   width: 240px;
   overflow-wrap: anywhere;
   color: var(--bad);
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }
 
 .status-badge {
   display: inline-block;
-  padding: 2px 12px;
+  padding: var(--space-2) var(--space-12);
   border-radius: 999px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
@@ -342,10 +342,10 @@
 }
 
 .select-pill {
-  padding: 3px 12px;
+  padding: 3px var(--space-12);
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   background-image: none;
 }
@@ -420,7 +420,7 @@
 .image-upload {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-12);
   flex-wrap: wrap;
 }
 
@@ -445,7 +445,7 @@
   width: min(560px, 100%);
   height: 100%;
   overflow-y: auto;
-  padding: 24px;
+  padding: var(--space-24);
   background: var(--surface);
   border-left: 1px solid var(--border);
   box-shadow: -8px 0 24px rgb(0 0 0 / 0.25);
@@ -485,17 +485,17 @@
 }
 
 .drawer .admin__form h2 {
-  margin: 0 0 4px;
-  padding: 0 44px 16px 0;
+  margin: 0 0 var(--space-4);
+  padding: 0 44px var(--space-16) 0;
   border-bottom: 1px solid var(--border);
-  font-size: 1.25rem;
+  font-size: var(--font-size-2xl);
 }
 
 .drawer .form__actions {
   position: sticky;
   bottom: -24px;
-  margin: 8px -24px -24px;
-  padding: 14px 24px;
+  margin: var(--space-8) -24px -24px;
+  padding: 14px var(--space-24);
   border-top: 1px solid var(--border);
   background: var(--surface);
 }
@@ -507,7 +507,7 @@ body.drawer-open {
 .admin__picker {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: var(--space-12);
 }
 
 .admin .table thead th,
@@ -536,13 +536,13 @@ body.drawer-open {
 .admin__name {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-12);
 }
 
 .category-members {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 2px 12px;
+  gap: var(--space-2) var(--space-12);
   max-height: 260px;
   overflow-y: auto;
 }
@@ -551,8 +551,8 @@ body.drawer-open {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
 }
 
 .section__header h2 {

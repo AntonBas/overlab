@@ -1,13 +1,13 @@
 .changes strong {
   color: var(--muted);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .changes {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }
 
 .changes del {
@@ -43,8 +43,8 @@
   .table-sort {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: var(--space-8);
+    margin-bottom: var(--space-12);
   }
 }
 
@@ -55,9 +55,9 @@
 }
 
 .table__flag {
-  padding: 2px 8px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  padding: var(--space-2) var(--space-8);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
   color: var(--accent);
   white-space: nowrap;
   background: var(--surface-2);
@@ -69,8 +69,8 @@
 .table__hero {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 600;
+  gap: var(--space-12);
+  font-weight: var(--font-weight-semibold);
 }
 
 .table__hero a {
@@ -80,8 +80,8 @@
 .table__mode {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 400;
+  gap: var(--space-4);
+  font-weight: var(--font-weight-regular);
 }
 
 .change__value {
@@ -94,15 +94,15 @@
 }
 
 .chart {
-  margin: 16px 0;
+  margin: var(--space-16) 0;
 }
 
 .chart__caption {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
+  gap: var(--space-12);
+  margin-bottom: var(--space-4);
 }
 
 .chart__svg {
@@ -156,16 +156,16 @@
 
 .chart__label {
   fill: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .stat-switch {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-12);
   flex-wrap: wrap;
-  margin: 12px 0;
+  margin: var(--space-12) 0;
 }
 
 .chart__plot {
@@ -196,15 +196,15 @@
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 6px 12px;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-12);
   transform: translate(-50%, calc(-100% - 12px));
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.3);
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
   pointer-events: none;
   white-space: nowrap;
 }
@@ -219,12 +219,12 @@
 
 .chart__tooltip-date {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .chart__tooltip-season {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   color: var(--accent-text);
 }
 
@@ -233,29 +233,29 @@
 }
 
 .chart__tooltip-effect {
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
   border-top: 1px solid var(--border);
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .chart__tooltip-patch {
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
   border-top: 1px solid var(--border);
   color: var(--accent-text);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .chart__tooltip-parent {
   display: block;
   color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
 }
 
 .chart__tooltip-change {
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
 }
