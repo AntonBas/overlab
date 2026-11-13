@@ -7,7 +7,7 @@ import { ModeIcon } from "../../../components/ui/ModeIcon";
 import type { MapVisual } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/guide";
 import { formatSeconds } from "../../../utils/format";
-import { AbilityText } from "../../heroes";
+import { AbilityText } from "../../abilities";
 import { GUIDE_KIND_LABELS, GUIDE_SIDE_LABELS } from "../labels";
 
 interface SpotCardProps {

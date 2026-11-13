@@ -1,5 +1,5 @@
-import { StatusMessage } from "../../admin";
-import { useSave } from "../../admin";
+import { StatusMessage } from "../../../components/admin/StatusMessage";
+import { useSave } from "../../../components/admin/useSave";
 import { exportAccount } from "../api/accountApi";
 
 export function ExportAccount() {

@@ -95,5 +95,3 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: ScrollText,
   },
 ];
-
-export const LEAVE_WARNING = "You have unsaved changes. Leave this page?";

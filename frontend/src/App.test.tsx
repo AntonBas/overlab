@@ -15,7 +15,7 @@ vi.mock("./features/personal/context/PersonalDataProvider", () => ({
 vi.mock("./features/stats/context/CoverageProvider", () => ({
   CoverageProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
-vi.mock("./features/heroes/context/AbilitiesProvider", () => ({
+vi.mock("./features/abilities/context/AbilitiesProvider", () => ({
   AbilitiesProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 

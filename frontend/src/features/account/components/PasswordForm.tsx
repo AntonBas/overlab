@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../components/ui/FormField";
-import { StatusMessage } from "../../admin";
-import { useSave } from "../../admin";
+import { StatusMessage } from "../../../components/admin/StatusMessage";
+import { useSave } from "../../../components/admin/useSave";
 import { useAuth } from "../../auth";
 import { changePassword } from "../api/accountApi";
 

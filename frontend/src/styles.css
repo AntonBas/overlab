@@ -3,6 +3,8 @@
 @import "./components/layout/layout.css";
 @import "./components/ui/ui.css";
 @import "./components/toast/toast.css";
+@import "./components/admin/admin.css";
+@import "./features/abilities/abilities.css";
 @import "./features/account/account.css";
 @import "./features/admin/admin.css";
 @import "./features/auth/auth.css";
@@ -12,5 +14,7 @@
 @import "./features/history/history.css";
 @import "./features/legal/legal.css";
 @import "./features/maps/maps.css";
+@import "./features/perks/perks.css";
 @import "./features/personal/personal.css";
+@import "./features/relations/relations.css";
 @import "./features/stats/stats.css";

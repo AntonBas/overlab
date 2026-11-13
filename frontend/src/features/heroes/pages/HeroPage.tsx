@@ -15,31 +15,31 @@ import {
   breadcrumbList,
   useStructuredData,
 } from "../../../hooks/useStructuredData";
-import { HeroMapPicks } from "../components/profile/HeroMapPicks";
+import { HeroMapPicks } from "../components/HeroMapPicks";
 import { HeroHistorySection } from "../../history";
 import { fetchGuides } from "../../guides";
 import { SpotsSection } from "../../guides";
 import { FavoriteButton } from "../../personal";
 import { fetchHeroMapStats } from "../../stats";
+import { fetchHeroAbilities } from "../../abilities";
+import { fetchPerks } from "../../perks";
 import {
   fetchCounters,
-  fetchHero,
   fetchHeroCategories,
-  fetchPerks,
-  fetchHeroAbilities,
   fetchSynergies,
-} from "../api/heroesApi";
-import { StatChips } from "../components/profile/StatChips";
-import { AbilityList } from "../components/abilities/AbilityList";
-import { AbilityText } from "../components/abilities/AbilityText";
-import { ControlSchemeToggle } from "../components/abilities/ControlSchemeToggle";
-import { HeroSectionNav } from "../components/profile/HeroSectionNav";
-import { HeroTraits } from "../components/profile/HeroTraits";
-import { heroBackdropStyle } from "../utils/heroBackdrop";
-import { PerkList } from "../components/profile/PerkList";
-import { RelationTabs } from "../components/relations/RelationTabs";
+} from "../../relations";
+import { fetchHero } from "../api/heroesApi";
+import { StatChips } from "../components/StatChips";
+import { AbilityList } from "../../abilities";
+import { AbilityText } from "../../abilities";
+import { ControlSchemeToggle } from "../../abilities";
+import { HeroSectionNav } from "../components/HeroSectionNav";
+import { HeroTraits } from "../components/HeroTraits";
+import { heroBackdropStyle } from "../../../utils/heroBackdrop";
+import { PerkList } from "../../perks";
+import { RelationTabs } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
-import { useRelationFeedback } from "../hooks/useRelationFeedback";
+import { useRelationFeedback } from "../../relations";
 import { heroPageDescription, heroPageTitle } from "../utils/heroSeo";
 
 export function HeroPage() {

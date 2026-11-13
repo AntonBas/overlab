@@ -6,9 +6,9 @@ import { BusinessPage } from "../features/feedback";
 import { FeedbackPage } from "../features/feedback";
 import { HeroPage } from "../features/heroes";
 import { HeroesPage } from "../features/heroes";
-import { CountersPage } from "../features/heroes";
+import { CountersPage } from "../features/relations";
 import { HeroOnMapRedirect } from "../features/heroes";
-import { PerksPage } from "../features/heroes";
+import { PerksPage } from "../features/perks";
 import { HeroSectionRedirect } from "../features/heroes";
 import { ChangesPage } from "../features/history";
 import { MapPage } from "../features/maps";
@@ -45,67 +45,63 @@ const VerifyEmailPage = lazy(() =>
   })),
 );
 const AuditAdminPage = lazy(() =>
-  import("../features/admin/pages/operations/AuditAdminPage").then(
-    (module) => ({
-      default: module.AuditAdminPage,
-    }),
-  ),
+  import("../features/admin/pages/AuditAdminPage").then((module) => ({
+    default: module.AuditAdminPage,
+  })),
 );
 const CollectorAdminPage = lazy(() =>
-  import("../features/admin/pages/operations/CollectorAdminPage").then(
-    (module) => ({
-      default: module.CollectorAdminPage,
-    }),
-  ),
+  import("../features/admin/pages/CollectorAdminPage").then((module) => ({
+    default: module.CollectorAdminPage,
+  })),
 );
 const GuidesAdminPage = lazy(() =>
-  import("../features/admin/pages/content/GuidesAdminPage").then((module) => ({
+  import("../features/guides/admin/pages/GuidesAdminPage").then((module) => ({
     default: module.GuidesAdminPage,
   })),
 );
 const AbilitiesAdminPage = lazy(() =>
-  import("../features/admin/pages/content/AbilitiesAdminPage").then(
+  import("../features/abilities/admin/pages/AbilitiesAdminPage").then(
     (module) => ({
       default: module.AbilitiesAdminPage,
     }),
   ),
 );
 const HeroesAdminPage = lazy(() =>
-  import("../features/admin/pages/content/HeroesAdminPage").then((module) => ({
+  import("../features/heroes/admin/pages/HeroesAdminPage").then((module) => ({
     default: module.HeroesAdminPage,
   })),
 );
 const MapsAdminPage = lazy(() =>
-  import("../features/admin/pages/content/MapsAdminPage").then((module) => ({
+  import("../features/maps/admin/pages/MapsAdminPage").then((module) => ({
     default: module.MapsAdminPage,
   })),
 );
 const PatchesAdminPage = lazy(() =>
-  import("../features/admin/pages/content/PatchesAdminPage").then((module) => ({
+  import("../features/patches/admin/pages/PatchesAdminPage").then((module) => ({
     default: module.PatchesAdminPage,
   })),
 );
 const PerksAdminPage = lazy(() =>
-  import("../features/admin/pages/content/PerksAdminPage").then((module) => ({
+  import("../features/perks/admin/pages/PerksAdminPage").then((module) => ({
     default: module.PerksAdminPage,
   })),
 );
 const CategoriesAdminPage = lazy(() =>
-  import("../features/admin/pages/content/CategoriesAdminPage").then(
+  import("../features/relations/admin/pages/CategoriesAdminPage").then(
     (module) => ({
       default: module.CategoriesAdminPage,
     }),
   ),
 );
 const FeedbackAdminPage = lazy(() =>
-  import("../features/admin/pages/operations/FeedbackAdminPage").then(
+  import("../features/feedback/admin/pages/FeedbackAdminPage").then(
     (module) => ({
       default: module.FeedbackAdminPage,
     }),
   ),
 );
 const RelationsAdminPage = lazy(() =>
-  import("../features/admin/pages/content/RelationsAdminPage").then(
+  import("../features/relations/admin/pages/RelationsAdminPage").then(
     (module) => ({
       default: module.RelationsAdminPage,
     }),
@@ -132,11 +128,9 @@ const SettingsPage = lazy(() =>
   })),
 );
 const UsersAdminPage = lazy(() =>
-  import("../features/admin/pages/operations/UsersAdminPage").then(
-    (module) => ({
-      default: module.UsersAdminPage,
-    }),
-  ),
+  import("../features/admin/pages/UsersAdminPage").then((module) => ({
+    default: module.UsersAdminPage,
+  })),
 );
 const RequireAdmin = lazy(() =>
   import("../features/admin/components/RequireAdmin").then((module) => ({

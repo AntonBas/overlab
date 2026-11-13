@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import { ToastProvider } from "../components/toast/ToastProvider";
 import { AuthProvider } from "../features/auth";
-import { AbilitiesProvider, ControlSchemeProvider } from "../features/heroes";
+import {
+  AbilitiesProvider,
+  ControlSchemeProvider,
+} from "../features/abilities";
 import { PersonalDataProvider } from "../features/personal";
 import { CoverageProvider, RegionProvider } from "../features/stats";
 

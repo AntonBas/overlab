@@ -6,8 +6,8 @@ import type {
   Region,
 } from "../../../types/common";
 import type { Preferences } from "../../../types/user";
-import { StatusMessage } from "../../admin";
-import { useSave } from "../../admin";
+import { StatusMessage } from "../../../components/admin/StatusMessage";
+import { useSave } from "../../../components/admin/useSave";
 import { AllItemsIcon } from "../../../components/ui/AllItemsIcon";
 import {
   IconSelect,

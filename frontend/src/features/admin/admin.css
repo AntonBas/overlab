@@ -13,17 +13,6 @@
   background: var(--surface);
 }
 
-.dialog h2 {
-  margin: 0 0 var(--space-8);
-  font-size: 1.15rem;
-}
-
-.dialog p {
-  margin: 0 0 20px;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
 @media (max-width: 800px) {
   .admin {
     grid-template-columns: minmax(0, 1fr);
@@ -42,18 +31,6 @@
 
 .nowrap {
   white-space: nowrap;
-}
-
-.table-search {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  margin-bottom: var(--space-12);
-}
-
-.table-search input {
-  flex: 0 1 320px;
-  min-width: 0;
 }
 
 .admin__menu {
@@ -232,54 +209,10 @@
   flex-wrap: wrap;
 }
 
-.form-field--checkbox label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.form-field--checkbox input {
-  width: auto;
-  accent-color: var(--accent);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-12);
-  margin-top: var(--space-16);
-  font-size: var(--font-size-md);
-}
-
 .pagination .button {
   min-height: 0;
   padding: var(--space-4) var(--space-12);
   font-size: var(--font-size-md);
-}
-
-.dialog__backdrop {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(0 0 0 / 0.5);
-  z-index: 50;
-}
-
-.dialog__backdrop {
-  backdrop-filter: blur(3px);
-}
-
-.dialog {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
-  padding: var(--space-24);
-  max-width: 440px;
-  width: calc(100% - 32px);
 }
 
 .dialog__actions {
@@ -318,18 +251,6 @@
   color: var(--bad);
   border-color: color-mix(in srgb, var(--bad) 40%, transparent);
   background: color-mix(in srgb, var(--bad) 12%, transparent);
-}
-
-.status-badge--warning {
-  color: var(--accent-text);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.status-badge--info {
-  color: var(--link);
-  border-color: color-mix(in srgb, var(--link) 40%, transparent);
-  background: color-mix(in srgb, var(--link) 12%, transparent);
 }
 
 .status-badge--action {
@@ -417,71 +338,12 @@
   object-fit: contain;
 }
 
-.image-upload {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  flex-wrap: wrap;
-}
-
-.image-upload__preview {
-  max-width: 160px;
-  max-height: 90px;
-  border-radius: 6px;
-  object-fit: contain;
-}
-
-.drawer__backdrop {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: flex-end;
-  background: rgb(0 0 0 / 0.45);
-  z-index: 40;
-}
-
-.drawer {
-  position: relative;
-  width: min(560px, 100%);
-  height: 100%;
-  overflow-y: auto;
-  padding: var(--space-24);
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  box-shadow: -8px 0 24px rgb(0 0 0 / 0.25);
-  animation: drawer-in 0.18s ease-out;
-}
-
-.drawer:focus {
-  outline: none;
-}
-
 .drawer .admin__form {
   margin-top: 0;
   padding: 0;
   border: 0;
   background: none;
   max-width: none;
-}
-
-.drawer__close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.drawer__close:hover {
-  border-color: var(--accent);
 }
 
 .drawer .admin__form h2 {
@@ -498,10 +360,6 @@
   padding: 14px var(--space-24);
   border-top: 1px solid var(--border);
   background: var(--surface);
-}
-
-body.drawer-open {
-  overflow: hidden;
 }
 
 .admin__picker {
@@ -524,12 +382,6 @@ body.drawer-open {
   to {
     transform: none;
     opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .drawer {
-    animation: none;
   }
 }
 
