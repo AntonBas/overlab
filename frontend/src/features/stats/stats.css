@@ -1,5 +1,5 @@
 .filters__note {
   flex-basis: 100%;
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }

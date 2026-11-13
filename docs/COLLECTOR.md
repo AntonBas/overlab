@@ -1,0 +1,48 @@
+# Statistics collector
+
+The backend collects statistics from Blizzard's public hero statistics page on a schedule and stores a snapshot per filter combination. Jobs are defined in `backend/src/main/resources/collector.yaml`. Scheduled, startup, manual and chained runs all execute on the single-threaded collector executor (queue of 4), never on the shared scheduler threads, so a long run cannot delay token cleanup or retention; a run that finds the queue full is recorded as failed and can be started again:
+
+- `daily-overview`: all ranks for Competitive and the overview for Quick Play, all maps combined
+- `daily-maps`: every map, rank `ALL`, both queues (about 62 requests). It has no schedule: it starts right after `daily-overview` and only when that job saved new rows, and at most once per 2 days (`min-interval: 2d`)
+- `weekly-maps`: every map, every rank from Bronze to Grandmaster for Competitive (about 248 requests, roughly 12 minutes with the 3 s pause). Same rule: runs after `daily-overview` found changes, at most once per 7 days
+- A job with `after: <job name>` instead of `cron` is chained. It starts when the job it follows saved rows, skips itself if its last successful run is younger than `min-interval`, and is shown in the admin panel as "After ... finds changes". Runs started by a patch are not chained, because a patch already runs every job
+- `daily-other-regions`: PC in Americas and Asia, both queues, rank `ALL`, all maps combined
+- `other-regions-ranks`: PC in Americas and Asia, Competitive, every rank from Bronze to Grandmaster (16 requests), all maps combined. Chained after `daily-other-regions`
+- `americas-maps`: PC in Americas, every map, rank `ALL`, both queues (62 requests), at most once per 2 days. Chained after `daily-other-regions`
+- `asia-maps`: the same for PC in Asia, at most once per 7 days, because the sample is smaller and the numbers change slower
+- `americas-rank-maps`: PC in Americas, every map and every rank for Competitive (248 requests, about 12 minutes), at most once per 7 days. Not started by a patch (`run-on-patch: false`)
+- `daily-console`: Console in every region, both queues, rank `ALL`, all maps combined
+- `console-ranks`: Console in Europe and Americas, Competitive, every rank, all maps combined. Chained after `daily-console`
+- `console-asia-ranks`: the same for Console in Asia, at most once per 7 days
+- Maps and rank by map for Console, and rank by map for Asia, are not collected: the samples are too small for those slices to be reliable
+
+`GET /api/stats/coverage` lists which platform, region and queue combinations have ranks (`tiers`, all maps combined) and which have maps (`mapTiers`), read from `snapshot_checks` and cached with the other statistics. The statistics, map, hero and changes pages use it to enable only the rank and map filters that have data, so a job in `collector.yaml` needs no matching frontend change. While the request is loading or failing the pages fall back to the old rule: ranks and maps only for PC in Europe.
+
+The region shown by default is chosen in this order: the region saved in the browser after the visitor picked one (`localStorage` key `overlab.region`), the default region from the profile, the region of the browser time zone (`frontend/src/features/stats/region.ts`: the Americas, including Oceania, for `America/*` and `Australia/*`; Asia for `Asia/*` except the Middle East, the Caucasus and Russia; Europe for the rest), then Europe. The header has a region switch that works on every page, and for a signed-in visitor it also saves the choice as the default region of the profile. The hero page and the hero history chart follow it; the statistics, map and changes pages read it when the address has no `region` parameter. An address without `region` therefore means "the visitor's own region".
+
+The collector retries temporary Blizzard errors, uses connect and read timeouts, and rejects a response that looks wrong (too few heroes, percentages outside 0-100, unknown roles, duplicates) instead of storing it. Every run is recorded in `collector_runs` (status `SUCCESS`, `PARTIAL` or `FAILED`, requests, failures, rows). A job never runs twice at the same time.
+
+Admin endpoints (`ADMIN` role):
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/admin/collector/jobs` | Configured jobs |
+| `POST /api/admin/collector/jobs/{name}/run` | Start a job now (202, 409 if it is already running) |
+| `GET /api/admin/collector/runs` | Latest 50 runs |
+| `POST /api/admin/collector/perks/import` | Import perks from the Blizzard hero pages in the background (202; 400 while `COLLECTOR_IMPORT_PERKS` is off, 409 if already running) |
+| `POST /api/admin/collector/patches/import` | Import new balance patches from the Blizzard patch notes page now, returns `{created}` (502 when the Blizzard page cannot be read or its markup changed) |
+
+To run one job when the backend starts:
+
+```bash
+COLLECTOR_STARTUP_JOB=daily-overview ./gradlew bootRun
+```
+
+The game format stored with every snapshot (`FIVE_VS_FIVE` or `SIX_VS_SIX`) is set with `COLLECTOR_GAME_FORMAT` and must be changed by hand when the game switches format. Every statistics, history and comparison query reads only snapshots of the format of the most recent snapshot, so after the switch the site shows the new format and the old numbers stay in the database without mixing into charts. Snapshots older than 180 days are thinned out weekly, keeping the latest snapshot of each combination in every UTC week; the deletion runs one week at a time in separate transactions so it never holds a long lock. Responses are cached in Redis and the caches are cleared after every collector run that saved rows.
+
+**What is stored.** One row per hero for every combination of mode (Quick Play or Competitive), platform, region, rank and map, with win rate, pick rate and ban rate (Competitive only), the capture time, the game format (`COLLECTOR_GAME_FORMAT`) and the source. A snapshot is stored only when the numbers differ from the previous snapshot of the same combination (a hash of every hero's win, pick and ban rate is compared); an unchanged run only moves the combination's `last_checked_at` in the `snapshot_checks` table, which is also where the last Blizzard `ETag` is kept. The next request sends it as `If-None-Match`, and a `304` answer skips parsing and storage altogether. Pages show the check time ("Checked 5 hours ago") and, from `GET /api/stats/freshness`, when Blizzard last changed the numbers; history charts are extended to the last check. Snapshots are kept as they were captured; older than 180 days they are thinned to the latest one per week. **What is not stored:** anything before the first collector run (Blizzard publishes only current values, and the Internet Archive holds too few copies of the data endpoint to import), individual matches, players, and the game format is not detected automatically because the Blizzard response does not contain it.
+
+Every snapshot is checked after validation but is still stored: pick rates that do not add up to about 500 (5v5) or 600 (6v6) are counted in `collector_suspicious_snapshots_total`, win or pick rate jumps of more than 5 and 8 percentage points against the previous snapshot of the same filters in `collector_outliers_total`, and heroes or maps seen for the first time in `collector_new_heroes_total` and `collector_new_maps_total` (each also logged as a warning; new maps need an image in the admin panel). Jobs that collect `EACH` map first read the map list from Blizzard's rates page (`BlizzardRatesPageClient`, `MapListParser`): maps missing in the database are created with their name and game mode, and a known map without a mode gets it; names you edited are not touched. A hero whose role differs from the one stored is logged, counted in `collector_role_changes_total` and written to `hero_role_changes`; the role of past snapshots is not stored, so the site shows the new role everywhere, and `/api/stats/compare` adds `roleChange` to a hero who moved between the two snapshots (the changes page shows a "Role changed" tag). A hero found after the very first collection, and a perk or ability added to a hero that already had some, get `introduced_at`; for 14 days (`NewBadge.WINDOW`) the API sets `recentlyAdded` and the site shows a "New" tag next to it (statistics table, heroes list, hero page, abilities, perks). Everything created by the first collection or the first import of a hero is not tagged. Grafana alerts (`docker/grafana/provisioning/alerting/`) fire for a stopped collector, rejected responses, a new hero, a new map and a role change; the Telegram contact point is created once in Grafana, see [docs/DEPLOY.md](docs/DEPLOY.md). Every snapshot row has a `source` (`COLLECTOR` or `ARCHIVE`); there is no history from before the first collector run.
+
+Metrics (`collector_requests_total`, `collector_rows_saved_total`, `collector_unchanged_snapshots_total`, `collector_job_duration_seconds`, `collector_last_success_timestamp_seconds`, `collector_last_change_timestamp_seconds{queue}`) are exposed to Prometheus, and the Grafana dashboard "Overlab: collector and API" is provisioned from `docker/grafana/dashboards/`.
+

@@ -2,6 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { user } from "../../../test/fixtures/auth";
 import { renderWithRouter } from "../../../test/render";
 import type { User } from "../../../types/user";
 
@@ -28,14 +29,7 @@ vi.mock("../../auth/context/useAuth", () => ({
 import { deleteAccount, updateProfile } from "../api/accountApi";
 import { SettingsPage } from "./SettingsPage";
 
-const localUser: User = {
-  id: 1,
-  email: "ana@overlab.gg",
-  displayName: "Ana",
-  role: "USER",
-  provider: "LOCAL",
-  emailVerified: true,
-};
+const localUser: User = user();
 
 function renderSettings() {
   renderWithRouter(

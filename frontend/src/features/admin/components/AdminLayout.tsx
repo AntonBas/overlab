@@ -2,8 +2,9 @@ import clsx from "clsx";
 import { useCallback, useMemo, useRef, type MouseEvent } from "react";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { ADMIN_SECTIONS, LEAVE_WARNING } from "./adminSections";
-import { UnsavedChangesContext } from "./forms/unsavedChanges";
+import { LEAVE_WARNING } from "../../../components/admin/unsavedChanges";
+import { ADMIN_SECTIONS } from "./adminSections";
+import { UnsavedChangesContext } from "../../../components/admin/unsavedChanges";
 
 export function AdminLayout() {
   const location = useLocation();

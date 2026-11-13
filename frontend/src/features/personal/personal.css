@@ -1,23 +1,23 @@
 .favorite-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-8);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .favorite-grid--wide {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
 }
 
 .favorite-grid li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-8);
   min-width: 0;
-  padding: 8px 8px 8px 12px;
+  padding: var(--space-8) var(--space-8) var(--space-8) var(--space-12);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
@@ -37,13 +37,13 @@
 
 .favorite-grid .place-icon {
   min-width: 0;
-  gap: 10px;
+  gap: var(--space-8);
 }
 
 .favorite-grid .place-icon a {
   overflow: hidden;
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -73,14 +73,25 @@
   color: var(--bad);
 }
 
+@media (pointer: coarse) {
+  .favorite-grid__remove {
+    width: 40px;
+    height: 40px;
+  }
+
+  .favorite-star {
+    padding: var(--space-8);
+  }
+}
+
 .preferences-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 20px;
+  gap: var(--space-16) var(--space-20);
   align-items: end;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .preferences-form {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -91,7 +102,7 @@
   grid-column: 1 / -1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-16);
 }
 
 .favorite-button {
@@ -100,8 +111,8 @@
 
 .favorite-star {
   flex-shrink: 0;
-  padding: 4px 6px;
-  font-size: 1.25rem;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--font-size-2xl);
   line-height: 1;
   color: var(--muted);
   background: none;
@@ -129,6 +140,6 @@
 .place-icon {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-6);
   vertical-align: middle;
 }

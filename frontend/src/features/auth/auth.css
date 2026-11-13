@@ -1,21 +1,28 @@
 .auth-card {
   max-width: 420px;
-  margin: 24px auto;
-  padding: 24px;
+  margin: var(--space-24) auto;
+  padding: var(--space-24);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-12);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    margin-block: var(--space-16);
+    padding: var(--space-16);
+  }
 }
 
 .auth-card__divider {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-12);
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }
 
 .auth-card__divider::before,
@@ -27,15 +34,15 @@
 }
 
 .auth-card__switch {
-  margin: 4px 0 0;
+  margin: var(--space-4) 0 0;
   text-align: center;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--font-size-lg);
 }
 
 .auth-link {
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
 }
 
@@ -46,19 +53,19 @@
 .auth-link--aside {
   align-self: flex-end;
   margin-top: -8px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
 }
 
 .auth-alert {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-16);
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   background: var(--surface-2);
-  font-size: 0.9rem;
+  font-size: var(--font-size-lg);
 }
 
 .auth-alert p {
@@ -72,7 +79,7 @@
   background: transparent;
   color: var(--accent-text);
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 

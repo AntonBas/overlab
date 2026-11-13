@@ -1,9 +1,53 @@
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 900px;
+  margin-bottom: var(--space-16);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.tag--kind-setup {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent-text);
+}
+
+.tag--kind-position {
+  background: color-mix(in srgb, var(--tank) 22%, transparent);
+  color: var(--tank);
+}
+
+.tag--kind-ultimate {
+  background: color-mix(in srgb, var(--damage) 22%, transparent);
+  color: var(--damage);
+}
+
+.tag--kind-tip {
+  background: color-mix(in srgb, var(--support) 22%, transparent);
+  color: var(--support);
+}
+
+.tag--side-attack,
+.tag--side-defense {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
 .spot-filters {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px 16px;
-  margin: 0 0 16px;
+  gap: var(--space-12) var(--space-16);
+  margin: 0 0 var(--space-16);
 }
 
 .spot-card {
@@ -72,9 +116,9 @@
   position: absolute;
   right: 8px;
   bottom: 8px;
-  padding: 2px 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   color: #fff;
   background: rgb(0 0 0 / 0.75);
   border-radius: 4px;
@@ -83,8 +127,8 @@
 .spot-card__body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 16px 16px;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-16) var(--space-16);
 }
 
 .spot-card__body h3 {
@@ -107,14 +151,14 @@
 }
 
 .spot-card__description {
-  font-size: 0.85rem;
+  font-size: var(--font-size-md);
 }
 
 .spot-card__tags {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-6);
   min-height: 28px;
 }
 
@@ -124,9 +168,9 @@
 
 .spot-rail {
   display: flex;
-  gap: 16px;
+  gap: var(--space-16);
   margin: 0;
-  padding: 0 0 12px;
+  padding: 0 0 var(--space-12);
   list-style: none;
   overflow-x: auto;
   scroll-snap-type: x proximity;
@@ -173,7 +217,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-4);
   margin: 0;
 }
 
@@ -186,7 +230,7 @@
 }
 
 .guide__header h1 {
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-12);
   text-wrap: balance;
 }
 
@@ -195,16 +239,16 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px 12px;
+  gap: var(--space-8) var(--space-12);
   margin: 0;
 }
 
 .guide__place {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-8);
   color: var(--text);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .guide__place .thumbnail {

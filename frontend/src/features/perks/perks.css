@@ -1,0 +1,259 @@
+.perk-card--right {
+  grid-column: 2;
+}
+
+.perk-card--left {
+  grid-column: 1;
+}
+
+@media (max-width: 640px) {
+  .perk-card--right,
+  .perk-card--left {
+    grid-column: auto;
+  }
+}
+
+.perk-group + .perk-group {
+  margin-top: var(--space-16);
+}
+
+.perk-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+.perk-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.perk-card--recommended {
+  border-color: var(--good);
+  box-shadow: inset 0 0 0 1px var(--good);
+}
+
+.perk-card--optional {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.perk-card--avoid {
+  border-color: var(--bad);
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+
+.perk-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  width: 100%;
+}
+
+.perk-card__side {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+}
+
+.perk-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  width: 100%;
+}
+
+.perk-card__icon {
+  align-self: flex-start;
+}
+
+@media (max-width: 640px) {
+  .perk-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero-perks-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-16);
+}
+
+.hero-perks--tank {
+  --role-color: var(--tank);
+}
+
+.hero-perks--damage {
+  --role-color: var(--damage);
+}
+
+.hero-perks--support {
+  --role-color: var(--support);
+}
+
+.hero-perks__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+
+.hero-perks__header {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.hero-perks__title {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.hero-perks__title strong {
+  font-size: 1.125rem;
+}
+
+.perk-row--compact {
+  gap: var(--space-8);
+}
+
+.perk-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+  padding: var(--space-8) var(--space-12);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+
+.perk-tile:hover {
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--text) 8%);
+}
+
+.perk-tile__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--font-size-md);
+}
+
+.perk-tile__icon {
+  flex-shrink: 0;
+}
+
+.perk-tile.perk-card--left {
+  grid-column: 1;
+}
+
+.perk-tile.perk-card--right {
+  grid-column: 2;
+}
+
+.perk-row.perk-row--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.perk-tile__body strong {
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.perk-card__note {
+  margin-top: var(--space-4);
+  padding-left: var(--space-12);
+  border-left: 2px solid var(--border);
+}
+
+.perk-tile .perk-tile__icon {
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.perk-tile__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.hero-perks-grid {
+  row-gap: 0;
+}
+
+.hero-perks-item {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  margin-bottom: var(--space-16);
+}
+
+.hero-perks-item .perk-group {
+  align-self: start;
+}
+
+.hero-perks__top {
+  align-self: start;
+}
+
+.perk-tile__trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+.perk-tile__trigger:focus-visible {
+  border-radius: 8px;
+}
+
+.perk-tip--recommended {
+  border-left-color: var(--good);
+}
+
+.perk-tip--avoid {
+  border-left-color: var(--bad);
+}
+
+.perk-tip__note {
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--border);
+}
+
+.perk-tip__label {
+  display: block;
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted);
+}
+
+.hero-perks--backdrop {
+  background-position: 90% 40%;
+  background-size: cover;
+  border-color: color-mix(in srgb, var(--role-color) 55%, var(--border));
+}

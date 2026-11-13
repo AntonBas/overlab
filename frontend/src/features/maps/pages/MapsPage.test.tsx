@@ -1,6 +1,8 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
+import { gameMap } from "../../../test/fixtures/maps";
 import { renderWithRouter } from "../../../test/render";
 
 const personal = vi.hoisted(() => ({ favoriteMaps: new Set<string>() }));
@@ -18,14 +20,9 @@ vi.mock("../../auth/context/useAuth", () => ({
 vi.mock("../api/mapsApi", () => ({
   fetchMaps: vi.fn(() =>
     Promise.resolve([
-      {
-        slug: "busan",
-        name: "Busan",
-        mode: "CONTROL",
-        imageUrl: "/media/maps/busan-1.webp",
-      },
-      { slug: "rialto", name: "Rialto", mode: "ESCORT", imageUrl: null },
-      { slug: "havana", name: "Havana", mode: "ESCORT", imageUrl: null },
+      gameMap({ imageUrl: "/media/maps/busan-1.webp" }),
+      gameMap({ slug: "rialto", name: "Rialto", mode: "ESCORT" }),
+      gameMap({ slug: "havana", name: "Havana", mode: "ESCORT" }),
     ]),
   ),
 }));
@@ -35,6 +32,14 @@ import { MapsPage } from "./MapsPage";
 describe("MapsPage", () => {
   beforeEach(() => {
     personal.favoriteMaps = new Set();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderWithRouter(<MapsPage />);
+
+    await screen.findByRole("link", { name: /Busan/ });
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("shows a card with the image for a map that has one", async () => {

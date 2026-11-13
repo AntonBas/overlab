@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
-import { StatusMessage } from "../../admin";
-import { useSave } from "../../admin";
+import { StatusMessage } from "../../../components/admin/StatusMessage";
+import { useSave } from "../../../components/admin/useSave";
 import { useAuth } from "../../auth";
 import { deleteAccount } from "../api/accountApi";
 

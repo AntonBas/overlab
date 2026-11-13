@@ -2,6 +2,8 @@ import { screen } from "@testing-library/react";
 import { AxiosError, AxiosHeaders } from "axios";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
+import { hero as heroFixture } from "../../../test/fixtures/heroes";
 import { renderWithRouter } from "../../../test/render";
 import { HeroPage } from "./HeroPage";
 
@@ -18,10 +20,16 @@ const api = vi.hoisted(() => ({
 
 vi.mock("../api/heroesApi", () => ({
   fetchHero: api.fetchHero,
+}));
+vi.mock("../../perks/api/perksApi", () => ({
   fetchPerks: api.fetchPerks,
+}));
+vi.mock("../../relations/api/relationsApi", () => ({
   fetchCounters: api.fetchCounters,
   fetchSynergies: api.fetchSynergies,
   fetchHeroCategories: api.fetchHeroCategories,
+}));
+vi.mock("../../abilities/api/abilitiesApi", () => ({
   fetchHeroAbilities: api.fetchHeroAbilities,
 }));
 vi.mock("../../stats/api/statsApi", () => ({
@@ -33,7 +41,7 @@ vi.mock("../../guides/api/guidesApi", () => ({
 vi.mock("../../stats/context/useRegion", () => ({
   useRegion: () => ({ region: "EUROPE" }),
 }));
-vi.mock("../hooks/useRelationFeedback", () => ({
+vi.mock("../../relations/hooks/useRelationFeedback", () => ({
   useRelationFeedback: () => ({}),
 }));
 vi.mock("../../history/components/HeroHistorySection", () => ({
@@ -53,32 +61,23 @@ vi.mock("../../history/components/HeroHistorySection", () => ({
 vi.mock("../../personal/components/FavoriteButton", () => ({
   FavoriteButton: () => <button type="button">Favorite</button>,
 }));
-vi.mock("../components/relations/RelationTabs", () => ({
+vi.mock("../../relations/components/RelationTabs", () => ({
   RelationTabs: () => <div>relation tabs</div>,
 }));
-vi.mock("../components/abilities/AbilityList", () => ({
+vi.mock("../../abilities/components/AbilityList", () => ({
   AbilityList: () => <div>ability list</div>,
 }));
-vi.mock("../components/profile/PerkList", () => ({
+vi.mock("../../perks/components/PerkList", () => ({
   PerkList: () => <div>perk list</div>,
 }));
-vi.mock("../components/profile/HeroMapPicks", () => ({
+vi.mock("../components/HeroMapPicks", () => ({
   HeroMapPicks: () => <div>map picks</div>,
 }));
 vi.mock("../../guides/components/SpotsSection", () => ({
   SpotsSection: () => <div>spots</div>,
 }));
 
-const hero = {
-  slug: "ana",
-  name: "Ana",
-  role: "SUPPORT",
-  subrole: "tactician",
-  description: "Sniper healer",
-  strengths: null,
-  weaknesses: null,
-  portraitUrl: null,
-};
+const hero = heroFixture();
 
 function failure(status: number) {
   const config = { headers: new AxiosHeaders() };
@@ -113,6 +112,14 @@ describe("HeroPage", () => {
     });
     api.fetchHeroAbilities.mockResolvedValue([]);
     api.fetchGuides.mockResolvedValue([]);
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderPage();
+
+    await screen.findByRole("heading", { name: "Ana", level: 1 });
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("shows the hero name and statistics, hiding sections without data", async () => {
