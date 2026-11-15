@@ -8,7 +8,6 @@ function highlightOf(
   label: string,
   value: number,
   tone: HeroHighlight["tone"],
-  portraits: Record<string, string | null>,
 ): HeroHighlight {
   return {
     key,
@@ -16,16 +15,13 @@ function highlightOf(
     heroSlug: change.heroSlug,
     heroName: change.heroName,
     role: change.role,
-    portraitUrl: portraits[change.heroSlug] ?? null,
+    portraitUrl: change.portraitUrl,
     value: `${formatDelta(value)}%`,
     tone,
   };
 }
 
-export function changeHighlights(
-  changes: HeroChange[],
-  portraits: Record<string, string | null>,
-): HeroHighlight[] {
+export function changeHighlights(changes: HeroChange[]): HeroHighlight[] {
   const byWin = [...changes].sort(
     (first, second) => second.winRateChange - first.winRateChange,
   );
@@ -43,7 +39,6 @@ export function changeHighlights(
         "Biggest win rate gain",
         gain.winRateChange,
         "up",
-        portraits,
       ),
     );
   }
@@ -55,7 +50,6 @@ export function changeHighlights(
         "Biggest win rate drop",
         drop.winRateChange,
         "down",
-        portraits,
       ),
     );
   }
@@ -67,7 +61,6 @@ export function changeHighlights(
         "Pick rate rising most",
         risingPick.pickRateChange,
         "pick",
-        portraits,
       ),
     );
   }

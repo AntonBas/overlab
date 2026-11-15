@@ -59,18 +59,6 @@
   gap: var(--space-16);
 }
 
-.hero-perks--tank {
-  --role-color: var(--tank);
-}
-
-.hero-perks--damage {
-  --role-color: var(--damage);
-}
-
-.hero-perks--support {
-  --role-color: var(--support);
-}
-
 .hero-perks__top {
   display: flex;
   align-items: center;
@@ -146,7 +134,7 @@
 }
 
 .perk-tile__body strong {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   line-height: 1.2;
 }
 
@@ -225,7 +213,7 @@
   gap: var(--space-8) var(--space-24);
   padding: var(--space-12) var(--space-16);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--surface), transparent);
 }
 
@@ -344,5 +332,37 @@
 
   .perk-group--tree .perk-row::before {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .perk-tile__trigger {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-8);
+  }
+
+  .perk-tile {
+    padding: var(--space-8);
+  }
+
+  .perk-tile__body,
+  .perk-tile__heading {
+    align-items: center;
+    max-width: 100%;
+  }
+
+  .perk-tile .tag {
+    max-width: 100%;
+    padding: var(--space-2) var(--space-8);
+    overflow: hidden;
+    font-size: var(--font-size-2xs);
+    text-overflow: ellipsis;
+  }
+
+  .perk-tile .perk-tile__icon {
+    width: 44px;
+    height: 44px;
   }
 }

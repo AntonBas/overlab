@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { usePersonalData } from "../context/usePersonalData";
 import { useRequireLogin } from "../hooks/useRequireLogin";
 
@@ -16,6 +17,7 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { signedIn, sendToLogin } = useRequireLogin();
   const personal = usePersonalData();
+  const [clicked, setClicked] = useState(false);
   const favorite =
     kind === "hero"
       ? personal.favoriteHeroes.has(slug)
@@ -36,12 +38,19 @@ export function FavoriteButton({
             ? `Remove ${name} from favorites`
             : `Add ${name} to favorites`
         }
-        onClick={() => (signedIn ? void toggle(slug) : sendToLogin())}
+        onClick={() => {
+          setClicked(true);
+          if (signedIn) {
+            void toggle(slug);
+          } else {
+            sendToLogin();
+          }
+        }}
       >
         <span aria-hidden="true">{favorite ? "★" : "☆"}</span>
         {!compact && (favorite ? " Favorite" : " Add to favorites")}
       </button>
-      {personal.failure && (
+      {clicked && personal.failure && (
         <span className="form-field__error" role="alert">
           {personal.failure}
         </span>

@@ -63,29 +63,37 @@ export function SpotCard({
             )}
           </button>
         )}
-      </div>
-      <div className="spot-card__body">
-        <div className="spot-card__tags">
+        {!playing && (
           <span
-            className={clsx("tag", `tag--kind-${guide.kind.toLowerCase()}`)}
+            className={clsx(
+              "tag",
+              "spot-card__kind",
+              `tag--kind-${guide.kind.toLowerCase()}`,
+            )}
           >
             {GUIDE_KIND_LABELS[guide.kind]}
           </span>
-          {guide.side !== "BOTH" && (
-            <span
-              className={clsx("tag", `tag--side-${guide.side.toLowerCase()}`)}
-            >
-              {GUIDE_SIDE_LABELS[guide.side]}
-            </span>
-          )}
-          {guide.abilitySlug && (
-            <span className="spot-card__ability">
-              <AbilityText
-                text={`[[${guide.heroSlug}/${guide.abilitySlug}]]`}
-              />
-            </span>
-          )}
-        </div>
+        )}
+      </div>
+      <div className="spot-card__body">
+        {(guide.side !== "BOTH" || guide.abilitySlug) && (
+          <div className="spot-card__tags">
+            {guide.side !== "BOTH" && (
+              <span
+                className={clsx("tag", `tag--side-${guide.side.toLowerCase()}`)}
+              >
+                {GUIDE_SIDE_LABELS[guide.side]}
+              </span>
+            )}
+            {guide.abilitySlug && (
+              <span className="spot-card__ability">
+                <AbilityText
+                  text={`[[${guide.heroSlug}/${guide.abilitySlug}]]`}
+                />
+              </span>
+            )}
+          </div>
+        )}
         <h3>
           <Link to={`/guides/${guide.path}`}>{guide.title}</Link>
         </h3>

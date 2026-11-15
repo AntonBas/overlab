@@ -1,15 +1,21 @@
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { LEGAL_LAST_UPDATED } from "../lastUpdated";
 import { CookieSettings } from "../components/CookieSettings";
 
 export function CookiesPage() {
   usePageTitle("Cookie policy");
   return (
     <div className="legal-page">
-      <PageHeader title="Cookie policy" />
+      <PageHeader
+        title="Cookie policy"
+        subtitle={`Last updated ${LEGAL_LAST_UPDATED}`}
+      />
       <div className="legal">
-        <section>
-          <h2>Necessary</h2>
+        <details className="legal-section" open>
+          <summary>
+            <h2>Necessary</h2>
+          </summary>
           <p>These are needed to sign in and cannot be turned off.</p>
           <ul>
             <li>
@@ -20,29 +26,51 @@ export function CookiesPage() {
               <code>refresh_token</code>: renews your session without asking for
               your password again. Removed when you sign out.
             </li>
+          </ul>
+        </details>
+        <details className="legal-section">
+          <summary>
+            <h2>Local storage</h2>
+          </summary>
+          <p>
+            These are not cookies. They stay in your browser and are never sent
+            to our servers.
+          </p>
+          <ul>
             <li>
               <code>overlab.controlScheme</code>: remembers the controller
-              layout you picked. It is stored, together with your choices on
-              this page, in your browser's local storage rather than in a
-              cookie.
+              layout you picked.
             </li>
+            <li>
+              <code>overlab.region</code>: remembers the statistics region you
+              picked.
+            </li>
+            <li>
+              <code>overlab.session</code>: remembers whether you were signed
+              in, so the site does not ask the server needlessly.
+            </li>
+            <li>Your choices on this page.</li>
           </ul>
-        </section>
-        <section>
-          <h2>Analytics</h2>
+        </details>
+        <details className="legal-section">
+          <summary>
+            <h2>Analytics</h2>
+          </summary>
           <p>
             Off until you allow it here. When allowed, Umami Cloud (EU) counts
             visits anonymously. It sets no cookies, does not track you across
             sites and respects the Do Not Track setting.
           </p>
-        </section>
-        <section>
-          <h2>Advertising</h2>
+        </details>
+        <details className="legal-section">
+          <summary>
+            <h2>Advertising</h2>
+          </summary>
           <p>
             Off by default. Advertising scripts, if added, will only load after
             you allow them here.
           </p>
-        </section>
+        </details>
         <CookieSettings />
       </div>
     </div>

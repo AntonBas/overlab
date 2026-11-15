@@ -12,7 +12,6 @@ import { sortChanges, type ChangeSort } from "../utils/changes";
 interface ChangesTableProps {
   changes: HeroChange[];
   showBan: boolean;
-  portraits?: Record<string, string | null>;
 }
 
 const DELTA_TITLE = "Change between the two snapshots";
@@ -34,11 +33,7 @@ function ChangeCell({ before, after, change }: ChangeCellProps) {
   );
 }
 
-export function ChangesTable({
-  changes,
-  showBan,
-  portraits = {},
-}: ChangesTableProps) {
+export function ChangesTable({ changes, showBan }: ChangesTableProps) {
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
   const rows = useMemo(
@@ -164,7 +159,7 @@ export function ChangesTable({
                   <span className="table__hero">
                     <HeroPortrait
                       name={change.heroName}
-                      url={portraits[change.heroSlug] ?? null}
+                      url={change.portraitUrl}
                     />
                     <RoleBadge role={change.role} compact />
                     <Link to={`/heroes/${change.heroSlug}`}>

@@ -1,33 +1,33 @@
 .glyph--triangle {
-  color: #0f9d78;
+  color: var(--glyph-triangle);
 }
 
 .glyph--circle {
-  color: #d6364f;
+  color: var(--glyph-circle);
 }
 
 .glyph--cross {
-  color: #2f6fdb;
+  color: var(--glyph-cross);
 }
 
 .glyph--square {
-  color: #c4488f;
+  color: var(--glyph-square);
 }
 
 .glyph--xbox-a {
-  color: #52b043;
+  color: var(--glyph-xbox-a);
 }
 
 .glyph--xbox-b {
-  color: #e0443e;
+  color: var(--glyph-xbox-b);
 }
 
 .glyph--xbox-x {
-  color: #3b8de0;
+  color: var(--glyph-xbox-x);
 }
 
 .glyph--xbox-y {
-  color: #ffbf00;
+  color: var(--glyph-xbox-y);
 }
 
 .ability-chip {
@@ -97,7 +97,7 @@
   margin-bottom: var(--space-12);
   padding: var(--space-12);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--surface), transparent);
 }
 
@@ -110,7 +110,7 @@
   width: 96px;
   padding: var(--space-8) var(--space-6) var(--space-8);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--muted);
   font: inherit;
@@ -156,7 +156,7 @@
   width: 56px;
   height: 56px;
   border: 2px solid color-mix(in srgb, var(--slot-color) 60%, transparent);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--bg);
 }
 
@@ -181,7 +181,7 @@
   gap: var(--space-16);
   padding: var(--space-16);
   border: 1px solid color-mix(in srgb, var(--slot-color) 45%, var(--border));
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -209,7 +209,7 @@
   place-items: center;
   width: 84px;
   height: 84px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--bg);
   box-shadow: 0 0 24px -6px var(--slot-color);
 }
@@ -298,7 +298,7 @@
   height: 18px;
   border-radius: 50%;
   border: 1px solid rgb(255 255 255 / 0.22);
-  background: #1d1f23;
+  background: var(--glyph-dark);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   line-height: 1;
@@ -308,6 +308,6 @@
 .glyph--plain-b,
 .glyph--plain-x,
 .glyph--plain-y {
-  background: #3b3d42;
-  color: #f2f2f2;
+  background: var(--glyph-plain);
+  color: var(--glyph-plain-text);
 }

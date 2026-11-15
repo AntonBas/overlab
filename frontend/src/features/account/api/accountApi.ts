@@ -29,6 +29,9 @@ export async function exportAccount(): Promise<Blob> {
   return data;
 }
 
-export async function deleteAccount(password: string | null): Promise<void> {
-  await api.delete("/me", { data: { password } });
+export async function deleteAccount(
+  password: string | null,
+  confirmEmail: string | null,
+): Promise<void> {
+  await api.delete("/me", { data: { password, confirmEmail } });
 }

@@ -113,7 +113,7 @@ export function GuidesAdminPage() {
                   </button>
                   <button
                     type="button"
-                    className="button button--ghost"
+                    className="button button--ghost button--danger-ghost"
                     onClick={() => setDeleting(guide)}
                   >
                     Delete

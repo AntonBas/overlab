@@ -25,7 +25,7 @@ export function MyLibraryPage() {
   const personal = usePersonalData();
   const favorites = useFetch(
     () => (user ? fetchFavorites() : Promise.resolve(null)),
-    [user?.id, personal.favoriteHeroes, personal.favoriteMaps],
+    [user?.id, personal.favoriteHeroes.size, personal.favoriteMaps.size],
     { keepPrevious: true },
   );
 

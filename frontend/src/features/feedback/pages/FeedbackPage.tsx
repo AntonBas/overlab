@@ -71,7 +71,7 @@ export function FeedbackPage() {
       <form className="form settings-section" onSubmit={submit}>
         {from && (
           <p className="feedback-origin">
-            About page <code>{from}</code>
+            Sent from <code>{from}</code>
           </p>
         )}
         <div className="form-field">

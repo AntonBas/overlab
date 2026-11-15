@@ -19,6 +19,7 @@ function change(overrides: Partial<HeroChange>): HeroChange {
     banRateBefore: 5,
     banRateAfter: 5,
     banRateChange: 0,
+    portraitUrl: null,
     roleChange: null,
     ...overrides,
   };

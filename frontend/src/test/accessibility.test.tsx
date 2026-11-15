@@ -114,6 +114,7 @@ describe("accessibility", () => {
               banRateBefore: null,
               banRateAfter: null,
               banRateChange: null,
+              portraitUrl: null,
               roleChange: null,
             },
           ]}

@@ -25,7 +25,7 @@ export interface CollectorRun {
 }
 
 export type AuditAction =
-  "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "PASSWORD_CHANGE";
+  "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "PASSWORD_CHANGE";
 
 export interface AuditEntry {
   id: number;

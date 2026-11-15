@@ -1,23 +1,64 @@
 import { lazy } from "react";
+import { lazyNamed } from "./lazyNamed";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
-import { GuidePage } from "../features/guides";
-import { BusinessPage } from "../features/feedback";
-import { FeedbackPage } from "../features/feedback";
-import { HeroPage } from "../features/heroes";
-import { HeroesPage } from "../features/heroes";
-import { CountersPage } from "../features/relations";
-import { HeroOnMapRedirect } from "../features/heroes";
-import { PerksPage } from "../features/perks";
-import { HeroSectionRedirect } from "../features/heroes";
-import { ChangesPage } from "../features/history";
-import { MapPage } from "../features/maps";
-import { MapsPage } from "../features/maps";
+import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
+import { HeroSectionRedirect } from "../features/heroes/pages/HeroSectionRedirect";
 import { StatsPage } from "../features/stats";
-import { CookiesPage } from "../features/legal";
-import { PrivacyPage } from "../features/legal";
-import { TermsPage } from "../features/legal";
 import { NotFoundPage } from "../pages/NotFoundPage";
+
+const GuidePage = lazyNamed(
+  () => import("../features/guides/pages/GuidePage"),
+  "GuidePage",
+);
+const BusinessPage = lazyNamed(
+  () => import("../features/feedback/pages/BusinessPage"),
+  "BusinessPage",
+);
+const FeedbackPage = lazyNamed(
+  () => import("../features/feedback/pages/FeedbackPage"),
+  "FeedbackPage",
+);
+const HeroPage = lazyNamed(
+  () => import("../features/heroes/pages/HeroPage"),
+  "HeroPage",
+);
+const HeroesPage = lazyNamed(
+  () => import("../features/heroes/pages/HeroesPage"),
+  "HeroesPage",
+);
+const CountersPage = lazyNamed(
+  () => import("../features/relations/pages/CountersPage"),
+  "CountersPage",
+);
+const PerksPage = lazyNamed(
+  () => import("../features/perks/pages/PerksPage"),
+  "PerksPage",
+);
+const ChangesPage = lazyNamed(
+  () => import("../features/history/pages/ChangesPage"),
+  "ChangesPage",
+);
+const MapPage = lazyNamed(
+  () => import("../features/maps/pages/MapPage"),
+  "MapPage",
+);
+const MapsPage = lazyNamed(
+  () => import("../features/maps/pages/MapsPage"),
+  "MapsPage",
+);
+const CookiesPage = lazyNamed(
+  () => import("../features/legal/pages/CookiesPage"),
+  "CookiesPage",
+);
+const PrivacyPage = lazyNamed(
+  () => import("../features/legal/pages/PrivacyPage"),
+  "PrivacyPage",
+);
+const TermsPage = lazyNamed(
+  () => import("../features/legal/pages/TermsPage"),
+  "TermsPage",
+);
 
 const ForgotPasswordPage = lazy(() =>
   import("../features/auth/pages/ForgotPasswordPage").then((module) => ({

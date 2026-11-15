@@ -10,9 +10,6 @@ vi.mock("../../stats/api/statsApi", () => ({
   fetchHistoryStart: vi.fn(),
 }));
 vi.mock("../../patches/api/patchesApi", () => ({ fetchPatches: vi.fn() }));
-vi.mock("../../heroes/api/heroesApi", () => ({
-  fetchHeroes: vi.fn(() => Promise.resolve([])),
-}));
 
 import { fetchPatches } from "../../patches";
 import { fetchComparison, fetchHistoryStart } from "../../stats";
@@ -277,6 +274,7 @@ describe("ChangesPage", () => {
           banRateBefore: 5,
           banRateAfter: 5,
           banRateChange: 0,
+          portraitUrl: null,
           roleChange: null,
         },
       ],
@@ -320,6 +318,7 @@ describe("ChangesPage", () => {
       banRateBefore: 5,
       banRateAfter: 5,
       banRateChange: 0,
+      portraitUrl: null,
       roleChange: null,
     });
     vi.mocked(fetchComparison).mockResolvedValue({

@@ -114,7 +114,7 @@ describe("SettingsPage", () => {
     );
     await userEvent.click(confirm);
 
-    expect(deleteAccount).toHaveBeenCalledWith("secret-password");
+    expect(deleteAccount).toHaveBeenCalledWith("secret-password", null);
     expect(await screen.findByText("stats page")).toBeInTheDocument();
     expect(replaceUser).toHaveBeenCalledWith(null);
   });

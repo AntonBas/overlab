@@ -14,13 +14,13 @@ export function splitWords(identifier: string): string {
 export function describeActor(
   actorId: number | null,
   actorRole: string | null,
+  actorName: string | null = null,
 ): string {
   if (actorId === null) {
     return "System";
   }
-  return actorRole
-    ? `User #${actorId} (${humanize(actorRole)})`
-    : `User #${actorId}`;
+  const label = actorName ?? `User #${actorId}`;
+  return actorRole ? `${label} (${humanize(actorRole)})` : label;
 }
 
 export function describeEntity(

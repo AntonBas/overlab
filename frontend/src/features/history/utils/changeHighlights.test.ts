@@ -16,6 +16,7 @@ function change(overrides: Partial<HeroChange>): HeroChange {
     banRateBefore: null,
     banRateAfter: null,
     banRateChange: null,
+    portraitUrl: null,
     roleChange: null,
     ...overrides,
   };
@@ -34,7 +35,7 @@ describe("changeHighlights", () => {
   ];
 
   it("names the biggest gain, the biggest drop and the rising pick rate", () => {
-    const items = changeHighlights(changes, {});
+    const items = changeHighlights(changes);
 
     expect(items.map((item) => [item.key, item.heroName])).toEqual([
       ["gain", "Ana"],
@@ -44,16 +45,17 @@ describe("changeHighlights", () => {
   });
 
   it("skips a card when nothing moved in that direction", () => {
-    const items = changeHighlights(
-      [change({ winRateChange: 0.5, pickRateChange: 0 })],
-      {},
-    );
+    const items = changeHighlights([
+      change({ winRateChange: 0.5, pickRateChange: 0 }),
+    ]);
 
     expect(items.map((item) => item.key)).toEqual(["gain"]);
   });
 
   it("uses the portrait of the hero when it is known", () => {
-    const items = changeHighlights(changes, { ana: "/media/ana.webp" });
+    const items = changeHighlights([
+      change({ winRateChange: 2, portraitUrl: "/media/ana.webp" }),
+    ]);
 
     expect(items[0].portraitUrl).toBe("/media/ana.webp");
   });

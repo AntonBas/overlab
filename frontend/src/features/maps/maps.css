@@ -14,7 +14,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: #fff;
+  color: var(--on-image);
   text-decoration: none;
 }
 
@@ -27,7 +27,11 @@
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: linear-gradient(135deg, #2a3446, #151a24);
+  background: linear-gradient(
+    135deg,
+    var(--placeholder-from),
+    var(--placeholder-to)
+  );
 }
 
 .map-card__image .thumbnail {
@@ -61,8 +65,12 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(135deg, #2a3446, #151a24);
-  color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--placeholder-from),
+    var(--placeholder-to)
+  );
+  color: var(--on-image);
 }
 
 .map-banner__image {
@@ -98,7 +106,7 @@
   gap: var(--space-8);
   margin-bottom: var(--space-4);
   font-size: var(--font-size-xl);
-  color: #fff;
+  color: var(--on-image);
 }
 
 .map-banner__mode .mode-icon {
@@ -254,4 +262,25 @@
   font-weight: var(--font-weight-semibold);
   background: rgb(0 0 0 / 0.55);
   border-radius: 999px;
+}
+
+.map-section .mode-heading::after {
+  flex: 1;
+  height: 1px;
+  content: "";
+  background: var(--border);
+}
+
+.map-section .map-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-16);
+}
+
+.map-section .map-card__image {
+  aspect-ratio: 16 / 9;
+}
+
+.map-section .map-card__name {
+  padding: 32px var(--space-12) var(--space-12);
+  font-size: var(--font-size-xl);
 }

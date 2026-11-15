@@ -50,14 +50,22 @@ export function HeroesPage() {
               <RoleBadge role={role} compact />
               {ROLE_LABELS[role]}
             </h2>
-            <ul className="chip-list chip-list--centered">
+            <ul className="hero-tiles">
               {data
                 .filter((hero) => hero.role === role)
                 .map((hero) => (
                   <li key={hero.slug}>
-                    <Link className="chip" to={`/heroes/${hero.slug}`}>
-                      <HeroPortrait name={hero.name} url={hero.portraitUrl} />
-                      {hero.name}
+                    <Link
+                      className="hero-tile"
+                      data-role={hero.role.toLowerCase()}
+                      to={`/heroes/${hero.slug}`}
+                    >
+                      <HeroPortrait
+                        name={hero.name}
+                        url={hero.portraitUrl}
+                        size={56}
+                      />
+                      <span className="hero-tile__name">{hero.name}</span>
                       {hero.recentlyAdded && <NewBadge />}
                     </Link>
                   </li>

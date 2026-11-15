@@ -17,6 +17,12 @@ import { formatDateTime } from "../../../../utils/format";
 
 const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 
+const STATUS_LABELS: Record<FeedbackStatus, string> = {
+  NEW: "New",
+  RESOLVED: "Resolved",
+  DISMISSED: "Dismissed",
+};
+
 const TYPE_LABELS: Record<FeedbackType, string> = {
   INACCURACY: "Inaccuracy",
   BUG: "Bug",
@@ -66,7 +72,7 @@ export function FeedbackAdminPage() {
           >
             {STATUSES.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {STATUS_LABELS[option]}
               </option>
             ))}
           </select>

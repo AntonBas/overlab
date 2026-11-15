@@ -21,7 +21,7 @@ export function HeroSearch() {
     if (heroes === null) {
       fetchHeroes()
         .then(setHeroes)
-        .catch(() => setHeroes([]));
+        .catch(() => undefined);
     }
   }
 

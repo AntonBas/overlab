@@ -35,7 +35,7 @@ import { AbilityText } from "../../abilities";
 import { ControlSchemeToggle } from "../../abilities";
 import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
-import { heroBackdropUrl } from "../../../utils/heroBackdrop";
+import { useHeroBackdrop } from "../../../utils/heroBackdrop";
 import { PerkList } from "../../perks";
 import { RelationTabs } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
@@ -48,6 +48,7 @@ export function HeroPage() {
   const { queue, linkSuffix, changeQueue } = useHeroQueue();
   const { region } = useRegion();
 
+  const art = useHeroBackdrop(slug);
   const hero = useFetch(() => fetchHero(slug), [slug]);
   const stats = useFetch(
     () =>
@@ -128,7 +129,6 @@ export function HeroPage() {
     },
   ].filter((section) => section.visible);
 
-  const art = heroBackdropUrl(slug);
   return (
     <div className="hero-page" data-role={hero.data.role.toLowerCase()}>
       <header className={clsx("hero-header", { "hero-header--art": art })}>

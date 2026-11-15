@@ -399,7 +399,7 @@ export function CategoriesAdminPage() {
                     </button>
                     <button
                       type="button"
-                      className="button button--ghost"
+                      className="button button--ghost button--danger-ghost"
                       onClick={() => setDeletingCategory(category)}
                     >
                       Delete
@@ -453,7 +453,7 @@ export function CategoriesAdminPage() {
                     </button>
                     <button
                       type="button"
-                      className="button button--ghost"
+                      className="button button--ghost button--danger-ghost"
                       onClick={() => setDeletingMatchup(matchup)}
                     >
                       Delete

@@ -127,7 +127,7 @@
 }
 
 .map-card__favorite .favorite-star {
-  color: #fff;
+  color: var(--on-image);
   background: rgb(0 0 0 / 0.55);
   border-radius: 999px;
 }

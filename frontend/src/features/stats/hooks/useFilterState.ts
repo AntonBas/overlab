@@ -127,6 +127,6 @@ export function useFilterState(
     filters,
     update,
     changeSort,
-    key: `${searchParams.toString()}#${filters.region}`,
+    key: JSON.stringify(filters),
   };
 }

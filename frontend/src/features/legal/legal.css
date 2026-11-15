@@ -4,15 +4,52 @@
   line-height: 1.65;
 }
 
-.legal > section {
-  padding: 20px var(--space-24);
+.legal > .legal-section {
+  padding: 0 var(--space-24);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
 }
 
+.legal-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-16) 0;
+  list-style: none;
+  cursor: pointer;
+}
+
+.legal-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.legal-section > summary::after {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.legal-section[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.legal-section > summary:hover h2 {
+  color: var(--accent-text);
+}
+
+.legal-section[open] {
+  padding-bottom: var(--space-20);
+}
+
 .legal h2 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: var(--font-size-xl);
 }
 

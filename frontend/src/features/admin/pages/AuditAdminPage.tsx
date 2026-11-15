@@ -7,7 +7,7 @@ import { useFetch } from "../../../hooks/useFetch";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
-import { fetchAuditLog } from "../api/adminApi";
+import { fetchAuditLog, fetchUserDirectory } from "../api/adminApi";
 import { ChangeView } from "../components/ChangeView";
 import { SelectField } from "../../../components/admin/Fields";
 import { Pagination } from "../../../components/admin/Pagination";
@@ -20,7 +20,6 @@ const ACTIONS: AuditAction[] = [
   "UPDATE",
   "DELETE",
   "LOGIN",
-  "LOGOUT",
   "PASSWORD_CHANGE",
 ];
 
@@ -29,7 +28,6 @@ const ACTION_TONES: Record<AuditAction, "good" | "bad" | "info" | "neutral"> = {
   UPDATE: "info",
   DELETE: "bad",
   LOGIN: "neutral",
-  LOGOUT: "neutral",
   PASSWORD_CHANGE: "neutral",
 };
 
@@ -43,6 +41,10 @@ export function AuditAdminPage() {
   const log = useFetch(
     () => fetchAuditLog({ ...applied, page }),
     [applied, page],
+  );
+  const directory = useFetch(fetchUserDirectory, []);
+  const names = new Map(
+    (directory.data ?? []).map((user) => [user.id, user.displayName]),
   );
   const filtered = Object.values(fields).some(Boolean);
 
@@ -133,7 +135,11 @@ export function AuditAdminPage() {
                     {formatDateTime(entry.occurredAt)}
                   </td>
                   <td data-label="Actor">
-                    {describeActor(entry.actorId, entry.actorRole)}
+                    {describeActor(
+                      entry.actorId,
+                      entry.actorRole,
+                      names.get(entry.actorId ?? -1) ?? null,
+                    )}
                   </td>
                   <td data-label="Action">
                     <StatusBadge

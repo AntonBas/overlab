@@ -25,7 +25,7 @@ import type { HeroRole } from "../../../types/hero";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
 import { fetchAllPerks } from "../api/perksApi";
-import { heroBackdropStyle } from "../../../utils/heroBackdrop";
+import { BackdropCard } from "../components/BackdropCard";
 import { PerkList } from "../components/PerkList";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
@@ -137,17 +137,7 @@ export function PerksPage() {
         <ul className="hero-perks-grid">
           {visibleHeroes.map((hero) => (
             <li key={hero.slug} className="hero-perks-item">
-              <article
-                className={clsx(
-                  "hero-perks",
-                  `hero-perks--${hero.role.toLowerCase()}`,
-                  {
-                    "hero-perks--backdrop":
-                      heroBackdropStyle(hero.slug) !== undefined,
-                  },
-                )}
-                style={heroBackdropStyle(hero.slug)}
-              >
+              <BackdropCard slug={hero.slug} role={hero.role}>
                 <div className="hero-perks__top">
                   <Link
                     className="hero-perks__header"
@@ -181,7 +171,7 @@ export function PerksPage() {
                   compact
                   perks={allPerks.filter((perk) => perk.heroSlug === hero.slug)}
                 />
-              </article>
+              </BackdropCard>
             </li>
           ))}
         </ul>

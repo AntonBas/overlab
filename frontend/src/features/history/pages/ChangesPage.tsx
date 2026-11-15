@@ -24,7 +24,6 @@ import {
   formatPatchDate,
 } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import { fetchHeroes } from "../../heroes";
 import { fetchPatches } from "../../patches";
 import { fetchComparison, fetchHistoryStart } from "../../stats";
 import { StatsFilters } from "../../stats";
@@ -118,7 +117,8 @@ export function ChangesPage() {
   const patches = useFetch(fetchPatches, []);
 
   const range = useMemo(
-    () => (PERIODS[view] ? periodRange(PERIODS[view].days) : null),
+    () =>
+      Object.hasOwn(PERIODS, view) ? periodRange(PERIODS[view].days) : null,
     [view],
   );
   const comparison = useFetch(
@@ -152,10 +152,6 @@ export function ChangesPage() {
         filters.region,
       ),
     [filters.queue, filters.tier, filters.platform, filters.region],
-  );
-  const heroes = useFetch(fetchHeroes, []);
-  const portraits = Object.fromEntries(
-    (heroes.data ?? []).map((hero) => [hero.slug, hero.portraitUrl]),
   );
   const activePatch = view.startsWith(PATCH_PREFIX)
     ? (patches.data ?? []).find(
@@ -288,7 +284,6 @@ export function ChangesPage() {
             comparisonData.heroes.filter(
               (change) => filters.role === null || change.role === filters.role,
             ),
-            portraits,
           )}
         />
       )}
@@ -355,7 +350,6 @@ export function ChangesPage() {
             <ChangesTable
               changes={visibleChanges}
               showBan={!isQuickPlay(filters)}
-              portraits={portraits}
             />
           )}
         </div>

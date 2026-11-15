@@ -5,7 +5,7 @@
   margin-bottom: var(--space-16);
   border-radius: var(--radius);
   overflow: hidden;
-  background: #000;
+  background: var(--video-bg);
 }
 
 .video-frame iframe {
@@ -63,7 +63,7 @@
 .spot-card__media {
   position: relative;
   aspect-ratio: 16 / 9;
-  background: #000;
+  background: var(--video-bg);
 }
 
 .spot-card__media iframe,
@@ -101,7 +101,7 @@
   place-items: center;
   width: 48px;
   height: 48px;
-  color: #fff;
+  color: var(--on-image);
   background: rgb(0 0 0 / 0.6);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -119,7 +119,7 @@
   padding: var(--space-2) var(--space-6);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  color: #fff;
+  color: var(--on-image);
   background: rgb(0 0 0 / 0.75);
   border-radius: 4px;
 }
@@ -162,55 +162,33 @@
   min-height: 28px;
 }
 
-.spot-rail-wrap {
-  position: relative;
-}
-
-.spot-rail {
-  display: flex;
+.spot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: var(--space-16);
   margin: 0;
-  padding: 0 0 var(--space-12);
-  list-style: none;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-}
-
-.spot-rail > li {
-  flex: 0 0 min(300px, 80vw);
-  scroll-snap-align: start;
-}
-
-.spot-rail__arrow {
-  position: absolute;
-  top: 75px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
   padding: 0;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.4);
-  cursor: pointer;
+  list-style: none;
 }
 
-.spot-rail__arrow:hover {
-  color: var(--accent-contrast);
-  background: var(--accent);
-  border-color: var(--accent);
+.spot-count {
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-size-md);
 }
 
-.spot-rail__arrow--back {
-  left: -12px;
+.spot-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-16);
 }
 
-.spot-rail__arrow--forward {
-  right: -12px;
+.spot-card__kind {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  pointer-events: none;
+  background: rgb(11 13 26 / 0.8);
+  border: 1px solid currentcolor;
 }
 
 .spot-card__place {
@@ -266,4 +244,14 @@
   max-width: 65ch;
   margin: 20px auto 0;
   text-wrap: balance;
+}
+
+.link-button {
+  padding: 0;
+  font: inherit;
+  color: var(--accent-text);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
 }

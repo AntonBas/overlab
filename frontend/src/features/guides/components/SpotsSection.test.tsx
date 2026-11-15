@@ -67,12 +67,11 @@ describe("SpotsSection", () => {
     expect(screen.queryByText("Illari pylon")).not.toBeInTheDocument();
   });
 
-  it("filters by type chosen in the select", async () => {
+  it("filters by the type button", async () => {
     renderSection("hero");
 
-    await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
     await userEvent.click(
-      screen.getByRole("option", { name: /^Ultimate spot/ }),
+      screen.getByRole("button", { name: /^Ultimate spot/ }),
     );
 
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
@@ -105,5 +104,44 @@ describe("SpotsSection", () => {
     expect(
       within(screen.getByRole("region")).getByText("Nothing yet"),
     ).toBeInTheDocument();
+  });
+
+  it("offers to reset filters when nothing matches", async () => {
+    renderSection("hero");
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Hero" }));
+    await userEvent.click(screen.getByRole("option", { name: /^Ashe/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^Setup/ }));
+
+    expect(screen.getByText(/No spots match/)).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset filters" }),
+    );
+
+    expect(screen.getByText("Illari pylon")).toBeInTheDocument();
+    expect(screen.getByText("Ashe bob")).toBeInTheDocument();
+  });
+
+  it("shows only the first spots until asked for all", async () => {
+    const many = Array.from({ length: 8 }, (_, index) =>
+      guide({ id: index + 1, title: `Spot ${index + 1}` }),
+    );
+    render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots & setups"
+          guides={many}
+          groupBy="none"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText("Spot 7")).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Show all 8 spots" }),
+    );
+
+    expect(screen.getByText("Spot 8")).toBeInTheDocument();
   });
 });

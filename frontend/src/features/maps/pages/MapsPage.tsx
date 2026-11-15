@@ -149,7 +149,7 @@ export function MapsPage() {
             <p className="muted">No maps match these filters.</p>
           )}
           {groupByMode(matching).map(([label, group]) => (
-            <section key={label} className="section">
+            <section key={label} className="section map-section">
               <h2 className="mode-heading">
                 {group.mode && <ModeIcon mode={group.mode} />}
                 {label}

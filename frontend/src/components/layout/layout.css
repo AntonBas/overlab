@@ -112,7 +112,7 @@
   background: linear-gradient(
     135deg,
     var(--accent),
-    color-mix(in srgb, var(--accent) 60%, #ff5c5c)
+    color-mix(in srgb, var(--accent) 60%, var(--bar-ban))
   );
   color: var(--accent-contrast);
   font-weight: var(--font-weight-semibold);
@@ -122,7 +122,7 @@
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--accent) 88%, white),
-    color-mix(in srgb, var(--accent) 55%, #ff5c5c)
+    color-mix(in srgb, var(--accent) 55%, var(--bar-ban))
   );
 }
 

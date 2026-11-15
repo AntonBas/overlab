@@ -253,6 +253,18 @@
   background: color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
+.status-badge--warning {
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.status-badge--info {
+  color: var(--link);
+  border-color: color-mix(in srgb, var(--link) 40%, transparent);
+  background: color-mix(in srgb, var(--link) 12%, transparent);
+}
+
 .status-badge--action {
   font-family: inherit;
   cursor: pointer;
@@ -274,18 +286,6 @@
 .select-pill option {
   color: var(--text);
   background: var(--surface);
-}
-
-.select-pill--good {
-  color: var(--good);
-  border-color: color-mix(in srgb, var(--good) 40%, transparent);
-  background-color: color-mix(in srgb, var(--good) 12%, transparent);
-}
-
-.select-pill--bad {
-  color: var(--bad);
-  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
-  background-color: color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
 .select-pill--warning {
@@ -362,12 +362,6 @@
   background: var(--surface);
 }
 
-.admin__picker {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-12);
-}
-
 .admin .table thead th,
 .admin .field__label {
   text-transform: none;
@@ -409,4 +403,8 @@
 
 .section__header h2 {
   margin: 0;
+}
+
+.admin__content .settings-section + .settings-section {
+  margin-top: var(--space-20);
 }

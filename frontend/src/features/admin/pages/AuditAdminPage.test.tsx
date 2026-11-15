@@ -4,9 +4,10 @@ import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../api/adminApi", () => ({
   fetchAuditLog: vi.fn(),
+  fetchUserDirectory: vi.fn(),
 }));
 
-import { fetchAuditLog } from "../api/adminApi";
+import { fetchAuditLog, fetchUserDirectory } from "../api/adminApi";
 import { AuditAdminPage } from "./AuditAdminPage";
 
 function auditPage(content: unknown[]) {
@@ -22,6 +23,8 @@ function auditPage(content: unknown[]) {
 describe("AuditAdminPage", () => {
   beforeEach(() => {
     vi.mocked(fetchAuditLog).mockReset();
+    vi.mocked(fetchUserDirectory).mockReset();
+    vi.mocked(fetchUserDirectory).mockResolvedValue([]);
   });
 
   it("lists audit entries with the action and entity", async () => {

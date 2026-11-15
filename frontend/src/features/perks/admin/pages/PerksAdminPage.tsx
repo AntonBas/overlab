@@ -302,7 +302,7 @@ export function PerksAdminPage() {
                   </button>
                   <button
                     type="button"
-                    className="button button--ghost"
+                    className="button button--ghost button--danger-ghost"
                     onClick={() => setDeleting(perk)}
                   >
                     Delete

@@ -7,6 +7,8 @@ vi.mock("../components/CookieSettings", () => ({
   CookieSettings: () => <div>cookie settings</div>,
 }));
 
+vi.mock("../contact", () => ({ contactEmail: undefined }));
+
 import { CookiesPage } from "./CookiesPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { TermsPage } from "./TermsPage";
@@ -47,5 +49,39 @@ describe("legal pages", () => {
     expect(screen.getAllByRole("heading", { level: 2 }).length).toBeGreaterThan(
       0,
     );
+  });
+
+  it.each([
+    ["cookies", <CookiesPage key="cookies" />],
+    ["privacy", <PrivacyPage key="privacy" />],
+    ["terms", <TermsPage key="terms" />],
+  ])("%s page shows the last updated date", (_name, page) => {
+    renderWithRouter(page, "/legal");
+
+    expect(screen.getByText(/^Last updated \d{1,2} \w+ \d{4}$/)).toBeVisible();
+  });
+
+  it.each([
+    ["privacy", <PrivacyPage key="privacy" />],
+    ["terms", <TermsPage key="terms" />],
+  ])(
+    "%s page points to the feedback form without a contact email",
+    (_name, page) => {
+      renderWithRouter(page, "/legal");
+
+      expect(
+        screen.getByRole("link", { name: "feedback form" }),
+      ).toHaveAttribute("href", "/feedback");
+    },
+  );
+
+  it("lists local storage entries separately from cookies", () => {
+    renderWithRouter(<CookiesPage />, "/cookies");
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Local storage" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("overlab.controlScheme")).toBeInTheDocument();
+    expect(screen.getByText("overlab.region")).toBeInTheDocument();
   });
 });

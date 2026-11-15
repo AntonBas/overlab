@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 interface SettingsSectionProps {
   title: string;
@@ -14,12 +14,13 @@ export function SettingsSection({
   danger,
   children,
 }: SettingsSectionProps) {
+  const headingId = useId();
   return (
     <section
       className={clsx("settings-section", danger && "settings-section--danger")}
-      aria-labelledby={`${title}-heading`}
+      aria-labelledby={headingId}
     >
-      <h2 id={`${title}-heading`}>{title}</h2>
+      <h2 id={headingId}>{title}</h2>
       {description && <p className="muted">{description}</p>}
       {children}
     </section>

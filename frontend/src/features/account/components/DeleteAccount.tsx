@@ -11,12 +11,17 @@ export function DeleteAccount() {
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const save = useSave();
   const needsPassword = user?.provider === "LOCAL";
 
   async function confirm() {
     const deleted = await save.run(
-      () => deleteAccount(needsPassword ? password : null),
+      () =>
+        deleteAccount(
+          needsPassword ? password : null,
+          needsPassword ? null : confirmEmail,
+        ),
       "Account deleted.",
     );
     if (deleted) {
@@ -53,6 +58,16 @@ export function DeleteAccount() {
           onChange={(event) => setPassword(event.target.value)}
         />
       )}
+      {!needsPassword && (
+        <FormField
+          label="Type your email address to confirm"
+          name="deleteEmail"
+          type="email"
+          autoComplete="off"
+          value={confirmEmail}
+          onChange={(event) => setConfirmEmail(event.target.value)}
+        />
+      )}
       <StatusMessage error={save.error} />
       <div className="dialog__actions">
         <button
@@ -65,7 +80,10 @@ export function DeleteAccount() {
         <button
           type="button"
           className="button button--danger"
-          disabled={save.saving || (needsPassword && password === "")}
+          disabled={
+            save.saving ||
+            (needsPassword ? password === "" : confirmEmail === "")
+          }
           onClick={() => void confirm()}
         >
           Delete permanently
