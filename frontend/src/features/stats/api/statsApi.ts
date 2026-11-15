@@ -1,4 +1,5 @@
 import { api } from "../../../services/api";
+import { cachedGet } from "../../../services/requestCache";
 import type {
   GameQueue,
   Platform,
@@ -27,9 +28,8 @@ export async function fetchFreshness(
   return data;
 }
 
-export async function fetchCoverage(): Promise<CoverageEntry[]> {
-  const { data } = await api.get<CoverageEntry[]>("/stats/coverage");
-  return data;
+export function fetchCoverage(): Promise<CoverageEntry[]> {
+  return cachedGet<CoverageEntry[]>("/stats/coverage");
 }
 
 export async function fetchStats(

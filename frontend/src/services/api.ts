@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import type { ApiErrorBody } from "../types/common";
+import { readSessionHint, writeSessionHint } from "./sessionHint";
 
 export interface RequestFailure {
   status: number;
@@ -39,14 +40,31 @@ interface RetriableRequest extends InternalAxiosRequestConfig {
   retried?: boolean;
 }
 
+const SESSION_FREE_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+  "/auth/verify-email",
+  "/auth/resend-verification",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+];
+
 let refreshing: Promise<boolean> | null = null;
 
 function refreshSession(): Promise<boolean> {
   if (!refreshing) {
     refreshing = axios
       .post("/api/auth/refresh", null, { withCredentials: true })
-      .then(() => true)
-      .catch(() => false)
+      .then(() => {
+        writeSessionHint("active");
+        return true;
+      })
+      .catch(() => {
+        writeSessionHint("ended");
+        return false;
+      })
       .finally(() => {
         refreshing = null;
       });
@@ -54,16 +72,32 @@ function refreshSession(): Promise<boolean> {
   return refreshing;
 }
 
+api.interceptors.response.use((response) => {
+  const url = response.config.url ?? "";
+  if (url.startsWith("/auth/login") || url.startsWith("/auth/me")) {
+    writeSessionHint("active");
+  } else if (url.startsWith("/auth/logout")) {
+    writeSessionHint("ended");
+  }
+  return response;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const request = error.config as RetriableRequest | undefined;
-    const isAuthCall = request?.url?.startsWith("/auth/") ?? false;
+    const isAuthCall = SESSION_FREE_PATHS.some((path) =>
+      request?.url?.startsWith(path),
+    );
+    const knownSignedOut =
+      request?.url?.startsWith("/auth/me") === true &&
+      readSessionHint() === "ended";
     if (
       error.response?.status === 401 &&
       request &&
       !request.retried &&
-      !isAuthCall
+      !isAuthCall &&
+      !knownSignedOut
     ) {
       request.retried = true;
       if (await refreshSession()) {

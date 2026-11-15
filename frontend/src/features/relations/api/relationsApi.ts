@@ -1,4 +1,5 @@
 import { api } from "../../../services/api";
+import { cachedGet } from "../../../services/requestCache";
 import type {
   HeroCategories,
   HeroCounters,
@@ -21,7 +22,6 @@ export async function fetchAllRelations(): Promise<HeroRelations[]> {
   return data;
 }
 
-export async function fetchHeroCategories(): Promise<HeroCategories> {
-  const { data } = await api.get<HeroCategories>("/hero-categories");
-  return data;
+export function fetchHeroCategories(): Promise<HeroCategories> {
+  return cachedGet<HeroCategories>("/hero-categories");
 }

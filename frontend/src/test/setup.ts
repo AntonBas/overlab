@@ -1,3 +1,4 @@
+import { clearRequestCache } from "../services/requestCache";
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, expect } from "vitest";
@@ -7,6 +8,7 @@ expect.extend(axeMatchers);
 
 afterEach(() => {
   cleanup();
+  clearRequestCache();
 });
 
 Object.defineProperty(window.navigator, "language", {
