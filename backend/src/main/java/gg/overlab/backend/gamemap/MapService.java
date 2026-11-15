@@ -11,6 +11,7 @@ import gg.overlab.backend.media.ImageStore;
 import gg.overlab.backend.media.MediaFolder;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,16 +37,15 @@ public class MapService {
     @Cacheable(value = CacheNames.MAPS, key = "'slug:' + #slug")
     @Transactional(readOnly = true)
     public MapDto getBySlug(String slug) {
-        GameMap map = gameMapRepository.findBySlug(slug)
-                .orElseThrow(() -> new EntityNotFoundException("Map", slug));
+        GameMap map = requireMap(slug);
         return mapMapper.toDto(map);
     }
 
     @EvictContentCaches
+    @CacheEvict(value = CacheNames.STATS, allEntries = true)
     @Transactional
     public MapDto update(String slug, MapUpdateRequest request) {
-        GameMap map = gameMapRepository.findBySlug(slug)
-                .orElseThrow(() -> new EntityNotFoundException("Map", slug));
+        GameMap map = requireMap(slug);
         MapDto before = mapMapper.toDto(map);
         map.setMode(request.mode());
         MapDto after = mapMapper.toDto(map);
@@ -54,10 +54,10 @@ public class MapService {
     }
 
     @EvictContentCaches
+    @CacheEvict(value = CacheNames.STATS, allEntries = true)
     @Transactional
     public MapDto replaceImage(String slug, MultipartFile file) {
-        GameMap map = gameMapRepository.findBySlug(slug)
-                .orElseThrow(() -> new EntityNotFoundException("Map", slug));
+        GameMap map = requireMap(slug);
         MapDto before = mapMapper.toDto(map);
         map.setImageUrl(imageStore.replace(MediaFolder.MAPS, slug, map.getImageUrl(), file));
         MapDto after = mapMapper.toDto(map);
@@ -66,15 +66,20 @@ public class MapService {
     }
 
     @EvictContentCaches
+    @CacheEvict(value = CacheNames.STATS, allEntries = true)
     @Transactional
     public MapDto removeImage(String slug) {
-        GameMap map = gameMapRepository.findBySlug(slug)
-                .orElseThrow(() -> new EntityNotFoundException("Map", slug));
+        GameMap map = requireMap(slug);
         MapDto before = mapMapper.toDto(map);
         imageStore.remove(map.getImageUrl());
         map.setImageUrl(null);
         MapDto after = mapMapper.toDto(map);
         auditService.logUpdate(AuditEntityType.MAP, slug, before, after);
         return after;
+    }
+
+    private GameMap requireMap(String slug) {
+        return gameMapRepository.findBySlug(slug)
+                .orElseThrow(() -> new EntityNotFoundException("Map", slug));
     }
 }

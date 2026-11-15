@@ -12,6 +12,7 @@ public final class AuditEntityType {
     public static final String HERO_RELATION = "HeroRelation";
     public static final String HERO_CATEGORY = "HeroCategory";
     public static final String HERO_CATEGORY_RELATION = "HeroCategoryRelation";
+    public static final String FEEDBACK = "Feedback";
     public static final String COLLECTOR_RUN = "CollectorRun";
 
     private AuditEntityType() {

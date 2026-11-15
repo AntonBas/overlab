@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/audit")
 @RequiredArgsConstructor
-public class AuditController {
+public class AuditAdminController {
 
     private final AuditQueryService queryService;
 

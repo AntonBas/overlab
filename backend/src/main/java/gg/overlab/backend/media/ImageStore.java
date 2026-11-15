@@ -1,10 +1,8 @@
 package gg.overlab.backend.media;
 
+import gg.overlab.backend.common.Sha256;
 import gg.overlab.backend.exception.core.BadRequestException;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -92,11 +90,6 @@ public class ImageStore {
     }
 
     private String shortHash(byte[] content) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(content);
-            return HexFormat.of().formatHex(digest).substring(0, HASH_LENGTH);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(exception);
-        }
+        return Sha256.hex(content).substring(0, HASH_LENGTH);
     }
 }

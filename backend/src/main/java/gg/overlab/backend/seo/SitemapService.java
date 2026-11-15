@@ -7,6 +7,7 @@ import gg.overlab.backend.guide.GuideService;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.dto.HeroDto;
+import java.time.Instant;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
@@ -39,12 +40,20 @@ public class SitemapService {
             appendUrl(xml, "/maps/" + map.slug());
         }
         for (GuideDto guide : guideService.findPublished(null, null)) {
-            appendUrl(xml, "/guides/" + guide.path());
+            appendUrl(xml, "/guides/" + guide.path(), guide.createdAt());
         }
         return xml.append("</urlset>\n").toString();
     }
 
     private void appendUrl(StringBuilder xml, String path) {
-        xml.append("  <url><loc>").append(HtmlUtils.htmlEscape(siteUrl.absolute(path))).append("</loc></url>\n");
+        appendUrl(xml, path, null);
+    }
+
+    private void appendUrl(StringBuilder xml, String path, Instant lastModified) {
+        xml.append("  <url><loc>").append(HtmlUtils.htmlEscape(siteUrl.absolute(path))).append("</loc>");
+        if (lastModified != null) {
+            xml.append("<lastmod>").append(lastModified).append("</lastmod>");
+        }
+        xml.append("</url>\n");
     }
 }

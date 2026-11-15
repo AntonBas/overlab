@@ -1,17 +1,14 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.common.Sha256;
 import gg.overlab.backend.exception.core.ConcurrentRefreshException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.User;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.HexFormat;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,11 +105,6 @@ public class UserTokenService {
     }
 
     private String hash(String rawToken) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(exception);
-        }
+        return Sha256.hex(rawToken);
     }
 }

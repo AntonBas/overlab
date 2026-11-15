@@ -20,8 +20,6 @@ public class SeoPageResolver {
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
-    private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
-    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     private final HeroService heroService;
     private final MapService mapService;
@@ -139,9 +137,7 @@ public class SeoPageResolver {
     }
 
     String plain(String text) {
-        String withoutLinks = LINK_MARKUP.matcher(text == null ? "" : text)
-                .replaceAll(match -> Matcher.quoteReplacement(match.group(1).replace('-', ' ')));
-        String readable = WHITESPACE.matcher(withoutLinks).replaceAll(" ").trim();
+        String readable = SeoContentBuilder.readable(text);
         return readable.length() > MAX_DESCRIPTION_LENGTH
                 ? readable.substring(0, MAX_DESCRIPTION_LENGTH - 1).stripTrailing() + "…" : readable;
     }

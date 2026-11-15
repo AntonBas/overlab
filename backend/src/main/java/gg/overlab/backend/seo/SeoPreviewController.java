@@ -26,7 +26,8 @@ public class SeoPreviewController {
     public ResponseEntity<String> preview(@RequestParam(defaultValue = "/") String path) {
         String html = path.length() > MAX_PATH_LENGTH ? null : previewService.renderPreview(path);
         if (html == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(previewService.renderNotFound());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noStore())
+                    .body(previewService.renderNotFound());
         }
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic()).body(html);
     }

@@ -88,6 +88,8 @@ public class AccountService {
         User user = load(userId);
         if (user.getPasswordHash() != null) {
             requirePassword(user, request.password());
+        } else {
+            requireEmailConfirmation(user, request.confirmEmail());
         }
         if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
             throw new ConflictException("The last administrator cannot be deleted");
@@ -96,6 +98,12 @@ public class AccountService {
         auditLogRepository.anonymizeActor(user.getId());
         auditLogRepository.anonymizeUserEntity(String.valueOf(user.getId()));
         userRepository.delete(user);
+    }
+
+    private void requireEmailConfirmation(User user, String confirmEmail) {
+        if (confirmEmail == null || !confirmEmail.trim().equalsIgnoreCase(user.getEmail())) {
+            throw new BadRequestException("Type your email address to confirm the deletion");
+        }
     }
 
     private boolean isLastActiveAdmin(User user) {

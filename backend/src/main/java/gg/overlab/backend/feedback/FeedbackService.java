@@ -1,5 +1,7 @@
 package gg.overlab.backend.feedback;
 
+import gg.overlab.backend.audit.AuditEntityType;
+import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -39,6 +41,7 @@ public class FeedbackService {
     private final EmailService emailService;
     private final FeedbackAuthors feedbackAuthors;
     private final RateLimitCounter rateLimitCounter;
+    private final AuditService auditService;
 
     @Transactional
     public void submit(Long userId, FeedbackRequest request) {
@@ -104,8 +107,10 @@ public class FeedbackService {
     public void changeStatus(Long id, FeedbackStatus status) {
         SiteFeedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Feedback", id));
+        FeedbackStatusSnapshot before = new FeedbackStatusSnapshot(feedback.getStatus());
         feedback.setStatus(status);
         feedback.setResolvedAt(status == FeedbackStatus.NEW ? null : Instant.now());
+        auditService.logUpdate(AuditEntityType.FEEDBACK, id, before, new FeedbackStatusSnapshot(status));
     }
 
     private void requireUserCapacity(Long userId) {

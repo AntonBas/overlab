@@ -84,6 +84,21 @@ tasks.named('bootJar') {
 	archiveFileName = 'app.jar'
 }
 
+tasks.named('jacocoTestCoverageVerification') {
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				minimum = 0.65
+			}
+		}
+	}
+}
+
+tasks.named('check') {
+	dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
 checkstyle {
 	toolVersion = '14.1.0'
 	maxWarnings = 0

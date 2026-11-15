@@ -16,7 +16,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
+import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -142,12 +147,26 @@ public class ApiErrorHandler {
                 List.of());
     }
 
-    @ExceptionHandler(ErrorResponseException.class)
-    public ResponseEntity<ApiError> handleErrorResponse(ErrorResponseException exception,
-                                                        HttpServletRequest request) {
-        HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
-        return build(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status, "Request failed", request,
+    @ExceptionHandler({ErrorResponseException.class, ServletRequestBindingException.class,
+            HandlerMethodValidationException.class, AsyncRequestTimeoutException.class, MultipartException.class})
+    public ResponseEntity<ApiError> handleErrorResponse(Exception exception, HttpServletRequest request) {
+        HttpStatus status = statusOf(exception);
+        if (status.is5xxServerError()) {
+            log.error("Request failed on {}", request.getRequestURI(), exception);
+            Sentry.captureException(exception);
+        }
+        return build(status, status.is5xxServerError() ? "Internal server error" : "Request failed", request,
                 List.of());
+    }
+
+    private static HttpStatus statusOf(Exception exception) {
+        int code = exception instanceof ErrorResponse errorResponse
+                ? errorResponse.getStatusCode().value() : HttpStatus.BAD_REQUEST.value();
+        try {
+            return HttpStatus.valueOf(code);
+        } catch (IllegalArgumentException unknownCode) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
     }
 
     @ExceptionHandler(Exception.class)

@@ -43,9 +43,20 @@ class AccountServiceDeleteTest {
         linked.setPasswordHash(null);
         when(userRepository.findById(7L)).thenReturn(Optional.of(linked));
 
-        assertThatCode(() -> service.deleteAccount(7L, new DeleteAccountRequest(null))).doesNotThrowAnyException();
+        assertThatCode(() -> service.deleteAccount(7L, new DeleteAccountRequest(null, "linked@overlab.gg"))).doesNotThrowAnyException();
 
         verify(userRepository).delete(linked);
+    }
+
+    @Test
+    void aPasswordlessAccountNeedsItsEmailTypedToConfirm() {
+        User linked = AuthFixtures.user(9, "linked@overlab.gg", UserRole.USER, true);
+        linked.setPasswordHash(null);
+        when(userRepository.findById(9L)).thenReturn(Optional.of(linked));
+
+        assertThatThrownBy(() -> service.deleteAccount(9L, new DeleteAccountRequest(null, "other@overlab.gg")))
+                .isInstanceOf(gg.overlab.backend.exception.core.BadRequestException.class);
+        verify(userRepository, org.mockito.Mockito.never()).delete(linked);
     }
 
     @Test
@@ -54,7 +65,7 @@ class AccountServiceDeleteTest {
         local.setPasswordHash("hash");
         when(userRepository.findById(8L)).thenReturn(Optional.of(local));
 
-        assertThatThrownBy(() -> service.deleteAccount(8L, new DeleteAccountRequest(null)))
+        assertThatThrownBy(() -> service.deleteAccount(8L, new DeleteAccountRequest(null, null)))
                 .isInstanceOf(gg.overlab.backend.exception.core.BadRequestException.class);
     }
 
@@ -64,7 +75,7 @@ class AccountServiceDeleteTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(last));
         when(userRepository.lockEnabledByRole(UserRole.ADMIN)).thenReturn(List.of(last));
 
-        assertThatThrownBy(() -> service.deleteAccount(1L, new DeleteAccountRequest(null)))
+        assertThatThrownBy(() -> service.deleteAccount(1L, new DeleteAccountRequest(null, "admin1@overlab.gg")))
                 .isInstanceOf(ConflictException.class);
     }
 
@@ -74,7 +85,7 @@ class AccountServiceDeleteTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(first));
         when(userRepository.lockEnabledByRole(UserRole.ADMIN)).thenReturn(List.of(first, admin(2, true)));
 
-        assertThatCode(() -> service.deleteAccount(1L, new DeleteAccountRequest(null))).doesNotThrowAnyException();
+        assertThatCode(() -> service.deleteAccount(1L, new DeleteAccountRequest(null, "admin1@overlab.gg"))).doesNotThrowAnyException();
 
         verify(userRepository).delete(first);
     }

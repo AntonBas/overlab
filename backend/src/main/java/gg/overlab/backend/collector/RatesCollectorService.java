@@ -193,11 +193,12 @@ public class RatesCollectorService {
             } catch (RuntimeException exception) {
                 run.setRequestsFailed(run.getRequestsFailed() + 1);
                 metrics.recordRequest(job.name(), false);
+                errors.add(request, exception);
                 if (exception instanceof InvalidSnapshotException) {
                     metrics.recordRejectedSnapshot();
+                } else {
+                    consecutiveFailures++;
                 }
-                errors.add(request, exception);
-                consecutiveFailures++;
                 log.warn("Collector request failed: {}", request.describe(exception));
             }
             if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {

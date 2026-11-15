@@ -29,6 +29,7 @@ public class PatchService {
     private final PatchMapper patchMapper;
     private final SlugService slugService;
     private final AuditService auditService;
+    private final PatchSeasonLookup seasonLookup;
 
     @Cacheable(value = CacheNames.CONTENT, key = "'patches:all'")
     @Transactional(readOnly = true)
@@ -68,7 +69,7 @@ public class PatchService {
         patch.setSlug(StringUtils.hasText(request.slug())
                 ? requireFreeSlug(request.slug(), null)
                 : slugService.generateUnique(request.version(), MAX_SLUG_LENGTH, patchRepository::existsBySlug));
-        PatchDto created = toDto(patchRepository.save(patch));
+        PatchDto created = toFreshDto(patchRepository.save(patch));
         auditService.logCreate(AuditEntityType.PATCH, created.id(), created);
         return created;
     }
@@ -80,12 +81,12 @@ public class PatchService {
         if (patchRepository.existsByVersionIgnoreCaseAndIdNot(request.version().trim(), id)) {
             throw new ConflictException("Patch already exists: " + request.version());
         }
-        PatchDto before = toDto(patch);
+        PatchDto before = toFreshDto(patch);
         patchMapper.apply(request, patch);
         if (StringUtils.hasText(request.slug()) && !request.slug().equals(patch.getSlug())) {
             patch.setSlug(requireFreeSlug(request.slug(), id));
         }
-        PatchDto after = toDto(patch);
+        PatchDto after = toFreshDto(patch);
         auditService.logUpdate(AuditEntityType.PATCH, id, before, after);
         return after;
     }
@@ -94,11 +95,15 @@ public class PatchService {
     @Transactional
     public void delete(Long id) {
         Patch patch = patchRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patch", id));
-        auditService.logDelete(AuditEntityType.PATCH, id, toDto(patch));
+        auditService.logDelete(AuditEntityType.PATCH, id, toFreshDto(patch));
         patchRepository.delete(patch);
     }
 
     private PatchDto toDto(Patch patch) {
+        return patchMapper.toDto(patch, seasonLookup.seasonsById().get(patch.getId()));
+    }
+
+    private PatchDto toFreshDto(Patch patch) {
         Map<Long, Integer> seasons = PatchSeasons.resolve(patchRepository.findAllByOrderByReleasedAtDesc());
         return patchMapper.toDto(patch, seasons.get(patch.getId()));
     }

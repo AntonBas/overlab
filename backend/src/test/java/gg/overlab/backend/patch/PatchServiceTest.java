@@ -27,7 +27,7 @@ class PatchServiceTest {
     private final PatchRepository repository = mock(PatchRepository.class);
     private final AuditService auditService = mock(AuditService.class);
     private final PatchService service = new PatchService(repository, new PatchMapper(), new SlugService(),
-            auditService);
+            auditService, new PatchSeasonLookup(repository));
 
     @Test
     void createGeneratesAUniqueSlugFromTheVersion() {

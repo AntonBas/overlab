@@ -1,13 +1,10 @@
 package gg.overlab.backend.user.auth;
 
+import gg.overlab.backend.common.Sha256;
 import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.TooManyRequestsException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.HexFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -81,11 +78,6 @@ public class LoginAttemptLimiter {
     }
 
     private String hash(String value) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(exception);
-        }
+        return Sha256.hex(value);
     }
 }

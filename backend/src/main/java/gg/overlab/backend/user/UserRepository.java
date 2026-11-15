@@ -12,9 +12,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    Optional<User> findByEmailIgnoreCase(String email);
+    @Query("select u from User u where lower(u.email) = lower(:email)")
+    Optional<User> findByEmailIgnoreCase(@Param("email") String email);
 
-    boolean existsByEmailIgnoreCase(String email);
+    @Query("select count(u) > 0 from User u where lower(u.email) = lower(:email)")
+    boolean existsByEmailIgnoreCase(@Param("email") String email);
 
     boolean existsByRole(UserRole role);
 
