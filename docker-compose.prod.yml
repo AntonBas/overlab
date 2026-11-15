@@ -137,7 +137,7 @@ services:
       - overlab-net
 
   prometheus:
-    image: prom/prometheus:v3.15.1
+    image: prom/prometheus:v3.16.0
     restart: unless-stopped
     volumes:
       - ./docker/prometheus/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro
