@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/caddy/Dockerfile
+      args:
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
     container_name: overlab-edge
     restart: unless-stopped
     environment:

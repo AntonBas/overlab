@@ -90,10 +90,19 @@
 		}
 	}
 
-	@hashedAssets path /assets/*
+	@hashedAssets {
+		path /assets/*
+		file
+	}
 	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
 
-	@appShell not path /assets/*
+	@missingAsset {
+		path /assets/*
+		not file
+	}
+	header @missingAsset Cache-Control "no-store"
+
+	@appShell not path /assets/* /api/* /media/* /oauth2/* /login/oauth2/* /sitemap.xml /robots.txt
 	header @appShell Cache-Control "no-cache"
 
 	root * /srv
