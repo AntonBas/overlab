@@ -125,16 +125,11 @@ describe("HeroMapPicks", () => {
 
   it("shows the placeholder image for a map without a picture", async () => {
     const { container } = renderWithRouter(
-      <HeroMapPicks
-        heroName="Ana"
-        maps={[maps[1], entry({ mapSlug: "rialto", winRateDelta: -4 })].slice(
-          0,
-          1,
-        )}
-        linkSuffix=""
-      />,
+      <HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />,
     );
-    await screen.findByRole("region", { name: "by gain" });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Show all 2 maps" }),
+    );
 
     expect(
       container.querySelector('img[src="/images/map-placeholder.svg"]'),
