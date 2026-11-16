@@ -14,7 +14,7 @@ public class CurrentGameFormat {
 
     private final HeroStatRepository heroStatRepository;
 
-    @Cacheable(value = CacheNames.STATS, key = "'game-format'")
+    @Cacheable(value = CacheNames.STATS, key = "'game-format'", sync = true)
     @Transactional(readOnly = true)
     public GameFormat get() {
         return heroStatRepository.findFirstByOrderByCapturedAtDesc()

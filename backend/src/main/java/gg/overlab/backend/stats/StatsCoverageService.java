@@ -22,7 +22,7 @@ public class StatsCoverageService {
 
     private final SnapshotCheckRepository snapshotCheckRepository;
 
-    @Cacheable(value = CacheNames.STATS, key = CACHE_KEY)
+    @Cacheable(value = CacheNames.STATS, key = CACHE_KEY, sync = true)
     @Transactional(readOnly = true)
     public List<CoverageDto> coverage() {
         Map<String, CoverageBuilder> builders = new LinkedHashMap<>();

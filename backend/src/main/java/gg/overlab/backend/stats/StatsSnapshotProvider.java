@@ -23,7 +23,7 @@ public class StatsSnapshotProvider {
     private final StatsMapper statsMapper;
     private final SnapshotCheckService snapshotCheckService;
 
-    @Cacheable(value = CacheNames.STATS, key = "'snapshot:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'snapshot:' + #filter.cacheKey()", sync = true)
     @Transactional(readOnly = true)
     public StatsSnapshotDto getSnapshot(StatsFilter filter) {
         List<HeroStat> stats = filter.isAllMaps()

@@ -45,7 +45,7 @@ public class StatsHistoryService {
     @Cacheable(value = CacheNames.STATS,
             key = "'history:' + #heroSlug + ':' + #filter.cacheKey()"
                     + " + (#from == null && #to == null ? '' : ':' + T(gg.overlab.backend.stats.StatsHistoryService)"
-                    + ".rangeKey(#from, #to))")
+                    + ".rangeKey(#from, #to))", sync = true)
     @Transactional(readOnly = true)
     public HeroHistoryDto getHeroHistory(String heroSlug, StatsFilter filter, Instant from, Instant to) {
         Instant requestedEnd = to == null ? Instant.now() : to;
@@ -107,7 +107,7 @@ public class StatsHistoryService {
         return buildComparison(filter, patch.releasedAt(), comparisonEnd);
     }
 
-    @Cacheable(value = CacheNames.STATS, key = "'history-start:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'history-start:' + #filter.cacheKey()", sync = true)
     @Transactional(readOnly = true)
     public HistoryStartDto historyStart(StatsFilter filter) {
         return new HistoryStartDto(heroStatRepository.findFirstCaptureForAllMaps(filter.queue(),
