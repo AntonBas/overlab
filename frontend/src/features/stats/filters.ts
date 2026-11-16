@@ -138,6 +138,12 @@ function pick<T extends string>(
   return match ?? fallback;
 }
 
+function sortFor(queue: GameQueue, sort: StatsSort): StatsSort {
+  return queue === "QUICK_PLAY" && sort === "BAN_RATE"
+    ? DEFAULT_FILTERS.sort
+    : sort;
+}
+
 export function parseFilters(
   params: URLSearchParams,
   defaultRegion: Region = DEFAULT_FILTERS.region,
@@ -155,7 +161,7 @@ export function parseFilters(
     platform: pick(params.get("platform"), PLATFORMS, DEFAULT_FILTERS.platform),
     region: pick(params.get("region"), REGIONS, defaultRegion),
     role: ROLES.find((role) => role === rawRole?.toUpperCase()) ?? null,
-    sort: pick(params.get("sort"), SORTS, DEFAULT_FILTERS.sort),
+    sort: sortFor(queue, pick(params.get("sort"), SORTS, DEFAULT_FILTERS.sort)),
     direction: pick(
       params.get("direction"),
       DIRECTIONS,
