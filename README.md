@@ -46,7 +46,7 @@ A scheduled **collector** is the only component that talks to Blizzard's public 
 
 ## Quick start
 
-You need Docker, and for development also JDK 21 and Node 22.22.2 or newer (`nvm use` reads `.nvmrc`).
+You need Docker, and for development also JDK 21 and Node 22.23.4 or newer (`nvm use` reads `.nvmrc`).
 
 **Whole stack in Docker:**
 
@@ -55,7 +55,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Fill in `DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` in `.env` first. The site opens at http://localhost:5173. The database starts empty: sign in as an admin and run the `daily-overview` job in the admin panel (Collector) to get the first statistics. To create the first admin, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` before the first start.
+Fill in `DB_PASSWORD`, `JWT_SECRET` (at least 32 random characters, for example `openssl rand -hex 32`) and `GRAFANA_ADMIN_PASSWORD` in `.env` first. The site opens at http://localhost:5173. The database starts empty: sign in as an admin and run the `daily-overview` job in the admin panel (Collector) to get the first statistics. To create the first admin, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` before the first start.
 
 **Development with hot reload:**
 
@@ -71,7 +71,7 @@ cd frontend && npm ci && npm run dev
 | API | http://localhost:8080/api |
 | Health | http://localhost:8080/actuator/health |
 | Mailpit (local mail inbox) | http://localhost:8025 |
-| Prometheus | http://localhost:9090 |
+| Prometheus (scrapes the backend container only; in hot reload mode the backend runs on the host and is not scraped) | http://localhost:9090 |
 | Grafana | http://localhost:3000 |
 
 ## Project structure
@@ -79,7 +79,7 @@ cd frontend && npm ci && npm run dev
 ```
 backend/    Spring Boot API and statistics collector (package by feature)
 frontend/   React SPA (src/features/<domain>)
-docker/     Caddy, Prometheus and Grafana configuration
+docker/     Caddy, Prometheus, Grafana and k6 configuration
 docs/       Detailed documentation
 media/      Hero, map, perk and ability images (Docker volume in production)
 ```
@@ -94,6 +94,10 @@ media/      Hero, map, perk and ability images (Docker volume in production)
 | [Statistics collector](docs/COLLECTOR.md) | Jobs, schedule, what is stored, metrics and alerts |
 | [Admin panel and media](docs/ADMIN.md) | Admin screens, images, Blizzard imports |
 | [Deployment](docs/DEPLOY.md) | Server setup, updates, backups, monitoring |
+| [Incident runbook](docs/RUNBOOK.md) | What to do when an alert fires |
+| [External uptime monitoring](docs/UPTIME_MONITORING.md) | What to monitor from outside the server and which services fit |
+| [Load testing](docs/LOAD_TESTING.md) | k6 scenario for the hero history endpoint, how to run it, reference results |
+| [Security policy](SECURITY.md) | How to report a vulnerability |
 
 ## Checks
 
@@ -107,7 +111,7 @@ Integration tests start their own PostgreSQL and Redis with Testcontainers, so D
 ## Branches and CI
 
 - `main` is production, `develop` is development.
-- GitHub Actions runs backend and frontend checks on every push and pull request. A Lighthouse workflow audits production pages after every deploy and weekly. Dependabot opens weekly update pull requests.
+- GitHub Actions runs backend and frontend checks on every push and pull request. A `lighthouse` job starts the compose stack with an empty database and audits the pages that need no collected statistics (`lighthouserc.preview.json`; accessibility and SEO fail the build, layout shift and speed only warn), so a regression is caught before deploy; a separate Lighthouse workflow audits production pages after every deploy and weekly. Docker image builds in CI use the GitHub Actions layer cache. Dependabot opens weekly update pull requests.
 
 ## License
 
