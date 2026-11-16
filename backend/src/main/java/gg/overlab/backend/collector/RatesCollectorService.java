@@ -31,6 +31,7 @@ public class RatesCollectorService {
     private static final int MAX_CONSECUTIVE_FAILURES = 5;
     private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
     private static final String OTHER_INSTANCE_SUMMARY = "Another instance is running this job";
+    private static final String LOCK_FAILED_SUMMARY = "The job lock could not be taken";
 
     private final CollectorProperties properties;
     private final SnapshotCollector snapshotCollector;
@@ -143,10 +144,17 @@ public class RatesCollectorService {
     }
 
     private void runUnderLock(CollectorJob job, CollectorRun run) {
-        boolean ran = jobLock.runExclusively("collector:" + job.name(), () -> {
-            finish(job, run);
-            runDependents(job, run);
-        });
+        boolean ran;
+        try {
+            ran = jobLock.runExclusively("collector:" + job.name(), () -> {
+                finish(job, run);
+                runDependents(job, run);
+            });
+        } catch (IllegalStateException exception) {
+            log.error("Collector job '{}' could not take its lock", job.name(), exception);
+            abandon(job, run, LOCK_FAILED_SUMMARY);
+            return;
+        }
         if (!ran) {
             abandon(job, run, OTHER_INSTANCE_SUMMARY);
         }

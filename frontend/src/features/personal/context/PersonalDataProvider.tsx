@@ -63,7 +63,11 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
           }));
         }
       })
-      .catch(() => undefined);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setFailure(toFailure(error).message);
+        }
+      });
     return () => {
       cancelled = true;
     };

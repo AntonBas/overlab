@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.CollectorFixtures;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
@@ -34,7 +35,8 @@ class HeroPortraitOptimizerTest {
     private final CacheEviction cacheEviction = mock(CacheEviction.class);
 
     private HeroPortraitOptimizer optimizer(MediaStorage storage) {
-        return new HeroPortraitOptimizer(heroRepository, storage, webpConverter, cacheEviction);
+        return new HeroPortraitOptimizer(heroRepository, storage, webpConverter, cacheEviction,
+                CollectorFixtures.openLock());
     }
 
     private MediaStorage storage() {

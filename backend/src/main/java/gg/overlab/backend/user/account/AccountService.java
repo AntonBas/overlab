@@ -112,7 +112,7 @@ public class AccountService {
             return;
         }
         tokenService.revokeAll(user, UserTokenType.ACCOUNT_DELETION);
-        String token = tokenService.issue(user, UserTokenType.ACCOUNT_DELETION, properties.verificationTokenTtl());
+        String token = tokenService.issue(user, UserTokenType.ACCOUNT_DELETION, properties.resetTokenTtl());
         emailService.sendAccountDeletion(user.toEmailRecipient(), token);
     }
 
@@ -151,6 +151,5 @@ public class AccountService {
             loginAttemptLimiter.recordFailure(user.getEmail());
             throw new BadRequestException(WRONG_PASSWORD);
         }
-        loginAttemptLimiter.reset(user.getEmail());
     }
 }

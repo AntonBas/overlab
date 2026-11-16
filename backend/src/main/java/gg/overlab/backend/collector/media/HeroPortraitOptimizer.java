@@ -1,5 +1,6 @@
 package gg.overlab.backend.collector.media;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
@@ -23,17 +24,24 @@ public class HeroPortraitOptimizer {
     private final MediaStorage mediaStorage;
     private final WebpConverter webpConverter;
     private final CacheEviction cacheEviction;
+    private final ScheduledJobLock jobLock;
 
     public HeroPortraitOptimizer(HeroRepository heroRepository, MediaStorage mediaStorage,
-                                 WebpConverter webpConverter, CacheEviction cacheEviction) {
+                                 WebpConverter webpConverter, CacheEviction cacheEviction,
+                                 ScheduledJobLock jobLock) {
         this.heroRepository = heroRepository;
         this.mediaStorage = mediaStorage;
         this.webpConverter = webpConverter;
         this.cacheEviction = cacheEviction;
+        this.jobLock = jobLock;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void optimizeStoredPortraits() {
+        jobLock.runExclusively("portrait-optimizer", this::convertStoredPortraits);
+    }
+
+    private void convertStoredPortraits() {
         List<Hero> candidates = heroRepository.findAll().stream().filter(this::isStoredPng).toList();
         if (candidates.isEmpty() || !webpConverter.isAvailable()) {
             return;

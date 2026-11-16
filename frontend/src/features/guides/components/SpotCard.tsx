@@ -38,6 +38,7 @@ export function SpotCard({
             title={guide.title}
             allow="autoplay; accelerometer; encrypted-media; gyroscope; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
             allowFullScreen
           />
         ) : (

@@ -75,6 +75,18 @@ class RateLimitFilterTest {
     }
 
     @Test
+    void startingAGoogleSignInIsLimitedLikeOtherAuthRequests() throws Exception {
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(11L);
+        MockHttpServletRequest request = request("GET", "/oauth2/authorization/google");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain, never()).doFilter(any(), any());
+        verify(resolver).resolveException(eq(request), eq(response), eq(null), any(TooManyRequestsException.class));
+    }
+
+    @Test
     void refreshUsesTheGeneralApiLimit() throws Exception {
         when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(101L);
         MockHttpServletRequest request = request("POST", "/api/auth/refresh");

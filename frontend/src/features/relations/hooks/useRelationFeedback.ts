@@ -92,7 +92,11 @@ export function useRelationVotes(): RelationVotes {
           });
         }
       })
-      .catch(() => undefined);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setFailure(toFailure(error).message);
+        }
+      });
     return () => {
       cancelled = true;
     };

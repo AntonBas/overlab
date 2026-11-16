@@ -24,6 +24,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/api/business");
     private static final String REFRESH_PATH = "/api/auth/refresh";
     private static final String STATS_PREFIX = "/api/stats";
+    private static final String OAUTH_START_PREFIX = "/oauth2/authorization/";
     private static final Duration WINDOW = Duration.ofMinutes(1);
 
     private final RateLimitCounter counter;
@@ -60,6 +61,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         if ("POST".equals(request.getMethod()) && LIMITED_PATHS.contains(path)) {
             return new Rule(path, authProperties.rateLimitPerMinute());
+        }
+        if ("GET".equals(request.getMethod()) && path.startsWith(OAUTH_START_PREFIX)) {
+            return new Rule("oauth", authProperties.rateLimitPerMinute());
         }
         if ("POST".equals(request.getMethod()) && REFRESH_PATH.equals(path)) {
             return new Rule("refresh", rateLimitProperties.apiPerMinute());

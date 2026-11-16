@@ -89,7 +89,7 @@ export function RegisterPage() {
           required
           minLength={8}
           maxLength={72}
-          hint="At least 8 characters"
+          hint="At least 8 characters, at most 72 bytes (letters outside A-Z take 2 bytes)"
           value={password}
           error={fieldErrors.password}
           onChange={(event) => setPassword(event.target.value)}

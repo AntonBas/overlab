@@ -9,7 +9,7 @@ import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.common.SlugService;
 import gg.overlab.backend.config.async.AsyncConfig;
-import gg.overlab.backend.config.cache.EvictContentCaches;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.UpstreamUnavailableException;
 import gg.overlab.backend.patch.Patch;
@@ -47,13 +47,14 @@ public class PatchImportService {
     private final TransactionTemplate transactionTemplate;
     private final TaskExecutor executor;
     private final ScheduledJobLock jobLock;
+    private final CacheEviction cacheEviction;
     private final AtomicBoolean running = new AtomicBoolean();
 
     public PatchImportService(CollectorProperties properties, PatchNotesClient client, PatchNotesParser parser,
                               PatchRepository patchRepository, SlugService slugService,
                               ApplicationEventPublisher eventPublisher, TransactionTemplate transactionTemplate,
                               @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor,
-                              ScheduledJobLock jobLock) {
+                              ScheduledJobLock jobLock, CacheEviction cacheEviction) {
         this.properties = properties;
         this.client = client;
         this.parser = parser;
@@ -63,6 +64,7 @@ public class PatchImportService {
         this.transactionTemplate = transactionTemplate;
         this.executor = executor;
         this.jobLock = jobLock;
+        this.cacheEviction = cacheEviction;
     }
 
     public void startAsync() {
@@ -85,7 +87,9 @@ public class PatchImportService {
 
     private void runInBackground() {
         try {
-            jobLock.runExclusively("patch-import", this::importNew);
+            jobLock.callExclusively("patch-import", this::importNew)
+                    .filter(created -> created > 0)
+                    .ifPresent(created -> cacheEviction.evictAll());
         } catch (RuntimeException exception) {
             log.error("Patch import failed", exception);
         } finally {
@@ -94,7 +98,6 @@ public class PatchImportService {
         }
     }
 
-    @EvictContentCaches
     public int importNew() {
         List<ParsedPatch> parsed;
         try {

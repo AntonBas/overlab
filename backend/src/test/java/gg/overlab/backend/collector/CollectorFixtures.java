@@ -16,6 +16,9 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import org.mockito.ArgumentMatchers;
 
 public final class CollectorFixtures {
 
@@ -28,12 +31,15 @@ public final class CollectorFixtures {
             invocation.<Runnable>getArgument(1).run();
             return true;
         });
+        when(lock.callExclusively(anyString(), ArgumentMatchers.<Supplier<Object>>any())).thenAnswer(invocation ->
+                Optional.ofNullable(invocation.<Supplier<Object>>getArgument(1).get()));
         return lock;
     }
 
     public static ScheduledJobLock heldLock() {
         ScheduledJobLock lock = mock(ScheduledJobLock.class);
         when(lock.runExclusively(anyString(), any(Runnable.class))).thenReturn(false);
+        when(lock.callExclusively(anyString(), ArgumentMatchers.<Supplier<Object>>any())).thenReturn(Optional.empty());
         return lock;
     }
 

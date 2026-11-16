@@ -15,6 +15,7 @@ import gg.overlab.backend.collector.client.PatchNotesClient;
 import gg.overlab.backend.collector.parser.PatchNotesParser;
 import gg.overlab.backend.collector.parser.PatchNotesParserTest;
 import gg.overlab.backend.common.SlugService;
+import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
@@ -34,12 +35,15 @@ class PatchImportServiceTest {
     private final PatchNotesClient client = mock(PatchNotesClient.class);
     private final PatchRepository patchRepository = mock(PatchRepository.class);
 
+    private final CacheEviction cacheEviction = mock(CacheEviction.class);
+
     private PatchImportService service() {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, false, null, null, 3, null, List.of());
         return new PatchImportService(properties, client, new PatchNotesParser(), patchRepository,
                 new SlugService(), mock(ApplicationEventPublisher.class),
-                new TransactionTemplate(mock(PlatformTransactionManager.class)), executor, CollectorFixtures.openLock());
+                new TransactionTemplate(mock(PlatformTransactionManager.class)), executor, CollectorFixtures.openLock(),
+                cacheEviction);
     }
 
     private final List<Runnable> queuedTasks = new ArrayList<>();
@@ -126,6 +130,28 @@ class PatchImportServiceTest {
         verify(patchRepository, times(3)).save(any(Patch.class));
         service.startAsync();
         assertThat(queuedTasks).hasSize(2);
+    }
+
+    @Test
+    void backgroundImportClearsTheCachesOnlyWhenPatchesWereCreated() {
+        when(client.fetch()).thenReturn(PatchNotesParserTest.PAGE);
+        PatchImportService service = service();
+
+        service.startAsync();
+        queuedTasks.get(0).run();
+
+        verify(cacheEviction).evictAll();
+    }
+
+    @Test
+    void backgroundImportKeepsTheCachesWhenNothingWasCreated() {
+        when(client.fetch()).thenReturn("<html></html>");
+        PatchImportService service = service();
+
+        service.startAsync();
+        queuedTasks.get(0).run();
+
+        verify(cacheEviction, never()).evictAll();
     }
 
     @Test

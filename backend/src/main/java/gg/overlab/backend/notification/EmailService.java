@@ -3,6 +3,7 @@ package gg.overlab.backend.notification;
 import gg.overlab.backend.common.Pause;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.security.AuthProperties;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.Duration;
@@ -25,6 +26,7 @@ public class EmailService {
 
     private static final String LOGO_PATH = "/email-logo.png";
     private static final int MAX_ATTEMPTS = 3;
+    private static final String FAILED_METER = "mail.failed";
 
     private final JavaMailSender mailSender;
     private final AuthProperties authProperties;
@@ -32,18 +34,22 @@ public class EmailService {
     private final String contactEmail;
     private final Duration retryDelay;
     private final Executor executor;
+    private final MeterRegistry meterRegistry;
 
     public EmailService(JavaMailSender mailSender, AuthProperties authProperties,
                         @Value("${app.frontend-url}") String frontendUrl,
                         @Value("${app.contact-email:}") String contactEmail,
                         @Value("${app.mail.retry-delay:2s}") Duration retryDelay,
-                        @Qualifier(AsyncConfig.MAIL_EXECUTOR) Executor executor) {
+                        @Qualifier(AsyncConfig.MAIL_EXECUTOR) Executor executor,
+                        MeterRegistry meterRegistry) {
         this.mailSender = mailSender;
         this.authProperties = authProperties;
         this.frontendUrl = frontendUrl;
         this.contactEmail = contactEmail;
         this.retryDelay = retryDelay;
         this.executor = executor;
+        this.meterRegistry = meterRegistry;
+        meterRegistry.counter(FAILED_METER);
     }
 
     public void sendVerification(EmailRecipient recipient, String rawToken) {
@@ -84,7 +90,7 @@ public class EmailService {
                 "Confirm the deletion of your Overlab account",
                 "Hi " + recipient.displayName() + ",",
                 List.of("Someone asked to delete your Overlab account and everything saved in it. The link works for "
-                        + describe(authProperties.verificationTokenTtl()) + " and the deletion cannot be undone."),
+                        + describe(authProperties.resetTokenTtl()) + " and the deletion cannot be undone."),
                 "Confirm account deletion",
                 frontendUrl + "/confirm-deletion?token=" + rawToken,
                 "If you did not request this, ignore this message: nothing is deleted."));
@@ -160,6 +166,7 @@ public class EmailService {
                 log.warn("Sending '{}' failed (attempt {}/{}): {}", template.subject(), attempt, MAX_ATTEMPTS,
                         exception.getMessage());
                 if (attempt == MAX_ATTEMPTS || !Pause.sleep(retryDelay.multipliedBy(attempt))) {
+                    meterRegistry.counter(FAILED_METER).increment();
                     log.error("Giving up on '{}'", template.subject());
                     return;
                 }

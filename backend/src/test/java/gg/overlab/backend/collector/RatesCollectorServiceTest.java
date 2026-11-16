@@ -288,6 +288,23 @@ class RatesCollectorServiceTest {
     }
 
     @Test
+    void aFailedLockAttemptMarksTheRunFailedAndFreesTheJob() {
+        ScheduledJobLock broken = mock(ScheduledJobLock.class);
+        when(broken.runExclusively(any(), any(Runnable.class)))
+                .thenThrow(new IllegalStateException("no connection"));
+        RatesCollectorService contended = serviceWith(CollectorFixtures.properties(1, job), deferredExecutor, broken);
+
+        contended.startAsync("daily", CollectorTrigger.SCHEDULED);
+        queuedTasks.get(0).run();
+
+        verify(client, times(0)).fetch(any(), any(), any(), any(), any(), any());
+        CollectorRun run = lastSavedRun();
+        assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.FAILED);
+        assertThat(run.getErrorSummary()).isEqualTo("The job lock could not be taken");
+        assertThat(contended.startAsync("daily", CollectorTrigger.SCHEDULED).id()).isEqualTo(7L);
+    }
+
+    @Test
     void startIfPossibleSkipsQuietlyWhileJobIsRunning() {
         service.startAsync("daily", CollectorTrigger.MANUAL);
 

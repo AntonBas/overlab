@@ -86,7 +86,7 @@ class AccountServiceDeleteTest {
         User linked = AuthFixtures.user(9, "linked@overlab.gg", UserRole.USER, true);
         linked.setPasswordHash(null);
         when(userRepository.findById(9L)).thenReturn(Optional.of(linked));
-        when(tokenService.issue(linked, UserTokenType.ACCOUNT_DELETION, AuthFixtures.properties().verificationTokenTtl()))
+        when(tokenService.issue(linked, UserTokenType.ACCOUNT_DELETION, AuthFixtures.properties().resetTokenTtl()))
                 .thenReturn("raw-token");
 
         service.requestDeletionConfirmation(9L);
