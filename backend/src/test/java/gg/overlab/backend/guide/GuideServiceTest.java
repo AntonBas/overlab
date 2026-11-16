@@ -17,6 +17,7 @@ import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
+import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,9 @@ class GuideServiceTest {
     private final GuideRepository guideRepository = mock(GuideRepository.class);
     private final HeroRepository heroRepository = mock(HeroRepository.class);
     private final GameMapRepository mapRepository = mock(GameMapRepository.class);
+    private final HeroAbilityRepository abilityRepository = mock(HeroAbilityRepository.class);
     private final GuideService service = new GuideService(guideRepository, heroRepository, mapRepository,
-            new GuideMapper(), new SlugService(), mock(AuditService.class));
+            abilityRepository, new GuideMapper(), new SlugService(), mock(AuditService.class));
 
     private Hero illari;
     private GameMap rialto;
@@ -119,6 +121,28 @@ class GuideServiceTest {
     @Test
     void publicLookupRejectsPathWithoutId() {
         assertThatThrownBy(() -> service.getPublishedByPath("no-id-here")).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void acceptsAnAbilityOfTheChosenHero() {
+        when(abilityRepository.existsByHeroIdAndSlug(1L, "pylon")).thenReturn(true);
+
+        GuideDto dto = service.create(requestWithAbility("pylon"));
+
+        assertThat(dto.abilitySlug()).isEqualTo("pylon");
+    }
+
+    @Test
+    void rejectsAnAbilityOfAnotherHero() {
+        when(abilityRepository.existsByHeroIdAndSlug(1L, "nano-boost")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.create(requestWithAbility("nano-boost")))
+                .isInstanceOf(BadRequestException.class);
+    }
+
+    private GuideRequest requestWithAbility(String abilitySlug) {
+        return new GuideRequest("illari", "rialto", "Title", null, "dQw4w9WgXcQ", 83, "Description", 1, true, null,
+                null, abilitySlug, null);
     }
 
     private GuideRequest request(String slug, String title, boolean published) {

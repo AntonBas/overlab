@@ -75,7 +75,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean isLimitExceeded(HttpServletRequest request, Rule rule) {
         String key = "overlab:ratelimit:" + rule.bucket() + ":" + request.getRemoteAddr();
-        return counter.increment(key, WINDOW) > rule.limit();
+        return counter.incrementSliding(key, WINDOW) > rule.limit();
     }
 
     private record Rule(String bucket, int limit) {

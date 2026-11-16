@@ -84,6 +84,22 @@ public class AbilityImportWriter {
         return new ImportCounts(created, updated, removed);
     }
 
+    private boolean keepsCuratedControl(HeroAbility stale, List<HeroAbility> existing, Set<String> currentSlugs) {
+        if (stale.getControl() == null) {
+            return false;
+        }
+        Optional<HeroAbility> successor = existing.stream()
+                .filter(ability -> currentSlugs.contains(ability.getSlug()))
+                .filter(ability -> ability.getControl() == null)
+                .filter(ability -> ability.getName().equalsIgnoreCase(stale.getName()))
+                .findFirst();
+        if (successor.isEmpty()) {
+            return true;
+        }
+        successor.get().setControl(stale.getControl());
+        return false;
+    }
+
     private int removeStale(String heroSlug, List<ParsedAbility> parsedAbilities) {
         if (parsedAbilities.isEmpty()) {
             return 0;
@@ -95,6 +111,7 @@ public class AbilityImportWriter {
         }
         List<HeroAbility> stale = existing.stream()
                 .filter(ability -> !currentSlugs.contains(ability.getSlug()))
+                .filter(ability -> !keepsCuratedControl(ability, existing, currentSlugs))
                 .toList();
         stale.forEach(ability -> imageStore.remove(ability.getIconUrl()));
         abilityRepository.deleteAll(stale);

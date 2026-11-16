@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.common.UserScopedLock;
 import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -35,7 +36,7 @@ class FeedbackServiceTest {
     private final RateLimitCounter rateLimitCounter = mock(RateLimitCounter.class);
     private final FeedbackService service =
             new FeedbackService(repository, emailService, feedbackAuthors, rateLimitCounter,
-                    mock(AuditService.class));
+                    mock(AuditService.class), mock(UserScopedLock.class));
 
     @Test
     void storesTrimmedFeedbackWithSafePagePath() {

@@ -2,6 +2,7 @@ package gg.overlab.backend.feedback;
 
 import gg.overlab.backend.audit.AuditEntityType;
 import gg.overlab.backend.audit.AuditService;
+import gg.overlab.backend.common.UserScopedLock;
 import gg.overlab.backend.config.security.RateLimitCounter;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -29,6 +30,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class FeedbackService {
 
+    private static final String LOCK_SCOPE = "feedback";
     public static final int MAX_OPEN_PER_USER = 20;
     public static final int MAX_ADMIN_ROWS = 500;
     public static final int MAX_OPEN_ANONYMOUS = 200;
@@ -42,12 +44,14 @@ public class FeedbackService {
     private final FeedbackAuthors feedbackAuthors;
     private final RateLimitCounter rateLimitCounter;
     private final AuditService auditService;
+    private final UserScopedLock userScopedLock;
 
     @Transactional
     public void submit(Long userId, FeedbackRequest request) {
         if (request.type() == FeedbackType.BUSINESS) {
             throw new BadRequestException("Business messages are sent from the Business page");
         }
+        userScopedLock.acquire(LOCK_SCOPE, userId);
         requireUserCapacity(userId);
         requireAnonymousCapacity(userId);
         SiteFeedback feedback = new SiteFeedback();
@@ -60,6 +64,7 @@ public class FeedbackService {
 
     @Transactional
     public void submitBusiness(Long userId, BusinessMessageRequest request) {
+        userScopedLock.acquire(LOCK_SCOPE, userId);
         requireAnonymousCapacity(userId);
         requireUserCapacity(userId);
         if (feedbackRepository.countByContactEmailIgnoreCaseAndStatus(request.email().trim(), FeedbackStatus.NEW)

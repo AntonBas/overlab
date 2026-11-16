@@ -1,5 +1,6 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.common.Sha256;
 import gg.overlab.backend.exception.core.ConcurrentRefreshException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
@@ -30,6 +31,7 @@ public class UserTokenService {
     private static final Duration REUSE_GRACE = Duration.ofSeconds(30);
 
     private final UserTokenRepository tokenRepository;
+    private final ScheduledJobLock jobLock;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
@@ -101,6 +103,10 @@ public class UserTokenService {
     @Scheduled(cron = "0 15 3 * * *")
     @Transactional
     public void deleteExpired() {
+        jobLock.runExclusively("token-cleanup", this::deleteTokensExpiredLongAgo);
+    }
+
+    private void deleteTokensExpiredLongAgo() {
         tokenRepository.deleteExpiredBefore(Instant.now().minus(Duration.ofDays(1)));
     }
 

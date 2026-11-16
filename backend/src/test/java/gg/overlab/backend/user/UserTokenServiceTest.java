@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.token.UserToken;
@@ -25,7 +26,7 @@ import org.mockito.ArgumentCaptor;
 class UserTokenServiceTest {
 
     private final UserTokenRepository repository = mock(UserTokenRepository.class);
-    private final UserTokenService service = new UserTokenService(repository);
+    private final UserTokenService service = new UserTokenService(repository, mock(ScheduledJobLock.class));
     private final User user = AuthFixtures.user(1, "a@overlab.gg", UserRole.USER, false);
 
     @Test

@@ -1,6 +1,12 @@
 package gg.overlab.backend.collector;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import gg.overlab.backend.collector.client.BlizzardRatesResponse;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
@@ -14,6 +20,21 @@ import java.util.List;
 public final class CollectorFixtures {
 
     private CollectorFixtures() {
+    }
+
+    public static ScheduledJobLock openLock() {
+        ScheduledJobLock lock = mock(ScheduledJobLock.class);
+        when(lock.runExclusively(anyString(), any(Runnable.class))).thenAnswer(invocation -> {
+            invocation.<Runnable>getArgument(1).run();
+            return true;
+        });
+        return lock;
+    }
+
+    public static ScheduledJobLock heldLock() {
+        ScheduledJobLock lock = mock(ScheduledJobLock.class);
+        when(lock.runExclusively(anyString(), any(Runnable.class))).thenReturn(false);
+        return lock;
     }
 
     public static CollectorProperties properties(int maxAttempts, CollectorJob... jobs) {

@@ -34,6 +34,7 @@ public class BlizzardRatesClient {
     private static final String RATES_PATH = "/en-us/rates/data/";
     private static final List<Integer> COMPETITIVE_QUEUES = List.of(2, 1);
     private static final int QUICK_PLAY_QUEUE = 0;
+    private static final Duration MAX_RETRY_AFTER = Duration.ofMinutes(5);
     private static final String BAN_RATE_COLUMN = "banrate";
 
     private final RestClient restClient;
@@ -65,7 +66,7 @@ public class BlizzardRatesClient {
                 if (attempt >= retry.maxAttempts()) {
                     throw exception;
                 }
-                Duration delay = retry.backoff().multipliedBy(attempt);
+                Duration delay = retryDelay(exception, attempt);
                 log.warn("Blizzard request failed (attempt {}/{}), retrying in {}: {}", attempt, retry.maxAttempts(),
                         delay, exception.getMessage());
                 if (!Pause.sleep(delay)) {
@@ -73,6 +74,26 @@ public class BlizzardRatesClient {
                 }
             }
         }
+    }
+
+    private Duration retryDelay(RuntimeException exception, int attempt) {
+        Duration backoff = retry.backoff().multipliedBy(attempt);
+        if (exception instanceof HttpClientErrorException.TooManyRequests tooMany) {
+            String retryAfter = tooMany.getResponseHeaders() == null
+                    ? null : tooMany.getResponseHeaders().getFirst(HttpHeaders.RETRY_AFTER);
+            Duration requested = parseRetryAfterSeconds(retryAfter);
+            if (requested != null && requested.compareTo(backoff) > 0) {
+                return requested.compareTo(MAX_RETRY_AFTER) > 0 ? MAX_RETRY_AFTER : requested;
+            }
+        }
+        return backoff;
+    }
+
+    private static Duration parseRetryAfterSeconds(String value) {
+        if (value == null || !value.trim().matches("\\d{1,6}")) {
+            return null;
+        }
+        return Duration.ofSeconds(Long.parseLong(value.trim()));
     }
 
     private RatesFetch fetchOnce(GameQueue queue, Platform platform, Region region, RankTier tier,
@@ -94,8 +115,11 @@ public class BlizzardRatesClient {
                 return RatesFetch.unchanged();
             }
             BlizzardRatesResponse response = entity.getBody();
-            if (heroes(response).isEmpty() || hasBanRateColumn(response)) {
+            boolean hasBanRate = hasBanRateColumn(response);
+            if (hasBanRate) {
                 competitiveQueue = candidate;
+            }
+            if (hasBanRate || heroes(response).isEmpty()) {
                 return new RatesFetch(heroes(response), etagOf(entity), false);
             }
             log.warn("Queue {} returned no ban rate column, trying the next Competitive queue", candidate);

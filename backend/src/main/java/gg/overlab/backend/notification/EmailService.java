@@ -79,6 +79,17 @@ public class EmailService {
                 "If you did not request this, you can ignore this message."));
     }
 
+    public void sendAccountDeletion(EmailRecipient recipient, String rawToken) {
+        deliver(recipient.email(), null, new EmailTemplate(
+                "Confirm the deletion of your Overlab account",
+                "Hi " + recipient.displayName() + ",",
+                List.of("Someone asked to delete your Overlab account and everything saved in it. The link works for "
+                        + describe(authProperties.verificationTokenTtl()) + " and the deletion cannot be undone."),
+                "Confirm account deletion",
+                frontendUrl + "/confirm-deletion?token=" + rawToken,
+                "If you did not request this, ignore this message: nothing is deleted."));
+    }
+
     public void sendEmailChangeNotice(EmailRecipient recipient, String newEmail) {
         deliver(recipient.email(), null, new EmailTemplate(
                 "Email change requested for your Overlab account",
@@ -114,7 +125,7 @@ public class EmailService {
 
     public void sendBusinessInquiry(String senderName, String senderEmail, String message) {
         if (!StringUtils.hasText(contactEmail)) {
-            log.info("CONTACT_EMAIL is not set, the business message from {} is only stored", senderEmail);
+            log.info("CONTACT_EMAIL is not set, the business message is only stored");
             return;
         }
         deliver(contactEmail, senderEmail, new EmailTemplate(

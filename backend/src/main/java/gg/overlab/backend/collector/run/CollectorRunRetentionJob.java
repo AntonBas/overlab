@@ -1,5 +1,6 @@
 package gg.overlab.backend.collector.run;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,15 @@ public class CollectorRunRetentionJob {
     private static final Duration RETENTION = Duration.ofDays(90);
 
     private final CollectorRunRepository repository;
+    private final ScheduledJobLock jobLock;
 
     @Scheduled(cron = "0 50 3 * * *")
     @Transactional
     public int deleteOldRuns() {
+        return jobLock.callExclusively("collector-run-retention", this::deleteFinishedRuns).orElse(0);
+    }
+
+    private int deleteFinishedRuns() {
         int deleted = repository.deleteFinishedBefore(CollectorRunStatus.RUNNING, Instant.now().minus(RETENTION));
         if (deleted > 0) {
             log.info("Deleted {} collector runs older than {}", deleted, RETENTION);

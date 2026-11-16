@@ -5,7 +5,7 @@ import gg.overlab.backend.audit.AuditService;
 import gg.overlab.backend.collector.dto.CollectorJobDto;
 import gg.overlab.backend.collector.dto.CollectorRunDto;
 import gg.overlab.backend.collector.dto.HeroContentImportStartedDto;
-import gg.overlab.backend.collector.dto.PatchImportResultDto;
+import gg.overlab.backend.collector.dto.PatchImportStartedDto;
 import gg.overlab.backend.collector.imports.PatchImportService;
 import gg.overlab.backend.collector.imports.HeroContentImportService;
 import gg.overlab.backend.collector.run.CollectorTrigger;
@@ -63,9 +63,11 @@ public class CollectorAdminController {
         return new HeroContentImportStartedDto(perkImportService.startAsync());
     }
 
-    @Operation(summary = "Import new balance patches from the Blizzard patch notes page")
+    @Operation(summary = "Import new balance patches from the Blizzard patch notes page in the background")
     @PostMapping("/patches/import")
-    public PatchImportResultDto importPatches() {
-        return new PatchImportResultDto(patchImportService.importNew());
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public PatchImportStartedDto importPatches() {
+        patchImportService.startAsync();
+        return new PatchImportStartedDto(true);
     }
 }

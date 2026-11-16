@@ -1,5 +1,6 @@
 package gg.overlab.backend.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,18 +11,25 @@ import gg.overlab.backend.user.AuthProvider;
 import gg.overlab.backend.user.User;
 import gg.overlab.backend.user.UserRepository;
 import jakarta.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @IntegrationTest
 class SecurityMatrixIntegrationTest {
@@ -36,6 +44,10 @@ class SecurityMatrixIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    @Qualifier("requestMappingHandlerMapping")
+    private RequestMappingHandlerMapping handlerMapping;
 
     private MockMvc mockMvc;
     private User admin;
@@ -97,6 +109,33 @@ class SecurityMatrixIntegrationTest {
                 .andExpect(status().is(user));
         mockMvc.perform(request(method, path).contentType(MediaType.APPLICATION_JSON).content("{}").cookie(adminCookie))
                 .andExpect(status().is(admin));
+    }
+
+    @Test
+    void everyAdminEndpointRejectsAnonymousVisitorsAndPlainUsers() throws Exception {
+        List<String[]> routes = new ArrayList<>();
+        handlerMapping.getHandlerMethods().keySet().forEach(mapping -> {
+            Set<String> patterns = mapping.getPathPatternsCondition() == null
+                    ? Set.of() : mapping.getPathPatternsCondition().getPatternValues();
+            Set<RequestMethod> methods = mapping.getMethodsCondition().getMethods();
+            for (String pattern : patterns) {
+                if (pattern.startsWith("/api/admin/")) {
+                    for (RequestMethod method : methods) {
+                        routes.add(new String[] {method.name(), pattern.replaceAll("\\{[^}]+}", "1")});
+                    }
+                }
+            }
+        });
+
+        assertThat(routes).hasSizeGreaterThan(30);
+        for (String[] route : routes) {
+            HttpMethod method = HttpMethod.valueOf(route[0]);
+            mockMvc.perform(request(method, route[1]).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                    .andExpect(status().isUnauthorized());
+            mockMvc.perform(request(method, route[1]).contentType(MediaType.APPLICATION_JSON).content("{}")
+                            .cookie(userCookie))
+                    .andExpect(status().isForbidden());
+        }
     }
 
     private User account(long id, UserRole role) {

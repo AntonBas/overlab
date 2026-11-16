@@ -74,6 +74,10 @@ public class CollectorMetrics {
         registry.counter("collector.outliers").increment(count);
     }
 
+    public void recordQuarantinedSnapshot(String reason) {
+        registry.counter("collector.quarantined.snapshots", "reason", reason).increment();
+    }
+
     public void recordSuspiciousSnapshot(String reason) {
         registry.counter("collector.suspicious.snapshots", "reason", reason).increment();
     }

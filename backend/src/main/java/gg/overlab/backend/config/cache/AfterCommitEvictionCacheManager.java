@@ -13,15 +13,25 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class AfterCommitEvictionCacheManager implements CacheManager {
 
     private final CacheManager delegate;
+    private final Supplier<RedisCircuitBreaker> breaker;
 
     public AfterCommitEvictionCacheManager(CacheManager delegate) {
+        this(delegate, fixed(new RedisCircuitBreaker()));
+    }
+
+    public AfterCommitEvictionCacheManager(CacheManager delegate, Supplier<RedisCircuitBreaker> breaker) {
         this.delegate = delegate;
+        this.breaker = breaker;
+    }
+
+    private static Supplier<RedisCircuitBreaker> fixed(RedisCircuitBreaker breaker) {
+        return () -> breaker;
     }
 
     @Override
     public Cache getCache(String name) {
         Cache cache = delegate.getCache(name);
-        return cache == null ? null : new AfterCommitEvictionCache(cache);
+        return cache == null ? null : new AfterCommitEvictionCache(cache, breaker.get());
     }
 
     @Override
@@ -38,9 +48,25 @@ public class AfterCommitEvictionCacheManager implements CacheManager {
     private static final class AfterCommitEvictionCache implements Cache {
 
         private final Cache delegate;
+        private final RedisCircuitBreaker breaker;
 
-        private AfterCommitEvictionCache(Cache delegate) {
+        private AfterCommitEvictionCache(Cache delegate, RedisCircuitBreaker breaker) {
             this.delegate = delegate;
+            this.breaker = breaker;
+        }
+
+        private <T> T guarded(Supplier<T> call, T whenOpen) {
+            if (breaker.isOpen()) {
+                return whenOpen;
+            }
+            try {
+                T result = call.get();
+                breaker.recordSuccess();
+                return result;
+            } catch (RuntimeException exception) {
+                breaker.recordFailure();
+                throw exception;
+            }
         }
 
         @Override
@@ -55,22 +81,29 @@ public class AfterCommitEvictionCacheManager implements CacheManager {
 
         @Override
         public ValueWrapper get(Object key) {
-            return delegate.get(key);
+            return guarded(() -> delegate.get(key), null);
         }
 
         @Override
         public <T> T get(Object key, Class<T> type) {
-            return delegate.get(key, type);
+            return guarded(() -> delegate.get(key, type), null);
         }
 
         @Override
         public <T> T get(Object key, Callable<T> valueLoader) {
-            return delegate.get(key, valueLoader);
+            if (breaker.isOpen()) {
+                try {
+                    return valueLoader.call();
+                } catch (Exception exception) {
+                    throw new ValueRetrievalException(key, valueLoader, exception);
+                }
+            }
+            return guarded(() -> delegate.get(key, valueLoader), null);
         }
 
         @Override
         public CompletableFuture<?> retrieve(Object key) {
-            return delegate.retrieve(key);
+            return guarded(() -> delegate.retrieve(key), CompletableFuture.completedFuture(null));
         }
 
         @Override
@@ -80,12 +113,15 @@ public class AfterCommitEvictionCacheManager implements CacheManager {
 
         @Override
         public void put(Object key, Object value) {
-            delegate.put(key, value);
+            guarded(() -> {
+                delegate.put(key, value);
+                return null;
+            }, null);
         }
 
         @Override
         public ValueWrapper putIfAbsent(Object key, Object value) {
-            return delegate.putIfAbsent(key, value);
+            return guarded(() -> delegate.putIfAbsent(key, value), null);
         }
 
         @Override

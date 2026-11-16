@@ -52,6 +52,16 @@ class ApiHardeningIntegrationTest {
             mockMvc.perform(get("/api/heroes").with(client)).andExpect(status().isOk());
         }
         mockMvc.perform(get("/api/stats").with(client)).andExpect(status().is(org.hamcrest.Matchers.not(429)));
+        mockMvc.perform(get("/api/stats").with(client)).andExpect(status().is(org.hamcrest.Matchers.not(429)));
+    }
+
+    @Test
+    void statsAreLimitedOnceTheirOwnLimitIsExceeded() throws Exception {
+        RequestPostProcessor client = uniqueClient();
+        for (int attempt = 0; attempt < 5; attempt++) {
+            mockMvc.perform(get("/api/stats").with(client)).andExpect(status().is(org.hamcrest.Matchers.not(429)));
+        }
+        mockMvc.perform(get("/api/stats").with(client)).andExpect(status().isTooManyRequests());
     }
 
     @Test

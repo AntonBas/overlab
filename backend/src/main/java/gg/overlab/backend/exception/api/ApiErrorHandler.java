@@ -2,6 +2,7 @@ package gg.overlab.backend.exception.api;
 
 import gg.overlab.backend.exception.core.ApiException;
 import io.sentry.Sentry;
+import org.apache.catalina.connector.ClientAbortException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.sql.SQLException;
@@ -11,7 +12,11 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +47,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class ApiErrorHandler {
 
     private static final String NO_STORE = "no-store";
+    private static final String UNAVAILABLE_RETRY_SECONDS = "5";
     private static final Set<String> CONFLICT_SQL_STATES = Set.of("23505", "23503");
 
     @ExceptionHandler(ApiException.class)
@@ -167,6 +173,23 @@ public class ApiErrorHandler {
         } catch (IllegalArgumentException unknownCode) {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
+    }
+
+    @ExceptionHandler({CannotGetJdbcConnectionException.class, CannotCreateTransactionException.class,
+            DataAccessResourceFailureException.class})
+    public ResponseEntity<ApiError> handleDatabaseUnavailable(Exception exception, HttpServletRequest request) {
+        log.error("The database is unavailable on {}: {}", request.getRequestURI(), exception.getMessage());
+        Sentry.captureException(exception);
+        ResponseEntity<ApiError> response = build(HttpStatus.SERVICE_UNAVAILABLE,
+                "The service is temporarily unavailable", request, List.of());
+        return ResponseEntity.status(response.getStatusCode()).headers(response.getHeaders())
+                .header(HttpHeaders.RETRY_AFTER, UNAVAILABLE_RETRY_SECONDS).body(response.getBody());
+    }
+
+    @ExceptionHandler({ClientAbortException.class, AsyncRequestNotUsableException.class})
+    public ResponseEntity<Void> handleClientAbort(Exception exception, HttpServletRequest request) {
+        log.debug("The client closed the connection on {}", request.getRequestURI());
+        return null;
     }
 
     @ExceptionHandler(Exception.class)

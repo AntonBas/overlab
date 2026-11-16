@@ -58,6 +58,6 @@ public class AdminBootstrap implements ApplicationRunner {
         admin.setProvider(AuthProvider.LOCAL);
         admin.setEmailVerified(true);
         userRepository.save(admin);
-        log.info("Admin account created for {}", email);
+        log.info("Admin account created");
     }
 }

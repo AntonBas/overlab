@@ -7,6 +7,7 @@ import gg.overlab.backend.collector.run.CollectorRunStatus;
 import gg.overlab.backend.collector.run.CollectorTrigger;
 import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
 import gg.overlab.backend.common.Pause;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.config.async.AsyncConfig;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
@@ -29,6 +30,7 @@ public class RatesCollectorService {
 
     private static final int MAX_CONSECUTIVE_FAILURES = 5;
     private static final String QUEUE_FULL_SUMMARY = "Collector queue is full";
+    private static final String OTHER_INSTANCE_SUMMARY = "Another instance is running this job";
 
     private final CollectorProperties properties;
     private final SnapshotCollector snapshotCollector;
@@ -38,13 +40,15 @@ public class RatesCollectorService {
     private final CollectorRunRepository runRepository;
     private final CollectorMetrics metrics;
     private final TaskExecutor executor;
+    private final ScheduledJobLock jobLock;
     private final Set<String> runningJobs = ConcurrentHashMap.newKeySet();
     private final ReentrantLock requestsLock = new ReentrantLock();
 
     public RatesCollectorService(CollectorProperties properties, SnapshotCollector snapshotCollector,
                                  MapSlugResolver mapSlugResolver, JobChain jobChain, CacheEviction cacheEviction,
                                  CollectorRunRepository runRepository, CollectorMetrics metrics,
-                                 @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
+                                 @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor,
+                                 ScheduledJobLock jobLock) {
         this.properties = properties;
         this.snapshotCollector = snapshotCollector;
         this.mapSlugResolver = mapSlugResolver;
@@ -53,6 +57,7 @@ public class RatesCollectorService {
         this.runRepository = runRepository;
         this.metrics = metrics;
         this.executor = executor;
+        this.jobLock = jobLock;
     }
 
     public List<CollectorRunDto> recentRuns() {
@@ -67,12 +72,9 @@ public class RatesCollectorService {
         CollectorJob job = findJob(jobName);
         CollectorRun run = begin(job, trigger);
         try {
-            executor.execute(() -> {
-                finish(job, run);
-                runDependents(job, run);
-            });
+            executor.execute(() -> runUnderLock(job, run));
         } catch (TaskRejectedException exception) {
-            abandon(job, run);
+            abandon(job, run, QUEUE_FULL_SUMMARY);
             throw new ConflictException("Collector queue is full, job was not started: " + job.name());
         }
         return CollectorRunDto.from(run);
@@ -140,9 +142,19 @@ public class RatesCollectorService {
         }
     }
 
-    private void abandon(CollectorJob job, CollectorRun run) {
+    private void runUnderLock(CollectorJob job, CollectorRun run) {
+        boolean ran = jobLock.runExclusively("collector:" + job.name(), () -> {
+            finish(job, run);
+            runDependents(job, run);
+        });
+        if (!ran) {
+            abandon(job, run, OTHER_INSTANCE_SUMMARY);
+        }
+    }
+
+    private void abandon(CollectorJob job, CollectorRun run, String summary) {
         run.setStatus(CollectorRunStatus.FAILED);
-        run.setErrorSummary(QUEUE_FULL_SUMMARY);
+        run.setErrorSummary(summary);
         run.setFinishedAt(Instant.now());
         runRepository.save(run);
         runningJobs.remove(job.name());
@@ -201,6 +213,7 @@ public class RatesCollectorService {
                 }
                 log.warn("Collector request failed: {}", request.describe(exception));
             }
+            saveProgress(run);
             if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
                 log.error("Collector job '{}' stopped after {} failed requests in a row", job.name(),
                         consecutiveFailures);
@@ -222,6 +235,14 @@ public class RatesCollectorService {
         }
         log.info("Collector job '{}' finished: {} rows saved, {} of {} requests failed", job.name(),
                 run.getRowsSaved(), run.getRequestsFailed(), run.getRequestsTotal());
+    }
+
+    private void saveProgress(CollectorRun run) {
+        try {
+            runRepository.save(run);
+        } catch (RuntimeException exception) {
+            log.warn("Progress of collector run {} could not be saved: {}", run.getJobName(), exception.getMessage());
+        }
     }
 
     private CollectorRunStatus statusOf(CollectorRun run, boolean interrupted) {

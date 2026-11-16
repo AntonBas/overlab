@@ -1,5 +1,6 @@
 package gg.overlab.backend.audit;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,15 @@ public class AuditRetentionJob {
 
     private final AuditLogRepository repository;
     private final AuditProperties properties;
+    private final ScheduledJobLock jobLock;
 
     @Scheduled(cron = "0 30 3 * * *")
     @Transactional
     public void deleteOldUserEvents() {
+        jobLock.runExclusively("audit-retention", this::deleteUserEventsAndIpAddresses);
+    }
+
+    private void deleteUserEventsAndIpAddresses() {
         int deleted = repository.deleteByEntityTypeBefore(AuditEntityType.USER,
                 Instant.now().minus(properties.userEventRetention()));
         if (deleted > 0) {

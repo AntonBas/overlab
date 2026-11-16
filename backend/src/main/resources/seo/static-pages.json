@@ -1,0 +1,79 @@
+[
+  {
+    "path": "/",
+    "title": "Overlab",
+    "description": "Overwatch hero statistics by map and rank: win, pick and ban rates, perks, counters and video guides. Unofficial fan site.",
+    "heading": "Overlab",
+    "navigation": false
+  },
+  {
+    "path": "/stats",
+    "title": "Overwatch hero win, pick and ban rates",
+    "description": "Overwatch hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
+    "heading": "Hero statistics",
+    "navigation": true
+  },
+  {
+    "path": "/heroes",
+    "title": "All Overwatch heroes: roles, abilities, perks",
+    "description": "All Overwatch heroes with roles, abilities, perks, counters and synergies.",
+    "heading": "Heroes",
+    "navigation": true
+  },
+  {
+    "path": "/counters",
+    "title": "Overwatch counters and synergies for every hero",
+    "description": "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
+    "heading": "Counters",
+    "navigation": true
+  },
+  {
+    "path": "/perks",
+    "title": "Overwatch hero perks: every Minor and Major perk",
+    "description": "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
+    "heading": "Perks",
+    "navigation": true
+  },
+  {
+    "path": "/maps",
+    "title": "Overwatch maps: hero win rates by map",
+    "description": "Overwatch maps by game mode, with hero win, pick and ban rates on each map.",
+    "heading": "Maps",
+    "navigation": true
+  },
+  {
+    "path": "/changes",
+    "title": "Overwatch hero win rate changes by patch",
+    "description": "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",
+    "heading": "What changed",
+    "navigation": true
+  },
+  {
+    "path": "/privacy",
+    "title": "Privacy policy",
+    "description": "How Overlab handles your data.",
+    "heading": "Privacy policy",
+    "navigation": false
+  },
+  {
+    "path": "/terms",
+    "title": "Terms of use",
+    "description": "The rules for using Overlab.",
+    "heading": "Terms of use",
+    "navigation": false
+  },
+  {
+    "path": "/cookies",
+    "title": "Cookie policy",
+    "description": "Which cookies and local storage Overlab uses.",
+    "heading": "Cookie policy",
+    "navigation": false
+  },
+  {
+    "path": "/business",
+    "title": "Sponsorship and business",
+    "description": "Contact Overlab about sponsorship and partnerships.",
+    "heading": "Sponsorship and business",
+    "navigation": false
+  }
+]

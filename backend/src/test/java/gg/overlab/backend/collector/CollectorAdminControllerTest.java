@@ -91,11 +91,11 @@ class CollectorAdminControllerTest {
     }
 
     @Test
-    void importsPatchesAndReportsTheNumberCreated() throws Exception {
-        when(patchImportService.importNew()).thenReturn(2);
-
+    void importsPatchesInTheBackgroundAndAnswersAccepted() throws Exception {
         mockMvc.perform(post("/api/admin/collector/patches/import"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.created").value(2));
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.started").value(true));
+
+        verify(patchImportService).startAsync();
     }
 }

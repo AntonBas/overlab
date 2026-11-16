@@ -1,6 +1,7 @@
 package gg.overlab.backend.collector.imports;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -8,19 +9,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.CollectorFixtures;
 import gg.overlab.backend.collector.CollectorProperties;
 import gg.overlab.backend.collector.client.PatchNotesClient;
 import gg.overlab.backend.collector.parser.PatchNotesParser;
 import gg.overlab.backend.collector.parser.PatchNotesParserTest;
 import gg.overlab.backend.common.SlugService;
+import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -34,8 +39,11 @@ class PatchImportServiceTest {
                 Duration.ZERO, null, null, false, false, null, null, 3, null, List.of());
         return new PatchImportService(properties, client, new PatchNotesParser(), patchRepository,
                 new SlugService(), mock(ApplicationEventPublisher.class),
-                new TransactionTemplate(mock(PlatformTransactionManager.class)));
+                new TransactionTemplate(mock(PlatformTransactionManager.class)), executor, CollectorFixtures.openLock());
     }
+
+    private final List<Runnable> queuedTasks = new ArrayList<>();
+    private final TaskExecutor executor = queuedTasks::add;
 
     @Test
     void savesNewBalancePatchesWithDateTitleAndLink() {
@@ -103,5 +111,34 @@ class PatchImportServiceTest {
 
         assertThat(service().importNew()).isZero();
         verify(patchRepository, never()).save(any(Patch.class));
+    }
+
+    @Test
+    void backgroundImportRunsOnTheExecutorAndRejectsASecondStart() {
+        when(client.fetch()).thenReturn(PatchNotesParserTest.PAGE);
+        PatchImportService service = service();
+
+        service.startAsync();
+
+        assertThat(queuedTasks).hasSize(1);
+        assertThatThrownBy(service::startAsync).isInstanceOf(ConflictException.class);
+        queuedTasks.get(0).run();
+        verify(patchRepository, times(3)).save(any(Patch.class));
+        service.startAsync();
+        assertThat(queuedTasks).hasSize(2);
+    }
+
+    @Test
+    void emptyPatchListIsStaleAndAFreshPatchIsNot() {
+        PatchImportService service = service();
+        assertThat(service.isStale(Duration.ofDays(7))).isTrue();
+
+        Patch fresh = new Patch();
+        fresh.setReleasedAt(Instant.now().minus(Duration.ofDays(2)));
+        when(patchRepository.findAllByOrderByReleasedAtDesc()).thenReturn(List.of(fresh));
+        assertThat(service.isStale(Duration.ofDays(7))).isFalse();
+
+        fresh.setReleasedAt(Instant.now().minus(Duration.ofDays(30)));
+        assertThat(service.isStale(Duration.ofDays(7))).isTrue();
     }
 }

@@ -43,19 +43,22 @@ public class StatsHistoryService {
     private final StatsMapper statsMapper;
 
     @Cacheable(value = CacheNames.STATS,
-            key = "'history:' + #heroSlug + ':' + #filter.cacheKey()",
-            condition = "#from == null && #to == null")
+            key = "'history:' + #heroSlug + ':' + #filter.cacheKey()"
+                    + " + (#from == null && #to == null ? '' : ':' + T(gg.overlab.backend.stats.StatsHistoryService)"
+                    + ".rangeKey(#from, #to))")
     @Transactional(readOnly = true)
     public HeroHistoryDto getHeroHistory(String heroSlug, StatsFilter filter, Instant from, Instant to) {
-        Instant end = to == null ? Instant.now() : to;
-        Instant start = from == null ? end.minus(DEFAULT_HISTORY_RANGE) : from;
-        if (start.isAfter(end)) {
+        Instant requestedEnd = to == null ? Instant.now() : to;
+        Instant requestedStart = from == null ? requestedEnd.minus(DEFAULT_HISTORY_RANGE) : from;
+        if (requestedStart.isAfter(requestedEnd)) {
             throw new BadRequestException("'from' must not be after 'to'");
         }
-        if (Duration.between(start, end).compareTo(MAX_HISTORY_RANGE) > 0) {
+        if (Duration.between(requestedStart, requestedEnd).compareTo(MAX_HISTORY_RANGE) > 0) {
             throw new BadRequestException("The requested range must not exceed " + MAX_HISTORY_RANGE.toDays()
                     + " days");
         }
+        Instant start = from == null ? requestedStart : startOfDay(from);
+        Instant end = to == null ? requestedEnd : startOfDay(to).plus(Duration.ofDays(1));
         HeroDto hero = heroService.getBySlug(heroSlug);
         if (!filter.isAllMaps()) {
             mapService.getBySlug(filter.mapSlug());
@@ -70,6 +73,15 @@ public class StatsHistoryService {
                 stats.stream().map(statsMapper::toHistoryPoint).toList());
         return new HeroHistoryDto(hero, filter.queue(), filter.tier(), filter.mapSlug(), filter.platform(),
                 filter.region(), start, end, points);
+    }
+
+    public static String rangeKey(Instant from, Instant to) {
+        return (from == null ? "-" : LocalDate.ofInstant(from, ZoneOffset.UTC).toString()) + "_"
+                + (to == null ? "-" : LocalDate.ofInstant(to, ZoneOffset.UTC).toString());
+    }
+
+    private static Instant startOfDay(Instant instant) {
+        return LocalDate.ofInstant(instant, ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC);
     }
 
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package gg.overlab.backend.collector.snapshot;
 
 import gg.overlab.backend.collector.CollectorProperties;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.stats.HeroStatRepository;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -21,9 +22,14 @@ public class SnapshotRetentionJob {
 
     private final HeroStatRepository heroStatRepository;
     private final CollectorProperties properties;
+    private final ScheduledJobLock jobLock;
 
     @Scheduled(cron = "0 45 3 * * SUN")
     public int thinOutOldSnapshots() {
+        return jobLock.callExclusively("snapshot-retention", this::thinOutSnapshotsOlderThanRetention).orElse(0);
+    }
+
+    private int thinOutSnapshotsOlderThanRetention() {
         Instant threshold = Instant.now().minus(Duration.ofDays(properties.retention().detailedDays()));
         int deleted = heroStatRepository.findOldestCaptureBefore(threshold)
                 .map(oldest -> thinOut(weekStart(oldest), threshold))

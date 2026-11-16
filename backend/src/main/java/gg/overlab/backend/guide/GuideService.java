@@ -12,6 +12,7 @@ import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;
+import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import gg.overlab.backend.hero.HeroRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class GuideService {
     private final GuideRepository guideRepository;
     private final HeroRepository heroRepository;
     private final GameMapRepository gameMapRepository;
+    private final HeroAbilityRepository abilityRepository;
     private final GuideMapper guideMapper;
     private final SlugService slugService;
     private final AuditService auditService;
@@ -121,7 +123,11 @@ public class GuideService {
         guide.setEndSeconds(request.endSeconds());
         guide.setKind(request.kind() == null ? GuideKind.TIP : request.kind());
         guide.setSide(request.side() == null ? GuideSide.BOTH : request.side());
-        guide.setAbilitySlug(StringUtils.hasText(request.abilitySlug()) ? request.abilitySlug() : null);
+        String abilitySlug = StringUtils.hasText(request.abilitySlug()) ? request.abilitySlug() : null;
+        if (abilitySlug != null && !abilityRepository.existsByHeroIdAndSlug(hero.getId(), abilitySlug)) {
+            throw new BadRequestException("The ability does not belong to the chosen hero");
+        }
+        guide.setAbilitySlug(abilitySlug);
         guide.setDescription(request.description());
         guide.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         guide.setPublished(Boolean.TRUE.equals(request.published()));

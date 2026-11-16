@@ -1,10 +1,13 @@
 package gg.overlab.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @IntegrationTest
@@ -19,7 +22,7 @@ class DatabaseSchemaIntegrationTest {
                 "select version from flyway_schema_history where success order by installed_rank", String.class);
 
         assertThat(versions).containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18",
-                "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31");
+                "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33");
     }
 
     @Test
@@ -59,6 +62,35 @@ class DatabaseSchemaIntegrationTest {
                 "uq_users_google_subject");
         assertThat(constraints).contains("uq_hero_stats_snapshot", "uq_perks_hero_name", "uq_hero_relations",
                 "ck_hero_relations_distinct");
+    }
+
+    @Test
+    void aRelationPairIsUniqueInEitherDirection() {
+        jdbcTemplate.update("insert into heroes (slug, name, role) values ('pair-a', 'Pair A', 'TANK'), "
+                + "('pair-b', 'Pair B', 'DAMAGE')");
+        try {
+            jdbcTemplate.update("insert into hero_relations (hero_id, related_hero_id, type) "
+                    + "select a.id, b.id, 'COUNTER' from heroes a, heroes b where a.slug = 'pair-a' and b.slug = 'pair-b'");
+
+            assertThatThrownBy(() -> jdbcTemplate.update("insert into hero_relations (hero_id, related_hero_id, type) "
+                    + "select b.id, a.id, 'COUNTER' from heroes a, heroes b where a.slug = 'pair-a' "
+                    + "and b.slug = 'pair-b'")).isInstanceOf(DuplicateKeyException.class);
+        } finally {
+            jdbcTemplate.update("delete from heroes where slug in ('pair-a', 'pair-b')");
+        }
+    }
+
+    @Test
+    void statisticsRatesAreLimitedToValidPercentages() {
+        jdbcTemplate.update("insert into heroes (slug, name, role) values ('rate-hero', 'Rate Hero', 'TANK')");
+        try {
+            assertThatThrownBy(() -> jdbcTemplate.update("insert into hero_stats (hero_id, queue, game_format, "
+                    + "platform, region, tier, win_rate, pick_rate, captured_at) select id, 'COMPETITIVE', "
+                    + "'FIVE_VS_FIVE', 'PC', 'EUROPE', 'ALL', 120, 5, now() from heroes where slug = 'rate-hero'"))
+                    .isInstanceOf(DataIntegrityViolationException.class);
+        } finally {
+            jdbcTemplate.update("delete from heroes where slug = 'rate-hero'");
+        }
     }
 
     @Test

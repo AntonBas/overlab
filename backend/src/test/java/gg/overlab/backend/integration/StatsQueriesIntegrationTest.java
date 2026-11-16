@@ -114,16 +114,22 @@ class StatsQueriesIntegrationTest {
     }
 
     @Test
-    void onlyTheDefaultHistoryRangeIsCached() {
+    void historyRangesAreCachedPerDayNotPerInstant() {
         StatsFilter filter = allMaps();
-        String key = "history:ana-test:" + filter.cacheKey();
+        String defaultKey = "history:ana-test:" + filter.cacheKey();
+        Instant from = OLD.minus(Duration.ofDays(1));
+        Instant to = NEW.plus(Duration.ofDays(1));
+        String rangedKey = defaultKey + ":" + StatsHistoryService.rangeKey(from, to);
 
-        historyService.getHeroHistory("ana-test", filter, OLD.minus(Duration.ofDays(1)), NEW.plus(Duration.ofDays(1)));
-        assertThat(cacheManager.getCache(CacheNames.STATS).get(key)).isNull();
+        historyService.getHeroHistory("ana-test", filter, from, to);
+        historyService.getHeroHistory("ana-test", filter, from.plusSeconds(37), to.plusSeconds(11));
+        await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
+                assertThat(cacheManager.getCache(CacheNames.STATS).get(rangedKey)).isNotNull());
+        assertThat(cacheManager.getCache(CacheNames.STATS).get(defaultKey)).isNull();
 
         historyService.getHeroHistory("ana-test", filter, null, null);
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
-                assertThat(cacheManager.getCache(CacheNames.STATS).get(key)).isNotNull());
+                assertThat(cacheManager.getCache(CacheNames.STATS).get(defaultKey)).isNotNull());
     }
 
     @Test

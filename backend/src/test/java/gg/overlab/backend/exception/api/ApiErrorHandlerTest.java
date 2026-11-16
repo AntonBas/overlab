@@ -13,7 +13,9 @@ import jakarta.validation.Path;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import java.sql.SQLException;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -54,6 +56,20 @@ class ApiErrorHandlerTest {
                 HttpStatus.CONFLICT, "taken");
         assertError(handler.handleApiException(new InvalidCredentialsException(), request),
                 HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    @Test
+    void unavailableDatabaseIs503WithRetryAfter() {
+        ResponseEntity<ApiError> response = handler.handleDatabaseUnavailable(
+                new CannotGetJdbcConnectionException("down"), request);
+
+        assertError(response, HttpStatus.SERVICE_UNAVAILABLE, "The service is temporarily unavailable");
+        assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("5");
+    }
+
+    @Test
+    void closedClientConnectionsProduceNoResponseBody() {
+        assertThat(handler.handleClientAbort(new ClientAbortException("Broken pipe"), request)).isNull();
     }
 
     @Test
