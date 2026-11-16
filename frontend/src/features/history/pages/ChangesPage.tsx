@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -23,6 +23,7 @@ import {
   formatDateTime,
   formatPatchDate,
 } from "../../../utils/format";
+import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
 import { fetchPatches } from "../../patches";
 import { fetchComparison, fetchHistoryStart } from "../../stats";
@@ -56,7 +57,7 @@ function isKnownViewShape(view: string): boolean {
 const OTHER_SEASON = "other";
 const RECENT_SEASONS = 2;
 const RECENT_SELECTION = "recent";
-const PRESERVED_PARAMS = ["view", "season"];
+const PRESERVED_PARAMS = ["view", "season", ...SEARCH_PARAMS];
 
 interface PatchGroup {
   key: string;
@@ -122,7 +123,7 @@ export function ChangesPage() {
     undefined,
     PRESERVED_PARAMS,
   );
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlParam("q");
   const patches = useFetch(fetchPatches, []);
 
   const range = useMemo(
@@ -242,6 +243,9 @@ export function ChangesPage() {
     }
     if (nextSeason !== RECENT_SELECTION) {
       params.set("season", nextSeason);
+    }
+    if (search !== "") {
+      params.set("q", search);
     }
     setSearchParams(params);
   }

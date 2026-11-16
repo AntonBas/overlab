@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -6,6 +5,7 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { RevealMore } from "../../../components/ui/RevealMore";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -18,14 +18,16 @@ import { FavoriteButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
-import type { HeroRole } from "../../../types/hero";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
 import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
+import { useHeroListView } from "../../heroes/hooks/useHeroListView";
 import { fetchAllPerks } from "../api/perksApi";
 import { BackdropCard } from "../components/BackdropCard";
 import { PerkList } from "../components/PerkList";
 import { staticSeoPage } from "../../../utils/staticSeoPages";
+
+const HEROES_PER_STEP = 12;
 
 export function PerksPage() {
   const page = staticSeoPage("/perks");
@@ -42,9 +44,16 @@ export function PerksPage() {
   );
   const heroes = useFetch(fetchHeroes, []);
   const perks = useFetch(fetchAllPerks, []);
-  const [role, setRole] = useState<HeroRole | null>(null);
-  const [query, setQuery] = useState("");
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const {
+    role,
+    query,
+    onlyFavorites,
+    shownRows,
+    setRole,
+    setQuery,
+    setOnlyFavorites,
+    showMore,
+  } = useHeroListView(HEROES_PER_STEP);
   const { favoriteHeroes } = usePersonalData();
 
   if (heroes.loading || perks.loading) {
@@ -100,47 +109,57 @@ export function PerksPage() {
             : "No heroes match the filters."}
         </EmptyState>
       ) : (
-        <ul className="hero-perks-grid">
-          {visibleHeroes.map((hero) => (
-            <li key={hero.slug} className="hero-perks-item">
-              <BackdropCard slug={hero.slug} role={hero.role}>
-                <div className="hero-perks__top">
-                  <Link
-                    className="hero-perks__header"
-                    to={`/heroes/${hero.slug}#perks`}
-                  >
-                    <HeroPortrait
-                      name={hero.name}
-                      url={hero.portraitUrl}
-                      size={48}
-                    />
-                    <span className="hero-perks__title">
-                      <strong>{hero.name}</strong>
-                      <span className="muted">
-                        {hero.subrole ? (
-                          <SubroleBadge subrole={hero.subrole} />
-                        ) : (
-                          ROLE_LABELS[hero.role]
-                        )}
+        <>
+          <ul className="hero-perks-grid">
+            {visibleHeroes.slice(0, shownRows).map((hero) => (
+              <li key={hero.slug} className="hero-perks-item">
+                <BackdropCard slug={hero.slug} role={hero.role}>
+                  <div className="hero-perks__top">
+                    <Link
+                      className="hero-perks__header"
+                      to={`/heroes/${hero.slug}#perks`}
+                    >
+                      <HeroPortrait
+                        name={hero.name}
+                        url={hero.portraitUrl}
+                        size={48}
+                      />
+                      <span className="hero-perks__title">
+                        <strong>{hero.name}</strong>
+                        <span className="muted">
+                          {hero.subrole ? (
+                            <SubroleBadge subrole={hero.subrole} />
+                          ) : (
+                            ROLE_LABELS[hero.role]
+                          )}
+                        </span>
                       </span>
-                    </span>
-                    <RoleBadge role={hero.role} compact />
-                  </Link>
-                  <FavoriteButton
+                      <RoleBadge role={hero.role} compact />
+                    </Link>
+                    <FavoriteButton
+                      compact
+                      kind="hero"
+                      slug={hero.slug}
+                      name={hero.name}
+                    />
+                  </div>
+                  <PerkList
                     compact
-                    kind="hero"
-                    slug={hero.slug}
-                    name={hero.name}
+                    perks={allPerks.filter(
+                      (perk) => perk.heroSlug === hero.slug,
+                    )}
                   />
-                </div>
-                <PerkList
-                  compact
-                  perks={allPerks.filter((perk) => perk.heroSlug === hero.slug)}
-                />
-              </BackdropCard>
-            </li>
-          ))}
-        </ul>
+                </BackdropCard>
+              </li>
+            ))}
+          </ul>
+          <RevealMore
+            remaining={visibleHeroes.length - shownRows}
+            shown={shownRows}
+            noun="heroes"
+            onMore={showMore}
+          />
+        </>
       )}
     </>
   );

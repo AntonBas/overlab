@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -13,6 +12,7 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
+import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps";
 import { fetchStats } from "../api/statsApi";
@@ -37,8 +37,11 @@ export function StatsPage() {
       window.location.origin,
     ),
   );
-  const { filters, update, changeSort, key } = useFilterState();
-  const [search, setSearch] = useState("");
+  const { filters, update, changeSort, key } = useFilterState(
+    undefined,
+    SEARCH_PARAMS,
+  );
+  const [search, setSearch] = useUrlParam("q");
   const maps = useFetch(fetchMaps, []);
   const stats = useFetch((signal) => fetchStats(filters, signal), [key], {
     keepPrevious: true,

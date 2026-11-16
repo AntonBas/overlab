@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation, type InitialEntry } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { CountersPage } from "./CountersPage";
 
@@ -113,10 +113,21 @@ function rows() {
     .filter((row) => row.classList.contains("matchup"));
 }
 
-function renderPage() {
+function LocationProbe() {
+  const location = useLocation();
+  return (
+    <output data-testid="location">
+      {location.pathname}
+      {location.search} {JSON.stringify(location.state)}
+    </output>
+  );
+}
+
+function renderPage(entry: InitialEntry = "/counters") {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <CountersPage />
+      <LocationProbe />
     </MemoryRouter>,
   );
 }
@@ -222,6 +233,42 @@ describe("CountersPage", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
     );
+    expect(rows()).toHaveLength(24);
+  });
+
+  it("reads the filters from the address", async () => {
+    renderPage("/counters?role=DAMAGE&q=rea");
+    await screen.findAllByText("Strong against");
+
+    expect(rows()).toHaveLength(1);
+    expect(rows()[0].querySelector("strong")?.textContent).toBe("Reaper");
+  });
+
+  it("writes the filters and the revealed rows to the address", async () => {
+    extra.heroes = Array.from({ length: 30 }, (_, index) => ({
+      slug: `hero-${String(index).padStart(2, "0")}`,
+    }));
+    renderPage();
+    await screen.findAllByText("Strong against");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
+    );
+    expect(screen.getByTestId("location")).toHaveTextContent('{"rows":24}');
+
+    fireEvent.click(screen.getByRole("button", { name: /only favorites/i }));
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      '/counters?favorites=1 {"rows":12}',
+    );
+  });
+
+  it("restores the revealed rows when coming back to the page", async () => {
+    extra.heroes = Array.from({ length: 30 }, (_, index) => ({
+      slug: `hero-${String(index).padStart(2, "0")}`,
+    }));
+    renderPage({ pathname: "/counters", state: { rows: 24 } });
+    await screen.findAllByText("Strong against");
+
     expect(rows()).toHaveLength(24);
   });
 });

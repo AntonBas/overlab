@@ -152,6 +152,22 @@ describe("StatsPage", () => {
     );
   });
 
+  it("reads the hero search from the address and keeps it when a filter changes", async () => {
+    fetchStatsMock.mockResolvedValue(snapshot());
+    renderPage("/stats?q=gen");
+
+    expect(await screen.findByRole("link", { name: "Genji" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Ana" })).not.toBeInTheDocument();
+    expect(screen.getByRole("searchbox")).toHaveValue("gen");
+
+    await userEvent.click(screen.getByRole("button", { name: "Quick Play" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("search")).toHaveTextContent("q=gen"),
+    );
+    expect(screen.getByTestId("search")).toHaveTextContent("queue=quick_play");
+  });
+
   it("sorts by a column and flips the direction on a second click", async () => {
     fetchStatsMock.mockResolvedValue(snapshot());
     renderPage();

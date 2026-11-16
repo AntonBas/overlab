@@ -1,10 +1,10 @@
 import clsx from "clsx";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
+import { RevealMore } from "../../../components/ui/RevealMore";
 import { Spinner } from "../../../components/ui/Spinner";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { useFetch } from "../../../hooks/useFetch";
@@ -14,7 +14,7 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import type { CategoryMatchup, HeroRole } from "../../../types/hero";
+import type { CategoryMatchup } from "../../../types/hero";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { FavoriteButton } from "../../personal";
@@ -22,6 +22,7 @@ import { usePersonalData } from "../../personal";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
 import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
+import { useHeroListView } from "../../heroes/hooks/useHeroListView";
 import { fetchAllRelations, fetchHeroCategories } from "../api/relationsApi";
 import { CategoryChip } from "../components/CategoryChip";
 import { RelationAvatar } from "../components/RelationAvatar";
@@ -71,23 +72,16 @@ export function CountersPage() {
   const heroes = useFetch(fetchHeroes, []);
   const relations = useFetch(fetchAllRelations, []);
   const categories = useFetch(fetchHeroCategories, []);
-  const [role, setRoleFilter] = useState<HeroRole | null>(null);
-  const [query, setQueryFilter] = useState("");
-  const [onlyFavorites, setOnlyFavoritesFilter] = useState(false);
-  const [shownRows, setShownRows] = useState(ROWS_PER_STEP);
-
-  function setRole(next: HeroRole | null) {
-    setRoleFilter(next);
-    setShownRows(ROWS_PER_STEP);
-  }
-  function setQuery(next: string) {
-    setQueryFilter(next);
-    setShownRows(ROWS_PER_STEP);
-  }
-  function setOnlyFavorites(next: boolean) {
-    setOnlyFavoritesFilter(next);
-    setShownRows(ROWS_PER_STEP);
-  }
+  const {
+    role,
+    query,
+    onlyFavorites,
+    shownRows,
+    setRole,
+    setQuery,
+    setOnlyFavorites,
+    showMore,
+  } = useHeroListView(ROWS_PER_STEP);
   const { favoriteHeroes } = usePersonalData();
   const relationVotes = useRelationVotes();
 
@@ -256,15 +250,12 @@ export function CountersPage() {
               );
             })}
           </ul>
-          {visibleHeroes.length > shownRows && (
-            <button
-              type="button"
-              className="button button--ghost matchups__more"
-              onClick={() => setShownRows((current) => current + ROWS_PER_STEP)}
-            >
-              Show more heroes ({visibleHeroes.length - shownRows} left)
-            </button>
-          )}
+          <RevealMore
+            remaining={visibleHeroes.length - shownRows}
+            shown={shownRows}
+            noun="heroes"
+            onMore={showMore}
+          />
         </div>
       )}
       <p className="muted footnote">

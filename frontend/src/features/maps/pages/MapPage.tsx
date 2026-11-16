@@ -2,7 +2,6 @@ import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
@@ -21,6 +20,7 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
+import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides";
@@ -38,7 +38,10 @@ import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 
 export function MapPage() {
   const { slug = "" } = useParams();
-  const { filters, update, changeSort, key } = useFilterState(slug);
+  const { filters, update, changeSort, key } = useFilterState(
+    slug,
+    SEARCH_PARAMS,
+  );
   const coverage = useCoverage();
   const map = useFetch(() => fetchMap(slug), [slug]);
   useNoIndex(map.error?.status === 404);
@@ -56,7 +59,7 @@ export function MapPage() {
   );
   const guides = useFetch(() => fetchGuides({ map: slug }), [slug]);
   const maps = useFetch(fetchMaps, []);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlParam("q");
   const heroes = stats.data?.heroes ?? [];
   const pickHeroes =
     filters.role === null ? heroes : (allRolesStats.data?.heroes ?? []);

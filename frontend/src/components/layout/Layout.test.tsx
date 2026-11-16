@@ -1,6 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
+import {
+  Link,
+  MemoryRouter,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./Header", () => ({ Header: () => <header>site header</header> }));
@@ -15,6 +21,15 @@ import { Layout } from "./Layout";
 
 function Broken(): never {
   throw new Error("page crashed");
+}
+
+function GoBack() {
+  const navigate = useNavigate();
+  return (
+    <button type="button" onClick={() => navigate(-1)}>
+      go back
+    </button>
+  );
 }
 
 function renderLayout() {
@@ -38,6 +53,7 @@ function renderLayout() {
               <>
                 <p>other page</p>
                 <Link to="/">go home</Link>
+                <GoBack />
               </>
             }
           />
@@ -88,5 +104,22 @@ describe("Layout", () => {
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("site header")).toBeInTheDocument();
     consoleError.mockRestore();
+  });
+
+  it("returns to the scroll position the visitor left when going back", async () => {
+    const user = userEvent.setup();
+    renderLayout();
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      value: 900,
+    });
+    window.dispatchEvent(new Event("scroll"));
+
+    await user.click(screen.getByRole("link", { name: "go other" }));
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+    window.dispatchEvent(new Event("scroll"));
+    await user.click(await screen.findByRole("button", { name: "go back" }));
+
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith(0, 900));
   });
 });

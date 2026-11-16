@@ -1,11 +1,11 @@
 import clsx from "clsx";
-import { useState } from "react";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useUrlFlag, useUrlParam } from "../../../hooks/useUrlParam";
 import {
   breadcrumbList,
   useStructuredData,
@@ -55,6 +55,10 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
   );
 }
 
+function parseMode(value: string): MapMode | null {
+  return Object.hasOwn(MAP_MODE_LABELS, value) ? (value as MapMode) : null;
+}
+
 export function MapsPage() {
   const page = staticSeoPage("/maps");
   usePageTitle(page.title);
@@ -70,9 +74,14 @@ export function MapsPage() {
   );
   const maps = useFetch(fetchMaps, []);
   const { favoriteMaps } = usePersonalData();
-  const [search, setSearch] = useState("");
-  const [mode, setMode] = useState<MapMode | null>(null);
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [search, setSearch] = useUrlParam("q");
+  const [modeParam, setModeParam] = useUrlParam("mode");
+  const [onlyFavorites, setOnlyFavorites] = useUrlFlag("favorites");
+  const mode = parseMode(modeParam);
+
+  function setMode(next: MapMode | null) {
+    setModeParam(next ?? "");
+  }
 
   const available = maps.data ?? [];
   const modes = [

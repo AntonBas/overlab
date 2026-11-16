@@ -100,6 +100,12 @@ describe("ChangesPage", () => {
     expect(labelsIn(list).slice(0, 2)).toEqual(["Last 7 days", "Last 30 days"]);
   });
 
+  it("reads the hero search from the address", async () => {
+    renderPage("/changes?q=zzz");
+
+    expect(await screen.findByRole("searchbox")).toHaveValue("zzz");
+  });
+
   it("offers a rank filter in Competitive and requests the chosen rank", async () => {
     renderPage("/changes?tier=gold");
 

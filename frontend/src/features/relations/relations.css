@@ -12,11 +12,6 @@
   margin-left: auto;
 }
 
-.matchups__more {
-  display: block;
-  margin: var(--space-16) auto 0;
-}
-
 .matchups__rows {
   display: grid;
   gap: var(--space-12);

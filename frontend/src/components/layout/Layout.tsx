@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 import { AnalyticsLoader, ErrorReportingLoader } from "../../features/legal";
 import { CookieBanner } from "../../features/legal";
+import { restoreScroll } from "../../utils/restoreScroll";
 import { Spinner } from "../ui/Spinner";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { Footer } from "./Footer";
@@ -17,8 +18,12 @@ export function Layout() {
   useEffect(() => {
     const positions = scrollPositions.current;
     const key = location.key;
-    return () => {
+    function remember() {
       positions.set(key, window.scrollY);
+    }
+    window.addEventListener("scroll", remember, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", remember);
     };
   }, [location.key]);
 
@@ -31,12 +36,12 @@ export function Layout() {
       navigationType === "POP"
         ? scrollPositions.current.get(location.key)
         : undefined;
+    content.current?.focus({ preventScroll: true });
     if (restoredPosition === undefined) {
       window.scrollTo(0, 0);
-    } else {
-      requestAnimationFrame(() => window.scrollTo(0, restoredPosition));
+      return;
     }
-    content.current?.focus({ preventScroll: true });
+    return restoreScroll(restoredPosition);
   }, [location.pathname, location.key, navigationType]);
 
   return (

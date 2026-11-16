@@ -705,3 +705,8 @@
     justify-content: center;
   }
 }
+
+.reveal-more {
+  display: block;
+  margin: var(--space-16) auto 0;
+}
