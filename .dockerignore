@@ -5,7 +5,14 @@
 .env.*
 !.env.example
 .tasks
-backend
+backend/*
+!backend/src
+backend/src/*
+!backend/src/main
+backend/src/main/*
+!backend/src/main/resources
+backend/src/main/resources/*
+!backend/src/main/resources/seo
 **/node_modules
 **/dist
 **/build

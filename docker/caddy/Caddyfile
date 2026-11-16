@@ -5,13 +5,15 @@
 		X-Content-Type-Options nosniff
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Frame-Options DENY
+		Cross-Origin-Opener-Policy same-origin
+		Cross-Origin-Resource-Policy same-site
 		Referrer-Policy strict-origin-when-cross-origin
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
 		-Server
 	}
 
 	@notSvgMedia not path /media/*.svg
-	header @notSvgMedia Content-Security-Policy "default-src 'self'; script-src 'self' https://cloud.umami.is; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://cloud.umami.is https://gateway.umami.is https://*.ingest.de.sentry.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+	header @notSvgMedia Content-Security-Policy "default-src 'self'; script-src 'self' https://cloud.umami.is; style-src 'self'; img-src 'self' data: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://cloud.umami.is https://gateway.umami.is https://*.ingest.de.sentry.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
 	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
 	handle @uploads {
@@ -34,6 +36,12 @@
 			User-agent: *
 			Disallow: /admin
 			Disallow: /feedback
+			Disallow: /api/
+			Disallow: /me
+			Disallow: /login
+			Disallow: /register
+			Disallow: /confirm-deletion
+			Disallow: /oauth2/
 			Sitemap: {scheme}://{hostport}/sitemap.xml
 			ROBOTS 200
 	}
@@ -51,9 +59,14 @@
 	@mapImages path /media/maps/*
 	handle @mapImages {
 		reverse_proxy backend:8080 {
-			header_down Cache-Control "public, max-age=31536000, immutable"
-			header_down -Pragma
-			header_down -Expires
+			@mapImageFound status 2xx
+			handle_response @mapImageFound {
+				copy_response_headers {
+					exclude Cache-Control Pragma Expires
+				}
+				header >Cache-Control "public, max-age=31536000, immutable"
+				copy_response
+			}
 		}
 	}
 
@@ -90,6 +103,49 @@
 		}
 	}
 
+	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+)/?$
+	@heroOnMapPage path_regexp heroOnMapPage ^/(maps/[^/]+)/[^/]+/?$
+
+	handle @entityPage {
+		rewrite * /api/seo/exists?path=/{http.regexp.entityPage.1}
+		reverse_proxy backend:8080 {
+			@pageFound status 2xx
+			handle_response @pageFound {
+				root * /srv
+				rewrite * /index.html
+				file_server
+			}
+			@pageMissing status 404
+			handle_response @pageMissing {
+				root * /srv
+				rewrite * /index.html
+				file_server {
+					status 404
+				}
+			}
+		}
+	}
+
+	handle @heroOnMapPage {
+		rewrite * /api/seo/exists?path=/{http.regexp.heroOnMapPage.1}
+		reverse_proxy backend:8080 {
+			@mapFound status 2xx
+			handle_response @mapFound {
+				root * /srv
+				rewrite * /index.html
+				file_server
+			}
+			@mapMissing status 404
+			handle_response @mapMissing {
+				root * /srv
+				rewrite * /index.html
+				file_server {
+					status 404
+				}
+			}
+		}
+	}
+
 	@hashedAssets {
 		path /assets/*
 		file
@@ -112,7 +168,7 @@
 		file_server
 	}
 
-	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
+	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
 	handle @appRoute {
 		rewrite * /index.html
 		file_server
@@ -122,6 +178,38 @@
 		rewrite * /index.html
 		file_server {
 			status 404
+		}
+	}
+
+	handle_errors {
+		header Retry-After "30"
+		header Cache-Control "no-store"
+
+		@upstreamDown expression {http.error.status_code} in [502, 503, 504]
+
+		@apiPath path /api/* /oauth2/* /login/oauth2/* /media/* /sitemap.xml
+		handle @upstreamDown {
+			handle @apiPath {
+				header Content-Type "application/json"
+				respond `{"status":503,"error":"Service Unavailable","message":"The service is temporarily unavailable"}` 503
+			}
+
+			@pageRoute path_regexp ^/(heroes|maps|guides)/
+			handle @pageRoute {
+				root * /srv
+				rewrite * /index.html
+				file_server {
+					status 503
+				}
+			}
+
+			handle {
+				respond "The service is temporarily unavailable. Please try again in a moment." 503
+			}
+		}
+
+		handle {
+			respond "{http.error.status_text}" {http.error.status_code}
 		}
 	}
 }

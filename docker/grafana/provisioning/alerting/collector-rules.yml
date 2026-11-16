@@ -30,7 +30,7 @@ groups:
                     type: gt
                     params:
                       - 172800
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Error
         for: 10m
         labels:
@@ -61,7 +61,7 @@ groups:
                     type: gt
                     params:
                       - 777600
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Error
         for: 10m
         labels:
