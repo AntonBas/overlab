@@ -3,6 +3,7 @@ package gg.overlab.backend.config.cache;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -98,7 +99,25 @@ public class AfterCommitEvictionCacheManager implements CacheManager {
                     throw new ValueRetrievalException(key, valueLoader, exception);
                 }
             }
-            return guarded(() -> delegate.get(key, valueLoader), null);
+            AtomicBoolean loaderFailed = new AtomicBoolean();
+            Callable<T> trackedLoader = () -> {
+                try {
+                    return valueLoader.call();
+                } catch (Exception exception) {
+                    loaderFailed.set(true);
+                    throw exception;
+                }
+            };
+            try {
+                T result = delegate.get(key, trackedLoader);
+                breaker.recordSuccess();
+                return result;
+            } catch (RuntimeException exception) {
+                if (!loaderFailed.get()) {
+                    breaker.recordFailure();
+                }
+                throw exception;
+            }
         }
 
         @Override

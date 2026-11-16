@@ -2,14 +2,17 @@ package gg.overlab.backend.config.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.Callable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -91,5 +94,33 @@ class AfterCommitEvictionCacheManagerTest {
                 () -> breaker).getCache("content");
 
         assertThat(cache.get("key", () -> "loaded")).isEqualTo("loaded");
+    }
+
+    @Test
+    void failureOfTheLoaderDoesNotOpenTheBreaker() {
+        RedisCircuitBreaker breaker = new RedisCircuitBreaker();
+        Cache cache = new AfterCommitEvictionCacheManager(new ConcurrentMapCacheManager("content"),
+                () -> breaker).getCache("content");
+
+        assertThatThrownBy(() -> cache.get("key", () -> {
+            throw new IllegalArgumentException("unknown hero");
+        })).hasRootCauseInstanceOf(IllegalArgumentException.class);
+
+        assertThat(breaker.isOpen()).isFalse();
+    }
+
+    @Test
+    void failureOfTheCacheWhileLoadingOpensTheBreaker() {
+        RedisCircuitBreaker breaker = new RedisCircuitBreaker();
+        Cache failing = mock(Cache.class);
+        when(failing.get(eq("key"), ArgumentMatchers.<Callable<String>>any()))
+                .thenThrow(new IllegalStateException("redis down"));
+        CacheManager delegate = mock(CacheManager.class);
+        when(delegate.getCache("content")).thenReturn(failing);
+        Cache cache = new AfterCommitEvictionCacheManager(delegate, () -> breaker).getCache("content");
+
+        assertThatThrownBy(() -> cache.get("key", () -> "loaded")).isInstanceOf(IllegalStateException.class);
+
+        assertThat(breaker.isOpen()).isTrue();
     }
 }
