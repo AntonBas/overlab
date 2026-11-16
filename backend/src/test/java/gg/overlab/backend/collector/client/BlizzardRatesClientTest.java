@@ -75,6 +75,15 @@ class BlizzardRatesClientTest {
     }
 
     @Test
+    void aCompetitiveAnswerWithoutABodyYieldsNoHeroesInsteadOfFailing() {
+        server.expect(queryParam("rq", "2")).andRespond(withSuccess());
+        BlizzardRatesClient client = client(1);
+
+        assertThat(fetch(client)).isEmpty();
+        server.verify();
+    }
+
+    @Test
     void anEmptyAnswerDoesNotMakeAQueueTheRememberedCompetitiveQueue() {
         server.expect(queryParam("rq", "2"))
                 .andRespond(withSuccess(CollectorFixtures.WITHOUT_BAN_RATE_JSON, MediaType.APPLICATION_JSON));

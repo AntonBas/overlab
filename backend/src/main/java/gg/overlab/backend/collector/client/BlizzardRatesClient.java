@@ -166,7 +166,7 @@ public class BlizzardRatesClient {
     }
 
     private boolean hasBanRateColumn(BlizzardRatesResponse response) {
-        return response.columns() != null
+        return response != null && response.columns() != null
                 && response.columns().stream().anyMatch(column -> BAN_RATE_COLUMN.equals(column.id()));
     }
 
