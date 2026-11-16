@@ -88,9 +88,11 @@ function GroupDetail({ group }: { group: RelatedGroup }) {
   );
 }
 
+const NO_GROUPS: RelatedGroup[] = [];
+
 export function RelatedHeroes({
   heroes,
-  groups = [],
+  groups = NO_GROUPS,
   type,
   feedback,
 }: RelatedHeroesProps) {

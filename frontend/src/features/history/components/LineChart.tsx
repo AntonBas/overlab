@@ -67,10 +67,12 @@ function tooltipClass(share: number): string {
     : "chart__tooltip";
 }
 
+const NO_MARKERS: ChartMarker[] = [];
+
 export function LineChart({
   title,
   points,
-  markers = [],
+  markers = NO_MARKERS,
   seasonAt,
   tone,
 }: LineChartProps) {
@@ -132,13 +134,13 @@ export function LineChart({
   }
 
   function moveWithKeys(event: KeyboardEvent<SVGSVGElement>) {
-    const last = geometry!.dots.length - 1;
+    const lastIndex = geometry!.dots.length - 1;
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      setActiveIndex((index) => Math.max(0, (index ?? last + 1) - 1));
+      setActiveIndex((index) => Math.max(0, (index ?? lastIndex + 1) - 1));
     } else if (event.key === "ArrowRight") {
       event.preventDefault();
-      setActiveIndex((index) => Math.min(last, (index ?? -1) + 1));
+      setActiveIndex((index) => Math.min(lastIndex, (index ?? -1) + 1));
     } else if (event.key === "Escape") {
       clearSelection();
     }

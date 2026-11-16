@@ -18,12 +18,15 @@ interface SpotCardProps {
   mapVisuals?: Record<string, MapVisual>;
 }
 
+const NO_HERO_PORTRAITS: Record<string, string | null> = {};
+const NO_MAP_VISUALS: Record<string, MapVisual> = {};
+
 export function SpotCard({
   guide,
   showHero = false,
   showMap = false,
-  heroPortraits = {},
-  mapVisuals = {},
+  heroPortraits = NO_HERO_PORTRAITS,
+  mapVisuals = NO_MAP_VISUALS,
 }: SpotCardProps) {
   const [playing, setPlaying] = useState(false);
   const mapMode = guide.mapSlug ? mapVisuals[guide.mapSlug]?.mode : null;

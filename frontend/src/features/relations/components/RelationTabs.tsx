@@ -35,12 +35,15 @@ const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
   synergies: "WORKS_WITH",
 };
 
+const NO_MATCHUPS: CategoryMatchup[] = [];
+const NO_CATEGORIES: HeroCategory[] = [];
+
 export function RelationTabs({
   strongAgainst,
   counteredBy,
   synergies,
-  categoryMatchups = [],
-  categories = [],
+  categoryMatchups = NO_MATCHUPS,
+  categories = NO_CATEGORIES,
   feedback,
   heroName,
 }: RelationTabsProps) {
