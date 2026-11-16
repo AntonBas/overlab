@@ -6,4 +6,3 @@ export {
   GUIDE_SIDES,
   GUIDE_SIDE_LABELS,
 } from "./labels";
-export { GuidePage } from "./pages/GuidePage";

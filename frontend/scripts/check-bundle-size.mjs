@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
@@ -7,6 +7,13 @@ const ENTRY_BUDGET_KB = 125;
 const CHUNK_BUDGET_KB = 30;
 
 const failures = [];
+
+if (!existsSync(ASSETS_DIRECTORY)) {
+  console.error(
+    `${ASSETS_DIRECTORY} does not exist, run "npm run build" first`,
+  );
+  process.exit(1);
+}
 
 for (const file of readdirSync(ASSETS_DIRECTORY)) {
   if (!file.endsWith(".js")) {

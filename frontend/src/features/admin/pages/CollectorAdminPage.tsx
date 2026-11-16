@@ -50,7 +50,7 @@ function formatDuration(startedAt: string, finishedAt: string | null): string {
 export function CollectorAdminPage() {
   usePageTitle("Admin: collector");
   const jobs = useFetch(fetchCollectorJobs, []);
-  const runs = useFetch(fetchCollectorRuns, []);
+  const runs = useFetch(fetchCollectorRuns, [], { keepPrevious: true });
   const [confirming, setConfirming] = useState<CollectorJob | null>(null);
   const start = useSave();
   const running = runs.data?.some((run) => run.status === "RUNNING") ?? false;
@@ -142,6 +142,7 @@ export function CollectorAdminPage() {
                   type="button"
                   className="button button--ghost"
                   disabled={running || start.saving}
+                  aria-label={`Run now: ${job.name}`}
                   onClick={() => setConfirming(job)}
                 >
                   Run now

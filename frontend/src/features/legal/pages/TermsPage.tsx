@@ -2,9 +2,10 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { LEGAL_LAST_UPDATED } from "../lastUpdated";
 import { ContactLine } from "../components/ContactLine";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function TermsPage() {
-  usePageTitle("Terms of use");
+  usePageTitle(staticSeoPage("/terms").title);
   return (
     <div className="legal-page">
       <PageHeader

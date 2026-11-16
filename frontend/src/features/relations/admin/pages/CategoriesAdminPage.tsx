@@ -25,8 +25,8 @@ import {
 } from "../../../../components/admin/Fields";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
 import { useHeroOptions } from "../../../heroes/admin";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
 import type {
   AdminCategory,
   AdminCategoryMatchup,
@@ -53,21 +53,20 @@ function CategoryForm({
   onSaved,
   onClose,
 }: CategoryFormProps) {
-  const [slug, setSlug] = useState(category?.slug ?? "");
-  const [name, setName] = useState(category?.name ?? "");
-  const [description, setDescription] = useState(category?.description ?? "");
-  const [members, setMembers] = useState(
-    () => new Set(category?.heroSlugs ?? []),
-  );
-  const save = useSave();
   const initialMembers = category?.heroSlugs ?? [];
-  const dirty =
-    slug !== (category?.slug ?? "") ||
-    name !== (category?.name ?? "") ||
-    description !== (category?.description ?? "") ||
+  const [members, setMembers] = useState(() => new Set(initialMembers));
+  const membersChanged =
     members.size !== initialMembers.length ||
     initialMembers.some((heroSlug) => !members.has(heroSlug));
-  useUnsavedChanges(dirty);
+  const { values, change, save } = useAdminForm(
+    {
+      slug: category?.slug ?? "",
+      name: category?.name ?? "",
+      description: category?.description ?? "",
+    },
+    membersChanged,
+  );
+  const { slug, name, description } = values;
 
   function toggleMember(heroSlug: string) {
     setMembers((current) => {
@@ -111,7 +110,7 @@ function CategoryForm({
         required
         value={name}
         error={save.fieldErrors.name}
-        onChange={(event) => setName(event.target.value)}
+        onChange={(event) => change("name", event.target.value)}
       />
       <FormField
         label="Slug"
@@ -120,7 +119,7 @@ function CategoryForm({
         value={slug}
         error={save.fieldErrors.slug}
         hint="Lowercase letters, digits and dashes, for example beam."
-        onChange={(event) => setSlug(event.target.value)}
+        onChange={(event) => change("slug", event.target.value)}
       />
       <TextAreaField
         label="Description"
@@ -129,7 +128,7 @@ function CategoryForm({
         value={description}
         error={save.fieldErrors.description}
         hint="Shown in the tooltip when a matchup has no note."
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={(event) => change("description", event.target.value)}
       />
       <fieldset className="form-field">
         <legend>Heroes ({members.size})</legend>
@@ -179,25 +178,19 @@ function MatchupForm({
   onSaved,
   onClose,
 }: MatchupFormProps) {
-  const [heroSlug, setHeroSlug] = useState(matchup?.heroSlug ?? "");
-  const [categorySlug, setCategorySlug] = useState(matchup?.categorySlug ?? "");
-  const [type, setType] = useState<CategoryMatchupType>(
-    matchup?.type ?? "STRONG_AGAINST",
-  );
-  const [note, setNote] = useState(matchup?.note ?? "");
-  const save = useSave();
+  const { values, change, save } = useAdminForm({
+    heroSlug: matchup?.heroSlug ?? "",
+    categorySlug: matchup?.categorySlug ?? "",
+    type: matchup?.type ?? "STRONG_AGAINST",
+    note: matchup?.note ?? "",
+  });
+  const { heroSlug, categorySlug, type, note } = values;
   const duplicate = existing.some(
     (other) =>
       other.id !== matchup?.id &&
       other.heroSlug === heroSlug &&
       other.categorySlug === categorySlug,
   );
-  const dirty =
-    heroSlug !== (matchup?.heroSlug ?? "") ||
-    categorySlug !== (matchup?.categorySlug ?? "") ||
-    type !== (matchup?.type ?? "STRONG_AGAINST") ||
-    note !== (matchup?.note ?? "");
-  useUnsavedChanges(dirty);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -229,7 +222,7 @@ function MatchupForm({
         required
         value={heroSlug}
         error={save.fieldErrors.heroSlug}
-        onChange={(event) => setHeroSlug(event.target.value)}
+        onChange={(event) => change("heroSlug", event.target.value)}
       >
         <option value="">Choose a hero</option>
         {heroes.map((hero) => (
@@ -242,7 +235,9 @@ function MatchupForm({
         label="Type"
         name="type"
         value={type}
-        onChange={(event) => setType(event.target.value as CategoryMatchupType)}
+        onChange={(event) =>
+          change("type", event.target.value as CategoryMatchupType)
+        }
       >
         <option value="STRONG_AGAINST">Strong against</option>
         <option value="WEAK_AGAINST">Struggles against</option>
@@ -254,7 +249,7 @@ function MatchupForm({
         required
         value={categorySlug}
         error={save.fieldErrors.categorySlug}
-        onChange={(event) => setCategorySlug(event.target.value)}
+        onChange={(event) => change("categorySlug", event.target.value)}
       >
         <option value="">Choose a category</option>
         {categories.map((category) => (
@@ -269,7 +264,7 @@ function MatchupForm({
         rows={2}
         value={note}
         error={save.fieldErrors.note}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => change("note", event.target.value)}
       />
       {duplicate && (
         <p className="notice notice--error">

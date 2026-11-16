@@ -1,11 +1,12 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FormField } from "../../../components/ui/FormField";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
+import { useResettingPage } from "../../../hooks/useResettingPage";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { useAuth } from "../../auth";
@@ -47,7 +48,6 @@ export function UsersAdminPage() {
   usePageTitle("Admin: users");
   const { user: currentUser } = useAuth();
   const [filters, setFilters] = useState<UserFilterForm>(EMPTY_FILTERS);
-  const [page, setPage] = useState(0);
   const [pending, setPending] = useState<AdminUser | null>(null);
   const [pendingRole, setPendingRole] = useState<{
     entry: AdminUser;
@@ -55,6 +55,25 @@ export function UsersAdminPage() {
   } | null>(null);
   const query = useDebouncedValue(filters.query, 350);
   const sorting = SORTS[filters.sort] ?? SORTS.newest;
+  const appliedFilters = useMemo(
+    () => ({
+      query,
+      role: filters.role,
+      enabled: filters.enabled,
+      emailVerified: filters.emailVerified,
+      provider: filters.provider,
+      sort: filters.sort,
+    }),
+    [
+      query,
+      filters.role,
+      filters.enabled,
+      filters.emailVerified,
+      filters.provider,
+      filters.sort,
+    ],
+  );
+  const [page, setPage] = useResettingPage(appliedFilters);
   const users = useFetch(
     () =>
       fetchAdminUsers({
@@ -76,12 +95,12 @@ export function UsersAdminPage() {
       filters.sort,
       page,
     ],
+    { keepPrevious: true },
   );
   const filtered = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS);
 
   function change(key: keyof UserFilterForm, value: string) {
     setFilters((current) => ({ ...current, [key]: value }));
-    setPage(0);
   }
   const save = useSave();
 
@@ -189,7 +208,6 @@ export function UsersAdminPage() {
             className="button button--ghost"
             onClick={() => {
               setFilters(EMPTY_FILTERS);
-              setPage(0);
             }}
           >
             Reset
@@ -270,6 +288,7 @@ export function UsersAdminPage() {
                         title={
                           entry.enabled ? "Click to block" : "Click to unblock"
                         }
+                        aria-label={`${entry.enabled ? "Active, block" : "Blocked, unblock"} ${entry.email}`}
                         onClick={() => setPending(entry)}
                       >
                         {entry.enabled ? "Active" : "Blocked"}

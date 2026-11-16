@@ -20,7 +20,7 @@ export function CookieSettings() {
             })
           }
         />{" "}
-        Analytics
+        Analytics and error reports
       </label>
       <label>
         <input

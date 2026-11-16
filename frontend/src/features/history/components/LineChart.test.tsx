@@ -29,7 +29,7 @@ function mockPlotBox() {
 }
 
 function hoverAt(clientX: number) {
-  const svg = screen.getByRole("img");
+  const svg = screen.getByRole("group", { name: /^Win rate: from/ });
   fireEvent(
     svg,
     new MouseEvent("pointermove", { bubbles: true, clientX, clientY: 50 }),
@@ -43,9 +43,9 @@ describe("LineChart", () => {
 
   it("describes the trend for screen readers", () => {
     render(<LineChart title="Win rate" tone="win" points={points} />);
-    expect(screen.getByRole("img")).toHaveAccessibleName(
-      "Win rate: from 47.1% on 1 Oct to 49.3% on 8 Oct",
-    );
+    expect(
+      screen.getByRole("group", { name: /^Win rate: from/ }),
+    ).toHaveAccessibleName("Win rate: from 47.1% on 1 Oct to 49.3% on 8 Oct");
   });
 
   it("offers the same data as a table", async () => {
@@ -343,7 +343,7 @@ describe("LineChart", () => {
     expect(container.querySelector(".chart__tooltip")).not.toBeNull();
 
     fireEvent(
-      screen.getByRole("img"),
+      screen.getByRole("group", { name: /^Win rate: from/ }),
       new MouseEvent("pointerout", { bubbles: true, relatedTarget: null }),
     );
 
@@ -354,7 +354,7 @@ describe("LineChart", () => {
     const user = userEvent.setup();
     render(<LineChart title="Win rate" tone="win" points={threePoints} />);
 
-    screen.getByRole("img").focus();
+    screen.getByRole("group", { name: /^Win rate: from/ }).focus();
     await user.keyboard("{ArrowRight}");
 
     expect(screen.getByRole("status")).toHaveTextContent("1 Oct 2026: 47.1%");

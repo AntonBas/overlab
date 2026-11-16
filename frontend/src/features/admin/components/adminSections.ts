@@ -3,7 +3,7 @@ import {
   BookOpen,
   Database,
   Hammer,
-  Map,
+  Map as MapIcon,
   MessageSquare,
   ScrollText,
   Sparkles,
@@ -74,7 +74,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     to: "/admin/maps",
     label: "Maps",
     description: "Maps, modes and images",
-    icon: Map,
+    icon: MapIcon,
   },
   {
     to: "/admin/users",

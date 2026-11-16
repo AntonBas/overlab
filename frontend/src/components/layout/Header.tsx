@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth";
 import { useRegion } from "../../features/stats";
@@ -14,6 +14,21 @@ export function Header() {
   const { user, loading, signOut } = useAuth();
   const { region, rememberRegion } = useRegion();
   const [menuOpen, setMenuOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        toggle.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -30,6 +45,7 @@ export function Header() {
         </Link>
         <button
           type="button"
+          ref={toggle}
           className="button button--ghost site-header__toggle"
           aria-expanded={menuOpen}
           aria-controls="site-menu"

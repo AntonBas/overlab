@@ -19,6 +19,7 @@ import { usePersonalData } from "../../personal";
 import { fetchMaps } from "../api/mapsApi";
 import { MapCard } from "../components/MapCard";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const OTHER = "Other";
 
@@ -55,10 +56,9 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
 }
 
 export function MapsPage() {
-  usePageTitle("Overwatch maps: hero win rates by map");
-  usePageDescription(
-    "Overwatch maps by game mode, with hero win, pick and ban rates on each map.",
-  );
+  const page = staticSeoPage("/maps");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [

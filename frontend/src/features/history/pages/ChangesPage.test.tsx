@@ -109,6 +109,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ queue: "COMPETITIVE", tier: "GOLD" }),
+        expect.any(AbortSignal),
       ),
     );
   });
@@ -119,6 +120,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ queue: "QUICK_PLAY", tier: "ALL" }),
+        expect.any(AbortSignal),
       ),
     );
     expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
@@ -236,6 +238,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ platform: "CONSOLE", region: "ASIA" }),
+        expect.any(AbortSignal),
       ),
     );
   });

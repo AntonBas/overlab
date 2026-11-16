@@ -1,9 +1,7 @@
 import { NewBadge } from "../../../components/ui/NewBadge";
 import clsx from "clsx";
-import { useId } from "react";
-import { createPortal } from "react-dom";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { useFloatingTip } from "../../../hooks/useFloatingTip";
+import { Tooltip } from "../../../components/ui/Tooltip";
 import type {
   Perk,
   PerkPosition,
@@ -75,9 +73,6 @@ function PerkCard({ perk }: { perk: Perk }) {
 
 function CompactPerkTile({ perk }: { perk: Perk }) {
   const position = positionOf(perk);
-  const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
-    useFloatingTip();
   const hasTip = Boolean(perk.description || perk.recommendationNote);
   return (
     <li
@@ -88,49 +83,23 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
         `perk-card--${perk.recommendation.toLowerCase()}`,
       )}
     >
-      <span
-        className="perk-tile__trigger"
-        ref={triggerRef}
-        tabIndex={hasTip ? 0 : undefined}
-        aria-describedby={hasTip ? tipId : undefined}
-        {...(hasTip ? triggerProps : {})}
-      >
-        <Thumbnail
-          url={perk.iconUrl}
-          width={44}
-          height={44}
-          className="perk-tile__icon"
-        />
-        <span className="perk-tile__body">
-          <span className="perk-tile__heading">
-            <strong>{perk.name}</strong>
-            {perk.recentlyAdded && <NewBadge />}
-            <span
-              className={clsx(
-                "tag",
-                `tag--${perk.recommendation.toLowerCase()}`,
-              )}
-            >
-              {RECOMMENDATION_LABELS[perk.recommendation]}
-            </span>
-          </span>
-        </span>
-      </span>
-      {hasTip &&
-        open &&
-        createPortal(
-          <span
-            id={tipId}
-            role="tooltip"
-            ref={tipRef}
-            className={clsx(
-              "perk-tip",
-              "perk-tip--interactive",
-              `perk-tip--${perk.recommendation.toLowerCase()}`,
-            )}
-            style={style}
-            {...tipProps}
-          >
+      <Tooltip
+        mount="open"
+        disabled={!hasTip}
+        describeTrigger
+        triggerClassName="perk-tile__trigger"
+        triggerProps={
+          hasTip
+            ? { tabIndex: 0, role: "group", "aria-label": perk.name }
+            : undefined
+        }
+        tipClassName={clsx(
+          "perk-tip",
+          "perk-tip--interactive",
+          `perk-tip--${perk.recommendation.toLowerCase()}`,
+        )}
+        content={
+          <>
             <span className="perk-tip__header">
               <Thumbnail
                 url={perk.iconUrl}
@@ -160,9 +129,34 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
                 <AbilityText text={perk.recommendationNote} />
               </span>
             )}
-          </span>,
-          document.body,
+          </>
+        }
+      >
+        {() => (
+          <>
+            <Thumbnail
+              url={perk.iconUrl}
+              width={44}
+              height={44}
+              className="perk-tile__icon"
+            />
+            <span className="perk-tile__body">
+              <span className="perk-tile__heading">
+                <strong>{perk.name}</strong>
+                {perk.recentlyAdded && <NewBadge />}
+                <span
+                  className={clsx(
+                    "tag",
+                    `tag--${perk.recommendation.toLowerCase()}`,
+                  )}
+                >
+                  {RECOMMENDATION_LABELS[perk.recommendation]}
+                </span>
+              </span>
+            </span>
+          </>
         )}
+      </Tooltip>
     </li>
   );
 }

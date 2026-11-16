@@ -1,7 +1,5 @@
-import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -16,7 +14,6 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import { FavoritesFilterButton } from "../../personal";
 import { FavoriteButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { ROLE_LABELS } from "../../../utils/format";
@@ -24,16 +21,16 @@ import { matchesName } from "../../../utils/search";
 import type { HeroRole } from "../../../types/hero";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
+import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
 import { fetchAllPerks } from "../api/perksApi";
 import { BackdropCard } from "../components/BackdropCard";
 import { PerkList } from "../components/PerkList";
-import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function PerksPage() {
-  usePageTitle("Overwatch hero perks: every Minor and Major perk");
-  usePageDescription(
-    "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
-  );
+  const page = staticSeoPage("/perks");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -88,45 +85,14 @@ export function PerksPage() {
         title="Perks"
         subtitle="Minor and major perks of every hero, left and right as in the game"
       />
-      <FiltersPanel>
-        <div className="filters">
-          <label className="field">
-            <span className="field__label">Hero</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="Search by name"
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <div className="field">
-            <span className="field__label">Role</span>
-            <div className="segmented" role="group" aria-label="Role">
-              {[null, ...ROLES].map((value) => (
-                <button
-                  key={value ?? "all"}
-                  type="button"
-                  className={clsx("segmented__item", {
-                    "segmented__item--active": role === value,
-                  })}
-                  aria-pressed={role === value}
-                  onClick={() => setRole(value)}
-                >
-                  {value ? (
-                    <RoleBadge role={value} />
-                  ) : (
-                    <AllRolesBadge label="All" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          <FavoritesFilterButton
-            active={onlyFavorites}
-            onToggle={() => setOnlyFavorites(!onlyFavorites)}
-          />
-        </div>
-      </FiltersPanel>
+      <HeroFilterBar
+        query={query}
+        onQueryChange={setQuery}
+        role={role}
+        onRoleChange={setRole}
+        onlyFavorites={onlyFavorites}
+        onOnlyFavoritesChange={setOnlyFavorites}
+      />
       {visibleHeroes.length === 0 ? (
         <EmptyState>
           {onlyFavorites && favoriteHeroes.size === 0

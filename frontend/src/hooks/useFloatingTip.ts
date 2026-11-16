@@ -5,6 +5,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type FocusEvent,
+  type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
 } from "react";
@@ -12,8 +14,18 @@ import {
 const VIEWPORT_MARGIN = 8;
 const DEFAULT_TRIGGER_GAP = 8;
 const HIDE_DELAY_MS = 150;
+const FOCUSABLE_SELECTOR = "a[href], button:not([disabled])";
 
-export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
+function focusableIn(root: HTMLElement | null): HTMLElement[] {
+  return root
+    ? Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+    : [];
+}
+
+export function useFloatingTip(
+  triggerGap: number = DEFAULT_TRIGGER_GAP,
+  interactive: boolean = false,
+) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tipRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
@@ -36,6 +48,76 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
   }, []);
 
   useEffect(() => () => window.clearTimeout(hideTimer.current), []);
+
+  const onTriggerBlur = useCallback(
+    (event: FocusEvent) => {
+      const next = event.relatedTarget as Node | null;
+      if (interactive && next && tipRef.current?.contains(next)) {
+        return;
+      }
+      hide();
+    },
+    [interactive, hide],
+  );
+
+  const onTriggerKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!interactive || !open || event.key !== "Tab" || event.shiftKey) {
+        return;
+      }
+      const [first] = focusableIn(tipRef.current);
+      if (first) {
+        event.preventDefault();
+        first.focus();
+      }
+    },
+    [interactive, open],
+  );
+
+  const onTipBlur = useCallback(
+    (event: FocusEvent) => {
+      if (!interactive) {
+        return;
+      }
+      const next = event.relatedTarget as Node | null;
+      if (
+        next &&
+        (tipRef.current?.contains(next) || triggerRef.current?.contains(next))
+      ) {
+        return;
+      }
+      hide();
+    },
+    [interactive, hide],
+  );
+
+  const onTipKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!interactive) {
+        return;
+      }
+      const [triggerTarget] = focusableIn(triggerRef.current);
+      if (event.key === "Escape") {
+        triggerTarget?.focus();
+        return;
+      }
+      if (event.key !== "Tab") {
+        return;
+      }
+      const items = focusableIn(tipRef.current);
+      if (event.shiftKey && document.activeElement === items[0]) {
+        event.preventDefault();
+        triggerTarget?.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === items[items.length - 1]
+      ) {
+        triggerTarget?.focus();
+        hide();
+      }
+    },
+    [interactive, hide],
+  );
 
   const onPointerDown = useCallback(
     (event: PointerEvent) => {
@@ -89,7 +171,7 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
     if (!open) {
       return;
     }
-    function onKeyDown(event: KeyboardEvent) {
+    function onKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") {
         setOpen(false);
       }
@@ -124,13 +206,16 @@ export function useFloatingTip(triggerGap: number = DEFAULT_TRIGGER_GAP) {
       onMouseEnter: show,
       onMouseLeave: hideSoon,
       onFocus: show,
-      onBlur: hide,
+      onBlur: onTriggerBlur,
+      onKeyDown: onTriggerKeyDown,
       onPointerDown,
       onClickCapture,
     },
     tipProps: {
       onMouseEnter: show,
       onMouseLeave: hideSoon,
+      onBlur: onTipBlur,
+      onKeyDown: onTipKeyDown,
     },
   };
 }

@@ -33,6 +33,7 @@ import { useFilterState } from "../../stats";
 import { ChangesTable } from "../components/ChangesTable";
 import { changeHighlights } from "../utils/changeHighlights";
 import { periodRange } from "../utils/chart";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const PERIODS: Record<string, { label: string; days: number }> = {
   "7d": { label: "Last 7 days", days: 7 },
@@ -44,6 +45,14 @@ const PERIODS: Record<string, { label: string; days: number }> = {
 
 const PATCH_PREFIX = "patch:";
 const DEFAULT_VIEW = "7d";
+
+function isKnownViewShape(view: string): boolean {
+  return (
+    Object.hasOwn(PERIODS, view) ||
+    (view.startsWith(PATCH_PREFIX) &&
+      /^[a-z0-9]+(-[a-z0-9]+)*$/.test(view.slice(PATCH_PREFIX.length)))
+  );
+}
 const OTHER_SEASON = "other";
 const RECENT_SEASONS = 2;
 const RECENT_SELECTION = "recent";
@@ -93,10 +102,9 @@ function patchLabel(patch: Patch): string {
 }
 
 export function ChangesPage() {
-  usePageTitle("Overwatch hero win rate changes by patch");
-  usePageDescription(
-    "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",
-  );
+  const page = staticSeoPage("/changes");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -107,7 +115,8 @@ export function ChangesPage() {
     ),
   );
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") ?? DEFAULT_VIEW;
+  const requestedView = searchParams.get("view") ?? DEFAULT_VIEW;
+  const view = isKnownViewShape(requestedView) ? requestedView : DEFAULT_VIEW;
   const { region: defaultRegion } = useRegion();
   const { filters, update: updateFilters } = useFilterState(
     undefined,
@@ -122,22 +131,24 @@ export function ChangesPage() {
     [view],
   );
   const comparison = useFetch(
-    () =>
-      fetchComparison({
-        queue: filters.queue,
-        tier: filters.tier,
-        platform: filters.platform,
-        region: filters.region,
-        ...(view.startsWith(PATCH_PREFIX)
-          ? { patch: view.slice(PATCH_PREFIX.length) }
-          : (range ?? {})),
-      }),
+    (signal) =>
+      fetchComparison(
+        {
+          queue: filters.queue,
+          tier: filters.tier,
+          platform: filters.platform,
+          region: filters.region,
+          ...(view.startsWith(PATCH_PREFIX)
+            ? { patch: view.slice(PATCH_PREFIX.length) }
+            : (range ?? {})),
+        },
+        signal,
+      ),
     [
       filters.queue,
       filters.tier,
       filters.platform,
       filters.region,
-      filters.map,
       view,
       range,
     ],

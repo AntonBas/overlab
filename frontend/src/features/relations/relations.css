@@ -1,10 +1,6 @@
-.card__icon {
-  align-self: flex-start;
-}
-
 .segmented__count {
   margin-left: var(--space-4);
-  opacity: 0.7;
+  opacity: 0.85;
   font-weight: var(--font-weight-regular);
 }
 
@@ -14,6 +10,11 @@
 
 .perk-tip__actions {
   margin-left: auto;
+}
+
+.matchups__more {
+  display: block;
+  margin: var(--space-16) auto 0;
 }
 
 .matchups__rows {
@@ -508,5 +509,35 @@
 }
 
 .relation-detail__member .portrait {
+  border-radius: 50%;
+}
+.matchups {
+  margin: 0 0 var(--space-24);
+}
+
+.matchup {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
+  align-items: stretch;
+  padding: var(--space-16);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--role-color, var(--border));
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 900px) {
+  .matchup {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.matchup__identity .portrait {
+  border-radius: 50%;
+  border: 2px solid var(--role-color);
+}
+
+.relation-avatar__image .portrait {
   border-radius: 50%;
 }

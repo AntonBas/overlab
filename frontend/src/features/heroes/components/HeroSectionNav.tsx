@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { preferredScrollBehavior } from "../../../utils/motion";
 
 interface HeroSectionNavProps {
   sections: { id: string; label: string }[];
@@ -8,7 +9,7 @@ interface HeroSectionNavProps {
 function scrollToSection(id: string) {
   document
     .getElementById(id)
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    ?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" });
 }
 
 export function HeroSectionNav({ sections }: HeroSectionNavProps) {

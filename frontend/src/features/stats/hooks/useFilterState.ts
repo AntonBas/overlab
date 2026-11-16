@@ -12,6 +12,7 @@ import {
 } from "../filters";
 
 const FILTER_PARAMS = ["queue", "tier", "platform", "region"];
+const NO_PRESERVED_PARAMS: readonly string[] = [];
 
 function keepPreserved(
   target: URLSearchParams,
@@ -28,7 +29,7 @@ function keepPreserved(
 
 export function useFilterState(
   fixedMap?: string,
-  preservedParams: readonly string[] = [],
+  preservedParams: readonly string[] = NO_PRESERVED_PARAMS,
 ) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { preferences } = usePersonalData();
@@ -85,7 +86,7 @@ export function useFilterState(
   ]);
 
   const update = useCallback(
-    (patch: Partial<StatsFilters>) => {
+    (patch: Partial<StatsFilters>, options: { replace?: boolean } = {}) => {
       const next = applyCoverage({ ...filters, ...patch }, coverage);
       if (next.queue === "QUICK_PLAY") {
         next.tier = "ALL";
@@ -98,7 +99,7 @@ export function useFilterState(
         params.delete("map");
       }
       keepPreserved(params, searchParams, preservedParams);
-      setSearchParams(params);
+      setSearchParams(params, { replace: options.replace });
     },
     [
       filters,
@@ -115,9 +116,15 @@ export function useFilterState(
   const changeSort = useCallback(
     (sort: StatsSort) => {
       if (filters.sort === sort) {
-        update({ direction: filters.direction === "ASC" ? "DESC" : "ASC" });
+        update(
+          { direction: filters.direction === "ASC" ? "DESC" : "ASC" },
+          { replace: true },
+        );
       } else {
-        update({ sort, direction: sort === "NAME" ? "ASC" : "DESC" });
+        update(
+          { sort, direction: sort === "NAME" ? "ASC" : "DESC" },
+          { replace: true },
+        );
       }
     },
     [filters.sort, filters.direction, update],

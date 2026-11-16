@@ -6,6 +6,7 @@ interface ThumbnailProps {
   height: number;
   className?: string;
   eager?: boolean;
+  priority?: boolean;
 }
 
 export function Thumbnail({
@@ -14,8 +15,10 @@ export function Thumbnail({
   height,
   className,
   eager = false,
+  priority = false,
 }: ThumbnailProps) {
-  const [failed, setFailed] = useState(false);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const failed = failedUrl === url;
 
   if (!url || failed) {
     return null;
@@ -27,9 +30,10 @@ export function Thumbnail({
       alt=""
       width={width}
       height={height}
-      loading={eager ? "eager" : "lazy"}
+      loading={eager || priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
       decoding="async"
-      onError={() => setFailed(true)}
+      onError={() => setFailedUrl(url)}
     />
   );
 }

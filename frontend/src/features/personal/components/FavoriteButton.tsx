@@ -9,6 +9,17 @@ interface FavoriteButtonProps {
   compact?: boolean;
 }
 
+function favoriteLabel(compact: boolean, favorite: boolean, name: string) {
+  if (compact) {
+    return favorite
+      ? `Remove ${name} from favorites`
+      : `Add ${name} to favorites`;
+  }
+  return favorite
+    ? `Favorite: remove ${name} from favorites`
+    : `Add to favorites: ${name}`;
+}
+
 export function FavoriteButton({
   kind,
   slug,
@@ -33,11 +44,7 @@ export function FavoriteButton({
           compact ? "favorite-star" : "button button--ghost favorite-button"
         }
         aria-pressed={favorite}
-        aria-label={
-          favorite
-            ? `Remove ${name} from favorites`
-            : `Add ${name} to favorites`
-        }
+        aria-label={favoriteLabel(compact, favorite, name)}
         onClick={() => {
           setClicked(true);
           if (signedIn) {

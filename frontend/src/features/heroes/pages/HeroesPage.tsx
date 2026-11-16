@@ -15,12 +15,12 @@ import { usePageDescription } from "../../../hooks/usePageDescription";
 import { ROLES } from "../../stats";
 import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function HeroesPage() {
-  usePageTitle("All Overwatch heroes: roles, abilities, perks");
-  usePageDescription(
-    "All Overwatch heroes with roles, abilities, perks, counters and synergies.",
-  );
+  const page = staticSeoPage("/heroes");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [

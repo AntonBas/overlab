@@ -11,8 +11,8 @@ export function CookieBanner() {
     <section className="cookie-banner" aria-label="Cookie preferences">
       <p>
         Overlab uses only the cookies needed to keep you signed in. Optional
-        analytics and advertising stay off unless you allow them. See the{" "}
-        <Link to="/cookies">cookie policy</Link>.
+        analytics (visit statistics and error reports) and advertising stay off
+        unless you allow them. See the <Link to="/cookies">cookie policy</Link>.
       </p>
       <div className="cookie-banner__actions">
         <button

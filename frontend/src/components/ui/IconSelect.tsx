@@ -160,13 +160,17 @@ export function IconSelect<T extends string>({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={open ? optionId(highlighted) : undefined}
-        title={selected.label}
-        disabled={disabled}
+        title={selected?.label}
+        disabled={disabled || options.length === 0}
         ref={trigger}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
       >
-        <OptionContent option={selected} reserveIconSpace={false} />
+        {selected ? (
+          <OptionContent option={selected} reserveIconSpace={false} />
+        ) : (
+          <span className="icon-select__empty">No options</span>
+        )}
       </button>
       {open && (
         <ul

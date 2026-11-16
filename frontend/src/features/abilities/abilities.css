@@ -49,6 +49,7 @@
   font-size: 0.9em;
   line-height: 1.6;
   cursor: help;
+  white-space: nowrap;
 }
 
 .ability-chip__button:hover,

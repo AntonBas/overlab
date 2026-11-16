@@ -31,7 +31,11 @@ export async function exportAccount(): Promise<Blob> {
 
 export async function deleteAccount(
   password: string | null,
-  confirmEmail: string | null,
+  deletionToken: string | null,
 ): Promise<void> {
-  await api.delete("/me", { data: { password, confirmEmail } });
+  await api.delete("/me", { data: { password, deletionToken } });
+}
+
+export async function requestAccountDeletion(): Promise<void> {
+  await api.post("/me/delete-request");
 }

@@ -1,5 +1,5 @@
 import type { AxiosAdapter, AxiosResponse } from "axios";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { api } from "./api";
 
@@ -21,6 +21,7 @@ describe("session refresh", () => {
   });
 
   it("refreshes the session and retries when the current user request is unauthorized", async () => {
+    window.localStorage.setItem("overlab.session", "active");
     let calls = 0;
     const adapter: AxiosAdapter = (config) => {
       calls += 1;
@@ -70,12 +71,36 @@ describe("session refresh", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("remembers that a failed refresh ended the session", async () => {
+  it("does not ask for a refresh when no session was ever seen", async () => {
     api.defaults.adapter = (config) => Promise.reject(unauthorized(config));
-    vi.spyOn(axios, "post").mockRejectedValue(new Error("401"));
+    const refresh = vi.spyOn(axios, "post");
+
+    await expect(api.get("/me/favorites")).rejects.toBeInstanceOf(AxiosError);
+
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("remembers that a rejected refresh ended the session", async () => {
+    window.localStorage.setItem("overlab.session", "active");
+    api.defaults.adapter = (config) => Promise.reject(unauthorized(config));
+    vi.spyOn(axios, "post").mockRejectedValue(
+      unauthorized({ headers: new AxiosHeaders() }),
+    );
 
     await expect(api.get("/auth/me")).rejects.toBeInstanceOf(AxiosError);
 
     expect(window.localStorage.getItem("overlab.session")).toBe("ended");
+  });
+
+  it("keeps the session when the refresh fails because of the network", async () => {
+    window.localStorage.setItem("overlab.session", "active");
+    api.defaults.adapter = (config) => Promise.reject(unauthorized(config));
+    vi.spyOn(axios, "post").mockRejectedValue(
+      new AxiosError("Network Error", "ERR_NETWORK"),
+    );
+
+    await expect(api.get("/auth/me")).rejects.toBeInstanceOf(AxiosError);
+
+    expect(window.localStorage.getItem("overlab.session")).toBe("active");
   });
 });

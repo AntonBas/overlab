@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameMap } from "../../../types/map";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 import { MapCard } from "./MapCard";
+import { preferredScrollBehavior } from "../../../utils/motion";
 
 interface MapNavigationProps {
   current: GameMap;
@@ -48,7 +49,10 @@ export function MapNavigation({ current, maps }: MapNavigationProps) {
     if (!track) {
       return;
     }
-    track.scrollBy({ left: direction * track.clientWidth, behavior: "smooth" });
+    track.scrollBy({
+      left: direction * track.clientWidth,
+      behavior: preferredScrollBehavior(),
+    });
   }
 
   if (sameMode.length === 0 || !current.mode) {

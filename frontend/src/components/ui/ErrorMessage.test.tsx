@@ -52,4 +52,15 @@ describe("ErrorMessage", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("Too many requests");
   });
+
+  it("offers to retry after a rate limit answer", async () => {
+    const onRetry = vi.fn();
+    render(
+      <ErrorMessage failure={failure({ status: 429 })} onRetry={onRetry} />,
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Too many requests");
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(onRetry).toHaveBeenCalledOnce();
+  });
 });

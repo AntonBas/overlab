@@ -1,10 +1,8 @@
 import clsx from "clsx";
-import { useId } from "react";
-import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import { useFloatingTip } from "../../../hooks/useFloatingTip";
+import { Tooltip } from "../../../components/ui/Tooltip";
 import type { RelatedHero } from "../../../types/hero";
 import type { RelationKind } from "../api/relationFeedbackApi";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
@@ -18,36 +16,16 @@ interface RelationAvatarProps {
 }
 
 export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
-  const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
-    useFloatingTip();
   return (
     <li>
-      <span ref={triggerRef} {...triggerProps}>
-        <Link
-          className={clsx(
-            "relation-avatar",
-            `relation-avatar--${hero.role.toLowerCase()}`,
-          )}
-          to={`/heroes/${hero.slug}`}
-          aria-describedby={open ? tipId : undefined}
-        >
-          <span className="relation-avatar__image">
-            <HeroPortrait name={hero.name} url={hero.portraitUrl} size={32} />
-          </span>
-          <span className="relation-avatar__name">{hero.name}</span>
-        </Link>
-      </span>
-      {open &&
-        createPortal(
-          <span
-            id={tipId}
-            role="tooltip"
-            ref={tipRef}
-            className="perk-tip perk-tip--interactive"
-            style={style}
-            {...tipProps}
-          >
+      <Tooltip
+        interactive
+        mount="open"
+        role="dialog"
+        label={`${hero.name}: note and vote`}
+        tipClassName="perk-tip perk-tip--interactive"
+        content={
+          <>
             <span className="perk-tip__header">
               <HeroPortrait name={hero.name} url={hero.portraitUrl} size={36} />
               <span className="perk-tip__title">
@@ -66,9 +44,25 @@ export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
             <span className="perk-tip__text">
               {hero.note ? <AbilityText text={hero.note} /> : "No note yet."}
             </span>
-          </span>,
-          document.body,
+          </>
+        }
+      >
+        {({ describedBy }) => (
+          <Link
+            className={clsx(
+              "relation-avatar",
+              `relation-avatar--${hero.role.toLowerCase()}`,
+            )}
+            to={`/heroes/${hero.slug}`}
+            aria-describedby={describedBy}
+          >
+            <span className="relation-avatar__image">
+              <HeroPortrait name={hero.name} url={hero.portraitUrl} size={32} />
+            </span>
+            <span className="relation-avatar__name">{hero.name}</span>
+          </Link>
         )}
+      </Tooltip>
     </li>
   );
 }

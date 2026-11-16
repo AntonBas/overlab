@@ -1,12 +1,10 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { Spinner } from "../../../components/ui/Spinner";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { useFetch } from "../../../hooks/useFetch";
@@ -20,10 +18,10 @@ import type { CategoryMatchup, HeroRole } from "../../../types/hero";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { FavoriteButton } from "../../personal";
-import { FavoritesFilterButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
+import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
 import { fetchAllRelations, fetchHeroCategories } from "../api/relationsApi";
 import { CategoryChip } from "../components/CategoryChip";
 import { RelationAvatar } from "../components/RelationAvatar";
@@ -32,7 +30,7 @@ import {
   useRelationVotes,
 } from "../hooks/useRelationFeedback";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
-import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const COLUMNS = [
   {
@@ -55,11 +53,12 @@ const COLUMNS = [
   },
 ] as const;
 
+const ROWS_PER_STEP = 12;
+
 export function CountersPage() {
-  usePageTitle("Overwatch counters and synergies for every hero");
-  usePageDescription(
-    "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
-  );
+  const page = staticSeoPage("/counters");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -72,9 +71,23 @@ export function CountersPage() {
   const heroes = useFetch(fetchHeroes, []);
   const relations = useFetch(fetchAllRelations, []);
   const categories = useFetch(fetchHeroCategories, []);
-  const [role, setRole] = useState<HeroRole | null>(null);
-  const [query, setQuery] = useState("");
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [role, setRoleFilter] = useState<HeroRole | null>(null);
+  const [query, setQueryFilter] = useState("");
+  const [onlyFavorites, setOnlyFavoritesFilter] = useState(false);
+  const [shownRows, setShownRows] = useState(ROWS_PER_STEP);
+
+  function setRole(next: HeroRole | null) {
+    setRoleFilter(next);
+    setShownRows(ROWS_PER_STEP);
+  }
+  function setQuery(next: string) {
+    setQueryFilter(next);
+    setShownRows(ROWS_PER_STEP);
+  }
+  function setOnlyFavorites(next: boolean) {
+    setOnlyFavoritesFilter(next);
+    setShownRows(ROWS_PER_STEP);
+  }
   const { favoriteHeroes } = usePersonalData();
   const relationVotes = useRelationVotes();
 
@@ -135,45 +148,14 @@ export function CountersPage() {
         title="Counters and synergies"
         subtitle="Who every hero is strong against, who counters them and who they work well with"
       />
-      <FiltersPanel>
-        <div className="filters">
-          <label className="field">
-            <span className="field__label">Hero</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="Search by name"
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <div className="field">
-            <span className="field__label">Role</span>
-            <div className="segmented" role="group" aria-label="Role">
-              {[null, ...ROLES].map((value) => (
-                <button
-                  key={value ?? "all"}
-                  type="button"
-                  className={clsx("segmented__item", {
-                    "segmented__item--active": role === value,
-                  })}
-                  aria-pressed={role === value}
-                  onClick={() => setRole(value)}
-                >
-                  {value ? (
-                    <RoleBadge role={value} />
-                  ) : (
-                    <AllRolesBadge label="All" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          <FavoritesFilterButton
-            active={onlyFavorites}
-            onToggle={() => setOnlyFavorites(!onlyFavorites)}
-          />
-        </div>
-      </FiltersPanel>
+      <HeroFilterBar
+        query={query}
+        onQueryChange={setQuery}
+        role={role}
+        onRoleChange={setRole}
+        onlyFavorites={onlyFavorites}
+        onOnlyFavoritesChange={setOnlyFavorites}
+      />
       {visibleHeroes.length === 0 ? (
         <EmptyState>
           {onlyFavorites && favoriteHeroes.size === 0
@@ -183,7 +165,7 @@ export function CountersPage() {
       ) : (
         <div className="matchups">
           <ul className="matchups__rows">
-            {visibleHeroes.map((hero) => {
+            {visibleHeroes.slice(0, shownRows).map((hero) => {
               const entry = relationsByHero.get(hero.slug);
               return (
                 <li
@@ -274,6 +256,15 @@ export function CountersPage() {
               );
             })}
           </ul>
+          {visibleHeroes.length > shownRows && (
+            <button
+              type="button"
+              className="button button--ghost matchups__more"
+              onClick={() => setShownRows((current) => current + ROWS_PER_STEP)}
+            >
+              Show more heroes ({visibleHeroes.length - shownRows} left)
+            </button>
+          )}
         </div>
       )}
       <p className="muted footnote">

@@ -15,8 +15,7 @@ import {
   TextAreaField,
 } from "../../../../components/admin/Fields";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
-import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 import { StatusBadge } from "../../../../components/admin/StatusBadge";
 import type { AdminHero } from "../types";
 
@@ -29,17 +28,13 @@ function HeroForm({
   onSaved: () => void;
   onClose: () => void;
 }) {
-  const [description, setDescription] = useState(hero.description ?? "");
-  const [strengths, setStrengths] = useState(hero.strengths ?? "");
-  const [weaknesses, setWeaknesses] = useState(hero.weaknesses ?? "");
-  const [active, setActive] = useState(hero.active);
-  const save = useSave();
-  const dirty =
-    description !== (hero.description ?? "") ||
-    strengths !== (hero.strengths ?? "") ||
-    weaknesses !== (hero.weaknesses ?? "") ||
-    active !== hero.active;
-  useUnsavedChanges(dirty);
+  const { values, change, save } = useAdminForm({
+    description: hero.description ?? "",
+    strengths: hero.strengths ?? "",
+    weaknesses: hero.weaknesses ?? "",
+    active: hero.active,
+  });
+  const { description, strengths, weaknesses, active } = values;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -66,7 +61,7 @@ function HeroForm({
         name="description"
         value={description}
         error={save.fieldErrors.description}
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={(event) => change("description", event.target.value)}
       />
       <TextAreaField
         label="Strengths"
@@ -74,7 +69,7 @@ function HeroForm({
         hint="One point per line."
         value={strengths}
         error={save.fieldErrors.strengths}
-        onChange={(event) => setStrengths(event.target.value)}
+        onChange={(event) => change("strengths", event.target.value)}
       />
       <TextAreaField
         label="Weaknesses"
@@ -82,14 +77,14 @@ function HeroForm({
         hint="One point per line."
         value={weaknesses}
         error={save.fieldErrors.weaknesses}
-        onChange={(event) => setWeaknesses(event.target.value)}
+        onChange={(event) => change("weaknesses", event.target.value)}
       />
       <CheckboxField
         label="Active"
         name="active"
         hint="Inactive heroes are hidden from the public site."
         checked={active}
-        onChange={(event) => setActive(event.target.checked)}
+        onChange={(event) => change("active", event.target.checked)}
       />
       <StatusMessage error={save.error} />
       <div className="form__actions">
@@ -154,6 +149,7 @@ export function HeroesAdminPage() {
                 <button
                   type="button"
                   className="button button--ghost"
+                  aria-label={`Edit ${hero.name}`}
                   onClick={() => setEditing(hero.slug)}
                 >
                   Edit

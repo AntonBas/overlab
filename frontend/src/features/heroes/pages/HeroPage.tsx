@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { preload } from "react-dom";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -9,6 +10,7 @@ import { useRegion } from "../../stats";
 import { RoleTags } from "../../../components/ui/RoleTags";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -35,7 +37,7 @@ import { AbilityText } from "../../abilities";
 import { ControlSchemeToggle } from "../../abilities";
 import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
-import { useHeroBackdrop } from "../../../utils/heroBackdrop";
+import { heroBackdropUrl, useHeroBackdrop } from "../../../utils/heroBackdrop";
 import { PerkList } from "../../perks";
 import { RelationTabs } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
@@ -48,8 +50,10 @@ export function HeroPage() {
   const { queue, linkSuffix, changeQueue } = useHeroQueue();
   const { region } = useRegion();
 
+  preload(heroBackdropUrl(slug), { as: "image", fetchPriority: "high" });
   const art = useHeroBackdrop(slug);
   const hero = useFetch(() => fetchHero(slug), [slug]);
+  useNoIndex(hero.error?.status === 404);
   const stats = useFetch(
     () =>
       fetchHeroMapStats(slug, {
@@ -95,6 +99,9 @@ export function HeroPage() {
     ) : null;
   }
 
+  const failedSections = [counters, synergies, abilities, perks, guides].filter(
+    (section) => section.error,
+  );
   const overall = stats.data?.overall ?? null;
   const focus = overall;
   const spots = guides.data ?? [];
@@ -179,6 +186,21 @@ export function HeroPage() {
         strengths={hero.data.strengths}
         weaknesses={hero.data.weaknesses}
       />
+
+      {failedSections.length > 0 && (
+        <div className="notice notice--error" role="alert">
+          <p>Some sections of this page could not be loaded.</p>
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={() =>
+              failedSections.forEach((section) => section.reload())
+            }
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       <HeroSectionNav sections={navigationSections} />
 

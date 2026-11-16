@@ -1,4 +1,5 @@
 import type { HeroRole } from "../types/hero";
+import { probeImage } from "./probeImage";
 
 const availability = new Map<HeroRole, Promise<boolean>>();
 
@@ -11,12 +12,7 @@ export function checkRoleIcon(role: HeroRole): Promise<boolean> {
   if (known) {
     return known;
   }
-  const check = new Promise<boolean>((resolve) => {
-    const image = new Image();
-    image.onload = () => resolve(true);
-    image.onerror = () => resolve(false);
-    image.src = roleIconUrl(role);
-  });
+  const check = probeImage(roleIconUrl(role));
   availability.set(role, check);
   return check;
 }

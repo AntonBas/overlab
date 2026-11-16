@@ -12,6 +12,6 @@ export async function fetchGuides(query: GuideQuery = {}): Promise<Guide[]> {
 }
 
 export async function fetchGuide(path: string): Promise<Guide> {
-  const { data } = await api.get<Guide>(`/guides/${path}`);
+  const { data } = await api.get<Guide>(`/guides/${encodeURIComponent(path)}`);
   return data;
 }

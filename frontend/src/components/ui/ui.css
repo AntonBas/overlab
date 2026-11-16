@@ -580,6 +580,22 @@
   list-style: none;
 }
 
+.hero-highlights--placeholder {
+  min-height: 98px;
+}
+
+@media (max-width: 800px) {
+  .hero-highlights--placeholder {
+    min-height: 208px;
+  }
+}
+
+@media (max-width: 540px) {
+  .hero-highlights--placeholder {
+    min-height: 317px;
+  }
+}
+
 .hero-highlight {
   --highlight-color: var(--border);
   --highlight-role: var(--border);

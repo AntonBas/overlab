@@ -3,9 +3,11 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { LEGAL_LAST_UPDATED } from "../lastUpdated";
 import { ContactLine } from "../components/ContactLine";
+import { controllerAddress, controllerName } from "../contact";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function PrivacyPage() {
-  usePageTitle("Privacy policy");
+  usePageTitle(staticSeoPage("/privacy").title);
   return (
     <div className="legal-page">
       <PageHeader
@@ -18,9 +20,17 @@ export function PrivacyPage() {
             <h2>Who we are</h2>
           </summary>
           <p>
-            Overlab is an unofficial fan site with hero statistics. It is run by
-            an individual and is not affiliated with Blizzard Entertainment.
+            Overlab is an unofficial fan site with hero statistics. It is not
+            affiliated with Blizzard Entertainment.
           </p>
+          {controllerName ? (
+            <p>
+              Data controller: {controllerName}
+              {controllerAddress ? `, ${controllerAddress}` : ""}.
+            </p>
+          ) : (
+            <p>The site is run by an individual.</p>
+          )}
           <ContactLine />
         </details>
         <details className="legal-section">
@@ -60,6 +70,20 @@ export function PrivacyPage() {
         </details>
         <details className="legal-section">
           <summary>
+            <h2>Server logs and abuse protection</h2>
+          </summary>
+          <p>
+            Like every web server, ours processes the IP address, browser
+            identifier and requested address of each request. Short-lived
+            counters keyed by IP address (and, for sign-in attempts, by email
+            address) limit how many requests one visitor can make and are
+            discarded within an hour. Technical server logs are rotated
+            automatically by size, so they hold only the most recent days or
+            weeks of traffic.
+          </p>
+        </details>
+        <details className="legal-section">
+          <summary>
             <h2>Why we use it</h2>
           </summary>
           <ul>
@@ -68,6 +92,30 @@ export function PrivacyPage() {
               To send service emails: address confirmation and password reset.
             </li>
             <li>To protect the site from abuse and investigate incidents.</li>
+            <li>
+              With your consent only: to count visits anonymously and to receive
+              error reports that help us fix bugs.
+            </li>
+          </ul>
+        </details>
+        <details className="legal-section">
+          <summary>
+            <h2>Legal basis</h2>
+          </summary>
+          <ul>
+            <li>
+              Running your account and sending service emails: performing the
+              agreement you enter into when you register.
+            </li>
+            <li>
+              Security log, server logs and abuse protection: our legitimate
+              interest in keeping the site secure and available.
+            </li>
+            <li>
+              Anonymous visit statistics and error reports: your consent, which
+              you can withdraw at any time in the{" "}
+              <Link to="/cookies">cookie settings</Link>.
+            </li>
           </ul>
         </details>
         <details className="legal-section">
@@ -76,9 +124,9 @@ export function PrivacyPage() {
           </summary>
           <p>
             Sign-in uses two strictly necessary cookies. Optional anonymous
-            visit statistics (Umami, no cookies, no personal identifiers) and
-            advertising are off until you allow them. Details are in the{" "}
-            <Link to="/cookies">cookie policy</Link>.
+            visit statistics (Umami, no cookies, no personal identifiers), error
+            reports (Sentry) and advertising are off until you allow them.
+            Details are in the <Link to="/cookies">cookie policy</Link>.
           </p>
         </details>
         <details className="legal-section">
@@ -87,9 +135,13 @@ export function PrivacyPage() {
           </summary>
           <p>
             Data is processed by our hosting provider, our email delivery
-            provider, our analytics provider Umami, our error reporting provider
-            Sentry and, if you choose Google sign-in, Google. Guide pages load
-            video thumbnails from YouTube (Google), which therefore sees your IP
+            provider, our analytics provider Umami (only with your consent), our
+            error reporting provider Sentry (only with your consent) and, if you
+            choose Google sign-in, Google. Error reports contain the page
+            address, browser and device type, the error message and technical
+            details of the error; we configure Sentry not to store IP addresses
+            and do not send account data to it. Guide pages load video
+            thumbnails from YouTube (Google), which therefore sees your IP
             address, and the player loads only when you press play. We do not
             sell personal data.
           </p>
@@ -100,8 +152,9 @@ export function PrivacyPage() {
           </summary>
           <p>
             Account data is kept until you delete your account. Security log
-            entries are kept for 90 days. Backups are rotated and may hold
-            deleted data for a limited time before they expire.
+            entries are kept for 90 days. Error reports are kept for the
+            retention period set in our Sentry project. Backups are rotated and
+            may hold deleted data for a limited time before they expire.
           </p>
         </details>
         <details className="legal-section">

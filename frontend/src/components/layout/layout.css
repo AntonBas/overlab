@@ -184,6 +184,9 @@
 }
 
 .site-footer__column a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   width: fit-content;
   color: var(--muted);
   text-decoration: none;

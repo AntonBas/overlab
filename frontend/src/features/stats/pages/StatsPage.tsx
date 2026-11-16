@@ -22,12 +22,12 @@ import { StatsTable } from "../components/StatsTable";
 import { ALL_MAPS, isQuickPlay } from "../filters";
 import { useFilterState } from "../hooks/useFilterState";
 import { statsHighlights } from "../utils/highlights";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function StatsPage() {
-  usePageTitle("Overwatch hero win, pick and ban rates");
-  usePageDescription(
-    "Overwatch hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
-  );
+  const page = staticSeoPage("/stats");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -40,7 +40,7 @@ export function StatsPage() {
   const { filters, update, changeSort, key } = useFilterState();
   const [search, setSearch] = useState("");
   const maps = useFetch(fetchMaps, []);
-  const stats = useFetch(() => fetchStats(filters), [key], {
+  const stats = useFetch((signal) => fetchStats(filters, signal), [key], {
     keepPrevious: true,
   });
 
@@ -75,6 +75,12 @@ export function StatsPage() {
           />
         }
       />
+      {!snapshot && stats.loading && (
+        <div
+          className="hero-highlights hero-highlights--placeholder"
+          aria-hidden="true"
+        />
+      )}
       {snapshot && (
         <HeroHighlights
           items={statsHighlights(snapshot.heroes, !isQuickPlay(filters))}

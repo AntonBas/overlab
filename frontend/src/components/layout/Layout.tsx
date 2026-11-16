@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
-import { AnalyticsLoader } from "../../features/legal";
+import { AnalyticsLoader, ErrorReportingLoader } from "../../features/legal";
 import { CookieBanner } from "../../features/legal";
 import { Spinner } from "../ui/Spinner";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -55,6 +55,7 @@ export function Layout() {
       <Footer />
       <CookieBanner />
       <AnalyticsLoader />
+      <ErrorReportingLoader />
     </div>
   );
 }

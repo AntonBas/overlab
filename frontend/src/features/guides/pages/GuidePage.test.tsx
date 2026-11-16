@@ -50,7 +50,7 @@ describe("GuidePage", () => {
   });
 
   it("shows the guide with hero, map, video and description", async () => {
-    vi.mocked(fetchGuide).mockResolvedValue(guide as never);
+    vi.mocked(fetchGuide).mockResolvedValue(guide);
 
     renderGuide();
 
@@ -69,13 +69,31 @@ describe("GuidePage", () => {
       mapSlug: null,
       mapName: null,
       description: "",
-    } as never);
+    });
 
     renderGuide();
 
     await screen.findByRole("heading", { name: "Ana nade spot" });
     expect(screen.queryByText("Numbani")).not.toBeInTheDocument();
     expect(screen.queryByText("on")).not.toBeInTheDocument();
+  });
+
+  it("keeps an unknown guide out of the search index", async () => {
+    vi.mocked(fetchGuide).mockRejectedValue(
+      Object.assign(new Error("missing"), {
+        isAxiosError: true,
+        response: { status: 404, data: { message: "missing" } },
+      }),
+    );
+
+    renderGuide();
+
+    await screen.findByRole("alert");
+    expect(
+      document.head
+        .querySelector('meta[name="robots"]')
+        ?.getAttribute("content"),
+    ).toBe("noindex, nofollow");
   });
 
   it("shows an error with retry when the guide cannot be loaded", async () => {

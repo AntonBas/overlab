@@ -7,6 +7,6 @@ export function fetchMaps(): Promise<GameMap[]> {
 }
 
 export async function fetchMap(slug: string): Promise<GameMap> {
-  const { data } = await api.get<GameMap>(`/maps/${slug}`);
+  const { data } = await api.get<GameMap>(`/maps/${encodeURIComponent(slug)}`);
   return data;
 }

@@ -81,6 +81,7 @@ describe("StatsPage", () => {
         platform: "PC",
         region: "EUROPE",
       }),
+      expect.any(AbortSignal),
     );
     expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
@@ -124,6 +125,7 @@ describe("StatsPage", () => {
     await screen.findByRole("link", { name: "Ana" });
     expect(fetchStatsMock).toHaveBeenCalledWith(
       expect.objectContaining({ tier: "GOLD", map: "rialto", role: "SUPPORT" }),
+      expect.any(AbortSignal),
     );
     expect(
       screen.getByText(/differs from its all-maps value/),
@@ -145,6 +147,7 @@ describe("StatsPage", () => {
     await waitFor(() =>
       expect(fetchStatsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({ queue: "QUICK_PLAY", tier: "ALL" }),
+        expect.any(AbortSignal),
       ),
     );
   });

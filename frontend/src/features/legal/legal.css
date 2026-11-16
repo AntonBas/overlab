@@ -91,7 +91,7 @@
   vertical-align: middle;
   padding: 0.25rem;
   background: transparent;
-  color: var(--text-muted, inherit);
+  color: var(--muted);
   border: 0;
   border-radius: 4px;
   cursor: pointer;

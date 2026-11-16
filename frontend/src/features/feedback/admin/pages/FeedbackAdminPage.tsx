@@ -121,6 +121,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Resolve message ${row.id}`}
                         onClick={() => void change(row, "RESOLVED")}
                       >
                         Resolve
@@ -130,6 +131,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Dismiss message ${row.id}`}
                         onClick={() => void change(row, "DISMISSED")}
                       >
                         Dismiss
@@ -139,6 +141,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Reopen message ${row.id}`}
                         onClick={() => void change(row, "NEW")}
                       >
                         Reopen

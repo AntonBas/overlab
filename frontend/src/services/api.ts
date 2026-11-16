@@ -53,6 +53,11 @@ const SESSION_FREE_PATHS = [
 
 let refreshing: Promise<boolean> | null = null;
 
+function isSessionRejection(error: AxiosError): boolean {
+  const status = error.response?.status;
+  return status === 401 || status === 403;
+}
+
 function refreshSession(): Promise<boolean> {
   if (!refreshing) {
     refreshing = axios
@@ -61,8 +66,10 @@ function refreshSession(): Promise<boolean> {
         writeSessionHint("active");
         return true;
       })
-      .catch(() => {
-        writeSessionHint("ended");
+      .catch((error: unknown) => {
+        if (axios.isAxiosError(error) && isSessionRejection(error)) {
+          writeSessionHint("ended");
+        }
         return false;
       })
       .finally(() => {
@@ -89,15 +96,13 @@ api.interceptors.response.use(
     const isAuthCall = SESSION_FREE_PATHS.some((path) =>
       request?.url?.startsWith(path),
     );
-    const knownSignedOut =
-      request?.url?.startsWith("/auth/me") === true &&
-      readSessionHint() === "ended";
+    const noSessionToRefresh = readSessionHint() !== "active";
     if (
       error.response?.status === 401 &&
       request &&
       !request.retried &&
       !isAuthCall &&
-      !knownSignedOut
+      !noSessionToRefresh
     ) {
       request.retried = true;
       if (await refreshSession()) {

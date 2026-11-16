@@ -19,8 +19,7 @@ import { Drawer } from "../../../../components/admin/Drawer";
 import { SelectField } from "../../../../components/admin/Fields";
 import { ImageUploadField } from "../../../../components/admin/ImageUploadField";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
-import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 
 const MODES: MapMode[] = [
   "CONTROL",
@@ -40,9 +39,8 @@ function MapForm({
   onSaved: () => void;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<string>(map.mode ?? "");
-  const save = useSave();
-  useUnsavedChanges(mode !== (map.mode ?? ""));
+  const { values, change, save } = useAdminForm({ mode: map.mode ?? "" });
+  const { mode } = values;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -66,7 +64,7 @@ function MapForm({
         name="mode"
         value={mode}
         error={save.fieldErrors.mode}
-        onChange={(event) => setMode(event.target.value)}
+        onChange={(event) => change("mode", event.target.value)}
       >
         <option value="">Unknown</option>
         {MODES.map((value) => (

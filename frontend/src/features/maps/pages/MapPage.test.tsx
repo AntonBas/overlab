@@ -33,6 +33,7 @@ vi.mock("../../personal/components/FavoriteButton", () => ({
 }));
 
 import { fetchStats } from "../../stats";
+import { fetchMap } from "../api/mapsApi";
 import { MapPage } from "./MapPage";
 
 const fetchStatsMock = vi.mocked(fetchStats);
@@ -52,12 +53,32 @@ describe("MapPage", () => {
     fetchStatsMock.mockResolvedValue(snapshot());
   });
 
+  it("keeps an unknown map out of the search index", async () => {
+    vi.mocked(fetchMap).mockRejectedValueOnce(
+      Object.assign(new Error("missing"), {
+        isAxiosError: true,
+        response: { status: 404, data: { message: "missing" } },
+      }),
+    );
+
+    renderPage("/maps/nowhere");
+
+    await waitFor(() =>
+      expect(
+        document.head
+          .querySelector('meta[name="robots"]')
+          ?.getAttribute("content"),
+      ).toBe("noindex, nofollow"),
+    );
+  });
+
   it("requests the map with the rank from the address", async () => {
     renderPage("/maps/rialto?tier=gold");
 
     await waitFor(() =>
       expect(fetchStatsMock).toHaveBeenCalledWith(
         expect.objectContaining({ map: "rialto", tier: "GOLD" }),
+        expect.any(AbortSignal),
       ),
     );
   });
@@ -72,6 +93,7 @@ describe("MapPage", () => {
     await waitFor(() =>
       expect(fetchStatsMock).toHaveBeenLastCalledWith(
         expect.objectContaining({ map: "rialto", tier: "DIAMOND" }),
+        expect.any(AbortSignal),
       ),
     );
   });

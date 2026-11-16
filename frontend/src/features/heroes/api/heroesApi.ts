@@ -7,6 +7,6 @@ export function fetchHeroes(): Promise<Hero[]> {
 }
 
 export async function fetchHero(slug: string): Promise<Hero> {
-  const { data } = await api.get<Hero>(`/heroes/${slug}`);
+  const { data } = await api.get<Hero>(`/heroes/${encodeURIComponent(slug)}`);
   return data;
 }

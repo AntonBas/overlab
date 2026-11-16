@@ -1,7 +1,5 @@
-import clsx from "clsx";
-import { useId, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { useFloatingTip } from "../../hooks/useFloatingTip";
+import type { ReactNode } from "react";
+import { Tooltip } from "./Tooltip";
 
 interface InfoChipProps {
   description?: string;
@@ -9,35 +7,25 @@ interface InfoChipProps {
 }
 
 export function InfoChip({ description, children }: InfoChipProps) {
-  const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps } = useFloatingTip();
-
   if (!description) {
     return <span className="info-chip info-chip--plain">{children}</span>;
   }
   return (
-    <span className="info-chip" ref={triggerRef} {...triggerProps}>
-      <button
-        type="button"
-        className="info-chip__button"
-        aria-describedby={tipId}
-      >
-        {children}
-      </button>
-      {createPortal(
-        <span
-          id={tipId}
-          role="tooltip"
-          ref={tipRef}
-          className={clsx("info-chip__tip", {
-            "info-chip__tip--open": open,
-          })}
-          style={style}
+    <Tooltip
+      content={description}
+      triggerClassName="info-chip"
+      tipClassName="info-chip__tip"
+      openTipClassName="info-chip__tip--open"
+    >
+      {({ describedBy }) => (
+        <button
+          type="button"
+          className="info-chip__button"
+          aria-describedby={describedBy}
         >
-          {description}
-        </span>,
-        document.body,
+          {children}
+        </button>
       )}
-    </span>
+    </Tooltip>
   );
 }

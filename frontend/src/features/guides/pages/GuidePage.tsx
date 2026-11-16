@@ -5,6 +5,7 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import { useFetch } from "../../../hooks/useFetch";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -18,6 +19,7 @@ import { fetchGuide } from "../api/guidesApi";
 export function GuidePage() {
   const { path = "" } = useParams();
   const guide = useFetch(() => fetchGuide(path), [path]);
+  useNoIndex(guide.error?.status === 404);
   usePageTitle(guide.data?.title);
   usePageDescription(
     guide.data

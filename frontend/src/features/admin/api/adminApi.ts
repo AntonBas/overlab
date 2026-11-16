@@ -62,13 +62,6 @@ export async function fetchAdminUsers(
   return data;
 }
 
-export async function fetchUserDirectory(): Promise<AdminUser[]> {
-  const { data } = await api.get<PageResponse<AdminUser>>("/admin/users", {
-    params: { size: 100 },
-  });
-  return data.content;
-}
-
 export async function setUserEnabled(
   id: number,
   enabled: boolean,

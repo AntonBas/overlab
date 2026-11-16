@@ -202,7 +202,10 @@ export function HeroMapPicks({
         </div>
       </div>
       <div className="highlights">
-        <section className="highlight" aria-label="by gain">
+        <section
+          className="highlight"
+          aria-label={best ? "Best maps" : "Weakest maps"}
+        >
           <MapList
             title={
               best
@@ -224,7 +227,7 @@ export function HeroMapPicks({
           className="map-more"
           aria-expanded={expanded}
           aria-label={
-            expanded ? "Show fewer maps" : `Show all ${fullList.length} maps`
+            expanded ? "Show fewer maps" : `Show all maps (${fullList.length})`
           }
           onClick={() => setExpanded((current) => !current)}
         >

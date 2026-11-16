@@ -7,7 +7,11 @@ vi.mock("../components/CookieSettings", () => ({
   CookieSettings: () => <div>cookie settings</div>,
 }));
 
-vi.mock("../contact", () => ({ contactEmail: undefined }));
+vi.mock("../contact", () => ({
+  contactEmail: undefined,
+  controllerName: "Test Operator",
+  controllerAddress: "1 Test Street, Test City",
+}));
 
 import { CookiesPage } from "./CookiesPage";
 import { PrivacyPage } from "./PrivacyPage";

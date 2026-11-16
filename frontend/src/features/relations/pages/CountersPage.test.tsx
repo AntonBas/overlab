@@ -1,7 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { CountersPage } from "./CountersPage";
+
+const extra = vi.hoisted(() => ({ heroes: [] as { slug: string }[] }));
 
 vi.mock("../../auth/context/useAuth", () => ({
   useAuth: () => ({ user: { id: 1 } }),
@@ -31,6 +34,7 @@ vi.mock("../../heroes/api/heroesApi", () => ({
     hero("ana", "Ana", "SUPPORT"),
     hero("reaper", "Reaper", "DAMAGE"),
     hero("winston", "Winston", "TANK"),
+    ...extra.heroes.map((entry) => hero(entry.slug, entry.slug, "DAMAGE")),
   ],
 }));
 
@@ -65,6 +69,20 @@ vi.mock("../api/relationsApi", () => ({
       synergies: [],
     },
     { heroSlug: "winston", counters: [], counteredBy: [], synergies: [] },
+    ...extra.heroes.map((entry) => ({
+      heroSlug: entry.slug,
+      counters: [
+        {
+          slug: "ana",
+          name: "Ana",
+          role: "SUPPORT",
+          note: null,
+          portraitUrl: null,
+        },
+      ],
+      counteredBy: [],
+      synergies: [],
+    })),
   ],
   fetchHeroCategories: async () => ({
     categories: [
@@ -144,14 +162,14 @@ describe("CountersPage", () => {
   it("shows the note in a tooltip on hover", async () => {
     renderPage();
     await screen.findAllByText("Strong against");
-    expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
 
     const avatar = screen
       .getAllByRole("link", { name: "Reaper" })
       .find((link) => link.classList.contains("relation-avatar"));
     fireEvent.mouseEnter(avatar?.parentElement as Element);
 
-    const tooltip = screen.getByRole("tooltip");
+    const tooltip = screen.getByRole("dialog");
     expect(tooltip).toHaveTextContent("Sleep dart stops him");
     expect(tooltip).toHaveTextContent("Reaper");
   });
@@ -164,9 +182,46 @@ describe("CountersPage", () => {
     expect(chip).toHaveTextContent("2");
     fireEvent.mouseEnter(chip.parentElement as Element);
 
-    const tooltip = screen.getByRole("tooltip");
+    const tooltip = screen.getByRole("dialog");
     expect(tooltip).toHaveTextContent("Hard to peel for");
     expect(tooltip).toHaveTextContent("Winston");
     expect(tooltip).toHaveTextContent("Reaper");
+  });
+
+  it("lets a keyboard user reach the links of a category popover and leave it", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findAllByText("Strong against");
+
+    const chip = screen.getByRole("button", { name: /Dive/ });
+    chip.focus();
+    const popover = await screen.findByRole("dialog");
+
+    await user.tab();
+    const links = within(popover).getAllByRole("link");
+    expect(links[0]).toHaveFocus();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    await user.tab({ shift: true });
+    expect(chip).toHaveFocus();
+
+    await user.tab();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(chip).toHaveFocus();
+  });
+
+  it("renders the heroes in steps so the page and its tab order stay small", async () => {
+    extra.heroes = Array.from({ length: 30 }, (_, index) => ({
+      slug: `hero-${String(index).padStart(2, "0")}`,
+    }));
+    renderPage();
+    await screen.findAllByText("Strong against");
+
+    expect(rows()).toHaveLength(12);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
+    );
+    expect(rows()).toHaveLength(24);
   });
 });

@@ -2,9 +2,10 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { LEGAL_LAST_UPDATED } from "../lastUpdated";
 import { CookieSettings } from "../components/CookieSettings";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function CookiesPage() {
-  usePageTitle("Cookie policy");
+  usePageTitle(staticSeoPage("/cookies").title);
   return (
     <div className="legal-page">
       <PageHeader
@@ -49,17 +50,27 @@ export function CookiesPage() {
               <code>overlab.session</code>: remembers whether you were signed
               in, so the site does not ask the server needlessly.
             </li>
-            <li>Your choices on this page.</li>
+            <li>
+              <code>overlab-cookie-consent</code>: remembers your choices on
+              this page.
+            </li>
           </ul>
         </details>
         <details className="legal-section">
           <summary>
-            <h2>Analytics</h2>
+            <h2>Analytics and error reports</h2>
           </summary>
           <p>
             Off until you allow it here. When allowed, Umami Cloud (EU) counts
             visits anonymously. It sets no cookies, does not track you across
             sites and respects the Do Not Track setting.
+          </p>
+          <p>
+            The same choice also allows error reports: when the site breaks in
+            your browser, Sentry receives the error message, the page address
+            and your browser and device type. It stores no IP address and
+            receives no account data. Withdrawing your choice stops the reports
+            straight away.
           </p>
         </details>
         <details className="legal-section">

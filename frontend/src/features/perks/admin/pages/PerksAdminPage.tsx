@@ -32,8 +32,8 @@ import { HeroSelect } from "../../../heroes/admin";
 import { ImageUploadField } from "../../../../components/admin/ImageUploadField";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
 import { useHeroOptions } from "../../../heroes/admin";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
 import { FormField } from "../../../../components/ui/FormField";
 
 const RECOMMENDATIONS: PerkRecommendation[] = [
@@ -50,25 +50,15 @@ interface PerkFormProps {
 }
 
 function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
-  const [name, setName] = useState(perk?.name ?? "");
-  const [description, setDescription] = useState(perk?.description ?? "");
-  const [slot, setSlot] = useState<PerkSlot>(perk?.slot ?? "MINOR");
-  const [position, setPosition] = useState<PerkPosition>(
-    perk?.position ?? "LEFT",
-  );
-  const [recommendation, setRecommendation] = useState<PerkRecommendation>(
-    perk?.recommendation ?? "OPTIONAL",
-  );
-  const [note, setNote] = useState(perk?.recommendationNote ?? "");
-  const save = useSave();
-  const dirty =
-    name !== (perk?.name ?? "") ||
-    description !== (perk?.description ?? "") ||
-    slot !== (perk?.slot ?? "MINOR") ||
-    position !== (perk?.position ?? "LEFT") ||
-    recommendation !== (perk?.recommendation ?? "OPTIONAL") ||
-    note !== (perk?.recommendationNote ?? "");
-  useUnsavedChanges(dirty && !save.success);
+  const { values, change, save } = useAdminForm({
+    name: perk?.name ?? "",
+    description: perk?.description ?? "",
+    slot: perk?.slot ?? "MINOR",
+    position: perk?.position ?? "LEFT",
+    recommendation: perk?.recommendation ?? "OPTIONAL",
+    note: perk?.recommendationNote ?? "",
+  });
+  const { name, description, slot, position, recommendation, note } = values;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -100,20 +90,20 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
         required
         value={name}
         error={save.fieldErrors.name}
-        onChange={(event) => setName(event.target.value)}
+        onChange={(event) => change("name", event.target.value)}
       />
       <TextAreaField
         label="Description"
         name="description"
         value={description}
         error={save.fieldErrors.description}
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={(event) => change("description", event.target.value)}
       />
       <SelectField
         label="Slot"
         name="slot"
         value={slot}
-        onChange={(event) => setSlot(event.target.value as PerkSlot)}
+        onChange={(event) => change("slot", event.target.value as PerkSlot)}
       >
         <option value="MINOR">Minor</option>
         <option value="MAJOR">Major</option>
@@ -123,7 +113,9 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
         name="position"
         value={position}
         error={save.fieldErrors.position}
-        onChange={(event) => setPosition(event.target.value as PerkPosition)}
+        onChange={(event) =>
+          change("position", event.target.value as PerkPosition)
+        }
       >
         <option value="LEFT">Left</option>
         <option value="RIGHT">Right</option>
@@ -133,7 +125,7 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
         name="recommendation"
         value={recommendation}
         onChange={(event) =>
-          setRecommendation(event.target.value as PerkRecommendation)
+          change("recommendation", event.target.value as PerkRecommendation)
         }
       >
         {RECOMMENDATIONS.map((value) => (
@@ -148,7 +140,7 @@ function PerkForm({ heroSlug, perk, onSaved, onClose }: PerkFormProps) {
         rows={2}
         value={note}
         error={save.fieldErrors.recommendationNote}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => change("note", event.target.value)}
       />
       {perk ? (
         <ImageUploadField

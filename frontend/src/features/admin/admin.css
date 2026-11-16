@@ -408,3 +408,24 @@
 .admin__content .settings-section + .settings-section {
   margin-top: var(--space-20);
 }
+
+.audit-changes strong {
+  color: var(--muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.audit-changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-md);
+}
+
+.audit-changes del {
+  color: var(--bad);
+}
+
+.audit-changes ins {
+  text-decoration: none;
+  color: var(--good, inherit);
+}

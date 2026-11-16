@@ -9,9 +9,7 @@ describe("cachedGet", () => {
   });
 
   it("shares one request between callers", async () => {
-    const get = vi
-      .spyOn(api, "get")
-      .mockResolvedValue({ data: ["ana"] } as never);
+    const get = vi.spyOn(api, "get").mockResolvedValue({ data: ["ana"] });
 
     const [first, second] = await Promise.all([
       cachedGet<string[]>("/heroes"),
@@ -27,7 +25,7 @@ describe("cachedGet", () => {
     const get = vi
       .spyOn(api, "get")
       .mockRejectedValueOnce(new Error("down"))
-      .mockResolvedValueOnce({ data: ["ana"] } as never);
+      .mockResolvedValueOnce({ data: ["ana"] });
 
     await expect(cachedGet("/heroes")).rejects.toThrow("down");
     await expect(cachedGet("/heroes")).resolves.toEqual(["ana"]);
@@ -35,9 +33,7 @@ describe("cachedGet", () => {
   });
 
   it("asks again after the cache is cleared", async () => {
-    const get = vi
-      .spyOn(api, "get")
-      .mockResolvedValue({ data: ["ana"] } as never);
+    const get = vi.spyOn(api, "get").mockResolvedValue({ data: ["ana"] });
 
     await cachedGet("/heroes");
     clearRequestCache();

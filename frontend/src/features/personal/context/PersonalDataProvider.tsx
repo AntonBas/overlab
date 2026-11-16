@@ -20,6 +20,7 @@ interface PersonalState {
   maps: ReadonlySet<string>;
   preferences: Preferences | null;
   preferencesLoaded: boolean;
+  preferencesFailed: boolean;
 }
 
 const EMPTY_STATE: PersonalState = {
@@ -28,6 +29,7 @@ const EMPTY_STATE: PersonalState = {
   maps: new Set(),
   preferences: null,
   preferencesLoaded: false,
+  preferencesFailed: false,
 };
 
 export function PersonalDataProvider({ children }: { children: ReactNode }) {
@@ -35,8 +37,10 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
   const userId = user?.id ?? null;
   const [stored, setStored] = useState<PersonalState>(EMPTY_STATE);
   const [failure, setFailure] = useState<string | null>(null);
+  const [preferencesAttempt, setPreferencesAttempt] = useState(0);
   const state = stored.userId === userId ? stored : EMPTY_STATE;
   const current = useRef(state);
+  const inFlight = useRef(new Set<string>());
 
   useEffect(() => {
     current.current = state;
@@ -60,25 +64,49 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId === null) {
+      return;
+    }
+    let cancelled = false;
     personalApi
       .fetchPreferences()
-      .catch(() => null)
-      .then((preferences) => {
+      .then(
+        (preferences) => ({ preferences, failed: false }),
+        () => ({ preferences: null, failed: true }),
+      )
+      .then(({ preferences, failed }) => {
         if (!cancelled) {
           setStored((existing) => ({
             ...(existing.userId === userId ? existing : EMPTY_STATE),
             userId,
             preferences,
-            preferencesLoaded: true,
+            preferencesLoaded: !failed,
+            preferencesFailed: failed,
           }));
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, preferencesAttempt]);
+
+  const reloadPreferences = useCallback(
+    () => setPreferencesAttempt((attempt) => attempt + 1),
+    [],
+  );
 
   const toggle = useCallback(async (kind: FavoriteKind, slug: string) => {
+    const flightKey = `${kind}:${slug}`;
+    if (inFlight.current.has(flightKey)) {
+      return;
+    }
+    inFlight.current.add(flightKey);
     const wasFavorite =
       kind === "hero"
         ? current.current.heroes.has(slug)
@@ -117,6 +145,8 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       apply(wasFavorite);
       setFailure(toFailure(error).message);
+    } finally {
+      inFlight.current.delete(flightKey);
     }
   }, []);
 
@@ -140,12 +170,21 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
       favoriteMaps: state.maps,
       preferences: state.preferences,
       preferencesLoaded: state.preferencesLoaded,
+      preferencesFailed: state.preferencesFailed,
+      reloadPreferences,
       failure,
       toggleHeroFavorite,
       toggleMapFavorite,
       replacePreferences,
     }),
-    [state, failure, toggleHeroFavorite, toggleMapFavorite, replacePreferences],
+    [
+      state,
+      failure,
+      reloadPreferences,
+      toggleHeroFavorite,
+      toggleMapFavorite,
+      replacePreferences,
+    ],
   );
 
   return (

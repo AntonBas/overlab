@@ -31,6 +31,7 @@ export interface AuditEntry {
   id: number;
   occurredAt: string;
   actorId: number | null;
+  actorName: string | null;
   actorRole: string | null;
   action: AuditAction;
   entityType: string;

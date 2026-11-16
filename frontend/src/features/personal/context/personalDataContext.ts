@@ -6,6 +6,8 @@ export interface PersonalDataValue {
   favoriteMaps: ReadonlySet<string>;
   preferences: Preferences | null;
   preferencesLoaded: boolean;
+  preferencesFailed: boolean;
+  reloadPreferences: () => void;
   failure: string | null;
   toggleHeroFavorite: (slug: string) => Promise<void>;
   toggleMapFavorite: (slug: string) => Promise<void>;
@@ -17,6 +19,8 @@ export const EMPTY_PERSONAL_DATA: PersonalDataValue = {
   favoriteMaps: new Set(),
   preferences: null,
   preferencesLoaded: false,
+  preferencesFailed: false,
+  reloadPreferences: () => undefined,
   failure: null,
   toggleHeroFavorite: () => Promise.resolve(),
   toggleMapFavorite: () => Promise.resolve(),

@@ -20,7 +20,7 @@ interface FetchOptions {
 }
 
 export function useFetch<T>(
-  fetcher: () => Promise<T>,
+  fetcher: (signal: AbortSignal) => Promise<T>,
   dependencies: readonly unknown[],
   options: FetchOptions = {},
 ): FetchState<T> {
@@ -36,7 +36,7 @@ export function useFetch<T>(
   useEffect(() => {
     const abort = new AbortController();
     fetcherRef
-      .current()
+      .current(abort.signal)
       .then((data) => {
         if (!abort.signal.aborted) {
           setSettled({ key, data, error: null });

@@ -36,13 +36,15 @@ function ChangeCell({ before, after, change }: ChangeCellProps) {
 export function ChangesTable({ changes, showBan }: ChangesTableProps) {
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
+  const activeSort: ChangeSort =
+    !showBan && sort === "BAN_CHANGE" ? "WIN_CHANGE" : sort;
   const rows = useMemo(
-    () => sortChanges(changes, sort, descending),
-    [changes, sort, descending],
+    () => sortChanges(changes, activeSort, descending),
+    [changes, activeSort, descending],
   );
 
   function toggle(next: ChangeSort) {
-    if (next === sort) {
+    if (next === activeSort) {
       setDescending((current) => !current);
     } else {
       setSort(next);
@@ -51,14 +53,14 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
   }
 
   function ariaSort(column: ChangeSort): "ascending" | "descending" | "none" {
-    if (column !== sort) {
+    if (column !== activeSort) {
       return "none";
     }
     return descending ? "descending" : "ascending";
   }
 
   function icon(column: ChangeSort) {
-    if (column !== sort) {
+    if (column !== activeSort) {
       return <ArrowUpDown size={14} aria-hidden="true" />;
     }
     return descending ? (
@@ -85,7 +87,7 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
         <label className="table-sort__field">
           <span className="field__label">Sort by</span>
           <select
-            value={sort}
+            value={activeSort}
             onChange={(event) => toggle(event.target.value as ChangeSort)}
           >
             {sortOptions.map((option) => (

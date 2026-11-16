@@ -12,6 +12,7 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
+import { useNoIndex } from "../../../hooks/useNoIndex";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -40,7 +41,8 @@ export function MapPage() {
   const { filters, update, changeSort, key } = useFilterState(slug);
   const coverage = useCoverage();
   const map = useFetch(() => fetchMap(slug), [slug]);
-  const stats = useFetch(() => fetchStats(filters), [key, slug], {
+  useNoIndex(map.error?.status === 404);
+  const stats = useFetch((signal) => fetchStats(filters, signal), [key, slug], {
     keepPrevious: true,
   });
   const picksKey = `${filters.queue}|${filters.tier}|${filters.platform}|${filters.region}|${slug}`;
@@ -98,6 +100,7 @@ export function MapPage() {
           width={1280}
           height={400}
           className="map-banner__image"
+          priority
         />
         <div className="map-banner__content">
           <h1>{map.data.name}</h1>

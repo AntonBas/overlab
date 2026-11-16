@@ -183,7 +183,8 @@ export function LineChart({
             ref={svgRef}
             className={`chart__svg chart__svg--${tone}`}
             viewBox={`0 0 ${SIZE.width} ${SIZE.height}`}
-            role="img"
+            role="group"
+            aria-roledescription="interactive line chart"
             aria-label={summary}
             tabIndex={0}
             onPointerMove={selectAt}

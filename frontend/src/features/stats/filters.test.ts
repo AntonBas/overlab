@@ -35,6 +35,15 @@ describe("parseFilters", () => {
     });
   });
 
+  it("treats an unknown role as all roles and drops a map that is not a slug", () => {
+    const filters = parseFilters(
+      new URLSearchParams("role=healer&map=../../x"),
+    );
+
+    expect(filters.role).toBeNull();
+    expect(filters.map).toBe(DEFAULT_FILTERS.map);
+  });
+
   it("ignores values it does not know", () => {
     const filters = parseFilters(
       new URLSearchParams(

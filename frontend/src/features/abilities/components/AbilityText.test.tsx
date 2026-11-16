@@ -33,9 +33,9 @@ describe("AbilityText", () => {
   it("replaces a known token with a chip that describes the ability", () => {
     renderText("Eats projectiles with [[dva/defense-matrix]] every time.");
 
-    expect(
-      screen.getByRole("button", { name: "Defense Matrix" }),
-    ).toBeInTheDocument();
+    const [chip] = screen.getAllByText("Defense Matrix");
+    expect(chip).toHaveAttribute("tabindex", "0");
+    expect(chip).toHaveAccessibleDescription(/Shoot incoming projectiles/);
     expect(screen.getByRole("tooltip")).toHaveTextContent(
       "Shoot incoming projectiles out of the air.",
     );

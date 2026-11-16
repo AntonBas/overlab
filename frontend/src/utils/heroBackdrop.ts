@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { probeImage } from "./probeImage";
 
 const availability = new Map<string, Promise<boolean>>();
 
@@ -11,12 +12,7 @@ export function checkHeroBackdrop(slug: string): Promise<boolean> {
   if (known) {
     return known;
   }
-  const check = new Promise<boolean>((resolve) => {
-    const image = new Image();
-    image.onload = () => resolve(true);
-    image.onerror = () => resolve(false);
-    image.src = heroBackdropUrl(slug);
-  });
+  const check = probeImage(heroBackdropUrl(slug));
   availability.set(slug, check);
   return check;
 }

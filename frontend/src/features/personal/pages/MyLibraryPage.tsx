@@ -115,7 +115,20 @@ export function MyLibraryPage() {
 
         description="Applied when you open statistics without choosing filters."
       >
-        {personal.preferencesLoaded ? <PreferencesForm /> : <Spinner />}
+        {personal.preferencesFailed && (
+          <div className="notice notice--error" role="alert">
+            <p>Your saved filters could not be loaded.</p>
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={personal.reloadPreferences}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+        {!personal.preferencesFailed &&
+          (personal.preferencesLoaded ? <PreferencesForm /> : <Spinner />)}
       </SettingsSection>
     </div>
   );

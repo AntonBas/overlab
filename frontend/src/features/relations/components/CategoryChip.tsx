@@ -1,9 +1,7 @@
 import clsx from "clsx";
-import { useId } from "react";
-import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
-import { useFloatingTip } from "../../../hooks/useFloatingTip";
+import { Tooltip } from "../../../components/ui/Tooltip";
 import type { CategoryMatchup, HeroCategory } from "../../../types/hero";
 import { AbilityText } from "../../abilities";
 
@@ -13,33 +11,16 @@ interface CategoryChipProps {
 }
 
 export function CategoryChip({ category, matchup }: CategoryChipProps) {
-  const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
-    useFloatingTip();
   return (
     <li>
-      <span ref={triggerRef} {...triggerProps}>
-        <button
-          type="button"
-          className={clsx("category-chip", {
-            "category-chip--open": open,
-          })}
-          aria-describedby={open ? tipId : undefined}
-        >
-          {category.name}
-          <span className="category-chip__count">{category.heroes.length}</span>
-        </button>
-      </span>
-      {open &&
-        createPortal(
-          <span
-            id={tipId}
-            role="tooltip"
-            ref={tipRef}
-            className="perk-tip perk-tip--interactive category-tip"
-            style={style}
-            {...tipProps}
-          >
+      <Tooltip
+        interactive
+        mount="open"
+        role="dialog"
+        label={`${category.name}: heroes`}
+        tipClassName="perk-tip perk-tip--interactive category-tip"
+        content={
+          <>
             <span className="perk-tip__header">
               <span className="perk-tip__title">
                 <strong>{category.name}</strong>
@@ -68,9 +49,24 @@ export function CategoryChip({ category, matchup }: CategoryChipProps) {
                 </Link>
               ))}
             </span>
-          </span>,
-          document.body,
+          </>
+        }
+      >
+        {({ describedBy, open }) => (
+          <button
+            type="button"
+            className={clsx("category-chip", {
+              "category-chip--open": open,
+            })}
+            aria-describedby={describedBy}
+          >
+            {category.name}
+            <span className="category-chip__count">
+              {category.heroes.length}
+            </span>
+          </button>
         )}
+      </Tooltip>
     </li>
   );
 }

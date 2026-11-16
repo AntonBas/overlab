@@ -60,118 +60,93 @@ const TermsPage = lazyNamed(
   "TermsPage",
 );
 
-const ForgotPasswordPage = lazy(() =>
-  import("../features/auth/pages/ForgotPasswordPage").then((module) => ({
-    default: module.ForgotPasswordPage,
-  })),
+const ForgotPasswordPage = lazyNamed(
+  () => import("../features/auth/pages/ForgotPasswordPage"),
+  "ForgotPasswordPage",
 );
-const LoginPage = lazy(() =>
-  import("../features/auth/pages/LoginPage").then((module) => ({
-    default: module.LoginPage,
-  })),
+const LoginPage = lazyNamed(
+  () => import("../features/auth/pages/LoginPage"),
+  "LoginPage",
 );
-const RegisterPage = lazy(() =>
-  import("../features/auth/pages/RegisterPage").then((module) => ({
-    default: module.RegisterPage,
-  })),
+const RegisterPage = lazyNamed(
+  () => import("../features/auth/pages/RegisterPage"),
+  "RegisterPage",
 );
-const ResetPasswordPage = lazy(() =>
-  import("../features/auth/pages/ResetPasswordPage").then((module) => ({
-    default: module.ResetPasswordPage,
-  })),
+const ResetPasswordPage = lazyNamed(
+  () => import("../features/auth/pages/ResetPasswordPage"),
+  "ResetPasswordPage",
 );
-const VerifyEmailPage = lazy(() =>
-  import("../features/auth/pages/VerifyEmailPage").then((module) => ({
-    default: module.VerifyEmailPage,
-  })),
+const VerifyEmailPage = lazyNamed(
+  () => import("../features/auth/pages/VerifyEmailPage"),
+  "VerifyEmailPage",
 );
-const AuditAdminPage = lazy(() =>
-  import("../features/admin/pages/AuditAdminPage").then((module) => ({
-    default: module.AuditAdminPage,
-  })),
+const AuditAdminPage = lazyNamed(
+  () => import("../features/admin/pages/AuditAdminPage"),
+  "AuditAdminPage",
 );
-const CollectorAdminPage = lazy(() =>
-  import("../features/admin/pages/CollectorAdminPage").then((module) => ({
-    default: module.CollectorAdminPage,
-  })),
+const CollectorAdminPage = lazyNamed(
+  () => import("../features/admin/pages/CollectorAdminPage"),
+  "CollectorAdminPage",
 );
-const GuidesAdminPage = lazy(() =>
-  import("../features/guides/admin/pages/GuidesAdminPage").then((module) => ({
-    default: module.GuidesAdminPage,
-  })),
+const GuidesAdminPage = lazyNamed(
+  () => import("../features/guides/admin/pages/GuidesAdminPage"),
+  "GuidesAdminPage",
 );
-const AbilitiesAdminPage = lazy(() =>
-  import("../features/abilities/admin/pages/AbilitiesAdminPage").then(
-    (module) => ({
-      default: module.AbilitiesAdminPage,
-    }),
-  ),
+const AbilitiesAdminPage = lazyNamed(
+  () => import("../features/abilities/admin/pages/AbilitiesAdminPage"),
+  "AbilitiesAdminPage",
 );
-const HeroesAdminPage = lazy(() =>
-  import("../features/heroes/admin/pages/HeroesAdminPage").then((module) => ({
-    default: module.HeroesAdminPage,
-  })),
+const HeroesAdminPage = lazyNamed(
+  () => import("../features/heroes/admin/pages/HeroesAdminPage"),
+  "HeroesAdminPage",
 );
-const MapsAdminPage = lazy(() =>
-  import("../features/maps/admin/pages/MapsAdminPage").then((module) => ({
-    default: module.MapsAdminPage,
-  })),
+const MapsAdminPage = lazyNamed(
+  () => import("../features/maps/admin/pages/MapsAdminPage"),
+  "MapsAdminPage",
 );
-const PatchesAdminPage = lazy(() =>
-  import("../features/patches/admin/pages/PatchesAdminPage").then((module) => ({
-    default: module.PatchesAdminPage,
-  })),
+const PatchesAdminPage = lazyNamed(
+  () => import("../features/patches/admin/pages/PatchesAdminPage"),
+  "PatchesAdminPage",
 );
-const PerksAdminPage = lazy(() =>
-  import("../features/perks/admin/pages/PerksAdminPage").then((module) => ({
-    default: module.PerksAdminPage,
-  })),
+const PerksAdminPage = lazyNamed(
+  () => import("../features/perks/admin/pages/PerksAdminPage"),
+  "PerksAdminPage",
 );
-const CategoriesAdminPage = lazy(() =>
-  import("../features/relations/admin/pages/CategoriesAdminPage").then(
-    (module) => ({
-      default: module.CategoriesAdminPage,
-    }),
-  ),
+const CategoriesAdminPage = lazyNamed(
+  () => import("../features/relations/admin/pages/CategoriesAdminPage"),
+  "CategoriesAdminPage",
 );
-const FeedbackAdminPage = lazy(() =>
-  import("../features/feedback/admin/pages/FeedbackAdminPage").then(
-    (module) => ({
-      default: module.FeedbackAdminPage,
-    }),
-  ),
+const FeedbackAdminPage = lazyNamed(
+  () => import("../features/feedback/admin/pages/FeedbackAdminPage"),
+  "FeedbackAdminPage",
 );
-const RelationsAdminPage = lazy(() =>
-  import("../features/relations/admin/pages/RelationsAdminPage").then(
-    (module) => ({
-      default: module.RelationsAdminPage,
-    }),
-  ),
+const RelationsAdminPage = lazyNamed(
+  () => import("../features/relations/admin/pages/RelationsAdminPage"),
+  "RelationsAdminPage",
 );
-const AdminHomePage = lazy(() =>
-  import("../features/admin/pages/AdminHomePage").then((module) => ({
-    default: module.AdminHomePage,
-  })),
+const AdminHomePage = lazyNamed(
+  () => import("../features/admin/pages/AdminHomePage"),
+  "AdminHomePage",
 );
-const AdminLayout = lazy(() =>
-  import("../features/admin/components/AdminLayout").then((module) => ({
-    default: module.AdminLayout,
-  })),
+const AdminLayout = lazyNamed(
+  () => import("../features/admin/components/AdminLayout"),
+  "AdminLayout",
 );
-const MyLibraryPage = lazy(() =>
-  import("../features/personal/pages/MyLibraryPage").then((module) => ({
-    default: module.MyLibraryPage,
-  })),
+const MyLibraryPage = lazyNamed(
+  () => import("../features/personal/pages/MyLibraryPage"),
+  "MyLibraryPage",
 );
-const SettingsPage = lazy(() =>
-  import("../features/account/pages/SettingsPage").then((module) => ({
-    default: module.SettingsPage,
-  })),
+const ConfirmDeletionPage = lazyNamed(
+  () => import("../features/account/pages/ConfirmDeletionPage"),
+  "ConfirmDeletionPage",
 );
-const UsersAdminPage = lazy(() =>
-  import("../features/admin/pages/UsersAdminPage").then((module) => ({
-    default: module.UsersAdminPage,
-  })),
+const SettingsPage = lazyNamed(
+  () => import("../features/account/pages/SettingsPage"),
+  "SettingsPage",
+);
+const UsersAdminPage = lazyNamed(
+  () => import("../features/admin/pages/UsersAdminPage"),
+  "UsersAdminPage",
 );
 const RequireAdmin = lazy(() =>
   import("../features/admin/components/RequireAdmin").then((module) => ({
@@ -217,6 +192,7 @@ export function AppRoutes() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
+        <Route path="confirm-deletion" element={<ConfirmDeletionPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route

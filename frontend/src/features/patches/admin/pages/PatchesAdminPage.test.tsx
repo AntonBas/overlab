@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../../test/render";
+import { patch as buildPatch } from "../../../../test/fixtures/admin";
 
 vi.mock("../api/patchesAdminApi", () => ({
   fetchPatches: vi.fn(),
@@ -19,26 +20,18 @@ import {
 } from "../api/patchesAdminApi";
 import { PatchesAdminPage } from "./PatchesAdminPage";
 
-const patch = {
-  id: 3,
-  version: "2.10",
-  slug: "2-10",
-  title: "Big balance",
-  season: null,
-  releasedAt: "2026-01-01T10:00:00Z",
-  notes: null,
-};
+const patch = buildPatch();
 
 describe("PatchesAdminPage", () => {
   beforeEach(() => {
     vi.mocked(fetchPatches).mockReset();
-    vi.mocked(fetchPatches).mockResolvedValue([patch] as never);
+    vi.mocked(fetchPatches).mockResolvedValue([patch]);
     vi.mocked(createPatch).mockReset();
-    vi.mocked(createPatch).mockResolvedValue(patch as never);
+    vi.mocked(createPatch).mockResolvedValue(patch);
     vi.mocked(deletePatch).mockReset();
-    vi.mocked(deletePatch).mockResolvedValue(undefined as never);
+    vi.mocked(deletePatch).mockResolvedValue(undefined);
     vi.mocked(importPatches).mockReset();
-    vi.mocked(importPatches).mockResolvedValue({ created: 2 });
+    vi.mocked(importPatches).mockResolvedValue({ started: true });
   });
 
   it("lists patches", async () => {
@@ -65,7 +58,7 @@ describe("PatchesAdminPage", () => {
     );
   });
 
-  it("imports patches and reloads the list", async () => {
+  it("starts the patch import in the background", async () => {
     renderWithRouter(<PatchesAdminPage />, "/admin/patches");
     await screen.findByText("2.10");
 
@@ -74,7 +67,7 @@ describe("PatchesAdminPage", () => {
     );
 
     expect(importPatches).toHaveBeenCalled();
-    expect(fetchPatches).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText(/Patch import started/)).toBeInTheDocument();
   });
 
   it("deletes a patch after confirmation", async () => {

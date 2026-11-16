@@ -25,8 +25,7 @@ import {
 } from "../../../../components/admin/Fields";
 import { HeroSelect } from "../../../heroes/admin";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
-import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 
 interface GuideFormProps {
   guide: Guide | null;
@@ -59,18 +58,8 @@ export function GuideForm({
     sortOrder: String(guide?.sortOrder ?? 0),
     published: guide?.published ?? false,
   };
-  const [values, setValues] = useState(initial);
+  const { values, change, save } = useAdminForm(initial);
   const [validated, setValidated] = useState(false);
-  const save = useSave();
-  const dirty = JSON.stringify(values) !== JSON.stringify(initial);
-  useUnsavedChanges(dirty);
-
-  function change<K extends keyof typeof values>(
-    key: K,
-    value: (typeof values)[K],
-  ) {
-    setValues((current) => ({ ...current, [key]: value }));
-  }
 
   const youtubeId = parseYoutubeId(values.video);
   const startSeconds = parseTimestamp(values.timestamp);
@@ -155,7 +144,12 @@ export function GuideForm({
         heroes={heroes}
         placeholder="Choose a hero"
         error={errors.heroSlug}
-        onChange={(slug) => change("heroSlug", slug)}
+        onChange={(slug) => {
+          if (slug !== values.heroSlug) {
+            change("abilitySlug", "");
+          }
+          change("heroSlug", slug);
+        }}
       />
       <SelectField
         label="Map (optional)"

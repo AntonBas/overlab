@@ -32,6 +32,18 @@ describe("Header", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("closes the compact menu with Escape and returns focus to its button", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Header />);
+    const toggle = screen.getByRole("button", { name: "Menu" });
+
+    await user.click(toggle);
+    await user.keyboard("{Escape}");
+
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveFocus();
+  });
+
   it("offers a single sign in button to anonymous visitors", () => {
     renderWithRouter(<Header />);
     expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(

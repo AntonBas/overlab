@@ -1,6 +1,6 @@
 import type { RequestFailure } from "../../services/api";
 
-function describe(failure: RequestFailure): string {
+function describeFailure(failure: RequestFailure): string {
   if (failure.network) {
     return "The server is not reachable. Try again in a moment.";
   }
@@ -24,16 +24,19 @@ interface ErrorMessageProps {
 export function ErrorMessage({ failure, onRetry }: ErrorMessageProps) {
   return (
     <div className="notice notice--error" role="alert">
-      <p>{describe(failure)}</p>
-      {onRetry && (failure.network || failure.status >= 500) && (
-        <button
-          type="button"
-          className="button button--ghost"
-          onClick={onRetry}
-        >
-          Try again
-        </button>
-      )}
+      <p>{describeFailure(failure)}</p>
+      {onRetry &&
+        (failure.network ||
+          failure.status === 429 ||
+          failure.status >= 500) && (
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={onRetry}
+          >
+            Try again
+          </button>
+        )}
     </div>
   );
 }

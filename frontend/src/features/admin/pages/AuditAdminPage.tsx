@@ -5,9 +5,10 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
+import { useResettingPage } from "../../../hooks/useResettingPage";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
-import { fetchAuditLog, fetchUserDirectory } from "../api/adminApi";
+import { fetchAuditLog } from "../api/adminApi";
 import { ChangeView } from "../components/ChangeView";
 import { SelectField } from "../../../components/admin/Fields";
 import { Pagination } from "../../../components/admin/Pagination";
@@ -36,21 +37,17 @@ const EMPTY: Omit<AuditFilters, "page"> = {};
 export function AuditAdminPage() {
   usePageTitle("Admin: audit log");
   const [fields, setFields] = useState(EMPTY);
-  const [page, setPage] = useState(0);
   const applied = useDebouncedValue(fields, 400);
+  const [page, setPage] = useResettingPage(applied);
   const log = useFetch(
     () => fetchAuditLog({ ...applied, page }),
     [applied, page],
-  );
-  const directory = useFetch(fetchUserDirectory, []);
-  const names = new Map(
-    (directory.data ?? []).map((user) => [user.id, user.displayName]),
+    { keepPrevious: true },
   );
   const filtered = Object.values(fields).some(Boolean);
 
   function change(key: keyof typeof fields, value: string) {
     setFields((current) => ({ ...current, [key]: value }));
-    setPage(0);
   }
 
   return (
@@ -104,7 +101,6 @@ export function AuditAdminPage() {
             className="button button--ghost"
             onClick={() => {
               setFields(EMPTY);
-              setPage(0);
             }}
           >
             Reset
@@ -138,7 +134,7 @@ export function AuditAdminPage() {
                     {describeActor(
                       entry.actorId,
                       entry.actorRole,
-                      names.get(entry.actorId ?? -1) ?? null,
+                      entry.actorName,
                     )}
                   </td>
                   <td data-label="Action">
