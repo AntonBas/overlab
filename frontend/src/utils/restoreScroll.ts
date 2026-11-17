@@ -1,5 +1,10 @@
 const MAX_FRAMES = 60;
-const USER_INPUT_EVENTS = ["wheel", "touchstart", "keydown"] as const;
+const USER_INPUT_EVENTS = [
+  "wheel",
+  "touchstart",
+  "keydown",
+  "pointerdown",
+] as const;
 
 /**
  * Scrolls to a remembered position and keeps trying for about a second, because the page may still be
@@ -44,7 +49,9 @@ const HOLD_FRAMES = 150;
  * Brings an element to the top of the viewport and keeps it there while content above it is still loading
  * and shifting the layout. Stops after a few seconds or as soon as the user scrolls by hand. Returns a cancel function.
  */
-export function holdElementInView(element: HTMLElement): () => void {
+export function holdElementInView(
+  findElement: () => HTMLElement | null,
+): () => void {
   let frame = 0;
   let frames = 0;
   let cancelled = false;
@@ -57,15 +64,18 @@ export function holdElementInView(element: HTMLElement): () => void {
     }
   }
 
-  const desiredTop = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
-
   function keep() {
     if (cancelled) {
       return;
     }
-    const drift = element.getBoundingClientRect().top - desiredTop;
-    if (Math.abs(drift) > 1) {
-      window.scrollBy(0, drift);
+    const element = findElement();
+    if (element) {
+      const desiredTop =
+        parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+      const drift = element.getBoundingClientRect().top - desiredTop;
+      if (Math.abs(drift) > 1) {
+        window.scrollBy(0, drift);
+      }
     }
     frames += 1;
     if (frames >= HOLD_FRAMES) {

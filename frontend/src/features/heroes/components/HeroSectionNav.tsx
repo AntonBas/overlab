@@ -24,10 +24,11 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
     const match = sectionKey
       .split(",")
       .find((sectionId) => sectionId === `hero-${target}`);
-    const element = match ? document.getElementById(match) : null;
-    if (!hashHandled.current && element) {
+    if (!hashHandled.current && match && document.getElementById(match)) {
       hashHandled.current = true;
-      releaseHold.current = holdElementInView(element);
+      releaseHold.current = holdElementInView(() =>
+        document.getElementById(match),
+      );
     }
   }, [sectionKey]);
 
@@ -80,6 +81,8 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
           })}
           aria-current={activeId === section.id ? "true" : undefined}
           onClick={() => {
+            releaseHold.current?.();
+            releaseHold.current = null;
             const url = new URL(window.location.href);
             url.hash = section.id.replace("hero-", "");
             window.history.replaceState(window.history.state, "", url);
