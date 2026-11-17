@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
@@ -61,6 +61,8 @@ function MapList({
   entries,
   linkSuffix,
   images,
+  totalCount,
+  onToggleExpanded,
 }: {
   title: string;
   featuredLabel: string;
@@ -69,6 +71,8 @@ function MapList({
   entries: HeroMapStat[];
   linkSuffix: string;
   images: Record<string, string | null>;
+  totalCount: number | null;
+  onToggleExpanded: () => void;
 }) {
   if (entries.length === 0) {
     return null;
@@ -108,51 +112,74 @@ function MapList({
             </span>
           </Link>
         )}
-        {rest.length > 0 && (
-          <ol className="map-picks__list" start={expanded ? 1 : 2}>
-            {rest.map((entry) => (
-              <li key={entry.mapSlug}>
-                <Link
-                  className={clsx("map-pick", {
-                    "map-pick--down": (entry.winRateDelta ?? 0) < 0,
-                  })}
-                  style={
-                    {
-                      "--delta-width": `${Math.max(
-                        6,
-                        (Math.abs(entry.winRateDelta ?? 0) / largestGain) * 100,
-                      )}%`,
-                    } as CSSProperties
-                  }
-                  to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
-                >
-                  <span className="map-pick__thumbnail">
-                    <Thumbnail
-                      url={images[entry.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL}
-                      width={64}
-                      height={38}
-                    />
-                  </span>
-                  <span className="map-pick__text">
-                    <span className="map-pick__name">
-                      <MapMeta entry={entry} />
+        <div className="map-picks__side">
+          {rest.length > 0 && (
+            <ol className="map-picks__list" start={expanded ? 1 : 2}>
+              {rest.map((entry) => (
+                <li key={entry.mapSlug}>
+                  <Link
+                    className={clsx("map-pick", {
+                      "map-pick--down": (entry.winRateDelta ?? 0) < 0,
+                    })}
+                    style={
+                      {
+                        "--delta-width": `${Math.max(
+                          6,
+                          (Math.abs(entry.winRateDelta ?? 0) / largestGain) *
+                            100,
+                        )}%`,
+                      } as CSSProperties
+                    }
+                    to={mapPagePath(entry.mapSlug ?? "", linkSuffix)}
+                  >
+                    <span className="map-pick__thumbnail">
+                      <Thumbnail
+                        url={images[entry.mapSlug ?? ""] ?? MAP_PLACEHOLDER_URL}
+                        width={64}
+                        height={38}
+                      />
                     </span>
-                    <span className="map-pick__stats muted">
-                      <MapStats entry={entry} />
+                    <span className="map-pick__text">
+                      <span className="map-pick__name">
+                        <MapMeta entry={entry} />
+                      </span>
+                      <span className="map-pick__stats muted">
+                        <MapStats entry={entry} />
+                      </span>
                     </span>
-                  </span>
-                  <span className="map-pick__delta">
-                    <DeltaValue
-                      value={entry.winRateDelta}
-                      unit="%"
-                      title={MAP_DELTA_TITLE}
-                    />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ol>
-        )}
+                    <span className="map-pick__delta">
+                      <DeltaValue
+                        value={entry.winRateDelta}
+                        unit="%"
+                        title={MAP_DELTA_TITLE}
+                      />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
+          {totalCount !== null && (
+            <button
+              type="button"
+              className="map-more"
+              aria-expanded={expanded}
+              aria-label={
+                expanded ? "Show fewer maps" : `Show all maps (${totalCount})`
+              }
+              onClick={onToggleExpanded}
+            >
+              {expanded ? (
+                "Show fewer maps"
+              ) : (
+                <>
+                  Show all maps
+                  <span className="map-more__count">{totalCount}</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );
@@ -169,6 +196,15 @@ export function HeroMapPicks({
     (allMaps.data ?? []).map((map) => [map.slug, map.imageUrl]),
   );
   const [expanded, setExpanded] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const wasExpanded = useRef(false);
+
+  useLayoutEffect(() => {
+    if (wasExpanded.current && !expanded) {
+      sectionRef.current?.scrollIntoView({ block: "start" });
+    }
+    wasExpanded.current = expanded;
+  }, [expanded]);
   const picks = mapPicks(maps);
   const best = view === "best";
   const ranked = mapsByGain(maps);
@@ -180,11 +216,21 @@ export function HeroMapPicks({
     return null;
   }
   return (
-    <section className="section" aria-labelledby="hero-map-picks-heading">
+    <section
+      ref={sectionRef}
+      className="section hero-map-picks"
+      aria-labelledby="hero-map-picks-heading"
+    >
       <div className="section__heading">
-        <h2 id="hero-map-picks-heading">
-          {VIEW_LABELS[view]} for {heroName}
-        </h2>
+        <div className="section__title">
+          <h2 id="hero-map-picks-heading">
+            {VIEW_LABELS[view]} for {heroName}
+          </h2>
+          <p className="muted section__description">
+            Win and pick rate per map. The coloured number is the gap to the
+            hero&apos;s all-maps win rate. Rare picks are weighted down.
+          </p>
+        </div>
         <div className="segmented" role="group" aria-label="Maps to show">
           {(Object.keys(VIEW_LABELS) as PickView[]).map((value) => (
             <button
@@ -218,35 +264,11 @@ export function HeroMapPicks({
             entries={expanded ? fullList : shortList}
             linkSuffix={linkSuffix}
             images={images}
+            totalCount={canExpand ? fullList.length : null}
+            onToggleExpanded={() => setExpanded((current) => !current)}
           />
         </section>
       </div>
-      {canExpand && (
-        <button
-          type="button"
-          className="map-more"
-          aria-expanded={expanded}
-          aria-label={
-            expanded ? "Show fewer maps" : `Show all maps (${fullList.length})`
-          }
-          onClick={() => setExpanded((current) => !current)}
-        >
-          {expanded ? (
-            "Show fewer maps"
-          ) : (
-            <>
-              Show all maps
-              <span className="map-more__count">{fullList.length}</span>
-            </>
-          )}
-        </button>
-      )}
-      <p className="muted footnote">
-        Each map shows the win rate of {heroName} there, how often the hero is
-        picked and, as the coloured number, how much the win rate on that map
-        differs from the all-maps win rate. The list is weighted by pick rate so
-        rare picks do not top it by chance.
-      </p>
     </section>
   );
 }

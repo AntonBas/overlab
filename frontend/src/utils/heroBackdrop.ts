@@ -23,7 +23,7 @@ export function resetHeroBackdropChecks(): void {
 
 export function heroBackdropStyle(url: string): CSSProperties {
   return {
-    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.55), rgb(15 18 24 / 0.88)), url(${url})`,
+    backgroundImage: `linear-gradient(180deg, rgb(15 18 24 / 0.7), rgb(15 18 24 / 0.9)), url(${url})`,
   };
 }
 

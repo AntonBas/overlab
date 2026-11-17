@@ -175,7 +175,8 @@ ul {
 }
 
 .button--ghost:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  border-color: var(--accent);
 }
 
 .notice {
@@ -331,7 +332,8 @@ select:disabled {
 }
 
 .table tbody tr:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  color: var(--text);
 }
 
 .table a {
@@ -594,6 +596,7 @@ select:disabled {
 }
 
 .highlight__hero:hover .highlight__name {
+  color: var(--accent-text);
   text-decoration: underline;
 }
 
@@ -625,6 +628,21 @@ input[type="range"] {
 
 .section__heading h2 {
   margin: 0;
+}
+
+.section__title {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.section > .section__description {
+  margin-bottom: var(--space-12);
+}
+
+.section__description {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
 }
 
 .tag--optional {

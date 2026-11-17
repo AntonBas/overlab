@@ -3,7 +3,8 @@
 #hero-abilities,
 #hero-perks,
 #hero-maps,
-#hero-spots {
+#hero-spots,
+.hero-map-picks {
   scroll-margin-top: calc(var(--header-height, 0px) + 64px);
 }
 
@@ -71,6 +72,9 @@
   border: 1px solid var(--border);
   border-bottom: 3px solid var(--role-color);
   border-radius: var(--radius);
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
 }
 
 .hero-tile[data-role="tank"] {
@@ -87,7 +91,9 @@
 
 .hero-tile:hover,
 .hero-tile:focus-visible {
+  transform: translateY(-2px);
   border-color: var(--role-color);
+  color: var(--text);
 }
 
 .hero-tile .portrait {
@@ -188,7 +194,8 @@
 
 .section-nav__link:hover {
   color: var(--text);
-  border-color: var(--muted);
+  background: var(--hover-wash);
+  border-color: var(--accent);
 }
 
 .section-nav__link--active {
@@ -571,6 +578,7 @@
 }
 
 .map-featured:hover .map-featured__name {
+  color: var(--accent-text);
   text-decoration: underline;
 }
 
@@ -591,6 +599,12 @@
 .map-pick__delta .delta {
   margin-left: 0;
   font-size: inherit;
+}
+
+.map-picks__side {
+  display: grid;
+  gap: var(--space-8);
+  justify-items: stretch;
 }
 
 .map-picks__list {
@@ -639,7 +653,8 @@
 }
 
 .map-pick:hover {
-  border-color: var(--muted);
+  background: var(--hover-wash);
+  border-color: var(--accent);
 }
 
 .map-pick__thumbnail .thumbnail {
@@ -686,7 +701,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-8);
-  margin-top: var(--space-4);
+  justify-content: center;
   padding: var(--space-8) var(--space-16);
   border: 1px solid var(--role-color, var(--accent));
   border-radius: 999px;

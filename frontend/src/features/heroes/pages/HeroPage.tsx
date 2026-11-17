@@ -117,6 +117,7 @@ export function HeroPage() {
     0;
   const navigationSections = [
     { id: "hero-statistics", label: "Statistics", visible: true },
+    { id: "hero-maps", label: "Maps", visible: hasMaps },
     { id: "hero-counters", label: "Counters", visible: hasRelations },
     {
       id: "hero-abilities",
@@ -128,7 +129,6 @@ export function HeroPage() {
       label: "Perks",
       visible: (perks.data?.length ?? 0) > 0,
     },
-    { id: "hero-maps", label: "Maps", visible: hasMaps },
     {
       id: "hero-spots",
       label: "Spots",
@@ -224,44 +224,6 @@ export function HeroPage() {
         </HeroHistorySection>
       </div>
 
-      {hasRelations && counters.data && synergies.data && (
-        <div id="hero-counters">
-          <RelationTabs
-            strongAgainst={counters.data.counters}
-            counteredBy={counters.data.counteredBy}
-            synergies={synergies.data}
-            categories={categories.data?.categories}
-            categoryMatchups={heroCategoryMatchups}
-            feedback={relationFeedback}
-            heroName={hero.data.name}
-          />
-          <p className="muted footnote">
-            Counters and synergies are curated recommendations, not statistics.
-          </p>
-        </div>
-      )}
-
-      {abilities.data && abilities.data.length > 0 && (
-        <section className="section" id="hero-abilities">
-          <div className="section__heading">
-            <h2>{hero.data.name} abilities</h2>
-            <ControlSchemeToggle />
-          </div>
-          <AbilityList abilities={abilities.data} />
-        </section>
-      )}
-
-      {perks.data && perks.data.length > 0 && (
-        <section className="section" id="hero-perks">
-          <h2>Best {hero.data.name} perks</h2>
-          <p className="muted">
-            Perks marked Recommended are the best picks for {hero.data.name};
-            Optional ones are situational.
-          </p>
-          <PerkList perks={perks.data} />
-        </section>
-      )}
-
       {hasMaps && stats.data && (
         <div id="hero-maps">
           <HeroMapPicks
@@ -272,10 +234,53 @@ export function HeroPage() {
         </div>
       )}
 
+      {hasRelations && counters.data && synergies.data && (
+        <div id="hero-counters">
+          <RelationTabs
+            strongAgainst={counters.data.counters}
+            counteredBy={counters.data.counteredBy}
+            synergies={synergies.data}
+            categories={categories.data?.categories}
+            categoryMatchups={heroCategoryMatchups}
+            feedback={relationFeedback}
+            heroName={hero.data.name}
+            description="Curated recommendations, not statistics."
+          />
+        </div>
+      )}
+
+      {abilities.data && abilities.data.length > 0 && (
+        <section className="section" id="hero-abilities">
+          <div className="section__heading">
+            <div className="section__title">
+              <h2>{hero.data.name} abilities</h2>
+              <p className="muted section__description">
+                Hover or tap an ability for details. Buttons follow the selected
+                platform.
+              </p>
+            </div>
+            <ControlSchemeToggle />
+          </div>
+          <AbilityList abilities={abilities.data} />
+        </section>
+      )}
+
+      {perks.data && perks.data.length > 0 && (
+        <section className="section" id="hero-perks">
+          <h2>Best {hero.data.name} perks</h2>
+          <p className="muted section__description">
+            Recommended perks are the default pick. Optional ones depend on the
+            situation.
+          </p>
+          <PerkList perks={perks.data} />
+        </section>
+      )}
+
       {guides.data && guides.data.length > 0 && (
         <div id="hero-spots">
           <SpotsSection
             title="Spots & setups"
+            description="Short videos with positions, setups, ultimates and tips."
             guides={spots}
             groupBy="map"
             emptyMessage="No spots or setups yet."

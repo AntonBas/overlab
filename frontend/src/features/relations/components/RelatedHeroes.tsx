@@ -188,7 +188,9 @@ export function RelatedHeroes({
           <div className="relation-detail__header">
             <HeroPortrait name={hero.name} url={hero.portraitUrl} size={40} />
             <RoleBadge role={hero.role} compact />
-            <Link to={`/heroes/${hero.slug}`}>Open hero page</Link>
+            <Link className="relation-detail__name" to={`/heroes/${hero.slug}`}>
+              {hero.name}
+            </Link>
             {feedback && (
               <RelationVoteButtons
                 feedback={feedback}

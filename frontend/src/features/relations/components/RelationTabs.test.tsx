@@ -45,8 +45,10 @@ describe("RelationTabs", () => {
     expect(
       screen.getByRole("tab", { name: /Struggles against 2/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Pharah")).toBeInTheDocument();
-    expect(screen.queryByText("Zarya")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Pharah/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Zarya/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("switches the list when another tab is chosen", async () => {
@@ -54,14 +56,16 @@ describe("RelationTabs", () => {
 
     await userEvent.click(screen.getByRole("tab", { name: /Works well with/ }));
 
-    expect(screen.getByText("Sombra")).toBeInTheDocument();
-    expect(screen.queryByText("Pharah")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sombra/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Pharah/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("starts on the tab named in the address", () => {
     renderTabs({}, "/heroes/dva?tab=struggles");
 
-    expect(screen.getByText("Zarya")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Zarya/ })).toBeInTheDocument();
   });
 
   it("hides empty tabs and falls back to the first one that has heroes", () => {
@@ -118,7 +122,7 @@ describe("RelationTabs", () => {
     );
 
     expect(screen.getByRole("button", { name: /Flying/ })).toBeInTheDocument();
-    expect(screen.getByText("Zarya")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Zarya/ })).toBeInTheDocument();
     expect(
       screen.getByRole("tab", { name: /Struggles against 3/ }),
     ).toBeInTheDocument();

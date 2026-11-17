@@ -42,7 +42,14 @@
 .perk-tile.perk-card--optional,
 .perk-tile.perk-card--avoid {
   border-color: var(--rec-color);
+  background: color-mix(in srgb, var(--rec-color) 22%, transparent);
   box-shadow: inset 0 0 0 1px var(--rec-color);
+}
+
+.perk-tile.perk-card--recommended:hover,
+.perk-tile.perk-card--optional:hover,
+.perk-tile.perk-card--avoid:hover {
+  background: color-mix(in srgb, var(--rec-color) 32%, transparent);
 }
 @media (max-width: 640px) {
   .perk-row {
@@ -202,7 +209,7 @@
   color: var(--muted);
 }
 
-.hero-perks--backdrop {
+.hero-perks.hero-perks--backdrop {
   background-position: 90% 40%;
   background-size: cover;
   border-color: color-mix(in srgb, var(--role-color) 55%, var(--border));
@@ -419,7 +426,8 @@
 .hero-perks .perk-group h3 {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  justify-content: center;
+  gap: var(--space-12);
   margin: var(--space-12) 0 var(--space-8);
   font-size: var(--font-size-2xs);
   color: var(--muted);
@@ -427,11 +435,12 @@
   letter-spacing: 0.08em;
 }
 
+.hero-perks .perk-group h3::before,
 .hero-perks .perk-group h3::after {
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--border);
+  background: color-mix(in srgb, var(--role-color) 55%, transparent);
 }
 
 .perk-tile .tag {

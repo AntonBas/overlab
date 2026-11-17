@@ -38,6 +38,7 @@
 
 .matchup__identity:hover strong {
   color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .matchup__title {
@@ -126,7 +127,8 @@
 
 .relation-avatar:hover,
 .relation-avatar:focus-visible {
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  color: var(--text);
 }
 
 .relation-avatar__image {
@@ -200,6 +202,7 @@
 }
 
 .category-tip__hero:hover {
+  background: var(--hover-wash);
   border-color: var(--accent);
 }
 
@@ -215,24 +218,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   color: var(--muted);
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
 .vote-buttons__button:hover {
-  color: var(--text);
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  border-color: var(--accent);
 }
 
-.vote-buttons__button[aria-pressed="true"] {
-  color: var(--accent-text);
-  border-color: var(--accent);
+.vote-buttons__button--up[aria-pressed="true"] {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+  border-color: var(--good);
+}
+
+.vote-buttons__button--down[aria-pressed="true"] {
+  color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 18%, transparent);
+  border-color: var(--bad);
 }
 
 .related-heroes__tiles {
@@ -282,6 +292,7 @@
 .related-tile:hover {
   transform: translateY(-2px);
   border-color: var(--tile-role);
+  color: var(--text);
 }
 
 .related-tile--active {
@@ -331,6 +342,19 @@
 
 .relation-detail__header .portrait {
   border-radius: 50%;
+}
+
+.relation-detail__name {
+  color: var(--text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.relation-detail__name:hover,
+.relation-detail__name:focus-visible {
+  color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .relation-detail__header .vote-buttons {
@@ -500,6 +524,7 @@
 }
 
 .relation-detail__member:hover {
+  background: var(--hover-wash);
   border-color: var(--accent);
 }
 

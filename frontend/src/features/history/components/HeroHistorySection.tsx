@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useMemo, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -235,18 +234,18 @@ export function HeroHistorySection({
             Checked <CollectedAt value={current.capturedAt} />.
           </>
         )}{" "}
-        Dashed lines mark patch releases, hollow dots mark hotfixes.{" "}
+        Dashed lines mark patch releases, hollow dots mark hotfixes.
         {!mapSlug && (
           <>
+            {" "}
             <DataFreshness
               queue={queue}
               tier="ALL"
               platform="PC"
               region={region}
-            />{" "}
+            />
           </>
         )}
-        <Link to="/changes">See what changed across all heroes</Link>.
       </p>
     </section>
   );
