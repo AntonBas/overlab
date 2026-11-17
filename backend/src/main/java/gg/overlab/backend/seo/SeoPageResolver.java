@@ -3,7 +3,6 @@ package gg.overlab.backend.seo;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.MapService;
 import gg.overlab.backend.gamemap.dto.MapDto;
-import gg.overlab.backend.guide.GuidePath;
 import gg.overlab.backend.guide.GuideService;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.hero.HeroService;
@@ -37,12 +36,7 @@ public class SeoPageResolver {
     }
 
     public static String cacheKey(String requestedPath) {
-        String path = normalize(requestedPath);
-        Matcher matcher = PAGE_PATH.matcher(path);
-        if (matcher.matches() && "guides".equals(matcher.group(1))) {
-            return GuidePath.parseId(matcher.group(2)).map(id -> "/guides/" + id).orElse(path);
-        }
-        return path;
+        return normalize(requestedPath);
     }
 
     public Optional<SeoPage> resolve(String requestedPath) {
@@ -114,9 +108,6 @@ public class SeoPageResolver {
     }
 
     private Optional<SeoPage> guidePage(String key) {
-        if (GuidePath.parseId(key).isEmpty()) {
-            return Optional.empty();
-        }
         try {
             return Optional.of(toGuidePage(guideService.getPublishedByPath(key)));
         } catch (EntityNotFoundException exception) {

@@ -57,7 +57,7 @@ class GuideServiceTest {
         GuideDto dto = service.create(request(null, "Illari pylons on Rialto", true));
 
         assertThat(dto.slug()).isEqualTo("illari-pylons-on-rialto");
-        assertThat(dto.path()).isEqualTo("42-illari-pylons-on-rialto");
+        assertThat(dto.path()).isEqualTo("illari-pylons-on-rialto");
         assertThat(dto.embedUrl()).isEqualTo("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=83");
         assertThat(dto.mapSlug()).isEqualTo("rialto");
         assertThat(dto.published()).isTrue();
@@ -101,26 +101,57 @@ class GuideServiceTest {
     }
 
     @Test
-    void publicLookupFindsGuideByIdEvenWhenSlugChanged() {
+    void publicLookupFindsGuideBySlug() {
+        when(guideRepository.findWithDetailsBySlug("current-slug")).thenReturn(Optional.of(guide(true)));
+
+        GuideDto dto = service.getPublishedByPath("current-slug");
+
+        assertThat(dto.id()).isEqualTo(42L);
+        assertThat(dto.path()).isEqualTo("current-slug");
+    }
+
+    @Test
+    void publicLookupStillResolvesALegacyPathWithAnIdPrefix() {
+        when(guideRepository.findWithDetailsBySlug("42-old-title")).thenReturn(Optional.empty());
         when(guideRepository.findWithDetailsById(42L)).thenReturn(Optional.of(guide(true)));
 
         GuideDto dto = service.getPublishedByPath("42-old-title");
 
-        assertThat(dto.id()).isEqualTo(42L);
         assertThat(dto.slug()).isEqualTo("current-slug");
+        assertThat(dto.path()).isEqualTo("current-slug");
     }
 
     @Test
     void publicLookupHidesUnpublishedGuides() {
-        when(guideRepository.findWithDetailsById(42L)).thenReturn(Optional.of(guide(false)));
+        when(guideRepository.findWithDetailsBySlug("current-slug")).thenReturn(Optional.of(guide(false)));
 
-        assertThatThrownBy(() -> service.getPublishedByPath("42-current-slug"))
+        assertThatThrownBy(() -> service.getPublishedByPath("current-slug"))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    void publicLookupRejectsPathWithoutId() {
-        assertThatThrownBy(() -> service.getPublishedByPath("no-id-here")).isInstanceOf(EntityNotFoundException.class);
+    void publicLookupRejectsAnUnknownSlug() {
+        assertThatThrownBy(() -> service.getPublishedByPath("no-such-guide"))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void addsTheHeroNameToTheSlugWhenTheTitleSlugIsTaken() {
+        when(guideRepository.existsBySlug("nade-spot")).thenReturn(true);
+
+        GuideDto dto = service.create(request(null, "Nade spot", true));
+
+        assertThat(dto.slug()).isEqualTo("illari-nade-spot");
+    }
+
+    @Test
+    void addsTheMapNameToTheSlugWhenHeroAndTitleSlugsAreTaken() {
+        when(guideRepository.existsBySlug("nade-spot")).thenReturn(true);
+        when(guideRepository.existsBySlug("illari-nade-spot")).thenReturn(true);
+
+        GuideDto dto = service.create(request(null, "Nade spot", true));
+
+        assertThat(dto.slug()).isEqualTo("rialto-illari-nade-spot");
     }
 
     @Test

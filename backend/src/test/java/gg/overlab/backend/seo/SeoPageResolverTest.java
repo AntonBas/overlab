@@ -77,16 +77,16 @@ class SeoPageResolverTest {
 
     @Test
     void buildsVideoDataForAPublishedGuideAndHidesUnknownOnes() {
-        GuideDto guide = new GuideDto(7L, "sleep-dart", "7-sleep-dart", "ana", "Ana", null, null, "Sleep dart tips",
+        GuideDto guide = new GuideDto(7L, "sleep-dart", "sleep-dart", "ana", "Ana", null, null, "Sleep dart tips",
                 "abc123", 0, null, null, null, null, null, null, 0, true, null);
-        when(guideService.getPublishedByPath("7-whatever")).thenReturn(guide);
-        when(guideService.getPublishedByPath("8-draft")).thenThrow(new EntityNotFoundException("Guide", "8-draft"));
+        when(guideService.getPublishedByPath("sleep-dart")).thenReturn(guide);
+        when(guideService.getPublishedByPath("draft")).thenThrow(new EntityNotFoundException("Guide", "draft"));
 
-        SeoPage page = resolver.resolve("/guides/7-whatever").orElseThrow();
+        SeoPage page = resolver.resolve("/guides/sleep-dart").orElseThrow();
 
         assertThat(page.openGraphType()).isEqualTo("video.other");
         assertThat(page.structuredData().getLast()).contains("VideoObject", "abc123");
-        assertThat(resolver.resolve("/guides/8-draft")).isEmpty();
+        assertThat(resolver.resolve("/guides/draft")).isEmpty();
     }
 
     @Test
@@ -95,9 +95,8 @@ class SeoPageResolverTest {
     }
 
     @Test
-    void cacheKeyIgnoresTheGuideSlugAndTrailingSlash() {
-        assertThat(SeoPageResolver.cacheKey("/guides/12-first-title")).isEqualTo("/guides/12");
-        assertThat(SeoPageResolver.cacheKey("/guides/12-another/")).isEqualTo("/guides/12");
+    void cacheKeyIgnoresTheTrailingSlash() {
+        assertThat(SeoPageResolver.cacheKey("/guides/first-title/")).isEqualTo("/guides/first-title");
         assertThat(SeoPageResolver.cacheKey("/heroes/ana/")).isEqualTo("/heroes/ana");
         assertThat(SeoPageResolver.cacheKey(null)).isEqualTo("/");
     }

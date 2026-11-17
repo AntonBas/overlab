@@ -94,7 +94,7 @@
 
 	@staticHtmlBot {
 		header_regexp userAgent User-Agent (?i)(facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal|bingbot|adidxbot|duckduckbot|yandexbot|baiduspider|applebot|slurp|seznambot)
-		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|maps/[a-z0-9-]+|guides/[0-9]+(-[A-Za-z0-9-]*)?)/?$
+		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|maps/[a-z0-9-]+|guides/[A-Za-z0-9-]+)/?$
 	}
 	handle @staticHtmlBot {
 		rewrite * /api/seo/preview?path={http.request.uri.path}
