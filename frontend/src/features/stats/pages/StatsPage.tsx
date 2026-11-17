@@ -66,6 +66,8 @@ export function StatsPage() {
                 platform={filters.platform}
                 region={filters.region}
               />
+              {showDelta &&
+                " Small numbers show how each rate differs from its all-maps value."}
             </>
           ) : (
             "Win, pick and ban rates collected from Blizzard's public statistics"
@@ -133,11 +135,6 @@ export function StatsPage() {
                 filters.queue === "QUICK_PLAY" ? "?queue=quick_play" : ""
               }
             />
-          )}
-          {showDelta && (
-            <p className="muted footnote">
-              Small numbers show how each rate differs from its all-maps value.
-            </p>
           )}
         </div>
       )}

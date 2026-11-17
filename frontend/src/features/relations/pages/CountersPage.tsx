@@ -140,7 +140,7 @@ export function CountersPage() {
     <>
       <PageHeader
         title="Counters and synergies"
-        subtitle="Who every hero is strong against, who counters them and who they work well with"
+        subtitle="Curated recommendations, not statistics: who every hero is strong against, who counters them and who they work well with"
       />
       <HeroFilterBar
         query={query}
@@ -258,9 +258,6 @@ export function CountersPage() {
           />
         </div>
       )}
-      <p className="muted footnote">
-        Counters and synergies are curated recommendations, not statistics.
-      </p>
     </>
   );
 }

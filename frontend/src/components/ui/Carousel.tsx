@@ -84,7 +84,7 @@ export function Carousel({
 
   return (
     <div
-      className="carousel"
+      className={clsx("carousel", { "carousel--scrollable": scrollable })}
       style={{ "--carousel-items": itemsPerView } as CSSProperties}
     >
       {scrollable && (

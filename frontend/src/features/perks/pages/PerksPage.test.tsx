@@ -214,9 +214,7 @@ describe("PerksPage", () => {
     await screen.findAllByRole("article");
 
     expect(screen.getAllByRole("article")).toHaveLength(12);
-    fireEvent.click(
-      screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Show more heroes/ }));
 
     expect(screen.getAllByRole("article")).toHaveLength(24);
     expect(screen.getByTestId("location")).toHaveTextContent('{"rows":24}');

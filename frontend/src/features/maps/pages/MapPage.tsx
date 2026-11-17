@@ -8,6 +8,7 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
+import { ShowMoreButton } from "../../../components/ui/ShowMoreButton";
 import { Spinner } from "../../../components/ui/Spinner";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -235,16 +236,13 @@ export function MapPage() {
               />
             )}
             {visibleHeroes.length > INITIAL_HERO_ROWS && (
-              <button
-                type="button"
-                className="button button--ghost reveal-more"
-                aria-expanded={showAllHeroes}
+              <ShowMoreButton
+                attached
+                label="Show all heroes"
+                expandedLabel="Show fewer heroes"
+                expanded={showAllHeroes}
                 onClick={() => setExpandedFor(showAllHeroes ? null : filterKey)}
-              >
-                {showAllHeroes
-                  ? "Show fewer heroes"
-                  : `Show all heroes (${visibleHeroes.length})`}
-              </button>
+              />
             )}
           </div>
         )}

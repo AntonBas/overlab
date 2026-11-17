@@ -1,4 +1,5 @@
 import { ScrollSentinel } from "./ScrollSentinel";
+import { ShowMoreButton } from "./ShowMoreButton";
 
 interface RevealMoreProps {
   remaining: number;
@@ -19,13 +20,7 @@ export function RevealMore({
   return (
     <>
       <ScrollSentinel onReach={onMore} resetKey={shown} />
-      <button
-        type="button"
-        className="button button--ghost reveal-more"
-        onClick={onMore}
-      >
-        Show more {noun} ({remaining} left)
-      </button>
+      <ShowMoreButton label={`Show more ${noun}`} onClick={onMore} />
     </>
   );
 }

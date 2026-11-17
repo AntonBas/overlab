@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
+import { ShowMoreButton } from "../../../components/ui/ShowMoreButton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import type { HeroMapStat } from "../../../types/stats";
@@ -160,24 +161,12 @@ function MapList({
             </ol>
           )}
           {totalCount !== null && (
-            <button
-              type="button"
-              className="map-more"
-              aria-expanded={expanded}
-              aria-label={
-                expanded ? "Show fewer maps" : `Show all maps (${totalCount})`
-              }
+            <ShowMoreButton
+              label="Show all maps"
+              expandedLabel="Show fewer maps"
+              expanded={expanded}
               onClick={onToggleExpanded}
-            >
-              {expanded ? (
-                "Show fewer maps"
-              ) : (
-                <>
-                  Show all maps
-                  <span className="map-more__count">{totalCount}</span>
-                </>
-              )}
-            </button>
+            />
           )}
         </div>
       </div>

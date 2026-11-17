@@ -230,9 +230,7 @@ describe("CountersPage", () => {
     await screen.findAllByText("Strong against");
 
     expect(rows()).toHaveLength(12);
-    fireEvent.click(
-      screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Show more heroes/ }));
     expect(rows()).toHaveLength(24);
   });
 
@@ -251,9 +249,7 @@ describe("CountersPage", () => {
     renderPage();
     await screen.findAllByText("Strong against");
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Show more heroes \(20 left\)/ }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Show more heroes/ }));
     expect(screen.getByTestId("location")).toHaveTextContent('{"rows":24}');
 
     fireEvent.click(screen.getByRole("button", { name: /only favorites/i }));

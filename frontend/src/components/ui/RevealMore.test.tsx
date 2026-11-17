@@ -11,7 +11,7 @@ describe("RevealMore", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Show more heroes (20 left)" }),
+      screen.getByRole("button", { name: "Show more heroes" }),
     );
 
     expect(onMore).toHaveBeenCalledTimes(1);

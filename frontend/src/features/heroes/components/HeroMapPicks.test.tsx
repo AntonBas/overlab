@@ -126,7 +126,7 @@ describe("HeroMapPicks", () => {
       <HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />,
     );
     await userEvent.click(
-      await screen.findByRole("button", { name: "Show all maps (2)" }),
+      await screen.findByRole("button", { name: "Show all maps" }),
     );
 
     expect(
@@ -148,7 +148,7 @@ describe("HeroMapPicks", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
     await userEvent.click(
-      screen.getByRole("button", { name: "Show all maps (8)" }),
+      screen.getByRole("button", { name: "Show all maps" }),
     );
 
     const names = within(screen.getByRole("region", { name: /maps$/ }))
