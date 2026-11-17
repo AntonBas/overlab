@@ -56,7 +56,7 @@
   align-items: center;
   gap: var(--space-12);
   padding: var(--space-8) var(--space-12);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--muted);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
@@ -108,7 +108,8 @@
   grid-template-columns: auto 1fr;
   column-gap: var(--space-12);
   row-gap: var(--space-4);
-  align-items: center;
+  align-items: start;
+  align-content: start;
   height: 100%;
   padding: var(--space-16);
   background: var(--surface);
@@ -151,6 +152,13 @@
 
 .admin__content > .hero-select {
   margin-bottom: var(--space-16);
+}
+
+.admin__form .field__label {
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .admin__form .hero-select .icon-select {

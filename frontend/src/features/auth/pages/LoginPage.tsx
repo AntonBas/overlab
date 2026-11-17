@@ -105,7 +105,7 @@ export function LoginPage() {
             </p>
             <button
               type="button"
-              className="auth-alert__action"
+              className="link-button auth-alert__action"
               onClick={resend}
             >
               Send the confirmation email again

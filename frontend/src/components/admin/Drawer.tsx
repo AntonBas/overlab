@@ -89,7 +89,7 @@ export function Drawer({ label, onClose, children }: DrawerProps) {
       >
         <button
           type="button"
-          className="drawer__close"
+          className="icon-button drawer__close"
           aria-label="Close panel"
           onClick={requestClose}
         >

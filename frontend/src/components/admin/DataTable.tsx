@@ -56,7 +56,7 @@ export function DataTable<T>({
               setPage(0);
             }}
           />
-          <span className="muted">
+          <span className="muted table-count">
             {filtered.length} of {rows.length}
           </span>
         </div>
@@ -78,7 +78,7 @@ export function DataTable<T>({
               <tr key={rowKey(row)}>
                 {columns.map((column) => (
                   <td key={column.header} data-label={column.header}>
-                    {column.render(row)}
+                    <TableCell>{column.render(row)}</TableCell>
                   </td>
                 ))}
               </tr>
@@ -89,4 +89,13 @@ export function DataTable<T>({
       <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </>
   );
+}
+
+function TableCell({ children }: { children: ReactNode }) {
+  const empty =
+    children === null ||
+    children === undefined ||
+    children === false ||
+    children === "";
+  return empty ? null : <span className="table__cell">{children}</span>;
 }

@@ -108,21 +108,6 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.drawer__close:hover {
-  background: var(--hover-wash);
-  border-color: var(--accent);
 }
 
 body.drawer-open {
@@ -133,4 +118,13 @@ body.drawer-open {
   .drawer {
     animation: none;
   }
+}
+
+.table__cell {
+  display: block;
+}
+
+.table-count {
+  flex: none;
+  white-space: nowrap;
 }

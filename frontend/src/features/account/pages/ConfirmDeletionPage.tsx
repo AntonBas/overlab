@@ -1,6 +1,7 @@
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { StatusMessage } from "../../../components/admin/StatusMessage";
 import { useSave } from "../../../components/admin/useSave";
+import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -42,7 +43,7 @@ export function ConfirmDeletionPage() {
 
   return (
     <div className="settings">
-      <h1>Confirm account deletion</h1>
+      <PageHeader title="Confirm account deletion" />
       {token === "" ? (
         <p className="form__error" role="alert">
           This confirmation link is incomplete.

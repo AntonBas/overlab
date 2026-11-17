@@ -48,17 +48,15 @@ export function AdminLayout() {
         </ul>
       </nav>
       <section className="admin__content">
-        <nav className="breadcrumbs" aria-label="Breadcrumb">
-          <Link to="/admin" onClick={guard}>
-            Admin
-          </Link>
-          {current && (
-            <>
-              <span aria-hidden="true">/</span>
-              <span aria-current="page">{current.label}</span>
-            </>
-          )}
-        </nav>
+        {current && (
+          <nav className="breadcrumbs" aria-label="Breadcrumb">
+            <Link to="/admin" onClick={guard}>
+              Admin
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{current.label}</span>
+          </nav>
+        )}
         <UnsavedChangesContext.Provider value={context}>
           <Outlet />
         </UnsavedChangesContext.Provider>

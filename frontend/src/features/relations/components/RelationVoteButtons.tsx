@@ -34,7 +34,7 @@ export function RelationVoteButtons({
     <span className="vote-buttons">
       <button
         type="button"
-        className="vote-buttons__button vote-buttons__button--up"
+        className="icon-button vote-buttons__button--up"
         aria-pressed={current === "UP"}
         aria-label={`Agree with ${relatedHeroName}`}
         title="I agree"
@@ -44,7 +44,7 @@ export function RelationVoteButtons({
       </button>
       <button
         type="button"
-        className="vote-buttons__button vote-buttons__button--down"
+        className="icon-button vote-buttons__button--down"
         aria-pressed={current === "DOWN"}
         aria-label={`Disagree with ${relatedHeroName}`}
         title="I disagree"

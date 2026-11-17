@@ -71,7 +71,7 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="favorite-grid__remove"
+                  className="icon-button icon-button--quiet favorite-grid__remove"
                   aria-label={`Remove ${hero.name}`}
                   title="Remove from favorites"
                   onClick={() => void personal.toggleHeroFavorite(hero.slug)}
@@ -98,7 +98,7 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="favorite-grid__remove"
+                  className="icon-button icon-button--quiet favorite-grid__remove"
                   aria-label={`Remove ${map.name}`}
                   title="Remove from favorites"
                   onClick={() => void personal.toggleMapFavorite(map.slug)}

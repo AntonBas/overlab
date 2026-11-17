@@ -93,7 +93,7 @@
   background: transparent;
   color: var(--muted);
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
@@ -166,8 +166,7 @@
 }
 
 .cookie-settings {
-  display: grid;
-  gap: var(--space-4);
+  display: block;
   margin: 0;
   padding: 20px var(--space-24);
   border: 1px solid var(--border);
@@ -176,9 +175,20 @@
 }
 
 .cookie-settings legend {
-  padding: 0 var(--space-8);
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-8);
+  padding: 0;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
+}
+
+.cookie-settings legend + * {
+  clear: both;
+}
+
+.cookie-settings label + label {
+  margin-top: var(--space-4);
 }
 
 .cookie-settings label {
@@ -186,7 +196,7 @@
   align-items: center;
   gap: 10px;
   padding: var(--space-8) var(--space-12);
-  border-radius: 8px;
+  border-radius: var(--radius);
   cursor: pointer;
 }
 

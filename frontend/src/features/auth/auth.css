@@ -55,6 +55,8 @@
 }
 
 .auth-link {
+  display: inline-block;
+  padding-block: var(--space-4);
   color: var(--accent-text);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
@@ -89,16 +91,5 @@
 
 .auth-alert__action {
   align-self: flex-start;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent-text);
-  font: inherit;
   font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.auth-alert__action:hover {
-  color: var(--accent-text);
-  text-decoration: underline;
 }
