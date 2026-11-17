@@ -3,7 +3,6 @@ import { lazyNamed } from "./lazyNamed";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
 import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
-import { HeroSectionRedirect } from "../features/heroes/pages/HeroSectionRedirect";
 import { StatsPage } from "../features/stats";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
@@ -30,6 +29,18 @@ const HeroesPage = lazyNamed(
 const CountersPage = lazyNamed(
   () => import("../features/relations/pages/CountersPage"),
   "CountersPage",
+);
+const HeroCountersPage = lazyNamed(
+  () => import("../features/relations/pages/HeroCountersPage"),
+  "HeroCountersPage",
+);
+const HeroMapsPage = lazyNamed(
+  () => import("../features/heroes/pages/HeroMapsPage"),
+  "HeroMapsPage",
+);
+const HeroPerksPage = lazyNamed(
+  () => import("../features/perks/pages/HeroPerksPage"),
+  "HeroPerksPage",
 );
 const PerksPage = lazyNamed(
   () => import("../features/perks/pages/PerksPage"),
@@ -163,19 +174,10 @@ export function AppRoutes() {
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
         <Route path="counters" element={<CountersPage />} />
-        <Route
-          path="heroes/:slug/counters"
-          element={<HeroSectionRedirect section="counters" />}
-        />
-        <Route
-          path="heroes/:slug/maps"
-          element={<HeroSectionRedirect section="maps" />}
-        />
+        <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
+        <Route path="heroes/:slug/maps" element={<HeroMapsPage />} />
         <Route path="perks" element={<PerksPage />} />
-        <Route
-          path="heroes/:slug/perks"
-          element={<HeroSectionRedirect section="perks" />}
-        />
+        <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />
         <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
         <Route path="changes" element={<ChangesPage />} />
         <Route path="patches/*" element={<Navigate to="/changes" replace />} />

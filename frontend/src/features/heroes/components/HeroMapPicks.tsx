@@ -17,6 +17,7 @@ interface HeroMapPicksProps {
   heroName: string;
   maps: HeroMapStat[];
   linkSuffix: string;
+  moreHref?: string;
 }
 
 const MAP_DELTA_TITLE =
@@ -178,6 +179,7 @@ export function HeroMapPicks({
   heroName,
   maps,
   linkSuffix,
+  moreHref,
 }: HeroMapPicksProps) {
   const [view, setView] = useState<PickView>("best");
   const allMaps = useFetch(fetchMaps, []);
@@ -219,6 +221,7 @@ export function HeroMapPicks({
             Win and pick rate per map. The coloured number is the gap to the
             hero&apos;s all-maps win rate. Rare picks are weighted down.
           </p>
+          {moreHref && <Link to={moreHref}>Maps page</Link>}
         </div>
         <div className="segmented" role="group" aria-label="Maps to show">
           {(Object.keys(VIEW_LABELS) as PickView[]).map((value) => (

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useId, type KeyboardEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import type {
   CategoryMatchup,
   CategoryMatchupType,
@@ -28,6 +28,8 @@ interface RelationTabsProps {
   feedback?: RelationFeedback;
   heroName?: string;
   description?: string;
+  showHeading?: boolean;
+  moreHref?: string;
 }
 
 const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
@@ -48,6 +50,8 @@ export function RelationTabs({
   feedback,
   heroName,
   description,
+  showHeading = true,
+  moreHref,
 }: RelationTabsProps) {
   const baseId = useId();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -117,11 +121,16 @@ export function RelationTabs({
 
   return (
     <section className="section">
-      <h2>
-        {heroName
-          ? `${heroName} counters and synergies`
-          : "Counters and synergies"}
-      </h2>
+      {showHeading && (
+        <div className="section__heading">
+          <h2>
+            {heroName
+              ? `${heroName} counters and synergies`
+              : "Counters and synergies"}
+          </h2>
+          {moreHref && <Link to={moreHref}>Counters page</Link>}
+        </div>
+      )}
       {description && (
         <p className="muted section__description">{description}</p>
       )}

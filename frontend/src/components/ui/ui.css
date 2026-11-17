@@ -817,7 +817,7 @@
   margin: 0;
   padding: 0 0 var(--space-8);
   display: flex;
-  gap: var(--space-24);
+  gap: var(--carousel-gap, var(--space-24));
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -830,10 +830,13 @@
 .carousel__item {
   flex: 0 0
     calc(
-      (100% - var(--space-24) * (var(--carousel-items) - 1)) /
+      (
+          100% - var(--carousel-gap, var(--space-24)) *
+            (var(--carousel-items) - 1)
+        ) /
         var(--carousel-items)
     );
-  min-width: 220px;
+  min-width: var(--carousel-min, 220px);
   scroll-snap-align: start;
 }
 
@@ -897,4 +900,8 @@
     height: 40px;
     transform: none;
   }
+}
+
+.carousel__item .hero-tile {
+  width: 100%;
 }

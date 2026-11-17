@@ -117,7 +117,7 @@ export function PerksPage() {
                   <div className="hero-perks__top">
                     <Link
                       className="hero-perks__header"
-                      to={`/heroes/${hero.slug}#perks`}
+                      to={`/heroes/${hero.slug}/perks`}
                     >
                       <HeroPortrait
                         name={hero.name}

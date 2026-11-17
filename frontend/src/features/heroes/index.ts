@@ -1,4 +1,6 @@
-export { fetchHeroes } from "./api/heroesApi";
+export { fetchHero, fetchHeroes } from "./api/heroesApi";
+export { HeroSubPageLayout } from "./components/HeroSubPageLayout";
+export { HeroMapPicks } from "./components/HeroMapPicks";
+export { useHeroQueue } from "./hooks/useHeroQueue";
 export { HeroOnMapRedirect } from "./pages/HeroOnMapRedirect";
-export { HeroSectionRedirect } from "./pages/HeroSectionRedirect";
 export { sortHeroesByRoleThenName } from "./utils/sortHeroes";

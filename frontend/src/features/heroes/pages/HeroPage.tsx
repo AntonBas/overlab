@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { preload } from "react-dom";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -230,6 +230,7 @@ export function HeroPage() {
             heroName={hero.data.name}
             maps={stats.data.maps}
             linkSuffix={linkSuffix}
+            moreHref={`/heroes/${slug}/maps`}
           />
         </div>
       )}
@@ -245,6 +246,7 @@ export function HeroPage() {
             feedback={relationFeedback}
             heroName={hero.data.name}
             description="Curated recommendations, not statistics."
+            moreHref={`/heroes/${slug}/counters`}
           />
         </div>
       )}
@@ -267,7 +269,10 @@ export function HeroPage() {
 
       {perks.data && perks.data.length > 0 && (
         <section className="section" id="hero-perks">
-          <h2>Best {hero.data.name} perks</h2>
+          <div className="section__heading">
+            <h2>Best {hero.data.name} perks</h2>
+            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
+          </div>
           <p className="muted section__description">
             Recommended perks are the default pick. Optional ones depend on the
             situation.

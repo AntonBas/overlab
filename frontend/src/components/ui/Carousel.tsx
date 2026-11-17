@@ -16,6 +16,8 @@ interface CarouselProps {
   previousLabel: string;
   nextLabel: string;
   resetKey?: string;
+  minItemWidth?: number;
+  gap?: number;
 }
 
 const SCROLL_TOLERANCE_PX = 1;
@@ -27,6 +29,8 @@ export function Carousel({
   previousLabel,
   nextLabel,
   resetKey,
+  minItemWidth,
+  gap,
 }: CarouselProps) {
   const trackRef = useRef<HTMLUListElement>(null);
   const [canScrollBack, setCanScrollBack] = useState(false);
@@ -85,7 +89,15 @@ export function Carousel({
   return (
     <div
       className={clsx("carousel", { "carousel--scrollable": scrollable })}
-      style={{ "--carousel-items": itemsPerView } as CSSProperties}
+      style={
+        {
+          "--carousel-items": itemsPerView,
+          ...(minItemWidth === undefined
+            ? {}
+            : { "--carousel-min": `${minItemWidth}px` }),
+          ...(gap === undefined ? {} : { "--carousel-gap": `${gap}px` }),
+        } as CSSProperties
+      }
     >
       {scrollable && (
         <button
