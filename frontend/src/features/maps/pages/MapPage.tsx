@@ -2,14 +2,15 @@ import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { RankFilter } from "../../../components/ui/RankFilter";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import clsx from "clsx";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { Spinner } from "../../../components/ui/Spinner";
-import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
+import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
@@ -35,6 +36,8 @@ import { MapBestPicks } from "../components/MapBestPicks";
 import { MapNavigation } from "../components/MapNavigation";
 import { fetchMap, fetchMaps } from "../api/mapsApi";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+
+const INITIAL_HERO_ROWS = 10;
 
 export function MapPage() {
   const { slug = "" } = useParams();
@@ -67,6 +70,20 @@ export function MapPage() {
     matchesName(hero.heroName, search),
   );
   const linkSuffix = isQuickPlay(filters) ? "?queue=quick_play" : "";
+  const filterKey = `${key}|${search}`;
+  const [expandedFor, setExpandedFor] = useState<string | null>(null);
+  const showAllHeroes = expandedFor === filterKey;
+  const statisticsRef = useRef<HTMLElement>(null);
+  const wasShowingAll = useRef(false);
+  useLayoutEffect(() => {
+    if (wasShowingAll.current && !showAllHeroes) {
+      statisticsRef.current?.scrollIntoView({ block: "start" });
+    }
+    wasShowingAll.current = showAllHeroes;
+  }, [showAllHeroes]);
+  const shownHeroes = showAllHeroes
+    ? visibleHeroes
+    : visibleHeroes.slice(0, INITIAL_HERO_ROWS);
   usePageTitle(map.data?.name);
   usePageDescription(
     map.data
@@ -129,93 +146,113 @@ export function MapPage() {
           linkSuffix={linkSuffix}
         />
       )}
-      <FiltersPanel>
-        <div className="filters">
-          {!isQuickPlay(filters) && (
-            <RankFilter
-              value={filters.tier}
-              tiers={availableTiers(coverage, filters)}
-              onChange={(tier) => update({ tier })}
-            />
+      <section ref={statisticsRef} className="section map-statistics">
+        <div className="section__title">
+          <h2>{map.data.name} hero statistics</h2>
+          {stats.data && (
+            <p className="muted section__description">
+              Checked <CollectedAt value={stats.data.capturedAt} />,{" "}
+              {TIER_LABELS[filters.tier].toLowerCase()}. Small numbers show the
+              difference from the all-maps value.
+            </p>
           )}
-          <label className="field">
-            <span className="field__label">Hero</span>
-            <input
-              type="search"
-              value={search}
-              placeholder="Search by name"
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          </label>
-          <div className="segmented" role="group" aria-label="Role">
-            <button
-              type="button"
-              className={clsx("segmented__item", {
-                "segmented__item--active": filters.role === null,
-              })}
-              aria-pressed={filters.role === null}
-              onClick={() => update({ role: null })}
-            >
-              <AllRolesBadge label="All roles" />
-            </button>
-            {ROLES.map((role) => (
+        </div>
+        <FiltersPanel>
+          <div className="filters">
+            {!isQuickPlay(filters) && (
+              <RankFilter
+                value={filters.tier}
+                tiers={availableTiers(coverage, filters)}
+                onChange={(tier) => update({ tier })}
+              />
+            )}
+            <label className="field">
+              <span className="field__label">Hero</span>
+              <input
+                type="search"
+                value={search}
+                placeholder="Search by name"
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </label>
+            <div className="segmented" role="group" aria-label="Role">
               <button
-                key={role}
                 type="button"
                 className={clsx("segmented__item", {
-                  "segmented__item--active": filters.role === role,
+                  "segmented__item--active": filters.role === null,
                 })}
-                aria-pressed={filters.role === role}
-                onClick={() => update({ role })}
+                aria-pressed={filters.role === null}
+                onClick={() => update({ role: null })}
               >
-                <RoleBadge role={role} />
+                <AllRolesBadge label="All roles" />
               </button>
-            ))}
+              {ROLES.map((role) => (
+                <button
+                  key={role}
+                  type="button"
+                  className={clsx("segmented__item", {
+                    "segmented__item--active": filters.role === role,
+                  })}
+                  aria-pressed={filters.role === role}
+                  onClick={() => update({ role })}
+                >
+                  <RoleBadge role={role} />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </FiltersPanel>
-      {stats.loading && <TableSkeleton label="Loading statistics" />}
-      {stats.error &&
-        (stats.error.status === 404 ? (
-          <EmptyState>
-            No statistics have been collected for this map yet.
-          </EmptyState>
-        ) : (
-          <ErrorMessage failure={stats.error} onRetry={stats.reload} />
-        ))}
-      {stats.data && (
-        <div
-          className={stats.stale ? "is-stale" : undefined}
-          aria-busy={stats.stale}
-        >
-          <p className="visually-hidden" role="status">
-            {stats.stale
-              ? "Updating results"
-              : `${visibleHeroes.length} heroes shown`}
-          </p>
-          <p className="muted footnote">
-            Checked <CollectedAt value={stats.data.capturedAt} />,{" "}
-            {TIER_LABELS[filters.tier].toLowerCase()}. Small numbers show the
-            difference from the all-maps value.
-          </p>
-          {visibleHeroes.length === 0 ? (
-            <EmptyState>No heroes match these filters.</EmptyState>
+        </FiltersPanel>
+        {stats.loading && <TableSkeleton label="Loading statistics" />}
+        {stats.error &&
+          (stats.error.status === 404 ? (
+            <EmptyState>
+              No statistics have been collected for this map yet.
+            </EmptyState>
           ) : (
-            <StatsTable
-              heroes={visibleHeroes}
-              showBan={!isQuickPlay(filters)}
-              showDelta
-              sort={filters.sort}
-              direction={filters.direction}
-              onSort={changeSort}
-              heroLinkSuffix={linkSuffix}
-            />
-          )}
-        </div>
-      )}
+            <ErrorMessage failure={stats.error} onRetry={stats.reload} />
+          ))}
+        {stats.data && (
+          <div
+            className={stats.stale ? "is-stale" : undefined}
+            aria-busy={stats.stale}
+          >
+            <p className="visually-hidden" role="status">
+              {stats.stale
+                ? "Updating results"
+                : `${visibleHeroes.length} heroes shown`}
+            </p>
+            {visibleHeroes.length === 0 ? (
+              <EmptyState>No heroes match these filters.</EmptyState>
+            ) : (
+              <StatsTable
+                heroes={shownHeroes}
+                showBan={!isQuickPlay(filters)}
+                showDelta
+                sort={filters.sort}
+                direction={filters.direction}
+                onSort={changeSort}
+                heroLinkSuffix={linkSuffix}
+              />
+            )}
+            {visibleHeroes.length > INITIAL_HERO_ROWS && (
+              <button
+                type="button"
+                className="button button--ghost reveal-more"
+                aria-expanded={showAllHeroes}
+                onClick={() => setExpandedFor(showAllHeroes ? null : filterKey)}
+              >
+                {showAllHeroes
+                  ? "Show fewer heroes"
+                  : `Show all heroes (${visibleHeroes.length})`}
+              </button>
+            )}
+          </div>
+        )}
+      </section>
       {guides.data && (
         <SpotsSection
           title="Spots & setups"
+          description="Short videos with positions, setups, ultimates and tips."
           guides={guides.data}
           groupBy="hero"
           emptyMessage="No spots or setups for this map yet."
