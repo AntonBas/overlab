@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { preferredScrollBehavior } from "../../../utils/motion";
+import { holdElementInView } from "../../../utils/restoreScroll";
 
 interface HeroSectionNavProps {
   sections: { id: string; label: string }[];
@@ -15,6 +16,7 @@ function scrollToSection(id: string) {
 export function HeroSectionNav({ sections }: HeroSectionNavProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const hashHandled = useRef(false);
+  const releaseHold = useRef<(() => void) | null>(null);
   const sectionKey = sections.map((section) => section.id).join(",");
 
   useEffect(() => {
@@ -22,11 +24,14 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
     const match = sectionKey
       .split(",")
       .find((sectionId) => sectionId === `hero-${target}`);
-    if (!hashHandled.current && match) {
+    const element = match ? document.getElementById(match) : null;
+    if (!hashHandled.current && element) {
       hashHandled.current = true;
-      scrollToSection(match);
+      releaseHold.current = holdElementInView(element);
     }
   }, [sectionKey]);
+
+  useEffect(() => () => releaseHold.current?.(), []);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") {
