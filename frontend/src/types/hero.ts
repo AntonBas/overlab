@@ -24,6 +24,8 @@ export type AbilityControl =
 
 export interface Ability {
   heroSlug: string;
+  heroName: string;
+  heroPortraitUrl: string | null;
   slug: string;
   name: string;
   description: string | null;

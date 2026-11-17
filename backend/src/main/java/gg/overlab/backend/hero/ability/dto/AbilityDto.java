@@ -5,6 +5,8 @@ import java.io.Serializable;
 
 public record AbilityDto(
         String heroSlug,
+        String heroName,
+        String heroPortraitUrl,
         String slug,
         String name,
         String description,

@@ -33,6 +33,7 @@ export function useFloatingTip(
 
   const hideTimer = useRef<number | undefined>(undefined);
   const touchStartedClosed = useRef<boolean | null>(null);
+  const pressedInsideTip = useRef(false);
 
   const show = useCallback(() => {
     window.clearTimeout(hideTimer.current);
@@ -177,6 +178,10 @@ export function useFloatingTip(
       }
     }
     function onOutsidePointerDown(event: globalThis.PointerEvent) {
+      if (pressedInsideTip.current) {
+        pressedInsideTip.current = false;
+        return;
+      }
       const target = event.target as Node;
       if (
         !triggerRef.current?.contains(target) &&
@@ -212,6 +217,9 @@ export function useFloatingTip(
       onClickCapture,
     },
     tipProps: {
+      onPointerDownCapture: () => {
+        pressedInsideTip.current = true;
+      },
       onMouseEnter: show,
       onMouseLeave: hideSoon,
       onBlur: onTipBlur,

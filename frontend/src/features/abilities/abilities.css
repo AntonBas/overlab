@@ -54,6 +54,7 @@
 
 .ability-chip__button:hover,
 .ability-chip__button:focus-visible {
+  background: var(--hover-wash);
   border-color: var(--accent);
 }
 
@@ -63,6 +64,44 @@
   height: 20px;
   border-radius: 4px;
   object-fit: contain;
+}
+
+.ability-chip__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.ability-chip__owner-portrait {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.ability-chip__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ability-chip__header .ability-key {
+  align-self: flex-start;
+}
+
+.ability-chip__owner {
+  color: var(--muted);
+  font-size: 0.85em;
+  text-decoration: none;
+}
+
+.ability-chip__owner:hover,
+.ability-chip__owner:focus-visible {
+  color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .ability-chip__tip {

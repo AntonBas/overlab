@@ -60,7 +60,7 @@ class SeoContentBuilderTest {
 
     @Test
     void buildsHeroSectionsFromAbilitiesPerksAndRelationsSkippingEmptyOnes() {
-        when(abilityService.findByHero("ana")).thenReturn(List.of(new AbilityDto("ana", "sleep-dart", "Sleep Dart",
+        when(abilityService.findByHero("ana")).thenReturn(List.of(new AbilityDto("ana", "Ana", null, "sleep-dart", "Sleep Dart",
                 "Puts an [[hero/reinhardt]] to sleep", null, AbilityControl.SECONDARY_FIRE, false)));
         when(perkService.findByHero("ana")).thenReturn(List.of(new PerkDto(1L, "ana", "Sharp Eye", "Better aim",
                 PerkSlot.MINOR, PerkPosition.LEFT, PerkRecommendation.RECOMMENDED, "Take it on ranged maps", null,

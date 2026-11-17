@@ -16,6 +16,8 @@ public class AbilityMapper {
     public AbilityDto toDto(HeroAbility ability) {
         return new AbilityDto(
                 ability.getHero().getSlug(),
+                ability.getHero().getName(),
+                mediaUrlResolver.resolve(ability.getHero().getPortraitUrl()),
                 ability.getSlug(),
                 ability.getName(),
                 ability.getDescription(),
