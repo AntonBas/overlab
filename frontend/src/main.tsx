@@ -8,3 +8,11 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+const bootScreen = document.querySelector(".boot");
+if (bootScreen) {
+  window.setTimeout(() => {
+    bootScreen.classList.add("boot--hidden");
+    window.setTimeout(() => bootScreen.remove(), 400);
+  }, 50);
+}
