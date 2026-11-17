@@ -67,11 +67,12 @@ describe("SpotsSection", () => {
     expect(screen.queryByText("Illari pylon")).not.toBeInTheDocument();
   });
 
-  it("filters by the type button", async () => {
+  it("filters by the type select", async () => {
     renderSection("hero");
 
+    await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
     await userEvent.click(
-      screen.getByRole("button", { name: /^Ultimate spot/ }),
+      screen.getByRole("option", { name: /^Ultimate spot/ }),
     );
 
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
@@ -111,7 +112,8 @@ describe("SpotsSection", () => {
 
     await userEvent.click(screen.getByRole("combobox", { name: "Hero" }));
     await userEvent.click(screen.getByRole("option", { name: /^Ashe/ }));
-    await userEvent.click(screen.getByRole("button", { name: /^Setup/ }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
+    await userEvent.click(screen.getByRole("option", { name: /^Setup/ }));
 
     expect(screen.getByText(/No spots match/)).toBeInTheDocument();
     await userEvent.click(
@@ -122,7 +124,7 @@ describe("SpotsSection", () => {
     expect(screen.getByText("Ashe bob")).toBeInTheDocument();
   });
 
-  it("shows only the first spots until asked for all", async () => {
+  it("puts every spot in one scrollable row", () => {
     const many = Array.from({ length: 8 }, (_, index) =>
       guide({ id: index + 1, title: `Spot ${index + 1}` }),
     );
@@ -137,11 +139,10 @@ describe("SpotsSection", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("Spot 7")).not.toBeInTheDocument();
-    await userEvent.click(
-      screen.getByRole("button", { name: "Show all 8 spots" }),
-    );
-
+    expect(screen.getByText("Spot 1")).toBeInTheDocument();
     expect(screen.getByText("Spot 8")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Show all/ }),
+    ).not.toBeInTheDocument();
   });
 });

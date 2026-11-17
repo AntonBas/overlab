@@ -6,6 +6,7 @@ import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../api/guidesApi", () => ({
   fetchGuide: vi.fn(),
+  fetchGuides: vi.fn(() => Promise.resolve([])),
 }));
 vi.mock("../../../hooks/useCatalog", () => ({
   useHeroPortraits: () => ({}),
@@ -61,6 +62,22 @@ describe("GuidePage", () => {
     expect(screen.getByText("video embed")).toBeInTheDocument();
     expect(screen.getByText("Throw it from the balcony")).toBeInTheDocument();
     expect(fetchGuide).toHaveBeenCalledWith("ana-nade-spot");
+  });
+
+  it("moves an old id-prefixed address to the slug address", async () => {
+    vi.mocked(fetchGuide).mockResolvedValue(guide);
+
+    renderWithRouter(
+      <Routes>
+        <Route path="/guides/:path" element={<GuidePage />} />
+      </Routes>,
+      "/guides/15-ana-nade-spot",
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Ana nade spot" }),
+    ).toBeInTheDocument();
+    expect(fetchGuide).toHaveBeenCalledWith("15-ana-nade-spot");
   });
 
   it("omits the map and description when the guide has none", async () => {

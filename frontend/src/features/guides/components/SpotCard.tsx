@@ -8,7 +8,11 @@ import type { MapVisual } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/guide";
 import { formatSeconds } from "../../../utils/format";
 import { AbilityText } from "../../abilities";
-import { GUIDE_KIND_LABELS, GUIDE_SIDE_LABELS } from "../labels";
+import {
+  GUIDE_KIND_ICONS,
+  GUIDE_KIND_LABELS,
+  GUIDE_SIDE_LABELS,
+} from "../labels";
 
 interface SpotCardProps {
   guide: Guide;
@@ -31,6 +35,42 @@ export function SpotCard({
   const [playing, setPlaying] = useState(false);
   const mapMode = guide.mapSlug ? mapVisuals[guide.mapSlug]?.mode : null;
   const hasPlace = showHero || showMap;
+
+  const KindIcon = GUIDE_KIND_ICONS[guide.kind];
+  const caption = (
+    <>
+      <h3>
+        <Link to={`/guides/${guide.path}`}>{guide.title}</Link>
+      </h3>
+      {(hasPlace || guide.abilitySlug) && (
+        <p className="spot-card__place">
+          {showHero && (
+            <span className="place-icon">
+              <HeroPortrait
+                name={guide.heroName}
+                url={heroPortraits[guide.heroSlug] ?? null}
+                size={16}
+              />
+              {guide.heroName}
+            </span>
+          )}
+          {showMap && (
+            <span className="place-icon">
+              {mapMode && <ModeIcon mode={mapMode} />}
+              {guide.mapName ?? "Any map"}
+            </span>
+          )}
+          {guide.abilitySlug && (
+            <span className="spot-card__ability">
+              <AbilityText
+                text={`[[${guide.heroSlug}/${guide.abilitySlug}]]`}
+              />
+            </span>
+          )}
+        </p>
+      )}
+    </>
+  );
 
   return (
     <article className="spot-card">
@@ -68,64 +108,35 @@ export function SpotCard({
           </button>
         )}
         {!playing && (
-          <span
-            className={clsx(
-              "tag",
-              "spot-card__kind",
-              `tag--kind-${guide.kind.toLowerCase()}`,
-            )}
-          >
-            {GUIDE_KIND_LABELS[guide.kind]}
-          </span>
-        )}
-      </div>
-      <div className="spot-card__body">
-        {(guide.side !== "BOTH" || guide.abilitySlug) && (
-          <div className="spot-card__tags">
-            {guide.side !== "BOTH" && (
+          <>
+            <span className="spot-card__chips">
               <span
-                className={clsx("tag", `tag--side-${guide.side.toLowerCase()}`)}
+                className={clsx(
+                  "tag",
+                  "spot-card__kind",
+                  `tag--kind-${guide.kind.toLowerCase()}`,
+                )}
               >
-                {GUIDE_SIDE_LABELS[guide.side]}
+                <KindIcon size={12} aria-hidden="true" />
+                {GUIDE_KIND_LABELS[guide.kind]}
               </span>
-            )}
-            {guide.abilitySlug && (
-              <span className="spot-card__ability">
-                <AbilityText
-                  text={`[[${guide.heroSlug}/${guide.abilitySlug}]]`}
-                />
-              </span>
-            )}
-          </div>
-        )}
-        <h3>
-          <Link to={`/guides/${guide.path}`}>{guide.title}</Link>
-        </h3>
-        {hasPlace && (
-          <p className="muted spot-card__place">
-            {showHero && (
-              <span className="place-icon">
-                <HeroPortrait
-                  name={guide.heroName}
-                  url={heroPortraits[guide.heroSlug] ?? null}
-                  size={20}
-                />
-                {guide.heroName}
-              </span>
-            )}
-            {showHero && showMap && " on "}
-            {showMap && (
-              <span className="place-icon">
-                {mapMode && <ModeIcon mode={mapMode} />}
-                {guide.mapName ?? "Any map"}
-              </span>
-            )}
-          </p>
-        )}
-        {guide.description && (
-          <p className="muted spot-card__description">{guide.description}</p>
+              {guide.side !== "BOTH" && (
+                <span
+                  className={clsx(
+                    "tag",
+                    "spot-card__kind",
+                    `tag--side-${guide.side.toLowerCase()}`,
+                  )}
+                >
+                  {GUIDE_SIDE_LABELS[guide.side]}
+                </span>
+              )}
+            </span>
+            <div className="spot-card__overlay">{caption}</div>
+          </>
         )}
       </div>
+      {playing && <div className="spot-card__caption">{caption}</div>}
     </article>
   );
 }
