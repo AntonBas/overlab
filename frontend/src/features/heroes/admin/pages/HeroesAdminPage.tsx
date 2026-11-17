@@ -112,7 +112,7 @@ export function HeroesAdminPage() {
   return (
     <>
       <PageHeader title="Heroes" />
-      {heroes.loading && <Spinner />}
+      {heroes.loading && <Spinner label="Loading heroes" />}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

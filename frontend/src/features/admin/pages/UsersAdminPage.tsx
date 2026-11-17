@@ -215,7 +215,7 @@ export function UsersAdminPage() {
         )}
       </div>
       <StatusMessage error={save.error} />
-      {users.loading && <Spinner />}
+      {users.loading && <Spinner label="Loading users" />}
       {users.error && (
         <ErrorMessage failure={users.error} onRetry={users.reload} />
       )}

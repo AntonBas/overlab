@@ -105,7 +105,7 @@ export function MapPage() {
   );
 
   if (map.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading map" />;
   }
   if (map.error || !map.data) {
     return map.error ? (

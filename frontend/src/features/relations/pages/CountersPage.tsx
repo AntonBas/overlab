@@ -86,7 +86,7 @@ export function CountersPage() {
   const relationVotes = useRelationVotes();
 
   if (heroes.loading || relations.loading || categories.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading counters" />;
   }
   const failure = heroes.error ?? relations.error ?? categories.error;
   if (failure || !heroes.data || !relations.data || !categories.data) {

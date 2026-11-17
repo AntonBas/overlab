@@ -18,7 +18,7 @@ export function ConfirmDeletionPage() {
   const save = useSave();
 
   if (loading) {
-    return <Spinner page />;
+    return <Spinner page label="Checking your session" />;
   }
   if (!user) {
     return (

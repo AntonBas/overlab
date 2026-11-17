@@ -107,7 +107,7 @@ export function AuditAdminPage() {
           </button>
         )}
       </div>
-      {log.loading && <Spinner />}
+      {log.loading && <Spinner label="Loading audit log" />}
       {log.error && <ErrorMessage failure={log.error} onRetry={log.reload} />}
       {log.data && log.data.content.length === 0 && (
         <p className="notice">No entries match these filters.</p>

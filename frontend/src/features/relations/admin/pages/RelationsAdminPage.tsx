@@ -200,7 +200,7 @@ export function RelationsAdminPage() {
         />
       )}
       <StatusMessage error={removal.error} />
-      {relations.loading && <Spinner />}
+      {relations.loading && <Spinner label="Loading relations" />}
       {relations.error && (
         <ErrorMessage failure={relations.error} onRetry={relations.reload} />
       )}

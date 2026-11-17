@@ -42,7 +42,7 @@ export function HeroPerksPage() {
   );
 
   if (hero.loading || perks.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading perks" />;
   }
   const failure = hero.error ?? perks.error;
   if (failure || !hero.data || !perks.data) {

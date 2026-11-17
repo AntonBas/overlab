@@ -57,7 +57,7 @@ export function PerksPage() {
   const { favoriteHeroes } = usePersonalData();
 
   if (heroes.loading || perks.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading perks" />;
   }
   const failure = heroes.error ?? perks.error;
   if (failure || !heroes.data || !perks.data) {

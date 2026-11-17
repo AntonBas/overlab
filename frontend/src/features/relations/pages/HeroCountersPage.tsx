@@ -50,7 +50,7 @@ export function HeroCountersPage() {
   );
 
   if (hero.loading || counters.loading || synergies.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading counters" />;
   }
   const failure = hero.error ?? counters.error ?? synergies.error;
   if (failure || !hero.data || !counters.data || !synergies.data) {

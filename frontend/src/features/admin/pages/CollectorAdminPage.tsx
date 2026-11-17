@@ -86,7 +86,7 @@ export function CollectorAdminPage() {
         subtitle="Manual runs send many requests to Blizzard. Use them sparingly."
       />
       <StatusMessage error={start.error} />
-      {jobs.loading && <Spinner />}
+      {jobs.loading && <Spinner label="Loading collector jobs" />}
       {jobs.error && (
         <ErrorMessage failure={jobs.error} onRetry={jobs.reload} />
       )}

@@ -111,7 +111,7 @@ export function MapsAdminPage() {
   return (
     <>
       <PageHeader title="Maps" />
-      {maps.loading && <Spinner />}
+      {maps.loading && <Spinner label="Loading maps" />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}

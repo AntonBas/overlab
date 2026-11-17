@@ -102,7 +102,7 @@ export function MapsPage() {
         title="Maps"
         subtitle="Pick a map to see which heroes over- or under-perform on it"
       />
-      {maps.loading && <Spinner page />}
+      {maps.loading && <Spinner page label="Loading maps" />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}

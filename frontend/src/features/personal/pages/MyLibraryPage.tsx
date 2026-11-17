@@ -30,7 +30,7 @@ export function MyLibraryPage() {
   );
 
   if (loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading your library" />;
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: "/me" }} />;
@@ -128,7 +128,11 @@ export function MyLibraryPage() {
           </div>
         )}
         {!personal.preferencesFailed &&
-          (personal.preferencesLoaded ? <PreferencesForm /> : <Spinner />)}
+          (personal.preferencesLoaded ? (
+            <PreferencesForm />
+          ) : (
+            <Spinner label="Loading preferences" />
+          ))}
       </SettingsSection>
     </div>
   );

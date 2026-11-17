@@ -251,7 +251,7 @@ export function PerksAdminPage() {
         />
       )}
       <StatusMessage error={removal.error} />
-      {heroSlug && perks.loading && <Spinner />}
+      {heroSlug && perks.loading && <Spinner label="Loading perks" />}
       {perks.error && (
         <ErrorMessage failure={perks.error} onRetry={perks.reload} />
       )}

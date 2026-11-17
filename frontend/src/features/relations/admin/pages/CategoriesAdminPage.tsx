@@ -355,7 +355,7 @@ export function CategoriesAdminPage() {
       <PageHeader title="Hero categories" />
       <StatusMessage error={removal.error} />
       {(categories.loading || matchups.loading || heroes.loading) && (
-        <Spinner />
+        <Spinner label="Loading categories" />
       )}
       {failure && <ErrorMessage failure={failure} onRetry={reload} />}
       {categories.data && (

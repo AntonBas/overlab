@@ -74,7 +74,7 @@ export function GuidePage() {
   const mapVisuals = useMapVisuals();
 
   if (guide.loading) {
-    return <Spinner />;
+    return <Spinner page label="Loading guide" />;
   }
   if (guide.error || !guide.data) {
     return guide.error ? (

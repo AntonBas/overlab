@@ -182,7 +182,7 @@ export function PatchesAdminPage() {
       />
       <StatusMessage error={importing.error} />
       <StatusMessage error={removal.error} />
-      {patches.loading && <Spinner />}
+      {patches.loading && <Spinner label="Loading patches" />}
       {patches.error && (
         <ErrorMessage failure={patches.error} onRetry={patches.reload} />
       )}

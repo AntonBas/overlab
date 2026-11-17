@@ -39,7 +39,7 @@ export function HeroesPage() {
         title="Heroes"
         subtitle="Perks, counters, synergies, map statistics and video guides"
       />
-      {heroes.loading && <Spinner page />}
+      {heroes.loading && <Spinner page label="Loading heroes" />}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

@@ -69,7 +69,7 @@ export function GuidesAdminPage() {
         />
       )}
       <StatusMessage error={removal.error} />
-      {guides.loading && <Spinner />}
+      {guides.loading && <Spinner label="Loading guides" />}
       {guides.error && (
         <ErrorMessage failure={guides.error} onRetry={guides.reload} />
       )}

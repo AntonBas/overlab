@@ -80,7 +80,7 @@ export function FeedbackAdminPage() {
         {messages.error && (
           <ErrorMessage failure={messages.error} onRetry={messages.reload} />
         )}
-        {messages.loading && <Spinner />}
+        {messages.loading && <Spinner label="Loading feedback" />}
         {messages.data && (
           <DataTable
             rows={messages.data}
@@ -161,7 +161,7 @@ export function FeedbackAdminPage() {
         {summary.error && (
           <ErrorMessage failure={summary.error} onRetry={summary.reload} />
         )}
-        {summary.loading && <Spinner />}
+        {summary.loading && <Spinner label="Loading summary" />}
         {summary.data && (
           <DataTable
             rows={summary.data}

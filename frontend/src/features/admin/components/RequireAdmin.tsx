@@ -9,7 +9,7 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (loading) {
-    return <Spinner />;
+    return <Spinner page label="Checking access" />;
   }
   if (!user) {
     return (

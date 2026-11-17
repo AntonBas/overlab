@@ -52,7 +52,7 @@ export function HeroMapsPage() {
   );
 
   if (hero.loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading hero map statistics" />;
   }
   if (hero.error || !hero.data) {
     return hero.error ? (
