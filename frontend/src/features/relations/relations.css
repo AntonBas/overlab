@@ -117,7 +117,7 @@
   gap: var(--space-4);
   width: 54px;
   padding: var(--space-4) var(--space-2);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--text);
   font-size: var(--font-size-xs);
   line-height: 1.2;
@@ -142,6 +142,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .relation-avatar__name {
+    font-size: 0.66rem;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    text-align: center;
+    text-overflow: clip;
+    white-space: normal;
+  }
 }
 
 .category-chip {
@@ -212,25 +225,6 @@
   align-items: center;
   align-self: flex-start;
   gap: var(--space-4);
-}
-
-.vote-buttons__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-
-.vote-buttons__button:hover {
-  background: var(--hover-wash);
-  border-color: var(--accent);
 }
 
 .vote-buttons__button--up[aria-pressed="true"] {
@@ -307,9 +301,9 @@
 
 .related-tile__name {
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .relation-detail {
@@ -345,6 +339,7 @@
 }
 
 .relation-detail__name {
+  padding-block: var(--space-6);
   color: var(--text);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);

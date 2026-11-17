@@ -1,5 +1,11 @@
 import clsx from "clsx";
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { DATE_LOCALE, formatPercent } from "../../../utils/format";
 import {
@@ -25,11 +31,13 @@ interface LineChartProps {
   tone: "win" | "pick" | "ban";
 }
 
-const SIZE: ChartSize = {
+const BASE_SIZE: ChartSize = {
   width: 600,
   height: 180,
   padding: { top: 12, right: 12, bottom: 24, left: 44 },
 };
+
+const MIN_CHART_WIDTH = 240;
 
 const dateFormat = new Intl.DateTimeFormat(DATE_LOCALE, {
   day: "numeric",
@@ -79,7 +87,31 @@ export function LineChart({
   const [asTable, setAsTable] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const geometry = buildChartGeometry(points, SIZE);
+  const plotRef = useRef<HTMLDivElement>(null);
+  const [plotWidth, setPlotWidth] = useState(BASE_SIZE.width);
+
+  useLayoutEffect(() => {
+    const plot = plotRef.current;
+    if (!plot) {
+      return;
+    }
+    function measure() {
+      const width = plot?.clientWidth ?? 0;
+      if (width > 0) {
+        setPlotWidth(Math.max(MIN_CHART_WIDTH, Math.round(width)));
+      }
+    }
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(plot);
+    return () => observer.disconnect();
+  }, [asTable]);
+
+  const size: ChartSize = { ...BASE_SIZE, width: plotWidth };
+  const geometry = buildChartGeometry(points, size);
   if (!geometry) {
     return null;
   }
@@ -90,7 +122,7 @@ export function LineChart({
   const first = points[0];
   const last = points[points.length - 1];
   const summary = `${title}: from ${formatPercent(first.value)} on ${formatDate(first.time)} to ${formatPercent(last.value)} on ${formatDate(last.time)}`;
-  const bottom = SIZE.height - SIZE.padding.bottom;
+  const bottom = size.height - size.padding.bottom;
   const active =
     activeIndex !== null && activeIndex < geometry.dots.length
       ? geometry.dots[activeIndex]
@@ -99,7 +131,7 @@ export function LineChart({
     active && activeIndex !== null && activeIndex > 0
       ? geometry.dots[activeIndex - 1]
       : null;
-  const activeShare = active ? (active.x / SIZE.width) * 100 : 0;
+  const activeShare = active ? (active.x / size.width) * 100 : 0;
   const activeSeason = active && seasonAt ? seasonAt(active.time) : null;
   const patchesAtActive = active
     ? visibleMarkers.filter(
@@ -124,7 +156,7 @@ export function LineChart({
 
   function selectAt(event: PointerEvent<SVGSVGElement>) {
     const box = svgRef.current?.getBoundingClientRect();
-    const scale = box && box.width > 0 ? SIZE.width / box.width : 1;
+    const scale = box && box.width > 0 ? size.width / box.width : 1;
     const x = (event.clientX - (box?.left ?? 0)) * scale;
     setActiveIndex(nearestDotIndex(geometry!.dots, x));
   }
@@ -180,11 +212,11 @@ export function LineChart({
           </table>
         </div>
       ) : (
-        <div className="chart__plot">
+        <div ref={plotRef} className="chart__plot">
           <svg
             ref={svgRef}
             className={`chart__svg chart__svg--${tone}`}
-            viewBox={`0 0 ${SIZE.width} ${SIZE.height}`}
+            viewBox={`0 0 ${size.width} ${size.height}`}
             role="group"
             aria-roledescription="interactive line chart"
             aria-label={summary}
@@ -196,15 +228,15 @@ export function LineChart({
             onKeyDown={moveWithKeys}
           >
             <text
-              x={SIZE.padding.left - 6}
-              y={SIZE.padding.top + 4}
+              x={size.padding.left - 6}
+              y={size.padding.top + 4}
               textAnchor="end"
               className="chart__label"
             >
               {formatPercent(geometry.maxValue)}
             </text>
             <text
-              x={SIZE.padding.left - 6}
+              x={size.padding.left - 6}
               y={bottom}
               textAnchor="end"
               className="chart__label"
@@ -212,22 +244,22 @@ export function LineChart({
               {formatPercent(geometry.minValue)}
             </text>
             <line
-              x1={SIZE.padding.left}
-              x2={SIZE.width - SIZE.padding.right}
+              x1={size.padding.left}
+              x2={size.width - size.padding.right}
               y1={bottom}
               y2={bottom}
               className="chart__axis"
             />
             <text
-              x={SIZE.padding.left}
-              y={SIZE.height - 6}
+              x={size.padding.left}
+              y={size.height - 6}
               className="chart__label"
             >
               {formatDate(geometry.minTime)}
             </text>
             <text
-              x={SIZE.width - SIZE.padding.right}
-              y={SIZE.height - 6}
+              x={size.width - size.padding.right}
+              y={size.height - 6}
               textAnchor="end"
               className="chart__label"
             >
@@ -241,7 +273,7 @@ export function LineChart({
                   <line
                     x1={x}
                     x2={x}
-                    y1={SIZE.padding.top}
+                    y1={size.padding.top}
                     y2={bottom}
                     className={clsx("chart__marker", {
                       "chart__marker--hotfix": marker.kind === "hotfix",
@@ -250,7 +282,7 @@ export function LineChart({
                   />
                   <circle
                     cx={x}
-                    cy={SIZE.padding.top}
+                    cy={size.padding.top}
                     r={isActive ? 5 : 3.5}
                     className={clsx("chart__marker-dot", {
                       "chart__marker-dot--hotfix": marker.kind === "hotfix",
@@ -264,7 +296,7 @@ export function LineChart({
               <line
                 x1={active.x}
                 x2={active.x}
-                y1={SIZE.padding.top}
+                y1={size.padding.top}
                 y2={bottom}
                 className="chart__guide"
               />
@@ -288,7 +320,7 @@ export function LineChart({
               className={tooltipClass(activeShare)}
               style={{
                 left: `${activeShare}%`,
-                top: `${(active.y / SIZE.height) * 100}%`,
+                top: `${(active.y / size.height) * 100}%`,
               }}
               aria-hidden="true"
             >

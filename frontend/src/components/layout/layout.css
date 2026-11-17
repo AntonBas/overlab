@@ -246,6 +246,7 @@
 }
 
 .table__sort {
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
@@ -325,7 +326,7 @@
 
 .hero-search__option {
   padding: var(--space-6) var(--space-12);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--text);
   cursor: pointer;
 }

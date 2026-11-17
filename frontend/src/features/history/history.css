@@ -168,7 +168,7 @@
   padding: var(--space-6) var(--space-12);
   transform: translate(-50%, calc(-100% - 12px));
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.3);
   color: var(--text);
