@@ -98,7 +98,7 @@
 }
 
 .email-copy:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
   color: var(--text);
 }
 
@@ -191,7 +191,8 @@
 }
 
 .cookie-settings label:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  color: var(--text);
 }
 
 .cookie-settings input {

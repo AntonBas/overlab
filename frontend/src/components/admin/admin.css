@@ -121,6 +121,7 @@
 }
 
 .drawer__close:hover {
+  background: var(--hover-wash);
   border-color: var(--accent);
 }
 

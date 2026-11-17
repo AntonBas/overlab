@@ -96,8 +96,8 @@
 }
 
 .nav__link:hover {
+  background: var(--hover-wash);
   color: var(--text);
-  background: color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .nav__link--active,
@@ -332,7 +332,8 @@
 
 .hero-search__option--active,
 .hero-search__option:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
+  color: var(--text);
 }
 
 @media (min-width: 1100px) and (max-width: 1240px) {

@@ -10,6 +10,7 @@
   --accent-text: #f99e1a;
   --accent-contrast: #1a1204;
   --link: #8ec5ff;
+  --hover-wash: color-mix(in srgb, var(--text) 8%, transparent);
   --good: #3ecf8e;
   --bad: #ff6b6b;
   --synergy: #6ea8ff;

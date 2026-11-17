@@ -61,6 +61,7 @@
 }
 
 .auth-link:hover {
+  color: var(--accent-text);
   text-decoration: underline;
 }
 
@@ -98,5 +99,6 @@
 }
 
 .auth-alert__action:hover {
+  color: var(--accent-text);
   text-decoration: underline;
 }

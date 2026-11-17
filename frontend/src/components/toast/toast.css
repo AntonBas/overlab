@@ -64,6 +64,6 @@
 }
 
 .toast__close:hover {
-  background: var(--border);
+  background: var(--hover-wash);
   color: var(--text);
 }

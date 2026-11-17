@@ -50,7 +50,8 @@
 }
 
 .favorite-grid .place-icon a:hover {
-  color: var(--accent);
+  color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .favorite-grid__remove {
