@@ -19,11 +19,14 @@ public class SitemapService {
     private final HeroService heroService;
     private final MapService mapService;
     private final GuideService guideService;
+    private final SeoContentBuilder contentBuilder;
     private final SiteUrl siteUrl;
     private final SnapshotCheckService snapshotCheckService;
 
     public SitemapService(HeroService heroService, MapService mapService, GuideService guideService,
-                          SiteUrl siteUrl, SnapshotCheckService snapshotCheckService) {
+                          SeoContentBuilder contentBuilder, SiteUrl siteUrl,
+                          SnapshotCheckService snapshotCheckService) {
+        this.contentBuilder = contentBuilder;
         this.heroService = heroService;
         this.mapService = mapService;
         this.guideService = guideService;
@@ -39,7 +42,17 @@ public class SitemapService {
         StaticSeoPage.navigationPages().forEach(page -> appendUrl(xml, page.path(),
                 "/stats".equals(page.path()) ? statsChanged : null));
         for (HeroDto hero : heroService.findAll()) {
-            appendUrl(xml, "/heroes/" + hero.slug(), statsChanged);
+            String heroPath = "/heroes/" + hero.slug();
+            appendUrl(xml, heroPath, statsChanged);
+            if (!contentBuilder.heroPerks(hero).isEmpty()) {
+                appendUrl(xml, heroPath + "/perks", statsChanged);
+            }
+            if (!contentBuilder.heroCounters(hero).isEmpty()) {
+                appendUrl(xml, heroPath + "/counters", statsChanged);
+            }
+            if (!contentBuilder.heroMaps(hero).isEmpty()) {
+                appendUrl(xml, heroPath + "/maps", statsChanged);
+            }
         }
         for (MapDto map : mapService.findAll()) {
             appendUrl(xml, "/maps/" + map.slug(), statsChanged);

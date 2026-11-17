@@ -68,6 +68,42 @@ class SeoPageResolverTest {
     }
 
     @Test
+    void buildsAHeroPerksPageOnlyForHeroesWithPerks() {
+        when(heroService.findAll()).thenReturn(List.of(hero("ana", "Ana", null), hero("zarya", "Zarya", null)));
+        when(contentBuilder.heroPerks(hero("ana", "Ana", null))).thenReturn(List.of(
+                new SeoSection("Best Ana perks", List.of(SeoItem.plain("Sharp Eye")))));
+        when(contentBuilder.heroPerks(hero("zarya", "Zarya", null))).thenReturn(List.of());
+
+        assertThat(resolver.resolve("/heroes/ana/perks")).hasValueSatisfying(page -> {
+            assertThat(page.path()).isEqualTo("/heroes/ana/perks");
+            assertThat(page.title()).isEqualTo("Ana perks: best Minor and Major perks");
+            assertThat(page.heading()).isEqualTo("Ana perks");
+            assertThat(page.structuredData().getFirst()).contains("BreadcrumbList", "/heroes/ana/perks");
+        });
+        assertThat(resolver.resolve("/heroes/zarya/perks")).isEmpty();
+        assertThat(resolver.resolve("/heroes/nobody/perks")).isEmpty();
+        assertThat(resolver.resolve("/maps/busan/perks")).isEmpty();
+    }
+
+    @Test
+    void buildsCountersAndMapsPagesWithTheirOwnTitles() {
+        HeroDto ana = hero("ana", "Ana", null);
+        when(heroService.findAll()).thenReturn(List.of(ana));
+        List<SeoSection> content = List.of(new SeoSection("Section", List.of(SeoItem.plain("Item"))));
+        when(contentBuilder.heroCounters(ana)).thenReturn(content);
+        when(contentBuilder.heroMaps(ana)).thenReturn(content);
+
+        assertThat(resolver.resolve("/heroes/ana/counters")).hasValueSatisfying(page -> {
+            assertThat(page.title()).isEqualTo("Ana counters and synergies");
+            assertThat(page.path()).isEqualTo("/heroes/ana/counters");
+        });
+        assertThat(resolver.resolve("/heroes/ana/maps")).hasValueSatisfying(page -> {
+            assertThat(page.title()).isEqualTo("Best and worst maps for Ana");
+            assertThat(page.heading()).isEqualTo("Ana maps");
+        });
+    }
+
+    @Test
     void buildsMapPage() {
         when(mapService.getBySlug("busan")).thenReturn(new MapDto("busan", "Busan", null, null));
 

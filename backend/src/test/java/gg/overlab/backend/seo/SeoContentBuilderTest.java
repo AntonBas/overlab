@@ -21,6 +21,7 @@ import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.relation.HeroRelationService;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
+import gg.overlab.backend.stats.StatsService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +32,10 @@ class SeoContentBuilderTest {
     private final AbilityService abilityService = mock(AbilityService.class);
     private final PerkService perkService = mock(PerkService.class);
     private final HeroRelationService relationService = mock(HeroRelationService.class);
+    private final StatsService statsService = mock(StatsService.class);
     private final SeoContentBuilder builder =
-            new SeoContentBuilder(heroService, mapService, abilityService, perkService, relationService);
+            new SeoContentBuilder(heroService, mapService, abilityService, perkService, relationService,
+                    statsService);
 
     private HeroDto hero() {
         return new HeroDto("ana", "Ana", HeroRole.SUPPORT, "tactician", "d",

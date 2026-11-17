@@ -10,6 +10,16 @@ import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.relation.HeroRelationService;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
+import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.stats.GameQueue;
+import gg.overlab.backend.stats.Platform;
+import gg.overlab.backend.stats.RankTier;
+import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.stats.StatsService;
+import gg.overlab.backend.stats.dto.HeroMapStatDto;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +40,12 @@ public class SeoContentBuilder {
     private final AbilityService abilityService;
     private final PerkService perkService;
     private final HeroRelationService relationService;
+    private final StatsService statsService;
 
     public SeoContentBuilder(HeroService heroService, MapService mapService, AbilityService abilityService,
-                             PerkService perkService, HeroRelationService relationService) {
+                             PerkService perkService, HeroRelationService relationService,
+                             StatsService statsService) {
+        this.statsService = statsService;
         this.heroService = heroService;
         this.mapService = mapService;
         this.abilityService = abilityService;
@@ -68,11 +81,74 @@ public class SeoContentBuilder {
                 .map(ability -> SeoItem.plain(ability.name() + ": " + readable(ability.description()))).toList());
         add(sections, "Best " + hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
                 .map(this::perkItem).toList());
+        sections.addAll(relationSections(hero));
+        return sections;
+    }
+
+    List<SeoSection> heroCounters(HeroDto hero) {
+        List<SeoSection> sections = relationSections(hero);
+        if (!sections.isEmpty()) {
+            add(sections, "More about " + hero.name(),
+                    List.of(SeoItem.link(hero.name() + " stats, perks and best maps", "/heroes/" + hero.slug())));
+        }
+        return sections;
+    }
+
+    List<SeoSection> heroMaps(HeroDto hero) {
+        List<HeroMapStatDto> maps;
+        try {
+            maps = statsService.getHeroByMaps(hero.slug(), GameQueue.COMPETITIVE, RankTier.ALL, Platform.PC,
+                    Region.EUROPE).maps().stream().filter(map -> map.winRateDelta() != null).toList();
+        } catch (EntityNotFoundException exception) {
+            return List.of();
+        }
+        if (maps.isEmpty()) {
+            return List.of();
+        }
+        List<HeroMapStatDto> ranked = maps.stream()
+                .sorted(Comparator.comparing(HeroMapStatDto::winRateDelta).reversed()).toList();
+        int shown = Math.min(5, ranked.size());
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "Best maps for " + hero.name(), ranked.subList(0, shown).stream().map(this::mapItem).toList());
+        add(sections, "Weakest maps for " + hero.name(),
+                ranked.reversed().subList(0, shown).stream().map(this::mapItem).toList());
+        add(sections, "More about " + hero.name(),
+                List.of(SeoItem.link(hero.name() + " stats, perks and counters", "/heroes/" + hero.slug())));
+        return sections;
+    }
+
+    private SeoItem mapItem(HeroMapStatDto map) {
+        return SeoItem.link(map.mapName() + modeSuffix(map.mode()) + ": " + percent(map.winRate()) + " win rate ("
+                + signed(map.winRateDelta()) + " compared with the hero's average)", "/maps/" + map.mapSlug());
+    }
+
+    private String percent(BigDecimal value) {
+        return value == null ? "n/a" : value.setScale(1, RoundingMode.HALF_UP) + "%";
+    }
+
+    private String signed(BigDecimal value) {
+        BigDecimal rounded = value.setScale(1, RoundingMode.HALF_UP);
+        return (rounded.signum() > 0 ? "+" : "") + rounded;
+    }
+
+    private List<SeoSection> relationSections(HeroDto hero) {
+        List<SeoSection> sections = new ArrayList<>();
         HeroCountersDto counters = relationService.getCounters(hero.slug());
         add(sections, "Heroes " + hero.name() + " is strong against", relatedItems(counters.counters()));
         add(sections, "Heroes that counter " + hero.name(), relatedItems(counters.counteredBy()));
         add(sections, "Heroes that work well with " + hero.name(),
                 relatedItems(relationService.getSynergies(hero.slug())));
+        return sections;
+    }
+
+    List<SeoSection> heroPerks(HeroDto hero) {
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "Best " + hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
+                .map(this::perkItem).toList());
+        if (!sections.isEmpty()) {
+            add(sections, "More about " + hero.name(),
+                    List.of(SeoItem.link(hero.name() + " stats, counters and best maps", "/heroes/" + hero.slug())));
+        }
         return sections;
     }
 

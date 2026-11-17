@@ -18,7 +18,8 @@ public class SeoPageResolver {
     static final String SITE_NAME = StaticSeoPage.SITE_NAME;
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
-    private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
+    private static final Pattern PAGE_PATH =
+            Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)(?:/(perks|counters|maps))?$");
 
     private final HeroService heroService;
     private final MapService mapService;
@@ -51,6 +52,9 @@ public class SeoPageResolver {
         }
         String section = matcher.group(1);
         String key = matcher.group(2);
+        if (matcher.group(3) != null) {
+            return "heroes".equals(section) ? heroSubPage(key, matcher.group(3)) : Optional.empty();
+        }
         return switch (section) {
             case "heroes" -> heroPage(key);
             case "maps" -> mapPage(key);
@@ -91,6 +95,50 @@ public class SeoPageResolver {
             return new SeoPage(path, hero.name() + " stats, perks, counters and best maps", plain(detail),
                     "website", hero.name(),
                     List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")), contentBuilder.heroDetails(hero));
+        });
+    }
+
+    private Optional<SeoPage> heroSubPage(String slug, String kind) {
+        return heroService.findAll().stream().filter(hero -> hero.slug().equals(slug)).findFirst().flatMap(hero -> {
+            List<SeoSection> sections = switch (kind) {
+                case "perks" -> contentBuilder.heroPerks(hero);
+                case "counters" -> contentBuilder.heroCounters(hero);
+                default -> contentBuilder.heroMaps(hero);
+            };
+            if (sections.isEmpty()) {
+                return Optional.<SeoPage>empty();
+            }
+            String path = "/heroes/" + hero.slug() + "/" + kind;
+            String name = hero.name();
+            String title = switch (kind) {
+                case "perks" -> name + " perks: best Minor and Major perks";
+                case "counters" -> name + " counters and synergies";
+                default -> "Best and worst maps for " + name;
+            };
+            String description = switch (kind) {
+                case "perks" -> "Best Overwatch " + name + " perks: every Minor and Major perk with a description,"
+                        + " a rating and why it is worth taking.";
+                case "counters" -> "Overwatch " + name + " counters: the heroes " + name + " is strong against,"
+                        + " the heroes that counter " + name + " and who works well with " + name + ".";
+                default -> "Best and worst Overwatch maps for " + name + ": win and pick rate on every map"
+                        + " compared with " + name + "'s average.";
+            };
+            String heading = switch (kind) {
+                case "perks" -> name + " perks";
+                case "counters" -> name + " counters and synergies";
+                default -> name + " maps";
+            };
+            String crumb = switch (kind) {
+                case "perks" -> "Perks";
+                case "counters" -> "Counters";
+                default -> "Maps";
+            };
+            return Optional.of(new SeoPage(path, title, plain(description), "website", heading,
+                    List.of(breadcrumbList(List.of(new String[] {SITE_NAME, "/"},
+                            new String[] {"Heroes", "/heroes"},
+                            new String[] {name, "/heroes/" + hero.slug()},
+                            new String[] {crumb, path}))),
+                    sections));
         });
     }
 
