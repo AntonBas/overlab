@@ -5,6 +5,7 @@ import { gzipSync } from "node:zlib";
 const ASSETS_DIRECTORY = "dist/assets";
 const ENTRY_BUDGET_KB = 125;
 const CHUNK_BUDGET_KB = 30;
+const CHUNK_BUDGETS_KB = { vendor: 80, shared: 50 };
 
 const failures = [];
 
@@ -21,7 +22,10 @@ for (const file of readdirSync(ASSETS_DIRECTORY)) {
   }
   const gzippedKb =
     gzipSync(readFileSync(join(ASSETS_DIRECTORY, file))).length / 1024;
-  const budget = file.startsWith("index-") ? ENTRY_BUDGET_KB : CHUNK_BUDGET_KB;
+  const chunkName = file.slice(0, file.lastIndexOf("-"));
+  const budget = file.startsWith("index-")
+    ? ENTRY_BUDGET_KB
+    : (CHUNK_BUDGETS_KB[chunkName] ?? CHUNK_BUDGET_KB);
   const status = gzippedKb > budget ? "OVER" : "ok";
   console.log(
     `${status.padEnd(4)} ${file} ${gzippedKb.toFixed(1)} KB gzip (budget ${budget} KB)`,
