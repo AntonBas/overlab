@@ -5,6 +5,7 @@ export const LEAVE_WARNING = "You have unsaved changes. Leave this page?";
 export interface UnsavedChangesValue {
   setDirty: (dirty: boolean) => void;
   isDirty: () => boolean;
+  dirty?: boolean;
 }
 
 export const UnsavedChangesContext = createContext<UnsavedChangesValue | null>(

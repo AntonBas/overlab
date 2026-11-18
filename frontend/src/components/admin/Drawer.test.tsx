@@ -8,7 +8,7 @@ function renderDrawer(dirty = false) {
   const onClose = vi.fn();
   render(
     <UnsavedChangesContext.Provider
-      value={{ setDirty: vi.fn(), isDirty: () => dirty }}
+      value={{ setDirty: vi.fn(), isDirty: () => dirty, dirty }}
     >
       <Drawer label="Edit hero" onClose={onClose}>
         <form>
@@ -31,6 +31,18 @@ describe("Drawer", () => {
 
     expect(screen.getByRole("dialog", { name: "Edit hero" })).toBeVisible();
     expect(screen.getByLabelText("Name")).toHaveFocus();
+  });
+
+  it("says when there are unsaved changes", () => {
+    renderDrawer(true);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Unsaved changes");
+  });
+
+  it("shows no unsaved marker for a clean form", () => {
+    renderDrawer(false);
+
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
   });
 
   it("closes with the close button, Escape and a click outside", async () => {

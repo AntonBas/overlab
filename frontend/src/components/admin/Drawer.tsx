@@ -87,6 +87,12 @@ export function Drawer({ label, onClose, children }: DrawerProps) {
         onMouseDown={(event) => event.stopPropagation()}
         onKeyDown={keepFocusInside}
       >
+        {unsaved?.dirty && (
+          <span className="drawer__unsaved" role="status">
+            <i aria-hidden="true" />
+            Unsaved changes
+          </span>
+        )}
         <button
           type="button"
           className="icon-button drawer__close"

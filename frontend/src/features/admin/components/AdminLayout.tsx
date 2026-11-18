@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useCallback, useMemo, useRef, type MouseEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { LEAVE_WARNING } from "../../../components/admin/unsavedChanges";
@@ -9,11 +9,16 @@ import { UnsavedChangesContext } from "../../../components/admin/unsavedChanges"
 export function AdminLayout() {
   const location = useLocation();
   const dirty = useRef(false);
+  const [dirtyShown, setDirtyShown] = useState(false);
   const setDirty = useCallback((value: boolean) => {
     dirty.current = value;
+    setDirtyShown(value);
   }, []);
   const isDirty = useCallback(() => dirty.current, []);
-  const context = useMemo(() => ({ setDirty, isDirty }), [setDirty, isDirty]);
+  const context = useMemo(
+    () => ({ setDirty, isDirty, dirty: dirtyShown }),
+    [setDirty, isDirty, dirtyShown],
+  );
 
   useNoIndex();
 

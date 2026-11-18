@@ -128,3 +128,31 @@ body.drawer-open {
   flex: none;
   white-space: nowrap;
 }
+.drawer__unsaved {
+  position: absolute;
+  top: 18px;
+  right: 56px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--accent-text);
+  font-size: var(--font-size-md);
+}
+
+.drawer__unsaved i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.drawer form > .form__actions {
+  position: sticky;
+  bottom: calc(-1 * var(--space-24));
+  z-index: 3;
+  margin: var(--space-16) calc(-1 * var(--space-24)) calc(-1 * var(--space-24));
+  padding: var(--space-12) var(--space-24);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
