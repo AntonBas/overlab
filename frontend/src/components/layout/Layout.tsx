@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 import { AnalyticsLoader, ErrorReportingLoader } from "../../features/legal";
 import { CookieBanner } from "../../features/legal";
 import { restoreScroll } from "../../utils/restoreScroll";
+import { BackToTop } from "../ui/BackToTop";
 import { Spinner } from "../ui/Spinner";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { Footer } from "./Footer";
@@ -58,6 +59,7 @@ export function Layout() {
         </ErrorBoundary>
       </main>
       <Footer />
+      <BackToTop />
       <CookieBanner />
       <AnalyticsLoader />
       <ErrorReportingLoader />
