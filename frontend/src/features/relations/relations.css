@@ -146,14 +146,8 @@
 
 @media (max-width: 480px) {
   .relation-avatar__name {
-    font-size: 0.66rem;
+    font-size: 0.7rem;
     letter-spacing: -0.02em;
-    line-height: 1.15;
-    hyphens: auto;
-    overflow-wrap: break-word;
-    text-align: center;
-    text-overflow: clip;
-    white-space: normal;
   }
 }
 

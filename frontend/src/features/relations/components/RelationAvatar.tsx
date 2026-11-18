@@ -54,6 +54,7 @@ export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
               `relation-avatar--${hero.role.toLowerCase()}`,
             )}
             to={`/heroes/${hero.slug}`}
+            title={hero.name}
             aria-describedby={describedBy}
           >
             <span className="relation-avatar__image">

@@ -116,6 +116,7 @@ export function RelationsOverview({
                       `relation-avatar--${hero.role.toLowerCase()}`,
                     )}
                     to={`/heroes/${hero.slug}`}
+                    title={hero.name}
                   >
                     <span className="relation-avatar__image">
                       <HeroPortrait
