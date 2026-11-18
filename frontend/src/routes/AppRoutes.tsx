@@ -38,6 +38,18 @@ const HeroMapsPage = lazyNamed(
   () => import("../features/heroes/pages/HeroMapsPage"),
   "HeroMapsPage",
 );
+const GuidesPage = lazyNamed(
+  () => import("../features/guides/pages/GuidesPage"),
+  "GuidesPage",
+);
+const HeroGuidesPage = lazyNamed(
+  () => import("../features/guides/pages/HeroGuidesPage"),
+  "HeroGuidesPage",
+);
+const MapGuidesPage = lazyNamed(
+  () => import("../features/maps/pages/MapGuidesPage"),
+  "MapGuidesPage",
+);
 const HeroPerksPage = lazyNamed(
   () => import("../features/perks/pages/HeroPerksPage"),
   "HeroPerksPage",
@@ -178,11 +190,14 @@ export function AppRoutes() {
         <Route path="heroes/:slug/maps" element={<HeroMapsPage />} />
         <Route path="perks" element={<PerksPage />} />
         <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />
+        <Route path="heroes/:slug/guides" element={<HeroGuidesPage />} />
+        <Route path="maps/:slug/guides" element={<MapGuidesPage />} />
         <Route path="maps/:map/:hero" element={<HeroOnMapRedirect />} />
         <Route path="changes" element={<ChangesPage />} />
         <Route path="patches/*" element={<Navigate to="/changes" replace />} />
         <Route path="maps" element={<MapsPage />} />
         <Route path="maps/:slug" element={<MapPage />} />
+        <Route path="guides" element={<GuidesPage />} />
         <Route path="guides/:path" element={<GuidePage />} />
         <Route path="feedback" element={<FeedbackPage />} />
         <Route path="business" element={<BusinessPage />} />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Carousel } from "../../../components/ui/Carousel";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { IconSelect } from "../../../components/ui/IconSelect";
+import { SectionLink } from "../../../components/ui/SectionLink";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import type { Guide } from "../../../types/guide";
 import {
@@ -23,6 +24,9 @@ interface SpotsSectionProps {
   guides: Guide[];
   groupBy: GroupBy;
   emptyMessage: string;
+  expanded?: boolean;
+  moreHref?: string;
+  moreLabel?: string;
 }
 
 function groupKey(guide: Guide, groupBy: GroupBy): string {
@@ -38,6 +42,9 @@ export function SpotsSection({
   guides,
   groupBy,
   emptyMessage,
+  expanded = false,
+  moreHref,
+  moreLabel = "All guides",
 }: SpotsSectionProps) {
   const [groupFilter, setGroupFilter] = useState<string>(ALL);
   const [kindFilter, setKindFilter] = useState<string>(ALL);
@@ -73,15 +80,24 @@ export function SpotsSection({
   const showKindSelect = kindOptions.length > 2;
 
   return (
-    <section className="section" aria-labelledby="spots-heading">
-      <div className="section__heading">
-        <div className="section__title">
-          <h2 id="spots-heading">{title}</h2>
-          {description && (
-            <p className="muted section__description">{description}</p>
+    <section
+      className="section"
+      aria-labelledby={expanded ? undefined : "spots-heading"}
+      aria-label={expanded ? title : undefined}
+    >
+      {!expanded && (
+        <div className="section__heading">
+          <div className="section__title">
+            <h2 id="spots-heading">{title}</h2>
+            {description && (
+              <p className="muted section__description">{description}</p>
+            )}
+          </div>
+          {moreHref && guides.length > SPOTS_PER_ROW * SPOT_ROWS && (
+            <SectionLink to={moreHref}>{moreLabel}</SectionLink>
           )}
         </div>
-      </div>
+      )}
       {(showGroupSelect || showKindSelect) && (
         <div className="spot-filters">
           {showGroupSelect && (
@@ -119,25 +135,41 @@ export function SpotsSection({
               {visible.length} of {guides.length} spots
             </p>
           )}
-          <Carousel
-            items={visible.map((guide) => ({
-              key: guide.id,
-              content: (
-                <SpotCard
-                  guide={guide}
-                  showHero={groupBy === "hero"}
-                  showMap={groupBy !== "hero"}
-                  heroPortraits={heroPortraits}
-                  mapVisuals={mapVisuals}
-                />
-              ),
-            }))}
-            itemsPerView={SPOTS_PER_ROW}
-            rows={SPOT_ROWS}
-            previousLabel="Previous spots"
-            nextLabel="Next spots"
-            resetKey={`${groupFilter}|${kindFilter}`}
-          />
+          {expanded ? (
+            <ul className="spot-grid">
+              {visible.map((guide) => (
+                <li key={guide.id}>
+                  <SpotCard
+                    guide={guide}
+                    showHero={groupBy === "hero"}
+                    showMap={groupBy !== "hero"}
+                    heroPortraits={heroPortraits}
+                    mapVisuals={mapVisuals}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Carousel
+              items={visible.map((guide) => ({
+                key: guide.id,
+                content: (
+                  <SpotCard
+                    guide={guide}
+                    showHero={groupBy === "hero"}
+                    showMap={groupBy !== "hero"}
+                    heroPortraits={heroPortraits}
+                    mapVisuals={mapVisuals}
+                  />
+                ),
+              }))}
+              itemsPerView={SPOTS_PER_ROW}
+              rows={SPOT_ROWS}
+              previousLabel="Previous spots"
+              nextLabel="Next spots"
+              resetKey={`${groupFilter}|${kindFilter}`}
+            />
+          )}
         </>
       )}
     </section>

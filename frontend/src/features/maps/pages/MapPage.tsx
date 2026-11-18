@@ -253,6 +253,7 @@ export function MapPage() {
           description="Short videos with positions, setups, ultimates and tips."
           guides={guides.data}
           groupBy="hero"
+          moreHref={`/maps/${slug}/guides`}
           emptyMessage="No spots or setups for this map yet."
         />
       )}

@@ -1,3 +1,4 @@
+import { SectionLink } from "../../../components/ui/SectionLink";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Carousel } from "../../../components/ui/Carousel";
@@ -13,8 +14,8 @@ interface HeroSubPageLayoutProps {
   hero: Hero;
   allHeroes: Hero[];
   section: string;
-  allHref: string;
-  allLabel: string;
+  allHref?: string;
+  allLabel?: string;
   title: string;
   subtitle: ReactNode;
   actions?: ReactNode;
@@ -42,7 +43,11 @@ export function HeroSubPageLayout({
         <span aria-hidden="true">&rsaquo;</span>
         <Link to={`/heroes/${hero.slug}`}>{hero.name}</Link>
         <span aria-hidden="true">&rsaquo;</span>
-        <span aria-current="page">{section}</span>
+        {allHref ? (
+          <Link to={allHref}>{section}</Link>
+        ) : (
+          <span aria-current="page">{section}</span>
+        )}
       </nav>
       <PageHeader
         title={title}
@@ -69,7 +74,9 @@ export function HeroSubPageLayout({
         <section className="section" aria-labelledby="more-heroes-heading">
           <div className="section__heading">
             <h2 id="more-heroes-heading">More heroes</h2>
-            <Link to={allHref}>{allLabel}</Link>
+            {allHref && allLabel && (
+              <SectionLink to={allHref}>{allLabel}</SectionLink>
+            )}
           </div>
           <Carousel
             items={sameRole.map((other) => ({

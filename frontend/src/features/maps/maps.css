@@ -243,3 +243,11 @@
 .map-statistics {
   scroll-margin-top: calc(var(--header-height, 0px) + 16px);
 }
+
+.map-card__caption {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal, 400);
+  opacity: 0.85;
+}

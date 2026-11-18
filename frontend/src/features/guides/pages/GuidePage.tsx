@@ -1,9 +1,8 @@
+import { SectionLink } from "../../../components/ui/SectionLink";
 import clsx from "clsx";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { Spinner } from "../../../components/ui/Spinner";
-import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
@@ -13,7 +12,6 @@ import {
   breadcrumbList,
   useStructuredData,
 } from "../../../hooks/useStructuredData";
-import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 import { GuideEmbed } from "../components/GuideEmbed";
 import { fetchGuide, fetchGuides } from "../api/guidesApi";
 import { SpotCard } from "../components/SpotCard";
@@ -85,9 +83,6 @@ export function GuidePage() {
   if (data.path !== path) {
     return <Navigate replace to={`/guides/${data.path}`} />;
   }
-  const mapImage = data.mapSlug
-    ? (mapVisuals[data.mapSlug]?.imageUrl ?? MAP_PLACEHOLDER_URL)
-    : null;
   const KindIcon = GUIDE_KIND_ICONS[data.kind];
   const moreSpots = (heroGuides.data ?? [])
     .filter((other) => other.id !== data.id)
@@ -97,21 +92,11 @@ export function GuidePage() {
       <nav className="guide__crumbs" aria-label="Breadcrumb">
         <Link to="/heroes">Heroes</Link>
         <span aria-hidden="true">&rsaquo;</span>
-        <Link className="guide__crumb" to={`/heroes/${data.heroSlug}`}>
-          <HeroPortrait
-            name={data.heroName}
-            url={heroPortraits[data.heroSlug] ?? null}
-            size={20}
-          />
-          {data.heroName}
-        </Link>
+        <Link to={`/heroes/${data.heroSlug}`}>{data.heroName}</Link>
         {data.mapSlug && (
           <>
             <span aria-hidden="true">&rsaquo;</span>
-            <Link className="guide__crumb" to={`/maps/${data.mapSlug}`}>
-              <Thumbnail url={mapImage} width={24} height={24} />
-              {data.mapName}
-            </Link>
+            <Link to={`/maps/${data.mapSlug}`}>{data.mapName}</Link>
           </>
         )}
       </nav>
@@ -145,7 +130,9 @@ export function GuidePage() {
         <section className="section" aria-labelledby="guide-more-heading">
           <div className="section__heading">
             <h2 id="guide-more-heading">More spots for {data.heroName}</h2>
-            <Link to={`/heroes/${data.heroSlug}#spots`}>All spots</Link>
+            <SectionLink to={`/heroes/${data.heroSlug}/guides`}>
+              All spots
+            </SectionLink>
           </div>
           <ul className="spot-grid">
             {moreSpots.map((other) => (

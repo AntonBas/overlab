@@ -245,17 +245,6 @@
   text-decoration: none;
 }
 
-.guide__crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.guide__crumb .thumbnail {
-  border-radius: 4px;
-  object-fit: cover;
-}
-
 .guide__crumbs a:hover {
   color: var(--accent-text);
   text-decoration: underline;
@@ -287,4 +276,8 @@
 .guide__description {
   max-width: 65ch;
   margin: var(--space-16) 0 0;
+}
+
+.guide-hub__group {
+  margin-top: var(--space-16);
 }

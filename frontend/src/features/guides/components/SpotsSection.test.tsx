@@ -145,4 +145,57 @@ describe("SpotsSection", () => {
       screen.queryByRole("button", { name: /Show all/ }),
     ).not.toBeInTheDocument();
   });
+
+  it("lists every guide in a grid without a heading when expanded", () => {
+    render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Illari guides"
+          guides={guides}
+          groupBy="hero"
+          expanded
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("links to the full list only when there are more guides than shown", () => {
+    const many = Array.from({ length: 7 }, (_, index) =>
+      guide({ id: index + 10, title: `Spot ${index}` }),
+    );
+    const { rerender } = render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots"
+          guides={many}
+          groupBy="map"
+          moreHref="/heroes/illari/guides"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("link", { name: "All guides" })).toHaveAttribute(
+      "href",
+      "/heroes/illari/guides",
+    );
+
+    rerender(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots"
+          guides={many.slice(0, 3)}
+          groupBy="map"
+          moreHref="/heroes/illari/guides"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("link", { name: "All guides" }),
+    ).not.toBeInTheDocument();
+  });
 });

@@ -42,6 +42,13 @@
     "navigation": true
   },
   {
+    "path": "/guides",
+    "title": "Overwatch video guides: spots, setups and tips",
+    "description": "Short Overwatch video guides with positions, setups, ultimates and tips, for every hero and map.",
+    "heading": "Guides",
+    "navigation": true
+  },
+  {
     "path": "/changes",
     "title": "Overwatch hero win rate changes by patch",
     "description": "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",

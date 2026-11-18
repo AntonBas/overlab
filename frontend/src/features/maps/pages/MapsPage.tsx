@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useUrlFlag, useUrlParam } from "../../../hooks/useUrlParam";
@@ -17,31 +17,10 @@ import { matchesName } from "../../../utils/search";
 import { FavoritesFilterButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { fetchMaps } from "../api/mapsApi";
+import { groupByMode } from "../utils/groupByMode";
 import { MapCard } from "../components/MapCard";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
 import { staticSeoPage } from "../../../utils/staticSeoPages";
-
-const OTHER = "Other";
-
-interface ModeGroup {
-  mode: MapMode | null;
-  maps: GameMap[];
-}
-
-function groupByMode(maps: GameMap[]): [string, ModeGroup][] {
-  const groups = new Map<string, ModeGroup>();
-  maps.forEach((map) => {
-    const label = map.mode ? MAP_MODE_LABELS[map.mode] : OTHER;
-    const group = groups.get(label) ?? { mode: map.mode, maps: [] };
-    groups.set(label, { ...group, maps: [...group.maps, map] });
-  });
-  return [...groups.entries()].sort(([first], [second]) => {
-    if (first === OTHER) {
-      return 1;
-    }
-    return second === OTHER ? -1 : first.localeCompare(second);
-  });
-}
 
 function MapGrid({ maps }: { maps: GameMap[] }) {
   return (
@@ -102,7 +81,7 @@ export function MapsPage() {
         title="Maps"
         subtitle="Pick a map to see which heroes over- or under-perform on it"
       />
-      {maps.loading && <Spinner page label="Loading maps" />}
+      {maps.loading && <ListSkeleton kind="map-cards" label="Loading maps" />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}

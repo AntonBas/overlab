@@ -9,11 +9,18 @@ import { MAP_PLACEHOLDER_URL } from "../../../utils/modes";
 interface MapCardProps {
   map: GameMap;
   withFavorite?: boolean;
+  to?: string;
+  caption?: string;
 }
 
-export function MapCard({ map, withFavorite = false }: MapCardProps) {
+export function MapCard({
+  map,
+  withFavorite = false,
+  to = `/maps/${map.slug}`,
+  caption,
+}: MapCardProps) {
   const card = (
-    <Link className="map-card" to={`/maps/${map.slug}`}>
+    <Link className="map-card" to={to}>
       <span className="map-card__image">
         <Thumbnail
           url={map.imageUrl ?? MAP_PLACEHOLDER_URL}
@@ -27,7 +34,10 @@ export function MapCard({ map, withFavorite = false }: MapCardProps) {
           {MAP_MODE_LABELS[map.mode]}
         </span>
       )}
-      <span className="map-card__name">{map.name}</span>
+      <span className="map-card__name">
+        {map.name}
+        {caption && <small className="map-card__caption">{caption}</small>}
+      </span>
     </Link>
   );
   if (!withFavorite) {
