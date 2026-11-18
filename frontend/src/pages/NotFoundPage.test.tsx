@@ -11,14 +11,19 @@ describe("NotFoundPage", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("explains the page is missing and links to the statistics", () => {
+  it("explains the page is missing and links onward", () => {
     renderWithRouter(<NotFoundPage />, "/nope");
 
     expect(
       screen.getByRole("heading", { name: "Page not found" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Go to the statistics" }),
-    ).toHaveAttribute("href", "/stats");
+    expect(screen.getByRole("link", { name: "Go to heroes" })).toHaveAttribute(
+      "href",
+      "/heroes",
+    );
+    expect(screen.getByRole("link", { name: "Statistics" })).toHaveAttribute(
+      "href",
+      "/stats",
+    );
   });
 });

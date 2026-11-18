@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import type { RequestFailure } from "../../services/api";
 import { ErrorMessage } from "./ErrorMessage";
@@ -40,11 +41,17 @@ describe("ErrorMessage", () => {
 
   it("does not offer a pointless retry for a missing item", () => {
     render(
-      <ErrorMessage failure={failure({ status: 404 })} onRetry={vi.fn()} />,
+      <MemoryRouter>
+        <ErrorMessage failure={failure({ status: 404 })} onRetry={vi.fn()} />
+      </MemoryRouter>,
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent("could not find");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go to heroes" })).toHaveAttribute(
+      "href",
+      "/heroes",
+    );
   });
 
   it("asks the visitor to wait when rate limited", () => {

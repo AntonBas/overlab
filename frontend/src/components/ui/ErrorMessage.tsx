@@ -1,5 +1,6 @@
 import type { RequestFailure } from "../../services/api";
 import { FlaskIcon } from "./FlaskIcon";
+import { NotFound } from "./NotFound";
 
 function describeFailure(failure: RequestFailure): string {
   if (failure.network) {
@@ -23,6 +24,9 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ failure, onRetry }: ErrorMessageProps) {
+  if (failure.status === 404) {
+    return <NotFound alert />;
+  }
   return (
     <div className="notice notice--error notice--centered" role="alert">
       <FlaskIcon variant="error" />
