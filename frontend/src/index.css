@@ -27,6 +27,16 @@
   --role-color: var(--support);
 }
 
+html {
+  scrollbar-color: color-mix(in srgb, var(--accent) 45%, var(--border))
+    var(--bg);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--text);
+}
+
 body {
   margin: 0;
   background:
