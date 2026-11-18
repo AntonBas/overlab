@@ -26,6 +26,13 @@ export function MapCard({
           url={map.imageUrl ?? MAP_PLACEHOLDER_URL}
           width={480}
           height={300}
+          fallback={
+            map.mode && (
+              <span className="map-card__fallback">
+                <ModeIcon mode={map.mode} />
+              </span>
+            )
+          }
         />
       </span>
       {map.mode && (

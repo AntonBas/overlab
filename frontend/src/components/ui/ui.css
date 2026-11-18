@@ -264,8 +264,32 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
+  color: var(--text);
   font-weight: var(--font-weight-bold);
+  background: color-mix(
+    in srgb,
+    var(--role-color, var(--muted)) 22%,
+    var(--surface)
+  );
+}
+
+.thumbnail:not([data-loaded]),
+.portrait:not(.portrait--fallback):not([data-loaded]) {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-2) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumbnail:not([data-loaded]),
+  .portrait:not(.portrait--fallback):not([data-loaded]) {
+    animation: none;
+  }
 }
 
 .page-header__title {

@@ -29,6 +29,7 @@
 }
 
 .map-card__image {
+  position: relative;
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
@@ -250,4 +251,18 @@
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-normal, 400);
   opacity: 0.85;
+}
+
+.map-card__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  opacity: 0.45;
+}
+
+.map-card__fallback .mode-icon {
+  width: 56px;
+  height: 56px;
 }

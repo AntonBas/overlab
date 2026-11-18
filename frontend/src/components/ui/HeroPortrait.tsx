@@ -8,6 +8,7 @@ interface HeroPortraitProps {
 
 export function HeroPortrait({ name, url, size = 28 }: HeroPortraitProps) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const failed = failedUrl === url;
   const dimensions = { width: size, height: size };
 
@@ -30,6 +31,8 @@ export function HeroPortrait({ name, url, size = 28 }: HeroPortraitProps) {
       {...dimensions}
       loading="lazy"
       decoding="async"
+      data-loaded={loadedUrl === url ? "" : undefined}
+      onLoad={() => setLoadedUrl(url)}
       onError={() => setFailedUrl(url)}
     />
   );
