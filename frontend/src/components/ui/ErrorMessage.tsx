@@ -1,4 +1,5 @@
 import type { RequestFailure } from "../../services/api";
+import { FlaskIcon } from "./FlaskIcon";
 
 function describeFailure(failure: RequestFailure): string {
   if (failure.network) {
@@ -23,7 +24,8 @@ interface ErrorMessageProps {
 
 export function ErrorMessage({ failure, onRetry }: ErrorMessageProps) {
   return (
-    <div className="notice notice--error" role="alert">
+    <div className="notice notice--error notice--centered" role="alert">
+      <FlaskIcon variant="error" />
       <p>{describeFailure(failure)}</p>
       {onRetry &&
         (failure.network ||

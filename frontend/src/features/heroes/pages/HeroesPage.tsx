@@ -4,7 +4,7 @@ import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -39,7 +39,9 @@ export function HeroesPage() {
         title="Heroes"
         subtitle="Perks, counters, synergies, map statistics and video guides"
       />
-      {heroes.loading && <Spinner page label="Loading heroes" />}
+      {heroes.loading && (
+        <ListSkeleton kind="hero-tiles" label="Loading heroes" />
+      )}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

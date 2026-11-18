@@ -21,6 +21,7 @@ interface IconSelectProps<T extends string> {
   value: T;
   options: readonly IconSelectOption<T>[];
   wide?: boolean;
+  hideLabel?: boolean;
   disabled?: boolean;
   searchable?: boolean;
   onChange: (value: T) => void;
@@ -48,6 +49,7 @@ export function IconSelect<T extends string>({
   value,
   options,
   wide = false,
+  hideLabel = false,
   disabled = false,
   searchable = false,
   onChange,
@@ -148,7 +150,10 @@ export function IconSelect<T extends string>({
       className={clsx("field icon-select", { "icon-select--wide": wide })}
       ref={container}
     >
-      <span className="field__label" id={labelId}>
+      <span
+        className={clsx("field__label", { "visually-hidden": hideLabel })}
+        id={labelId}
+      >
         {label}
       </span>
       <button
