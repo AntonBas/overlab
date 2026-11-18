@@ -9,7 +9,8 @@ import { NewBadge } from "../../../components/ui/NewBadge";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { useRegion } from "../../stats";
 import { RoleTags } from "../../../components/ui/RoleTags";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
+import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
@@ -90,7 +91,7 @@ export function HeroPage() {
   );
 
   if (hero.loading) {
-    return <Spinner page label="Loading hero" />;
+    return <ListSkeleton kind="detail" label="Loading hero" />;
   }
   if (hero.error || !hero.data) {
     return hero.error ? (
@@ -219,7 +220,7 @@ export function HeroPage() {
           region={region}
           current={focus}
         >
-          {stats.loading && <Spinner label="Loading statistics" />}
+          {stats.loading && <TableSkeleton label="Loading statistics" />}
           {stats.error &&
             (stats.error.status === 404 ? (
               <EmptyState kind="waiting">

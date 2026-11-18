@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
@@ -50,7 +50,7 @@ export function HeroCountersPage() {
   );
 
   if (hero.loading || counters.loading || synergies.loading) {
-    return <Spinner page label="Loading counters" />;
+    return <ListSkeleton kind="detail" label="Loading counters" />;
   }
   const failure = hero.error ?? counters.error ?? synergies.error;
   if (failure || !hero.data || !counters.data || !synergies.data) {

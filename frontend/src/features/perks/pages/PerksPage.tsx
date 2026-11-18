@@ -6,7 +6,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { RevealMore } from "../../../components/ui/RevealMore";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -57,7 +57,7 @@ export function PerksPage() {
   const { favoriteHeroes } = usePersonalData();
 
   if (heroes.loading || perks.loading) {
-    return <Spinner page label="Loading perks" />;
+    return <ListSkeleton kind="hero-tiles" label="Loading perks" />;
   }
   const failure = heroes.error ?? perks.error;
   if (failure || !heroes.data || !perks.data) {

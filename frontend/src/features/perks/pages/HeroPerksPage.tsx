@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
@@ -42,7 +42,7 @@ export function HeroPerksPage() {
   );
 
   if (hero.loading || perks.loading) {
-    return <Spinner page label="Loading perks" />;
+    return <ListSkeleton kind="detail" label="Loading perks" />;
   }
   const failure = hero.error ?? perks.error;
   if (failure || !hero.data || !perks.data) {

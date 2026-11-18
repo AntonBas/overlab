@@ -2,7 +2,8 @@ import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
+import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
@@ -52,7 +53,7 @@ export function HeroMapsPage() {
   );
 
   if (hero.loading) {
-    return <Spinner page label="Loading hero map statistics" />;
+    return <ListSkeleton kind="detail" label="Loading hero map statistics" />;
   }
   if (hero.error || !hero.data) {
     return hero.error ? (
@@ -74,7 +75,9 @@ export function HeroMapsPage() {
       subtitle="Win and pick rate on every map compared with the hero's average."
       actions={<QueueToggle value={queue} onChange={changeQueue} />}
     >
-      {stats.loading && !stats.data && <Spinner label="Loading statistics" />}
+      {stats.loading && !stats.data && (
+        <TableSkeleton label="Loading statistics" />
+      )}
       {stats.error &&
         (stats.error.status === 404 ? (
           <EmptyState kind="waiting">

@@ -2,7 +2,7 @@ import { SectionLink } from "../../../components/ui/SectionLink";
 import clsx from "clsx";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
@@ -72,7 +72,7 @@ export function GuidePage() {
   const mapVisuals = useMapVisuals();
 
   if (guide.loading) {
-    return <Spinner page label="Loading guide" />;
+    return <ListSkeleton kind="detail" label="Loading guide" />;
   }
   if (guide.error || !guide.data) {
     return guide.error ? (

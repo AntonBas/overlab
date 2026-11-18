@@ -4,7 +4,7 @@ import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
@@ -93,7 +93,7 @@ export function GuidesPage() {
   const mapVisuals = useMapVisuals();
 
   if (guides.loading) {
-    return <Spinner page label="Loading guides" />;
+    return <ListSkeleton kind="cards" label="Loading guides" />;
   }
   if (guides.error || !guides.data) {
     return guides.error ? (

@@ -1,11 +1,13 @@
 interface ListSkeletonProps {
-  kind: "hero-tiles" | "map-cards";
+  kind: "hero-tiles" | "map-cards" | "detail" | "cards";
   label: string;
 }
 
 const HERO_SECTIONS = 3;
 const HERO_TILES_PER_SECTION = 7;
 const MAP_CARDS = 6;
+const DETAIL_CARDS = 4;
+const CARD_ROWS = 6;
 
 function items(count: number) {
   return Array.from({ length: count }, (_, index) => index);
@@ -41,6 +43,30 @@ export function ListSkeleton({ kind, label }: ListSkeletonProps) {
               <div
                 key={card}
                 className="list-skeleton__block list-skeleton__map"
+              />
+            ))}
+          </div>
+        )}
+        {kind === "detail" && (
+          <div className="list-skeleton__detail">
+            <div className="list-skeleton__block list-skeleton__title" />
+            <div className="list-skeleton__block list-skeleton__subtitle" />
+            <div className="list-skeleton__cards">
+              {items(DETAIL_CARDS).map((card) => (
+                <div
+                  key={card}
+                  className="list-skeleton__block list-skeleton__card"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {kind === "cards" && (
+          <div className="list-skeleton__rows">
+            {items(CARD_ROWS).map((row) => (
+              <div
+                key={row}
+                className="list-skeleton__block list-skeleton__row"
               />
             ))}
           </div>

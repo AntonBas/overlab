@@ -9,7 +9,7 @@ import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { ShowMoreButton } from "../../../components/ui/ShowMoreButton";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
@@ -105,7 +105,7 @@ export function MapPage() {
   );
 
   if (map.loading) {
-    return <Spinner page label="Loading map" />;
+    return <ListSkeleton kind="detail" label="Loading map" />;
   }
   if (map.error || !map.data) {
     return map.error ? (

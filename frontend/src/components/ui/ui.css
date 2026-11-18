@@ -155,7 +155,7 @@
 .new-badge {
   flex: none;
   padding: 1px 7px;
-  font-size: 0.65rem;
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-bold);
   line-height: 1.4;
   color: var(--accent-contrast);
@@ -1072,6 +1072,37 @@
 
 .list-skeleton__map {
   aspect-ratio: 16 / 10;
+}
+
+.list-skeleton__title {
+  width: min(320px, 70%);
+  height: 36px;
+  margin-bottom: var(--space-12);
+}
+
+.list-skeleton__subtitle {
+  width: min(520px, 90%);
+  height: 18px;
+  margin-bottom: var(--space-24);
+}
+
+.list-skeleton__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--space-16);
+}
+
+.list-skeleton__card {
+  height: 140px;
+}
+
+.list-skeleton__rows {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.list-skeleton__row {
+  height: 84px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
 import { usePageDescription } from "../../../hooks/usePageDescription";
@@ -45,7 +45,7 @@ export function HeroGuidesPage() {
   );
 
   if (hero.loading || guides.loading) {
-    return <Spinner page label="Loading guides" />;
+    return <ListSkeleton kind="detail" label="Loading guides" />;
   }
   const failure = hero.error ?? guides.error;
   if (failure || !hero.data || !guides.data) {

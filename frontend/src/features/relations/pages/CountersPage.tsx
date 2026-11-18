@@ -5,7 +5,7 @@ import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { RevealMore } from "../../../components/ui/RevealMore";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -86,7 +86,7 @@ export function CountersPage() {
   const relationVotes = useRelationVotes();
 
   if (heroes.loading || relations.loading || categories.loading) {
-    return <Spinner page label="Loading counters" />;
+    return <ListSkeleton kind="hero-tiles" label="Loading counters" />;
   }
   const failure = heroes.error ?? relations.error ?? categories.error;
   if (failure || !heroes.data || !relations.data || !categories.data) {

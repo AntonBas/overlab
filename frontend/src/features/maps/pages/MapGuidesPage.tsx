@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
 import { useFetch } from "../../../hooks/useFetch";
 import { useNoIndex } from "../../../hooks/useNoIndex";
@@ -50,7 +50,7 @@ export function MapGuidesPage() {
   );
 
   if (map.loading || guides.loading) {
-    return <Spinner page label="Loading guides" />;
+    return <ListSkeleton kind="detail" label="Loading guides" />;
   }
   const failure = map.error ?? guides.error;
   if (failure || !map.data || !guides.data) {
