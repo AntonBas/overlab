@@ -438,3 +438,23 @@
   text-decoration: none;
   color: var(--good, inherit);
 }
+
+@media (min-width: 769px) {
+  .filters--compact {
+    gap: var(--space-12);
+  }
+
+  .filters--compact > * {
+    flex: 1 1 100px;
+    min-width: 0;
+  }
+
+  .filters--compact > :first-child {
+    flex-grow: 2;
+    flex-basis: 160px;
+  }
+
+  .filters--compact > .button {
+    flex: none;
+  }
+}

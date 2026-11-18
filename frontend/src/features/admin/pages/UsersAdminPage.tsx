@@ -143,7 +143,7 @@ export function UsersAdminPage() {
   return (
     <>
       <PageHeader title="Users" />
-      <div className="filters">
+      <div className="filters filters--compact">
         <FormField
           label="Search"
           name="query"
