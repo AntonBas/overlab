@@ -64,6 +64,7 @@ export function HeroPerksPage() {
       allHeroes={heroes.data ?? []}
       section="Perks"
       allHref="/perks"
+      sectionPath="perks"
       allLabel="All perks"
       title={`${current.name} perks`}
       subtitle="Recommended perks are the default pick. Optional ones depend on the situation."

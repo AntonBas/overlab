@@ -68,10 +68,10 @@ describe("HeroPerksPage", () => {
     ).toHaveAttribute("href", "/heroes/mauga");
   });
 
-  it("lists other heroes of the same role that open their full pages", async () => {
+  it("lists other heroes of the same role that open their perks", async () => {
     renderPage();
 
     const orisa = await screen.findByRole("link", { name: /Orisa/ });
-    expect(orisa).toHaveAttribute("href", "/heroes/orisa");
+    expect(orisa).toHaveAttribute("href", "/heroes/orisa/perks");
   });
 });

@@ -88,7 +88,7 @@ describe("HeroMapsPage", () => {
     ).toHaveAttribute("href", "/heroes/mauga");
     expect(screen.getByRole("link", { name: /Orisa/ })).toHaveAttribute(
       "href",
-      "/heroes/orisa",
+      "/heroes/orisa/maps",
     );
   });
 

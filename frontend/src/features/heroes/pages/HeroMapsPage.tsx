@@ -67,6 +67,8 @@ export function HeroMapsPage() {
       allHeroes={heroes.data ?? []}
       section="Maps"
       allHref="/maps"
+      sectionPath="maps"
+      linkSuffix={linkSuffix}
       allLabel="All maps"
       title={`${current.name} maps`}
       subtitle="Win and pick rate on every map compared with the hero's average."

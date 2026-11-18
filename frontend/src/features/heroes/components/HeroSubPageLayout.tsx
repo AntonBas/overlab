@@ -16,6 +16,8 @@ interface HeroSubPageLayoutProps {
   section: string;
   allHref?: string;
   allLabel?: string;
+  sectionPath?: string;
+  linkSuffix?: string;
   title: string;
   subtitle: ReactNode;
   actions?: ReactNode;
@@ -28,6 +30,8 @@ export function HeroSubPageLayout({
   section,
   allHref,
   allLabel,
+  sectionPath,
+  linkSuffix = "",
   title,
   subtitle,
   actions,
@@ -85,7 +89,7 @@ export function HeroSubPageLayout({
                 <Link
                   className="hero-tile"
                   data-role={other.role.toLowerCase()}
-                  to={`/heroes/${other.slug}`}
+                  to={`/heroes/${other.slug}${sectionPath ? `/${sectionPath}` : ""}${linkSuffix}`}
                 >
                   <HeroPortrait
                     name={other.name}

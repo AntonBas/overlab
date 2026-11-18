@@ -82,6 +82,7 @@ export function HeroCountersPage() {
       allHeroes={heroes.data ?? []}
       section="Counters"
       allHref="/counters"
+      sectionPath="counters"
       allLabel="All counters"
       title={`${current.name} counters and synergies`}
       subtitle="Curated recommendations, not statistics."
