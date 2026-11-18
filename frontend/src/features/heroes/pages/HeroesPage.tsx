@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -55,8 +56,12 @@ export function HeroesPage() {
             <ul className="hero-tiles">
               {data
                 .filter((hero) => hero.role === role)
-                .map((hero) => (
-                  <li key={hero.slug}>
+                .map((hero, index) => (
+                  <li
+                    key={hero.slug}
+                    className="reveal"
+                    style={{ "--i": index } as CSSProperties}
+                  >
                     <Link
                       className="hero-tile"
                       data-role={hero.role.toLowerCase()}

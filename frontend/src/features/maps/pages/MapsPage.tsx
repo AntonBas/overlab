@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import clsx from "clsx";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -26,8 +27,12 @@ import { staticSeoPage } from "../../../utils/staticSeoPages";
 function MapGrid({ maps }: { maps: GameMap[] }) {
   return (
     <ul className="map-grid">
-      {maps.map((map) => (
-        <li key={map.slug}>
+      {maps.map((map, index) => (
+        <li
+          key={map.slug}
+          className="reveal"
+          style={{ "--i": index } as CSSProperties}
+        >
           <MapCard map={map} withFavorite />
         </li>
       ))}

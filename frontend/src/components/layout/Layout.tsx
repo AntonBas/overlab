@@ -2,6 +2,8 @@ import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 import { AnalyticsLoader, ErrorReportingLoader } from "../../features/legal";
 import { CookieBanner } from "../../features/legal";
+import { useSegmentedIndicator } from "../../hooks/useSegmentedIndicator";
+import { prefersReducedMotion } from "../../utils/motion";
 import { restoreScroll } from "../../utils/restoreScroll";
 import { BackToTop } from "../ui/BackToTop";
 import { Spinner } from "../ui/Spinner";
@@ -15,6 +17,7 @@ export function Layout() {
   const scrollPositions = useRef(new Map<string, number>());
   const content = useRef<HTMLElement>(null);
   const previousPathname = useRef(location.pathname);
+  useSegmentedIndicator();
 
   useEffect(() => {
     const positions = scrollPositions.current;
@@ -33,6 +36,15 @@ export function Layout() {
       return;
     }
     previousPathname.current = location.pathname;
+    if (!prefersReducedMotion()) {
+      content.current?.animate?.(
+        [
+          { opacity: 0, transform: "translateY(8px)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 200, easing: "ease-out" },
+      );
+    }
     const restoredPosition =
       navigationType === "POP"
         ? scrollPositions.current.get(location.key)

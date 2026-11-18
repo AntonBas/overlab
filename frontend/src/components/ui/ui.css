@@ -1202,6 +1202,34 @@
     animation: none;
   }
 }
+
+.reveal {
+  animation: reveal 0.35s ease-out both;
+  animation-delay: calc(min(var(--i, 0), 11) * 40ms);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.rate-bar__fill {
+  transform-origin: left;
+  animation: bar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.rate-bar__fill--loss {
+  transform-origin: right;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 .segmented--slide {
   position: relative;
 }
@@ -1234,6 +1262,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .rate-bar__fill {
+    animation: none;
+  }
+
   .segmented--slide.segmented--animate::before {
     transition: none;
   }

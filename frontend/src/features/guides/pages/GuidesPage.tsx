@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -142,8 +143,12 @@ export function GuidesPage() {
           <section className="section" aria-labelledby="latest-guides-heading">
             <h2 id="latest-guides-heading">Latest guides</h2>
             <ul className="spot-grid">
-              {latest.map((guide) => (
-                <li key={guide.id}>
+              {latest.map((guide, index) => (
+                <li
+                  key={guide.id}
+                  className="reveal"
+                  style={{ "--i": index } as CSSProperties}
+                >
                   <SpotCard
                     guide={guide}
                     showHero

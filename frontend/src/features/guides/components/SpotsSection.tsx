@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { Carousel } from "../../../components/ui/Carousel";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -137,8 +138,12 @@ export function SpotsSection({
           )}
           {expanded ? (
             <ul className="spot-grid">
-              {visible.map((guide) => (
-                <li key={guide.id}>
+              {visible.map((guide, index) => (
+                <li
+                  key={guide.id}
+                  className="reveal"
+                  style={{ "--i": index } as CSSProperties}
+                >
                   <SpotCard
                     guide={guide}
                     showHero={groupBy === "hero"}
