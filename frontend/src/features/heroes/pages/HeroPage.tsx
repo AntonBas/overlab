@@ -201,7 +201,14 @@ export function HeroPage() {
         </div>
       )}
 
-      <HeroSectionNav sections={navigationSections} />
+      <HeroSectionNav
+        sections={navigationSections}
+        hero={{
+          slug,
+          name: hero.data.name,
+          portraitUrl: hero.data.portraitUrl,
+        }}
+      />
 
       <div id="hero-statistics">
         <HeroHistorySection
