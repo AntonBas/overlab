@@ -42,9 +42,6 @@ vi.mock("../../guides/api/guidesApi", () => ({
 vi.mock("../../stats/context/useRegion", () => ({
   useRegion: () => ({ region: "EUROPE" }),
 }));
-vi.mock("../../relations/hooks/useRelationFeedback", () => ({
-  useRelationFeedback: () => ({}),
-}));
 vi.mock("../../history/components/HeroHistorySection", () => ({
   HeroHistorySection: ({
     title,
@@ -62,8 +59,8 @@ vi.mock("../../history/components/HeroHistorySection", () => ({
 vi.mock("../../personal/components/FavoriteButton", () => ({
   FavoriteButton: () => <button type="button">Favorite</button>,
 }));
-vi.mock("../../relations/components/RelationTabs", () => ({
-  RelationTabs: () => <div>relation tabs</div>,
+vi.mock("../../relations/components/RelationsOverview", () => ({
+  RelationsOverview: () => <div>relation tabs</div>,
 }));
 vi.mock("../../abilities/components/AbilityList", () => ({
   AbilityList: () => <div>ability list</div>,

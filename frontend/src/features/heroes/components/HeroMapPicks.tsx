@@ -1,3 +1,4 @@
+import { SectionLink } from "../../../components/ui/SectionLink";
 import clsx from "clsx";
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
@@ -18,6 +19,7 @@ interface HeroMapPicksProps {
   maps: HeroMapStat[];
   linkSuffix: string;
   moreHref?: string;
+  overview?: boolean;
 }
 
 const MAP_DELTA_TITLE =
@@ -180,6 +182,7 @@ export function HeroMapPicks({
   maps,
   linkSuffix,
   moreHref,
+  overview = false,
 }: HeroMapPicksProps) {
   const [view, setView] = useState<PickView>("best");
   const allMaps = useFetch(fetchMaps, []);
@@ -201,7 +204,7 @@ export function HeroMapPicks({
   const ranked = mapsByGain(maps);
   const fullList = best ? ranked : [...ranked].reverse();
   const shortList = best ? picks.best : picks.worst;
-  const canExpand = fullList.length > shortList.length;
+  const canExpand = !overview && fullList.length > shortList.length;
 
   if (maps.length === 0) {
     return null;
@@ -221,23 +224,29 @@ export function HeroMapPicks({
             Win and pick rate per map. The coloured number is the gap to the
             hero&apos;s all-maps win rate. Rare picks are weighted down.
           </p>
-          {moreHref && <Link to={moreHref}>Maps page</Link>}
         </div>
-        <div className="segmented" role="group" aria-label="Maps to show">
-          {(Object.keys(VIEW_LABELS) as PickView[]).map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={clsx("segmented__item", {
-                "segmented__item--active": view === value,
-              })}
-              aria-pressed={view === value}
-              onClick={() => setView(value)}
-            >
-              {VIEW_LABELS[value]}
-            </button>
-          ))}
-        </div>
+        {moreHref && (
+          <SectionLink to={moreHref}>
+            {overview ? "All maps" : "Maps page"}
+          </SectionLink>
+        )}
+        {!overview && (
+          <div className="segmented" role="group" aria-label="Maps to show">
+            {(Object.keys(VIEW_LABELS) as PickView[]).map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={clsx("segmented__item", {
+                  "segmented__item--active": view === value,
+                })}
+                aria-pressed={view === value}
+                onClick={() => setView(value)}
+              >
+                {VIEW_LABELS[value]}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="highlights">
         <section

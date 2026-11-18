@@ -556,3 +556,96 @@
 .relation-avatar__image .portrait {
   border-radius: 50%;
 }
+
+.relations-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.relations-overview__row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.relations-overview__label {
+  font-weight: 600;
+}
+
+.relations-overview__heroes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.relations-overview__more {
+  display: inline-flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4) var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.relations-overview__more:hover {
+  background: var(--hover-wash);
+}
+
+@media (max-width: 640px) {
+  .relations-overview__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.relations-overview__row--strong {
+  --row-tone: var(--good);
+}
+
+.relations-overview__row--struggles {
+  --row-tone: var(--bad);
+}
+
+.relations-overview__row--synergies {
+  --row-tone: var(--accent);
+}
+
+.relation-avatar--category {
+  --role-color: var(--row-tone, var(--border));
+}
+
+.category-mosaic {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 32px;
+  height: 32px;
+  overflow: visible;
+  background: var(--surface-2);
+}
+
+.category-mosaic__count {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 var(--space-4);
+  border-radius: 8px;
+  background: var(--role-color);
+  color: var(--accent-contrast);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  text-align: center;
+  box-sizing: border-box;
+}

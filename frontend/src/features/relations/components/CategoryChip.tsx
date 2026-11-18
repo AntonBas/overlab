@@ -1,9 +1,7 @@
 import clsx from "clsx";
-import { Link } from "react-router-dom";
-import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { Tooltip } from "../../../components/ui/Tooltip";
 import type { CategoryMatchup, HeroCategory } from "../../../types/hero";
-import { AbilityText } from "../../abilities";
+import { CategoryTip } from "./CategoryTip";
 
 interface CategoryChipProps {
   category: HeroCategory;
@@ -19,38 +17,7 @@ export function CategoryChip({ category, matchup }: CategoryChipProps) {
         role="dialog"
         label={`${category.name}: heroes`}
         tipClassName="perk-tip perk-tip--interactive category-tip"
-        content={
-          <>
-            <span className="perk-tip__header">
-              <span className="perk-tip__title">
-                <strong>{category.name}</strong>
-              </span>
-            </span>
-            {(matchup.note ?? category.description) && (
-              <span className="perk-tip__text">
-                <AbilityText
-                  text={matchup.note ?? category.description ?? ""}
-                />
-              </span>
-            )}
-            <span className="category-tip__heroes">
-              {category.heroes.map((hero) => (
-                <Link
-                  key={hero.slug}
-                  className="category-tip__hero"
-                  to={`/heroes/${hero.slug}`}
-                >
-                  <HeroPortrait
-                    name={hero.name}
-                    url={hero.portraitUrl}
-                    size={32}
-                  />
-                  {hero.name}
-                </Link>
-              ))}
-            </span>
-          </>
-        }
+        content={<CategoryTip category={category} matchup={matchup} />}
       >
         {({ describedBy, open }) => (
           <button

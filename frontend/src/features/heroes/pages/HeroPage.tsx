@@ -1,6 +1,7 @@
+import { SectionLink } from "../../../components/ui/SectionLink";
 import clsx from "clsx";
 import { preload } from "react-dom";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -39,14 +40,12 @@ import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
 import { heroBackdropUrl, useHeroBackdrop } from "../../../utils/heroBackdrop";
 import { PerkList } from "../../perks";
-import { RelationTabs } from "../../relations";
+import { RelationsOverview } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
-import { useRelationFeedback } from "../../relations";
 import { heroPageDescription, heroPageTitle } from "../utils/heroSeo";
 
 export function HeroPage() {
   const { slug = "" } = useParams();
-  const relationFeedback = useRelationFeedback(slug);
   const { queue, linkSuffix, changeQueue } = useHeroQueue();
   const { region } = useRegion();
 
@@ -207,6 +206,7 @@ export function HeroPage() {
       <div id="hero-statistics">
         <HeroHistorySection
           title={`${hero.data.name} statistics`}
+          subject={hero.data.name}
           slug={slug}
           queue={queue}
           region={region}
@@ -231,21 +231,20 @@ export function HeroPage() {
             maps={stats.data.maps}
             linkSuffix={linkSuffix}
             moreHref={`/heroes/${slug}/maps`}
+            overview
           />
         </div>
       )}
 
       {hasRelations && counters.data && synergies.data && (
         <div id="hero-counters">
-          <RelationTabs
+          <RelationsOverview
             strongAgainst={counters.data.counters}
             counteredBy={counters.data.counteredBy}
             synergies={synergies.data}
             categories={categories.data?.categories}
             categoryMatchups={heroCategoryMatchups}
-            feedback={relationFeedback}
             heroName={hero.data.name}
-            description="Curated recommendations, not statistics."
             moreHref={`/heroes/${slug}/counters`}
           />
         </div>
@@ -271,7 +270,7 @@ export function HeroPage() {
         <section className="section" id="hero-perks">
           <div className="section__heading">
             <h2>Best {hero.data.name} perks</h2>
-            <Link to={`/heroes/${slug}/perks`}>Perks page</Link>
+            <SectionLink to={`/heroes/${slug}/perks`}>Perks page</SectionLink>
           </div>
           <p className="muted section__description">
             Recommended perks are the default pick. Optional ones depend on the
@@ -288,6 +287,7 @@ export function HeroPage() {
             description="Short videos with positions, setups, ultimates and tips."
             guides={spots}
             groupBy="map"
+            moreHref={`/heroes/${slug}/guides`}
             emptyMessage="No spots or setups yet."
           />
         </div>
