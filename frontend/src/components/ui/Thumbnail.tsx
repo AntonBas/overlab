@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 interface ThumbnailProps {
   url: string | null;
@@ -6,6 +6,8 @@ interface ThumbnailProps {
   height: number;
   className?: string;
   eager?: boolean;
+  priority?: boolean;
+  fallback?: ReactNode;
 }
 
 export function Thumbnail({
@@ -14,11 +16,15 @@ export function Thumbnail({
   height,
   className,
   eager = false,
+  priority = false,
+  fallback = null,
 }: ThumbnailProps) {
-  const [failed, setFailed] = useState(false);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const failed = failedUrl === url;
 
   if (!url || failed) {
-    return null;
+    return fallback;
   }
   return (
     <img
@@ -27,9 +33,12 @@ export function Thumbnail({
       alt=""
       width={width}
       height={height}
-      loading={eager ? "eager" : "lazy"}
+      loading={eager || priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
       decoding="async"
-      onError={() => setFailed(true)}
+      data-loaded={loadedUrl === url ? "" : undefined}
+      onLoad={() => setLoadedUrl(url)}
+      onError={() => setFailedUrl(url)}
     />
   );
 }

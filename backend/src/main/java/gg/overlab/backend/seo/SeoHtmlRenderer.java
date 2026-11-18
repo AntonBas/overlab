@@ -15,10 +15,11 @@ public class SeoHtmlRenderer {
     }
 
     public String render(SeoPage page) {
-        String title = SeoPageResolver.SITE_NAME.equals(page.title())
-                ? page.title() : page.title() + " | " + SeoPageResolver.SITE_NAME;
+        boolean home = "/".equals(page.path()) || SeoPageResolver.SITE_NAME.equals(page.title());
+        String title = home ? page.title() : page.title() + " | " + SeoPageResolver.SITE_NAME;
         String url = siteUrl.absolute(page.path());
-        String image = siteUrl.absolute("/og-image.png");
+        boolean customImage = page.imagePath() != null;
+        String image = siteUrl.absolute(customImage ? page.imagePath() : "/og-image.png");
         StringBuilder html = new StringBuilder("<!doctype html>\n<html lang=\"en\">\n<head>\n")
                 .append("<meta charset=\"UTF-8\">\n")
                 .append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n")
@@ -31,8 +32,10 @@ public class SeoHtmlRenderer {
         meta(html, "property", "og:description", page.description());
         meta(html, "property", "og:url", url);
         meta(html, "property", "og:image", image);
-        meta(html, "property", "og:image:width", "1200");
-        meta(html, "property", "og:image:height", "630");
+        if (!customImage) {
+            meta(html, "property", "og:image:width", "1200");
+            meta(html, "property", "og:image:height", "630");
+        }
         meta(html, "name", "twitter:card", "summary_large_image");
         meta(html, "name", "twitter:title", title);
         meta(html, "name", "twitter:description", page.description());

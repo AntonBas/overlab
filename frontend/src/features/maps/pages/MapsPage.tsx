@@ -1,11 +1,13 @@
+import type { CSSProperties } from "react";
+import { EmptyState } from "../../../components/ui/EmptyState";
 import clsx from "clsx";
-import { useState } from "react";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useUrlFlag, useUrlParam } from "../../../hooks/useUrlParam";
 import {
   breadcrumbList,
   useStructuredData,
@@ -17,36 +19,20 @@ import { matchesName } from "../../../utils/search";
 import { FavoritesFilterButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { fetchMaps } from "../api/mapsApi";
+import { groupByMode } from "../utils/groupByMode";
 import { MapCard } from "../components/MapCard";
 import { FiltersPanel } from "../../../components/ui/FiltersPanel";
-
-const OTHER = "Other";
-
-interface ModeGroup {
-  mode: MapMode | null;
-  maps: GameMap[];
-}
-
-function groupByMode(maps: GameMap[]): [string, ModeGroup][] {
-  const groups = new Map<string, ModeGroup>();
-  maps.forEach((map) => {
-    const label = map.mode ? MAP_MODE_LABELS[map.mode] : OTHER;
-    const group = groups.get(label) ?? { mode: map.mode, maps: [] };
-    groups.set(label, { ...group, maps: [...group.maps, map] });
-  });
-  return [...groups.entries()].sort(([first], [second]) => {
-    if (first === OTHER) {
-      return 1;
-    }
-    return second === OTHER ? -1 : first.localeCompare(second);
-  });
-}
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 function MapGrid({ maps }: { maps: GameMap[] }) {
   return (
     <ul className="map-grid">
-      {maps.map((map) => (
-        <li key={map.slug}>
+      {maps.map((map, index) => (
+        <li
+          key={map.slug}
+          className="reveal"
+          style={{ "--i": index } as CSSProperties}
+        >
           <MapCard map={map} withFavorite />
         </li>
       ))}
@@ -54,11 +40,14 @@ function MapGrid({ maps }: { maps: GameMap[] }) {
   );
 }
 
+function parseMode(value: string): MapMode | null {
+  return Object.hasOwn(MAP_MODE_LABELS, value) ? (value as MapMode) : null;
+}
+
 export function MapsPage() {
-  usePageTitle("Overwatch maps: hero win rates by map");
-  usePageDescription(
-    "Overwatch maps by game mode, with hero win, pick and ban rates on each map.",
-  );
+  const page = staticSeoPage("/maps");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -70,9 +59,14 @@ export function MapsPage() {
   );
   const maps = useFetch(fetchMaps, []);
   const { favoriteMaps } = usePersonalData();
-  const [search, setSearch] = useState("");
-  const [mode, setMode] = useState<MapMode | null>(null);
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [search, setSearch] = useUrlParam("q");
+  const [modeParam, setModeParam] = useUrlParam("mode");
+  const [onlyFavorites, setOnlyFavorites] = useUrlFlag("favorites");
+  const mode = parseMode(modeParam);
+
+  function setMode(next: MapMode | null) {
+    setModeParam(next ?? "");
+  }
 
   const available = maps.data ?? [];
   const modes = [
@@ -93,7 +87,7 @@ export function MapsPage() {
         title="Maps"
         subtitle="Pick a map to see which heroes over- or under-perform on it"
       />
-      {maps.loading && <Spinner page />}
+      {maps.loading && <ListSkeleton kind="map-cards" label="Loading maps" />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}
@@ -146,10 +140,12 @@ export function MapsPage() {
             </div>
           </FiltersPanel>
           {matching.length === 0 && (
-            <p className="muted">No maps match these filters.</p>
+            <EmptyState kind="no-match">
+              No maps match these filters.
+            </EmptyState>
           )}
           {groupByMode(matching).map(([label, group]) => (
-            <section key={label} className="section">
+            <section key={label} className="section map-section">
               <h2 className="mode-heading">
                 {group.mode && <ModeIcon mode={group.mode} />}
                 {label}

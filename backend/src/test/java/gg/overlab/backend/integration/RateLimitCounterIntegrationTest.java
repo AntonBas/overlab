@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import gg.overlab.backend.config.security.RateLimitCounter;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +50,20 @@ class RateLimitCounterIntegrationTest {
 
         assertThat(counter.current(key)).isZero();
         assertThat(counter.increment(key, Duration.ofMinutes(1))).isEqualTo(1L);
+    }
+
+    @Test
+    void slidingCounterCarriesThePreviousWindowIntoTheNextOneAndExpires() {
+        String key = "overlab:test:" + UUID.randomUUID();
+        Duration window = Duration.ofMinutes(1);
+        Instant windowStart = Instant.ofEpochMilli(60_000L * 1000);
+        for (int request = 1; request <= 10; request++) {
+            assertThat(counter.incrementSliding(key, window, windowStart.plusSeconds(request))).isEqualTo(request);
+        }
+
+        assertThat(counter.incrementSliding(key, window, windowStart.plusSeconds(60 + 30))).isEqualTo(1 + 5);
+        assertThat(counter.incrementSliding(key, window, windowStart.plusSeconds(60 + 45))).isEqualTo(2 + 2);
+
+        assertThat(redisTemplate.getExpire(key + ":1001")).isPositive().isLessThanOrEqualTo(120L);
     }
 }

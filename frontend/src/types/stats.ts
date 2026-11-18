@@ -99,6 +99,7 @@ export interface HeroChange {
   banRateBefore: number | null;
   banRateAfter: number | null;
   banRateChange: number | null;
+  portraitUrl: string | null;
   roleChange: HeroRoleChange | null;
 }
 

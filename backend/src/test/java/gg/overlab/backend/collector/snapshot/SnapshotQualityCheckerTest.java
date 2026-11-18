@@ -1,9 +1,12 @@
 package gg.overlab.backend.collector.snapshot;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,12 +45,78 @@ class SnapshotQualityCheckerTest {
     }
 
     @Test
-    void flagsPickRatesFarFromExpectedSum() {
+    void quarantinesPickRatesFarFromExpectedSumEveryTime() {
+        when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any())).thenReturn(List.of());
+        List<BlizzardRatesResponse.HeroRate> rates = ratesSummingTo("320");
+
+        assertThatThrownBy(() -> inspect(rates)).isInstanceOf(QuarantinedSnapshotException.class)
+                .hasMessageContaining("pick rates sum to 320");
+        assertThatThrownBy(() -> inspect(rates)).isInstanceOf(QuarantinedSnapshotException.class);
+
+        verify(metrics, times(2)).recordSuspiciousSnapshot("pick_rate_sum");
+        verify(metrics, times(2)).recordQuarantinedSnapshot("pick_rate_sum");
+    }
+
+    @Test
+    void flagsButKeepsPickRatesWithinTenPercentOfTheExpectedSum() {
         when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any())).thenReturn(List.of());
 
-        inspect(ratesSummingTo("320"));
+        assertThatCode(() -> inspect(ratesSummingTo("520"))).doesNotThrowAnyException();
 
         verify(metrics).recordSuspiciousSnapshot("pick_rate_sum");
+        verify(metrics, never()).recordQuarantinedSnapshot(any());
+    }
+
+    @Test
+    void quarantinesAMassJumpOnceAndAcceptsTheSameNumbersOnTheNextRun() {
+        when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any()))
+                .thenReturn(previousHeroes(20, "50.0"));
+        List<BlizzardRatesResponse.HeroRate> jumped = ratesWithWinRate(20, "60.0");
+
+        assertThatThrownBy(() -> inspect(jumped)).isInstanceOf(QuarantinedSnapshotException.class)
+                .hasMessageContaining("20 of 20 heroes jumped");
+        assertThatCode(() -> inspect(jumped)).doesNotThrowAnyException();
+
+        verify(metrics, times(1)).recordQuarantinedSnapshot("mass_jump");
+        assertThatThrownBy(() -> inspect(jumped)).isInstanceOf(QuarantinedSnapshotException.class);
+    }
+
+    @Test
+    void aDifferentMassJumpIsQuarantinedAgain() {
+        when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any()))
+                .thenReturn(previousHeroes(20, "50.0"));
+
+        assertThatThrownBy(() -> inspect(ratesWithWinRate(20, "60.0")))
+                .isInstanceOf(QuarantinedSnapshotException.class);
+        assertThatThrownBy(() -> inspect(ratesWithWinRate(20, "61.0")))
+                .isInstanceOf(QuarantinedSnapshotException.class);
+
+        verify(metrics, times(2)).recordQuarantinedSnapshot("mass_jump");
+    }
+
+    @Test
+    void keepsASnapshotWhenOnlyAFewHeroesJumped() {
+        when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any()))
+                .thenReturn(previousHeroes(20, "50.0"));
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>(ratesWithWinRate(20, "50.0"));
+        for (int index = 0; index < 3; index++) {
+            rates.set(index, CollectorFixtures.rate("hero-" + index, "TANK", "60.0", "25.0", null));
+        }
+
+        assertThatCode(() -> inspect(rates)).doesNotThrowAnyException();
+
+        verify(metrics).recordOutliers(3);
+        verify(metrics, never()).recordQuarantinedSnapshot(any());
+    }
+
+    @Test
+    void doesNotJudgeMassJumpsOnAFewHeroes() {
+        when(repository.findPreviousForAllMaps(any(), any(), any(), any(), any(), any()))
+                .thenReturn(previousHeroes(5, "50.0"));
+
+        assertThatCode(() -> inspect(ratesWithWinRate(5, "60.0"))).doesNotThrowAnyException();
+
+        verify(metrics, never()).recordQuarantinedSnapshot(any());
     }
 
     @Test
@@ -85,6 +154,24 @@ class SnapshotQualityCheckerTest {
             rates.add(CollectorFixtures.rate("hero-" + index, "TANK", "50.0", each.toPlainString(), null));
         }
         return rates;
+    }
+
+    private List<BlizzardRatesResponse.HeroRate> ratesWithWinRate(int count, String winRate) {
+        BigDecimal each = new BigDecimal("500").divide(BigDecimal.valueOf(count));
+        List<BlizzardRatesResponse.HeroRate> rates = new ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            rates.add(CollectorFixtures.rate("hero-" + index, "TANK", winRate, each.toPlainString(), null));
+        }
+        return rates;
+    }
+
+    private List<HeroStat> previousHeroes(int count, String winRate) {
+        BigDecimal each = new BigDecimal("500").divide(BigDecimal.valueOf(count));
+        List<HeroStat> stats = new ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            stats.add(previous("hero-" + index, winRate, each.toPlainString()));
+        }
+        return stats;
     }
 
     private HeroStat previous(String slug, String win, String pick) {

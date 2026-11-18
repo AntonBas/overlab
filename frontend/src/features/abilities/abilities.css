@@ -1,33 +1,33 @@
 .glyph--triangle {
-  color: #0f9d78;
+  color: var(--glyph-triangle);
 }
 
 .glyph--circle {
-  color: #d6364f;
+  color: var(--glyph-circle);
 }
 
 .glyph--cross {
-  color: #2f6fdb;
+  color: var(--glyph-cross);
 }
 
 .glyph--square {
-  color: #c4488f;
+  color: var(--glyph-square);
 }
 
 .glyph--xbox-a {
-  color: #52b043;
+  color: var(--glyph-xbox-a);
 }
 
 .glyph--xbox-b {
-  color: #e0443e;
+  color: var(--glyph-xbox-b);
 }
 
 .glyph--xbox-x {
-  color: #3b8de0;
+  color: var(--glyph-xbox-x);
 }
 
 .glyph--xbox-y {
-  color: #ffbf00;
+  color: var(--glyph-xbox-y);
 }
 
 .ability-chip {
@@ -46,22 +46,62 @@
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 0.9em;
+  font-size: max(0.9em, var(--font-size-xs));
   line-height: 1.6;
   cursor: help;
+  white-space: nowrap;
 }
 
 .ability-chip__button:hover,
 .ability-chip__button:focus-visible {
+  background: var(--hover-wash);
   border-color: var(--accent);
 }
 
 .ability-chip__icon {
   width: auto;
-  max-width: 56px;
+  max-width: 32px;
   height: 20px;
   border-radius: 4px;
   object-fit: contain;
+}
+
+.ability-chip__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.ability-chip__owner-portrait {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.ability-chip__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ability-chip__header .ability-key {
+  align-self: flex-start;
+}
+
+.ability-chip__owner {
+  color: var(--muted);
+  font-size: max(0.85em, var(--font-size-xs));
+  text-decoration: none;
+}
+
+.ability-chip__owner:hover,
+.ability-chip__owner:focus-visible {
+  color: var(--accent-text);
+  text-decoration: underline;
 }
 
 .ability-chip__tip {
@@ -74,7 +114,7 @@
   max-width: min(280px, 80vw);
   padding: var(--space-8) var(--space-12);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
   color: var(--text);
@@ -85,39 +125,176 @@
   display: flex;
 }
 
-.ability-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--space-12);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.ability-bar {
+  --slot-color: var(--muted);
 }
 
-.ability-list__item {
+.ability-bar__slots {
   display: flex;
-  gap: var(--space-12);
-  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
   padding: var(--space-12);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--surface), transparent);
 }
 
-.ability-list__icon {
-  flex: none;
-  width: auto;
-  max-width: 96px;
-  height: 48px;
-  border-radius: 8px;
+.ability-slot {
+  --slot-color: var(--muted);
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-6);
+  width: 96px;
+  padding: var(--space-8) var(--space-6) var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+
+.ability-slot--primary_fire,
+.ability-slot--secondary_fire {
+  --slot-color: var(--damage);
+}
+
+.ability-slot--ability_1,
+.ability-slot--ability_2 {
+  --slot-color: var(--link);
+}
+
+.ability-slot--ultimate {
+  --slot-color: var(--accent);
+}
+
+.ability-slot:hover {
+  transform: translateY(-2px);
+  border-color: var(--slot-color);
+}
+
+.ability-slot--active {
+  border-color: var(--slot-color);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--slot-color) 20%, var(--surface)),
+    var(--surface)
+  );
+  box-shadow: 0 8px 24px -12px var(--slot-color);
+  color: var(--text);
+}
+
+.ability-slot__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 2px solid color-mix(in srgb, var(--slot-color) 60%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+}
+
+.ability-slot__icon .thumbnail {
+  max-width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
-.ability-list__title {
+.ability-slot__name {
+  min-height: 2.4em;
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.ability-detail {
+  --slot-color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  padding: var(--space-16);
+  border: 1px solid color-mix(in srgb, var(--slot-color) 45%, var(--border));
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.ability-detail[hidden] {
+  display: none;
+}
+
+.ability-detail.ability-slot--primary_fire,
+.ability-detail.ability-slot--secondary_fire {
+  --slot-color: var(--damage);
+}
+
+.ability-detail.ability-slot--ability_1,
+.ability-detail.ability-slot--ability_2 {
+  --slot-color: var(--link);
+}
+
+.ability-detail.ability-slot--ultimate {
+  --slot-color: var(--accent);
+}
+
+.ability-detail__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: 0 0 24px -6px var(--slot-color);
+}
+
+.ability-detail__icon .thumbnail {
+  max-width: 68px;
+  height: 68px;
+  object-fit: contain;
+}
+
+.ability-detail__body {
+  min-width: 0;
+}
+
+.ability-detail__title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-8);
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-2xl);
+}
+
+.ability-detail__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--font-size-base);
+}
+
+@media (max-width: 640px) {
+  .ability-bar__slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+    padding: var(--space-8);
+  }
+
+  .ability-slot {
+    width: auto;
+  }
+
+  .ability-detail {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .ability-key {
@@ -161,7 +338,7 @@
   height: 18px;
   border-radius: 50%;
   border: 1px solid rgb(255 255 255 / 0.22);
-  background: #1d1f23;
+  background: var(--glyph-dark);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   line-height: 1;
@@ -171,6 +348,6 @@
 .glyph--plain-b,
 .glyph--plain-x,
 .glyph--plain-y {
-  background: #3b3d42;
-  color: #f2f2f2;
+  background: var(--glyph-plain);
+  color: var(--glyph-plain-text);
 }

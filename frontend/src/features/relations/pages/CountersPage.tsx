@@ -1,13 +1,11 @@
 import clsx from "clsx";
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AllRolesBadge } from "../../../components/ui/AllRolesBadge";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { PageHeader } from "../../../components/ui/PageHeader";
-import { RoleBadge } from "../../../components/ui/RoleBadge";
-import { Spinner } from "../../../components/ui/Spinner";
+import { RevealMore } from "../../../components/ui/RevealMore";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { SubroleBadge } from "../../../components/ui/SubroleBadge";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
@@ -16,23 +14,24 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
-import type { CategoryMatchup, HeroRole } from "../../../types/hero";
+import type { CategoryMatchup } from "../../../types/hero";
 import { ROLE_LABELS } from "../../../utils/format";
 import { matchesName } from "../../../utils/search";
 import { FavoriteButton } from "../../personal";
-import { FavoritesFilterButton } from "../../personal";
 import { usePersonalData } from "../../personal";
 import { ROLES } from "../../stats";
 import { fetchHeroes } from "../../heroes";
+import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
+import { useHeroListView } from "../../heroes/hooks/useHeroListView";
 import { fetchAllRelations, fetchHeroCategories } from "../api/relationsApi";
-import { CategoryChip } from "../components/CategoryChip";
+import { CategoryAvatar } from "../components/CategoryAvatar";
 import { RelationAvatar } from "../components/RelationAvatar";
 import {
   bindRelationFeedback,
   useRelationVotes,
 } from "../hooks/useRelationFeedback";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
-import { FiltersPanel } from "../../../components/ui/FiltersPanel";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const COLUMNS = [
   {
@@ -55,11 +54,12 @@ const COLUMNS = [
   },
 ] as const;
 
+const ROWS_PER_STEP = 12;
+
 export function CountersPage() {
-  usePageTitle("Overwatch counters and synergies for every hero");
-  usePageDescription(
-    "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
-  );
+  const page = staticSeoPage("/counters");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -72,14 +72,21 @@ export function CountersPage() {
   const heroes = useFetch(fetchHeroes, []);
   const relations = useFetch(fetchAllRelations, []);
   const categories = useFetch(fetchHeroCategories, []);
-  const [role, setRole] = useState<HeroRole | null>(null);
-  const [query, setQuery] = useState("");
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const {
+    role,
+    query,
+    onlyFavorites,
+    shownRows,
+    setRole,
+    setQuery,
+    setOnlyFavorites,
+    showMore,
+  } = useHeroListView(ROWS_PER_STEP);
   const { favoriteHeroes } = usePersonalData();
   const relationVotes = useRelationVotes();
 
   if (heroes.loading || relations.loading || categories.loading) {
-    return <Spinner page />;
+    return <ListSkeleton kind="hero-tiles" label="Loading counters" />;
   }
   const failure = heroes.error ?? relations.error ?? categories.error;
   if (failure || !heroes.data || !relations.data || !categories.data) {
@@ -133,49 +140,22 @@ export function CountersPage() {
     <>
       <PageHeader
         title="Counters and synergies"
-        subtitle="Who every hero is strong against, who counters them and who they work well with"
+        subtitle="Curated recommendations, not statistics: who every hero is strong against, who counters them and who they work well with"
       />
-      <FiltersPanel>
-        <div className="filters">
-          <label className="field">
-            <span className="field__label">Hero</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="Search by name"
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <div className="field">
-            <span className="field__label">Role</span>
-            <div className="segmented" role="group" aria-label="Role">
-              {[null, ...ROLES].map((value) => (
-                <button
-                  key={value ?? "all"}
-                  type="button"
-                  className={clsx("segmented__item", {
-                    "segmented__item--active": role === value,
-                  })}
-                  aria-pressed={role === value}
-                  onClick={() => setRole(value)}
-                >
-                  {value ? (
-                    <RoleBadge role={value} />
-                  ) : (
-                    <AllRolesBadge label="All" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          <FavoritesFilterButton
-            active={onlyFavorites}
-            onToggle={() => setOnlyFavorites(!onlyFavorites)}
-          />
-        </div>
-      </FiltersPanel>
+      <HeroFilterBar
+        query={query}
+        onQueryChange={setQuery}
+        role={role}
+        onRoleChange={setRole}
+        onlyFavorites={onlyFavorites}
+        onOnlyFavoritesChange={setOnlyFavorites}
+      />
       {visibleHeroes.length === 0 ? (
-        <EmptyState>
+        <EmptyState
+          kind={
+            onlyFavorites && favoriteHeroes.size === 0 ? "empty" : "no-match"
+          }
+        >
           {onlyFavorites && favoriteHeroes.size === 0
             ? "You have no favorite heroes yet. Use the star on a hero card to add one."
             : "No heroes match the filters."}
@@ -183,7 +163,7 @@ export function CountersPage() {
       ) : (
         <div className="matchups">
           <ul className="matchups__rows">
-            {visibleHeroes.map((hero) => {
+            {visibleHeroes.slice(0, shownRows).map((hero) => {
               const entry = relationsByHero.get(hero.slug);
               return (
                 <li
@@ -196,7 +176,7 @@ export function CountersPage() {
                   <div className="matchup__hero">
                     <Link
                       className="matchup__identity"
-                      to={`/heroes/${hero.slug}#counters`}
+                      to={`/heroes/${hero.slug}/counters`}
                     >
                       <HeroPortrait
                         name={hero.name}
@@ -247,11 +227,12 @@ export function CountersPage() {
                                 matchup.categorySlug,
                               );
                               return category ? (
-                                <CategoryChip
-                                  key={matchup.categorySlug}
-                                  category={category}
-                                  matchup={matchup}
-                                />
+                                <li key={matchup.categorySlug}>
+                                  <CategoryAvatar
+                                    category={category}
+                                    matchup={matchup}
+                                  />
+                                </li>
                               ) : null;
                             })}
                             {related.map((relatedHero) => (
@@ -274,11 +255,14 @@ export function CountersPage() {
               );
             })}
           </ul>
+          <RevealMore
+            remaining={visibleHeroes.length - shownRows}
+            shown={shownRows}
+            noun="heroes"
+            onMore={showMore}
+          />
         </div>
       )}
-      <p className="muted footnote">
-        Counters and synergies are curated recommendations, not statistics.
-      </p>
     </>
   );
 }

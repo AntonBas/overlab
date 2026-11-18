@@ -25,6 +25,9 @@ public interface GuideRepository extends JpaRepository<Guide, Long> {
     @EntityGraph(attributePaths = {"hero", "map"})
     Optional<Guide> findWithDetailsById(Long id);
 
+    @EntityGraph(attributePaths = {"hero", "map"})
+    Optional<Guide> findWithDetailsBySlug(String slug);
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, Long id);

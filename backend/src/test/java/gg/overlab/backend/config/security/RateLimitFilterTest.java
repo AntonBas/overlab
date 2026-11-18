@@ -36,7 +36,7 @@ class RateLimitFilterTest {
 
     @Test
     void anAuthPostWithinTheLimitPassesThrough() throws Exception {
-        when(counter.increment(anyString(), any(Duration.class))).thenReturn(10L);
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(10L);
         MockHttpServletRequest request = request("POST", "/api/auth/login");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -48,7 +48,7 @@ class RateLimitFilterTest {
 
     @Test
     void anAuthPostOverTheLimitIsAnsweredWithTooManyRequestsAndRetryAfter() throws Exception {
-        when(counter.increment(anyString(), any(Duration.class))).thenReturn(11L);
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(11L);
         MockHttpServletRequest request = request("POST", "/api/auth/login");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -61,7 +61,7 @@ class RateLimitFilterTest {
 
     @Test
     void everyLimitedPathHasItsOwnCounterPerAddress() throws Exception {
-        when(counter.increment(anyString(), any(Duration.class))).thenReturn(1L);
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(1L);
 
         for (String path : new String[] {"/api/auth/register", "/api/auth/login", "/api/auth/forgot-password",
                 "/api/auth/reset-password", "/api/auth/resend-verification", "/api/feedback", "/api/business"}) {
@@ -69,14 +69,26 @@ class RateLimitFilterTest {
         }
 
         ArgumentCaptor<String> keys = ArgumentCaptor.forClass(String.class);
-        verify(counter, org.mockito.Mockito.times(7)).increment(keys.capture(), any(Duration.class));
+        verify(counter, org.mockito.Mockito.times(7)).incrementSliding(keys.capture(), any(Duration.class));
         assertThat(keys.getAllValues()).doesNotHaveDuplicates()
                 .allMatch(key -> key.startsWith("overlab:ratelimit:") && key.endsWith(":203.0.113.5"));
     }
 
     @Test
+    void startingAGoogleSignInIsLimitedLikeOtherAuthRequests() throws Exception {
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(11L);
+        MockHttpServletRequest request = request("GET", "/oauth2/authorization/google");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain, never()).doFilter(any(), any());
+        verify(resolver).resolveException(eq(request), eq(response), eq(null), any(TooManyRequestsException.class));
+    }
+
+    @Test
     void refreshUsesTheGeneralApiLimit() throws Exception {
-        when(counter.increment(anyString(), any(Duration.class))).thenReturn(101L);
+        when(counter.incrementSliding(anyString(), any(Duration.class))).thenReturn(101L);
         MockHttpServletRequest request = request("POST", "/api/auth/refresh");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -87,7 +99,7 @@ class RateLimitFilterTest {
 
     @Test
     void statsReadsHaveTheirOwnHigherLimit() throws Exception {
-        when(counter.increment(eq("overlab:ratelimit:stats:203.0.113.5"), any(Duration.class))).thenReturn(150L);
+        when(counter.incrementSliding(eq("overlab:ratelimit:stats:203.0.113.5"), any(Duration.class))).thenReturn(150L);
         MockHttpServletRequest request = request("GET", "/api/stats");
 
         filter.doFilter(request, new MockHttpServletResponse(), chain);
@@ -98,7 +110,7 @@ class RateLimitFilterTest {
 
     @Test
     void otherPublicReadsUseTheApiLimit() throws Exception {
-        when(counter.increment(eq("overlab:ratelimit:api:203.0.113.5"), any(Duration.class))).thenReturn(101L);
+        when(counter.incrementSliding(eq("overlab:ratelimit:api:203.0.113.5"), any(Duration.class))).thenReturn(101L);
         MockHttpServletRequest request = request("GET", "/api/heroes");
         MockHttpServletResponse response = new MockHttpServletResponse();
 

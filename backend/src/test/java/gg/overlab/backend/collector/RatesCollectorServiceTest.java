@@ -23,6 +23,7 @@ import gg.overlab.backend.collector.run.CollectorTrigger;
 import gg.overlab.backend.collector.snapshot.InvalidSnapshotException;
 import gg.overlab.backend.collector.snapshot.RatesValidator;
 import gg.overlab.backend.collector.snapshot.SnapshotRecorder;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.config.cache.CacheEviction;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
@@ -65,7 +66,7 @@ class RatesCollectorServiceTest {
         CollectorProperties properties = CollectorFixtures.properties(1, job);
         metrics = new CollectorMetrics(meterRegistry, runRepository, properties, mock(SnapshotCheckRepository.class));
         metrics.registerMeters();
-        service = serviceWith(properties, deferredExecutor);
+        service = serviceWith(properties, deferredExecutor, CollectorFixtures.openLock());
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
             CollectorRun run = invocation.getArgument(0);
             if (run.getId() == null) {
@@ -79,14 +80,15 @@ class RatesCollectorServiceTest {
                 .thenReturn(new SnapshotRecorder.Outcome(5, true));
     }
 
-    private RatesCollectorService serviceWith(CollectorProperties properties, TaskExecutor taskExecutor) {
+    private RatesCollectorService serviceWith(CollectorProperties properties, TaskExecutor taskExecutor,
+                                              ScheduledJobLock jobLock) {
         SnapshotCollector snapshotCollector = new SnapshotCollector(properties, client, validator, recorder,
                 mock(HeroAssetService.class), metrics);
         MapSlugResolver mapSlugResolver = new MapSlugResolver(mock(GameMapRepository.class),
                 mock(MapDiscoveryService.class));
         return new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
                 new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
-                taskExecutor);
+                taskExecutor, jobLock);
     }
 
     @Test
@@ -102,6 +104,40 @@ class RatesCollectorServiceTest {
         assertThat(run.getErrorSummary()).isNull();
         assertThat(meterRegistry.get("collector.requests").tag("result", "success").counter().count()).isEqualTo(3.0);
         assertThat(meterRegistry.get("collector.rows.saved").counter().count()).isEqualTo(15.0);
+    }
+
+    @Test
+    void progressIsSavedAfterEveryRequestSoARestartKeepsTheCounts() {
+        List<Integer> requestsAtSave = new ArrayList<>();
+        List<Integer> rowsAtSave = new ArrayList<>();
+        when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
+            CollectorRun run = invocation.getArgument(0);
+            run.setId(7L);
+            requestsAtSave.add(run.getRequestsTotal());
+            rowsAtSave.add(run.getRowsSaved());
+            return run;
+        });
+
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
+
+        assertThat(requestsAtSave).contains(1, 2, 3);
+        assertThat(rowsAtSave).contains(5, 10, 15);
+    }
+
+    @Test
+    void aFailingProgressSaveDoesNotStopTheRun() {
+        when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> {
+            CollectorRun run = invocation.getArgument(0);
+            if (run.getRequestsTotal() > 0 && run.getFinishedAt() == null) {
+                throw new IllegalStateException("db busy");
+            }
+            run.setId(7L);
+            return run;
+        });
+
+        service.runInline("daily", CollectorTrigger.SCHEDULED);
+
+        assertThat(lastSavedRun().getRequestsTotal()).isEqualTo(3);
     }
 
     @Test
@@ -224,7 +260,8 @@ class RatesCollectorServiceTest {
         TaskExecutor rejectingExecutor = task -> {
             throw new TaskRejectedException("queue is full");
         };
-        RatesCollectorService rejecting = serviceWith(CollectorFixtures.properties(1, job), rejectingExecutor);
+        RatesCollectorService rejecting = serviceWith(CollectorFixtures.properties(1, job), rejectingExecutor,
+                CollectorFixtures.openLock());
 
         assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
                 .isInstanceOf(ConflictException.class);
@@ -233,6 +270,38 @@ class RatesCollectorServiceTest {
         assertThatThrownBy(() -> rejecting.startAsync("daily", CollectorTrigger.MANUAL))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("queue is full");
+    }
+
+    @Test
+    void runHeldByAnotherInstanceIsMarkedFailedWithoutFetchingAndFreesTheJob() {
+        RatesCollectorService contended = serviceWith(CollectorFixtures.properties(1, job), deferredExecutor,
+                CollectorFixtures.heldLock());
+
+        contended.startAsync("daily", CollectorTrigger.SCHEDULED);
+        queuedTasks.get(0).run();
+
+        verify(client, times(0)).fetch(any(), any(), any(), any(), any(), any());
+        CollectorRun run = lastSavedRun();
+        assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.FAILED);
+        assertThat(run.getErrorSummary()).isEqualTo("Another instance is running this job");
+        assertThat(contended.startAsync("daily", CollectorTrigger.SCHEDULED).id()).isEqualTo(7L);
+    }
+
+    @Test
+    void aFailedLockAttemptMarksTheRunFailedAndFreesTheJob() {
+        ScheduledJobLock broken = mock(ScheduledJobLock.class);
+        when(broken.runExclusively(any(), any(Runnable.class)))
+                .thenThrow(new IllegalStateException("no connection"));
+        RatesCollectorService contended = serviceWith(CollectorFixtures.properties(1, job), deferredExecutor, broken);
+
+        contended.startAsync("daily", CollectorTrigger.SCHEDULED);
+        queuedTasks.get(0).run();
+
+        verify(client, times(0)).fetch(any(), any(), any(), any(), any(), any());
+        CollectorRun run = lastSavedRun();
+        assertThat(run.getStatus()).isEqualTo(CollectorRunStatus.FAILED);
+        assertThat(run.getErrorSummary()).isEqualTo("The job lock could not be taken");
+        assertThat(contended.startAsync("daily", CollectorTrigger.SCHEDULED).id()).isEqualTo(7L);
     }
 
     @Test

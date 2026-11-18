@@ -1,0 +1,63 @@
+.boot {
+  transition: opacity 0.3s ease;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #0b0d1a;
+  color: #a0a9cc;
+  font:
+    14px system-ui,
+    sans-serif;
+}
+.boot--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.boot__ring {
+  transform-origin: 32px 32px;
+  animation: boot-spin 1.4s linear infinite;
+}
+.boot__bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: boot-bar 1s ease-in-out infinite;
+}
+.boot__bar:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.boot__bar:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.boot__name {
+  color: #e8ecf3;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 4px;
+}
+.boot__name span {
+  color: #f99e1a;
+}
+@keyframes boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes boot-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot__ring,
+  .boot__bar {
+    animation: none;
+  }
+}

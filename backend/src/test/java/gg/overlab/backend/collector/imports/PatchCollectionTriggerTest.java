@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.collector.CollectorFixtures;
 import gg.overlab.backend.collector.CollectorJob;
 import gg.overlab.backend.collector.RatesCollectorService;
 import gg.overlab.backend.collector.run.CollectorTrigger;
@@ -22,7 +23,8 @@ class PatchCollectionTriggerTest {
     private final RatesCollectorService collectorService = mock(RatesCollectorService.class);
     private final HeroContentImportService perkImportService = mock(HeroContentImportService.class);
     private final PatchCollectionTrigger trigger =
-            new PatchCollectionTrigger(collectorService, perkImportService, Runnable::run, 7);
+            new PatchCollectionTrigger(collectorService, perkImportService, Runnable::run, 7,
+                    CollectorFixtures.openLock());
 
     private CollectorJob job(String name, boolean runOnPatch) {
         return new CollectorJob(name, "0 0 4 * * *", false, List.of(GameQueue.COMPETITIVE), List.of(Platform.PC),

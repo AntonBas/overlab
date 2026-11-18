@@ -1,9 +1,7 @@
 import { NewBadge } from "../../../components/ui/NewBadge";
 import clsx from "clsx";
-import { useId } from "react";
-import { createPortal } from "react-dom";
 import { Thumbnail } from "../../../components/ui/Thumbnail";
-import { useFloatingTip } from "../../../hooks/useFloatingTip";
+import { Tooltip } from "../../../components/ui/Tooltip";
 import type {
   Perk,
   PerkPosition,
@@ -42,35 +40,32 @@ function PerkCard({ perk }: { perk: Perk }) {
         `perk-card--${perk.recommendation.toLowerCase()}`,
       )}
     >
-      <span className="perk-card__header">
-        <span className="perk-card__side muted">
-          {POSITION_LABELS[position]}
-        </span>
-        <span
-          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
-        >
-          {RECOMMENDATION_LABELS[perk.recommendation]}
-        </span>
-      </span>
-      <span className="perk-card__main">
+      <span className="perk-card__side muted">{POSITION_LABELS[position]}</span>
+      <span className="perk-card__node">
         <Thumbnail
           url={perk.iconUrl}
           width={56}
           height={56}
           className="perk-card__icon"
         />
-        <span className="card__body">
-          <strong>{perk.name}</strong>
-          {perk.recentlyAdded && <NewBadge />}
-          {perk.description && (
-            <span className="muted">{perk.description}</span>
-          )}
-          {perk.recommendationNote && (
-            <span className="perk-card__note">
+      </span>
+      <span className="card__body">
+        <strong>{perk.name}</strong>
+        {perk.recentlyAdded && <NewBadge />}
+        <span
+          className={clsx("tag", `tag--${perk.recommendation.toLowerCase()}`)}
+        >
+          {RECOMMENDATION_LABELS[perk.recommendation]}
+        </span>
+        {perk.description && <span className="muted">{perk.description}</span>}
+        {perk.recommendationNote && (
+          <span className="perk-card__note">
+            <span className="perk-card__note-label">Why this rating</span>
+            <span className="perk-card__note-text">
               <AbilityText text={perk.recommendationNote} />
             </span>
-          )}
-        </span>
+          </span>
+        )}
       </span>
     </li>
   );
@@ -78,9 +73,6 @@ function PerkCard({ perk }: { perk: Perk }) {
 
 function CompactPerkTile({ perk }: { perk: Perk }) {
   const position = positionOf(perk);
-  const tipId = useId();
-  const { open, style, triggerRef, tipRef, triggerProps, tipProps } =
-    useFloatingTip();
   const hasTip = Boolean(perk.description || perk.recommendationNote);
   return (
     <li
@@ -91,49 +83,23 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
         `perk-card--${perk.recommendation.toLowerCase()}`,
       )}
     >
-      <span
-        className="perk-tile__trigger"
-        ref={triggerRef}
-        tabIndex={hasTip ? 0 : undefined}
-        aria-describedby={hasTip ? tipId : undefined}
-        {...(hasTip ? triggerProps : {})}
-      >
-        <Thumbnail
-          url={perk.iconUrl}
-          width={44}
-          height={44}
-          className="perk-tile__icon"
-        />
-        <span className="perk-tile__body">
-          <span className="perk-tile__heading">
-            <strong>{perk.name}</strong>
-            {perk.recentlyAdded && <NewBadge />}
-            <span
-              className={clsx(
-                "tag",
-                `tag--${perk.recommendation.toLowerCase()}`,
-              )}
-            >
-              {RECOMMENDATION_LABELS[perk.recommendation]}
-            </span>
-          </span>
-        </span>
-      </span>
-      {hasTip &&
-        open &&
-        createPortal(
-          <span
-            id={tipId}
-            role="tooltip"
-            ref={tipRef}
-            className={clsx(
-              "perk-tip",
-              "perk-tip--interactive",
-              `perk-tip--${perk.recommendation.toLowerCase()}`,
-            )}
-            style={style}
-            {...tipProps}
-          >
+      <Tooltip
+        mount="open"
+        disabled={!hasTip}
+        describeTrigger
+        triggerClassName="perk-tile__trigger"
+        triggerProps={
+          hasTip
+            ? { tabIndex: 0, role: "group", "aria-label": perk.name }
+            : undefined
+        }
+        tipClassName={clsx(
+          "perk-tip",
+          "perk-tip--interactive",
+          `perk-tip--${perk.recommendation.toLowerCase()}`,
+        )}
+        content={
+          <>
             <span className="perk-tip__header">
               <Thumbnail
                 url={perk.iconUrl}
@@ -163,9 +129,34 @@ function CompactPerkTile({ perk }: { perk: Perk }) {
                 <AbilityText text={perk.recommendationNote} />
               </span>
             )}
-          </span>,
-          document.body,
+          </>
+        }
+      >
+        {() => (
+          <>
+            <Thumbnail
+              url={perk.iconUrl}
+              width={44}
+              height={44}
+              className="perk-tile__icon"
+            />
+            <span className="perk-tile__body">
+              <span className="perk-tile__heading">
+                <strong>{perk.name}</strong>
+                {perk.recentlyAdded && <NewBadge />}
+                <span
+                  className={clsx(
+                    "tag",
+                    `tag--${perk.recommendation.toLowerCase()}`,
+                  )}
+                >
+                  {RECOMMENDATION_LABELS[perk.recommendation]}
+                </span>
+              </span>
+            </span>
+          </>
         )}
+      </Tooltip>
     </li>
   );
 }
@@ -189,7 +180,10 @@ export function PerkList({
           return null;
         }
         return (
-          <div key={slot} className="perk-group">
+          <div
+            key={slot}
+            className={clsx("perk-group", { "perk-group--tree": !compact })}
+          >
             <h3>{SLOT_LABELS[slot]}</h3>
             <ul className={clsx("perk-row", { "perk-row--compact": compact })}>
               {group.map((perk) =>

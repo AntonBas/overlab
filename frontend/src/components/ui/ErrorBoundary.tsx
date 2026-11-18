@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/react";
 import { Component, type ReactNode, type ErrorInfo } from "react";
+import { isChunkLoadError, reloadForNewBuild } from "../../utils/staleBuild";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -22,6 +23,9 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (isChunkLoadError(error) && reloadForNewBuild()) {
+      return;
+    }
     captureException(error, {
       extra: { componentStack: errorInfo.componentStack },
     });

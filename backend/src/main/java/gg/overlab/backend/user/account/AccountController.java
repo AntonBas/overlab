@@ -75,6 +75,13 @@ public class AccountController {
                 .body(exportService.export(user.id()));
     }
 
+    @Operation(summary = "Email a link that confirms the deletion of an account without a password")
+    @PostMapping("/delete-request")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void requestDeletion(@AuthenticationPrincipal AuthenticatedUser user) {
+        accountService.requestDeletionConfirmation(user.id());
+    }
+
     @Operation(summary = "Delete the account permanently")
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)

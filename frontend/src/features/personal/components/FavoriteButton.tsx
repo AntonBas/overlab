@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { usePersonalData } from "../context/usePersonalData";
 import { useRequireLogin } from "../hooks/useRequireLogin";
 
@@ -8,6 +9,17 @@ interface FavoriteButtonProps {
   compact?: boolean;
 }
 
+function favoriteLabel(compact: boolean, favorite: boolean, name: string) {
+  if (compact) {
+    return favorite
+      ? `Remove ${name} from favorites`
+      : `Add ${name} to favorites`;
+  }
+  return favorite
+    ? `Favorite: remove ${name} from favorites`
+    : `Add to favorites: ${name}`;
+}
+
 export function FavoriteButton({
   kind,
   slug,
@@ -16,6 +28,7 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { signedIn, sendToLogin } = useRequireLogin();
   const personal = usePersonalData();
+  const [clicked, setClicked] = useState(false);
   const favorite =
     kind === "hero"
       ? personal.favoriteHeroes.has(slug)
@@ -31,17 +44,20 @@ export function FavoriteButton({
           compact ? "favorite-star" : "button button--ghost favorite-button"
         }
         aria-pressed={favorite}
-        aria-label={
-          favorite
-            ? `Remove ${name} from favorites`
-            : `Add ${name} to favorites`
-        }
-        onClick={() => (signedIn ? void toggle(slug) : sendToLogin())}
+        aria-label={favoriteLabel(compact, favorite, name)}
+        onClick={() => {
+          setClicked(true);
+          if (signedIn) {
+            void toggle(slug);
+          } else {
+            sendToLogin();
+          }
+        }}
       >
         <span aria-hidden="true">{favorite ? "★" : "☆"}</span>
         {!compact && (favorite ? " Favorite" : " Add to favorites")}
       </button>
-      {personal.failure && (
+      {clicked && personal.failure && (
         <span className="form-field__error" role="alert">
           {personal.failure}
         </span>

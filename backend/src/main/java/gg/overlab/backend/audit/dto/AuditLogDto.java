@@ -9,6 +9,7 @@ public record AuditLogDto(
         Long id,
         Instant occurredAt,
         Long actorId,
+        String actorName,
         String actorRole,
         AuditAction action,
         String entityType,
@@ -16,8 +17,9 @@ public record AuditLogDto(
         Map<String, Object> changes,
         String ipAddress) {
 
-    public static AuditLogDto from(AuditLog log) {
-        return new AuditLogDto(log.getId(), log.getOccurredAt(), log.getActorId(), log.getActorRole(),
+    public static AuditLogDto from(AuditLog log, Map<Long, String> actorNames) {
+        return new AuditLogDto(log.getId(), log.getOccurredAt(), log.getActorId(), actorNames.get(log.getActorId()),
+                log.getActorRole(),
                 log.getAction(), log.getEntityType(), log.getEntityId(), log.getChanges(), log.getIpAddress());
     }
 }

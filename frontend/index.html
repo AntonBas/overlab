@@ -4,37 +4,85 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Overlab</title>
+    <title>Overlab: Overwatch hero statistics</title>
     <meta
       name="description"
       content="Overwatch hero statistics by map and rank: win, pick and ban rates, perks, counters and video guides. Unofficial fan site."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Overlab" />
-    <meta property="og:title" content="Overlab" />
-    <meta property="og:url" content="https://overlabgg.com/" />
+    <meta property="og:title" content="Overlab: Overwatch hero statistics" />
+    <meta property="og:url" content="%SITE_URL%/" />
     <meta
       property="og:description"
       content="Overwatch hero statistics by map and rank: win, pick and ban rates, perks, counters and video guides. Unofficial fan site."
     />
-    <meta property="og:image" content="https://overlabgg.com/og-image.png" />
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Overlab: hero win, pick and ban rates" />
+    <meta
+      property="og:image:alt"
+      content="Overlab: hero win, pick and ban rates"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://overlabgg.com/og-image.png" />
-    <meta name="theme-color" content="#171c26" />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.png" />
+    <meta name="theme-color" content="#0b0d1a" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Overlab",
-        "url": "https://overlabgg.com/"
+        "url": "%SITE_URL%/"
       }
     </script>
+    <link rel="stylesheet" href="/boot.css" />
   </head>
   <body>
     <div id="root"></div>
+    <div class="boot" role="status">
+      <svg
+        width="80"
+        height="80"
+        viewBox="0 0 64 64"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect width="64" height="64" rx="14" fill="#171c26" />
+        <g class="boot__ring">
+          <circle
+            cx="32"
+            cy="32"
+            r="27.5"
+            stroke="#e8ecf3"
+            stroke-width="5"
+            stroke-dasharray="140.8 32"
+            transform="rotate(-56.7 32 32)"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            r="27.5"
+            stroke="#f99e1a"
+            stroke-width="5"
+            stroke-dasharray="24 148.8"
+            transform="rotate(-115 32 32)"
+          />
+        </g>
+        <path
+          d="M28 13v15L17 44a3 3 0 0 0 3 5h24a3 3 0 0 0 3-5L36 28V13"
+          stroke="#f99e1a"
+          stroke-width="4"
+          stroke-linejoin="round"
+        />
+        <g fill="#4f9dff">
+          <rect class="boot__bar" x="24" y="41" width="4" height="6" rx="1" />
+          <rect class="boot__bar" x="30" y="35" width="4" height="12" rx="1" />
+          <rect class="boot__bar" x="36" y="41" width="4" height="6" rx="1" />
+        </g>
+      </svg>
+      <div class="boot__name">OVER<span>LAB</span></div>
+      <div>Loading...</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

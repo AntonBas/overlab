@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { StatsSort } from "../../../types/common";
 import { usePersonalData } from "../../personal";
@@ -12,6 +12,7 @@ import {
 } from "../filters";
 
 const FILTER_PARAMS = ["queue", "tier", "platform", "region"];
+const NO_PRESERVED_PARAMS: readonly string[] = [];
 
 function keepPreserved(
   target: URLSearchParams,
@@ -28,13 +29,14 @@ function keepPreserved(
 
 export function useFilterState(
   fixedMap?: string,
-  preservedParams: readonly string[] = [],
+  preservedParams: readonly string[] = NO_PRESERVED_PARAMS,
 ) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { preferences } = usePersonalData();
+  const { preferences, preferencesPending } = usePersonalData();
   const coverage = useCoverage();
   const { region: defaultRegion, rememberRegion } = useRegion();
   const preferencesApplied = useRef(false);
+  const explicitFilters = FILTER_PARAMS.some((name) => searchParams.has(name));
   const filters = useMemo(() => {
     const parsed = parseFilters(searchParams, defaultRegion);
     const covered = applyCoverage(
@@ -43,14 +45,9 @@ export function useFilterState(
     );
     return fixedMap ? { ...covered, map: fixedMap } : covered;
   }, [searchParams, fixedMap, coverage, defaultRegion]);
-
-  useEffect(() => {
-    if (preferencesApplied.current || !preferences) {
-      return;
-    }
-    preferencesApplied.current = true;
-    if (FILTER_PARAMS.some((name) => searchParams.has(name))) {
-      return;
+  const preferred = useMemo(() => {
+    if (!preferences) {
+      return null;
     }
     const withPreferences = parseFilters(searchParams, defaultRegion);
     const next: StatsFilters = applyCoverage(
@@ -66,7 +63,29 @@ export function useFilterState(
     if (next.queue === "QUICK_PLAY") {
       next.tier = "ALL";
     }
-    const params = toSearchParams(next, defaultRegion);
+    return next;
+  }, [preferences, searchParams, coverage, defaultRegion]);
+  const inSync =
+    explicitFilters ||
+    (preferred === null && !preferencesPending) ||
+    (preferred !== null &&
+      toSearchParams(preferred, defaultRegion).toString() ===
+        searchParams.toString());
+  const [wasReady, setWasReady] = useState(false);
+  if (inSync && !wasReady) {
+    setWasReady(true);
+  }
+  const ready = wasReady || inSync;
+
+  useEffect(() => {
+    if (preferencesApplied.current || !preferred) {
+      return;
+    }
+    preferencesApplied.current = true;
+    if (explicitFilters) {
+      return;
+    }
+    const params = toSearchParams(preferred, defaultRegion);
     if (fixedMap) {
       params.delete("map");
     }
@@ -75,17 +94,17 @@ export function useFilterState(
       setSearchParams(params, { replace: true });
     }
   }, [
-    preferences,
+    preferred,
+    explicitFilters,
     searchParams,
     fixedMap,
     preservedParams,
-    coverage,
     defaultRegion,
     setSearchParams,
   ]);
 
   const update = useCallback(
-    (patch: Partial<StatsFilters>) => {
+    (patch: Partial<StatsFilters>, options: { replace?: boolean } = {}) => {
       const next = applyCoverage({ ...filters, ...patch }, coverage);
       if (next.queue === "QUICK_PLAY") {
         next.tier = "ALL";
@@ -98,7 +117,7 @@ export function useFilterState(
         params.delete("map");
       }
       keepPreserved(params, searchParams, preservedParams);
-      setSearchParams(params);
+      setSearchParams(params, { replace: options.replace });
     },
     [
       filters,
@@ -115,13 +134,25 @@ export function useFilterState(
   const changeSort = useCallback(
     (sort: StatsSort) => {
       if (filters.sort === sort) {
-        update({ direction: filters.direction === "ASC" ? "DESC" : "ASC" });
+        update(
+          { direction: filters.direction === "ASC" ? "DESC" : "ASC" },
+          { replace: true },
+        );
       } else {
-        update({ sort, direction: sort === "NAME" ? "ASC" : "DESC" });
+        update(
+          { sort, direction: sort === "NAME" ? "ASC" : "DESC" },
+          { replace: true },
+        );
       }
     },
     [filters.sort, filters.direction, update],
   );
 
-  return { filters, update, changeSort, key: searchParams.toString() };
+  return {
+    filters,
+    update,
+    changeSort,
+    ready,
+    key: JSON.stringify(filters),
+  };
 }

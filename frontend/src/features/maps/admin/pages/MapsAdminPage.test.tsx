@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { gameMap } from "../../../../test/fixtures/maps";
 import { renderWithRouter } from "../../../../test/render";
 
 vi.mock("../api/mapsAdminApi", () => ({
@@ -19,9 +20,9 @@ describe("MapsAdminPage", () => {
     vi.mocked(fetchAdminMaps).mockResolvedValue([
       { slug: "numbani", name: "Numbani", imageUrl: null, mode: "HYBRID" },
       { slug: "ilios", name: "Ilios", imageUrl: null, mode: null },
-    ] as never);
+    ]);
     vi.mocked(updateMap).mockReset();
-    vi.mocked(updateMap).mockResolvedValue({} as never);
+    vi.mocked(updateMap).mockResolvedValue(gameMap());
   });
 
   it("lists maps with their mode", async () => {

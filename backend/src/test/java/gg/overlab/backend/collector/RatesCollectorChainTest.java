@@ -54,7 +54,7 @@ class RatesCollectorChainTest {
                 mock(MapDiscoveryService.class));
         service = new RatesCollectorService(properties, snapshotCollector, mapSlugResolver,
                 new JobChain(properties, runRepository), mock(CacheEviction.class), runRepository, metrics,
-                Runnable::run);
+                Runnable::run, CollectorFixtures.openLock());
         when(runRepository.save(any(CollectorRun.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(client.fetch(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new RatesFetch(CollectorFixtures.rates(5), "etag", false));

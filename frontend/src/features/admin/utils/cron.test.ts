@@ -30,6 +30,12 @@ describe("describeInterval", () => {
     expect(describeInterval("PT168H")).toBe("7 days");
   });
 
+  it("describes minutes instead of fractions of an hour", () => {
+    expect(describeInterval("PT1M")).toBe("minute");
+    expect(describeInterval("PT15M")).toBe("15 minutes");
+    expect(describeInterval("PT90M")).toBe("90 minutes");
+  });
+
   it("describes hours", () => {
     expect(describeInterval("PT6H")).toBe("6 hours");
   });

@@ -20,7 +20,7 @@ export function ChangeView({ action, changes }: ChangeViewProps) {
     return null;
   }
   return (
-    <ul className="changes">
+    <ul className="audit-changes">
       {Object.entries(changes).map(([field, value]) => (
         <li key={field}>
           <strong>{splitWords(field)}</strong>:{" "}

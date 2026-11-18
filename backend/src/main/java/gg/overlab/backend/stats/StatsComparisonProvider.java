@@ -26,7 +26,7 @@ public class StatsComparisonProvider {
     private final StatsMapper statsMapper;
 
     @Cacheable(value = CacheNames.STATS,
-            key = "'compare:' + #filter.cacheKey() + ':' + #beforeCapturedAt + ':' + #afterCapturedAt")
+            key = "'compare:' + #filter.cacheKey() + ':' + #beforeCapturedAt + ':' + #afterCapturedAt", sync = true)
     @Transactional(readOnly = true)
     public StatsComparisonDto compareCaptures(StatsFilter filter, Instant beforeCapturedAt, Instant afterCapturedAt) {
         Map<Long, HeroStat> beforeByHero = new HashMap<>();

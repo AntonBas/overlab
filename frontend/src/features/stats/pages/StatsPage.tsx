@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import { HeroHighlights } from "../../../components/ui/HeroHighlights";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -12,6 +12,7 @@ import {
   useStructuredData,
 } from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
+import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
 import { fetchMaps } from "../../maps";
 import { fetchStats } from "../api/statsApi";
@@ -20,12 +21,13 @@ import { StatsFilters } from "../components/StatsFilters";
 import { StatsTable } from "../components/StatsTable";
 import { ALL_MAPS, isQuickPlay } from "../filters";
 import { useFilterState } from "../hooks/useFilterState";
+import { statsHighlights } from "../utils/highlights";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function StatsPage() {
-  usePageTitle("Overwatch hero win, pick and ban rates");
-  usePageDescription(
-    "Overwatch hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
-  );
+  const page = staticSeoPage("/stats");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -35,11 +37,15 @@ export function StatsPage() {
       window.location.origin,
     ),
   );
-  const { filters, update, changeSort, key } = useFilterState();
-  const [search, setSearch] = useState("");
+  const { filters, update, changeSort, ready, key } = useFilterState(
+    undefined,
+    SEARCH_PARAMS,
+  );
+  const [search, setSearch] = useUrlParam("q");
   const maps = useFetch(fetchMaps, []);
-  const stats = useFetch(() => fetchStats(filters), [key], {
+  const stats = useFetch((signal) => fetchStats(filters, signal), [key], {
     keepPrevious: true,
+    enabled: ready,
   });
 
   const showDelta = filters.map !== ALL_MAPS;
@@ -61,6 +67,8 @@ export function StatsPage() {
                 platform={filters.platform}
                 region={filters.region}
               />
+              {showDelta &&
+                " Small numbers show how each rate differs from its all-maps value."}
             </>
           ) : (
             "Win, pick and ban rates collected from Blizzard's public statistics"
@@ -73,6 +81,20 @@ export function StatsPage() {
           />
         }
       />
+      {!snapshot && stats.loading && (
+        <div
+          className="hero-highlights hero-highlights--placeholder"
+          aria-hidden="true"
+        />
+      )}
+      {snapshot && (
+        <HeroHighlights
+          items={statsHighlights(snapshot.heroes, !isQuickPlay(filters))}
+          heroLinkSuffix={
+            filters.queue === "QUICK_PLAY" ? "?queue=quick_play" : ""
+          }
+        />
+      )}
       <StatsFilters
         filters={filters}
         maps={maps.data ?? []}
@@ -80,10 +102,10 @@ export function StatsPage() {
         search={search}
         onSearchChange={setSearch}
       />
-      {stats.loading && <TableSkeleton label="Loading statistics" />}
+      {stats.loading && <TableSkeleton label="Loading statistics" tall />}
       {stats.error &&
         (stats.error.status === 404 ? (
-          <EmptyState>
+          <EmptyState kind="waiting">
             No statistics have been collected for this combination yet. Map
             statistics are collected once a week.
           </EmptyState>
@@ -101,7 +123,9 @@ export function StatsPage() {
               : `${visibleHeroes.length} heroes shown`}
           </p>
           {visibleHeroes.length === 0 ? (
-            <EmptyState>No heroes match these filters.</EmptyState>
+            <EmptyState kind="no-match">
+              No heroes match these filters.
+            </EmptyState>
           ) : (
             <StatsTable
               heroes={visibleHeroes}
@@ -114,11 +138,6 @@ export function StatsPage() {
                 filters.queue === "QUICK_PLAY" ? "?queue=quick_play" : ""
               }
             />
-          )}
-          {showDelta && (
-            <p className="muted footnote">
-              Small numbers show how each rate differs from its all-maps value.
-            </p>
           )}
         </div>
       )}

@@ -5,46 +5,8 @@
   margin-inline: auto;
 }
 
-.settings-section .button {
-  justify-self: start;
-}
-
 .settings .form > .button {
   align-self: flex-start;
-}
-
-.settings-section {
-  display: grid;
-  gap: var(--space-12);
-  padding: var(--space-24);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.settings-section h2 {
-  margin: 0;
-  font-size: var(--font-size-xl);
-}
-
-.settings-section > .muted {
-  margin: 0;
-}
-
-.link-list {
-  display: grid;
-  gap: var(--space-8);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.link-list li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
 }
 
 .account-header {
@@ -136,6 +98,7 @@
 }
 
 .account-tab:hover {
+  background: var(--hover-wash);
   color: var(--text);
 }
 
@@ -149,10 +112,6 @@
     gap: var(--space-16);
   }
 
-  .settings-section {
-    padding: var(--space-16);
-  }
-
   .account-header__body {
     padding: var(--space-16);
   }
@@ -163,9 +122,5 @@
 
   .account-header__tabs {
     padding-inline: var(--space-8);
-  }
-
-  .settings-section .button {
-    justify-self: stretch;
   }
 }

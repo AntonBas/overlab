@@ -1,3 +1,5 @@
+import { FormError } from "../../../components/ui/FormError";
+import { useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
@@ -11,12 +13,20 @@ export function VerifyEmailPage() {
   useNoIndex();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
-  const result = useFetch(async () => {
+  const sent = useRef<{ token: string; request: Promise<boolean> } | null>(
+    null,
+  );
+  const result = useFetch(() => {
     if (!token) {
-      throw new Error("The confirmation link is incomplete.");
+      return Promise.reject(new Error("The confirmation link is incomplete."));
     }
-    await verifyEmail(token);
-    return true;
+    if (sent.current?.token !== token) {
+      sent.current = {
+        token,
+        request: verifyEmail(token).then(() => true),
+      };
+    }
+    return sent.current.request;
   }, [token]);
 
   return (
@@ -28,10 +38,12 @@ export function VerifyEmailPage() {
         </p>
       )}
       {result.error && (
-        <p className="form__error" role="alert">
-          This confirmation link is invalid or has expired.{" "}
+        <FormError>
+          {token === ""
+            ? "This confirmation link is incomplete."
+            : "This confirmation link is invalid or has expired."}{" "}
           <Link to="/login">Sign in</Link> to request a new one.
-        </p>
+        </FormError>
       )}
     </AuthLayout>
   );

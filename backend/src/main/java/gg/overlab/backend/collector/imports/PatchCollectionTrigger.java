@@ -3,6 +3,7 @@ package gg.overlab.backend.collector.imports;
 import gg.overlab.backend.collector.CollectorJob;
 import gg.overlab.backend.collector.RatesCollectorService;
 import gg.overlab.backend.collector.run.CollectorTrigger;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.config.async.AsyncConfig;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,14 +23,17 @@ public class PatchCollectionTrigger {
     private final HeroContentImportService perkImportService;
     private final TaskExecutor executor;
     private final Duration recentWindow;
+    private final ScheduledJobLock jobLock;
 
     public PatchCollectionTrigger(RatesCollectorService collectorService, HeroContentImportService perkImportService,
                                   @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor,
-                                  @Value("${collector.patch-import.recent-days:7}") int recentDays) {
+                                  @Value("${collector.patch-import.recent-days:7}") int recentDays,
+                                 ScheduledJobLock jobLock) {
         this.collectorService = collectorService;
         this.perkImportService = perkImportService;
         this.executor = executor;
         this.recentWindow = Duration.ofDays(recentDays);
+        this.jobLock = jobLock;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -41,7 +45,7 @@ public class PatchCollectionTrigger {
             return;
         }
         log.info("A new patch was released, starting a full collection");
-        executor.execute(this::collectEverything);
+        executor.execute(() -> jobLock.runExclusively("patch-collection", this::collectEverything));
     }
 
     void collectEverything() {

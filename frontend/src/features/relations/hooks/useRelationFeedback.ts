@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toFailure } from "../../../services/api";
 import { useAuth } from "../../auth";
 import {
@@ -92,7 +92,11 @@ export function useRelationVotes(): RelationVotes {
           });
         }
       })
-      .catch(() => undefined);
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setFailure(toFailure(error).message);
+        }
+      });
     return () => {
       cancelled = true;
     };
@@ -104,6 +108,8 @@ export function useRelationVotes(): RelationVotes {
     [votes],
   );
 
+  const inFlight = useRef(new Set<string>());
+
   const vote = useCallback(
     async (
       heroSlug: string,
@@ -112,6 +118,10 @@ export function useRelationVotes(): RelationVotes {
       value: RelationVoteValue,
     ) => {
       const key = pairKey(heroSlug, relatedHeroSlug, type);
+      if (inFlight.current.has(key)) {
+        return;
+      }
+      inFlight.current.add(key);
       const previous = votes.get(key) ?? null;
       const next = previous === value ? null : value;
       const apply = (applied: RelationVoteValue | null) =>
@@ -142,6 +152,8 @@ export function useRelationVotes(): RelationVotes {
       } catch (error) {
         apply(previous);
         setFailure(toFailure(error).message);
+      } finally {
+        inFlight.current.delete(key);
       }
     },
     [userId, votes],

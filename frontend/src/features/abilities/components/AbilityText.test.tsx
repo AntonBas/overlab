@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import type { Ability } from "../../../types/hero";
 import { AbilitiesContext, abilityKey } from "../context/abilitiesContext";
@@ -6,6 +7,8 @@ import { AbilityText } from "./AbilityText";
 
 const defenseMatrix: Ability = {
   heroSlug: "dva",
+  heroName: "D.Va",
+  heroPortraitUrl: null,
   slug: "defense-matrix",
   name: "Defense Matrix",
   description: "Shoot incoming projectiles out of the air.",
@@ -18,7 +21,9 @@ function renderText(text: string) {
     <AbilitiesContext.Provider
       value={new Map([[abilityKey("dva", "defense-matrix"), defenseMatrix]])}
     >
-      <AbilityText text={text} />
+      <MemoryRouter>
+        <AbilityText text={text} />
+      </MemoryRouter>
     </AbilitiesContext.Provider>,
   );
 }
@@ -33,13 +38,17 @@ describe("AbilityText", () => {
   it("replaces a known token with a chip that describes the ability", () => {
     renderText("Eats projectiles with [[dva/defense-matrix]] every time.");
 
-    expect(
-      screen.getByRole("button", { name: "Defense Matrix" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("tooltip")).toHaveTextContent(
+    const [chip] = screen.getAllByText("Defense Matrix");
+    expect(chip).toHaveAttribute("tabindex", "0");
+    expect(chip).toHaveAccessibleDescription(/Shoot incoming projectiles/);
+    expect(screen.getByRole("dialog")).toHaveTextContent(
       "Shoot incoming projectiles out of the air.",
     );
-    expect(screen.getByRole("tooltip")).toHaveTextContent("Ability 2");
+    expect(screen.getByRole("dialog")).toHaveTextContent("E");
+    expect(screen.getByRole("link", { name: "D.Va" })).toHaveAttribute(
+      "href",
+      "/heroes/dva",
+    );
     expect(screen.getByText(/every time\./)).toBeInTheDocument();
   });
 

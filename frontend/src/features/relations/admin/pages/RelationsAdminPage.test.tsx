@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../../test/render";
+import { heroRelation } from "../../../../test/fixtures/admin";
 
 vi.mock("../../../heroes/admin/api/heroesAdminApi", () => ({
   fetchAdminHeroes: vi.fn(() =>
@@ -26,13 +27,7 @@ import {
 } from "../api/relationsAdminApi";
 import { RelationsAdminPage } from "./RelationsAdminPage";
 
-const relation = {
-  id: 9,
-  heroSlug: "ana",
-  relatedHeroSlug: "reaper",
-  type: "COUNTER",
-  note: null,
-};
+const relation = heroRelation();
 
 async function pickHero(label: string, name: string) {
   await userEvent.click(screen.getByRole("combobox", { name: label }));
@@ -42,11 +37,11 @@ async function pickHero(label: string, name: string) {
 describe("RelationsAdminPage", () => {
   beforeEach(() => {
     vi.mocked(fetchRelations).mockReset();
-    vi.mocked(fetchRelations).mockResolvedValue([relation] as never);
+    vi.mocked(fetchRelations).mockResolvedValue([relation]);
     vi.mocked(createRelation).mockReset();
-    vi.mocked(createRelation).mockResolvedValue(relation as never);
+    vi.mocked(createRelation).mockResolvedValue(relation);
     vi.mocked(deleteRelation).mockReset();
-    vi.mocked(deleteRelation).mockResolvedValue(undefined as never);
+    vi.mocked(deleteRelation).mockResolvedValue(undefined);
   });
 
   it("lists relations with hero names", async () => {

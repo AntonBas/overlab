@@ -1,7 +1,8 @@
 package gg.overlab.backend.collector.imports;
 
-import lombok.RequiredArgsConstructor;
+import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -10,23 +11,35 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @ConditionalOnProperty(name = "collector.patch-import.enabled", havingValue = "true", matchIfMissing = true)
 public class PatchImportScheduler {
 
     private final PatchImportService importService;
+    private final Duration startupStaleAfter;
+
+    public PatchImportScheduler(PatchImportService importService,
+                                @Value("${collector.patch-import.startup-stale-after:7d}") Duration startupStaleAfter) {
+        this.importService = importService;
+        this.startupStaleAfter = startupStaleAfter;
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void runOnStartup() {
-        run();
+        if (importService.isStale(startupStaleAfter)) {
+            start();
+        }
     }
 
     @Scheduled(cron = "${collector.patch-import.cron:0 45 3 * * *}")
     public void run() {
+        start();
+    }
+
+    private void start() {
         try {
-            importService.importNew();
+            importService.startAsync();
         } catch (RuntimeException exception) {
-            log.error("Patch import failed", exception);
+            log.warn("Patch import was not started: {}", exception.getMessage());
         }
     }
 }

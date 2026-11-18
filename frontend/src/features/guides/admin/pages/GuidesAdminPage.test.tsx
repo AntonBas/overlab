@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { guide } from "../../../../test/fixtures/guides";
 import { renderWithRouter } from "../../../../test/render";
 
 vi.mock("../api/guidesAdminApi", () => ({
@@ -27,17 +28,16 @@ vi.mock("../components/GuideForm", () => ({
 import { deleteGuide, fetchAdminGuides } from "../api/guidesAdminApi";
 import { GuidesAdminPage } from "./GuidesAdminPage";
 
-function guide(id: number, title: string, heroSlug: string) {
-  return {
+function guideRow(id: number, title: string, heroSlug: string) {
+  return guide({
     id,
     title,
     heroSlug,
     heroName: heroSlug,
-    mapName: null,
     path: `guide-${id}`,
     sortOrder: id,
     published: id === 1,
-  };
+  });
 }
 
 async function pickHero(label: string, name: string) {
@@ -49,11 +49,11 @@ describe("GuidesAdminPage", () => {
   beforeEach(() => {
     vi.mocked(fetchAdminGuides).mockReset();
     vi.mocked(fetchAdminGuides).mockResolvedValue([
-      guide(1, "Ana nade", "ana"),
-      guide(2, "Reaper flank", "reaper"),
-    ] as never);
+      guideRow(1, "Ana nade", "ana"),
+      guideRow(2, "Reaper flank", "reaper"),
+    ]);
     vi.mocked(deleteGuide).mockReset();
-    vi.mocked(deleteGuide).mockResolvedValue(undefined as never);
+    vi.mocked(deleteGuide).mockResolvedValue(undefined);
   });
 
   it("lists guides and filters them by hero", async () => {

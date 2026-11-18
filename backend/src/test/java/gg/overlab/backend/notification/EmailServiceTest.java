@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Properties;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,10 +31,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 class EmailServiceTest {
 
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final EmailService service = new EmailService(mailSender, AuthFixtures.properties(),
-            "https://overlabgg.com", "contact@overlabgg.com", Duration.ZERO, Runnable::run);
+            "https://overlabgg.com", "contact@overlabgg.com", Duration.ZERO, Runnable::run, meterRegistry);
     private final EmailService serviceWithoutContact = new EmailService(mailSender, AuthFixtures.properties(),
-            "https://overlabgg.com", "", Duration.ZERO, Runnable::run);
+            "https://overlabgg.com", "", Duration.ZERO, Runnable::run, meterRegistry);
     private final User user = AuthFixtures.user(1, "ana@overlab.gg", UserRole.USER, false);
 
     @BeforeEach
@@ -107,6 +109,7 @@ class EmailServiceTest {
         service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
 
         verify(mailSender, times(3)).send(any(MimeMessage.class));
+        assertThat(meterRegistry.counter("mail.failed").count()).isEqualTo(1.0);
     }
 
     @Test
@@ -116,6 +119,7 @@ class EmailServiceTest {
         service.sendPasswordReset(user.toEmailRecipient(), "reset-token");
 
         verify(mailSender, times(2)).send(any(MimeMessage.class));
+        assertThat(meterRegistry.counter("mail.failed").count()).isZero();
     }
 
     @Test

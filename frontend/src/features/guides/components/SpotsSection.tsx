@@ -1,122 +1,113 @@
+import type { CSSProperties } from "react";
 import { useState } from "react";
+import { Carousel } from "../../../components/ui/Carousel";
 import { EmptyState } from "../../../components/ui/EmptyState";
-import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { IconSelect } from "../../../components/ui/IconSelect";
-import type { IconSelectOption } from "../../../components/ui/IconSelect";
-import { ModeIcon } from "../../../components/ui/ModeIcon";
+import { SectionLink } from "../../../components/ui/SectionLink";
 import { useHeroPortraits, useMapVisuals } from "../../../hooks/useCatalog";
-import type { Guide, GuideKind } from "../../../types/guide";
-import { GUIDE_KIND_LABELS, GUIDE_KINDS } from "../labels";
-import { SpotRail } from "./SpotRail";
+import type { Guide } from "../../../types/guide";
+import {
+  ALL,
+  heroOptions,
+  kindOptions as buildKindOptions,
+  mapOptions,
+} from "../utils/spotFilterOptions";
+import { SpotCard } from "./SpotCard";
 
 type GroupBy = "hero" | "map" | "none";
 
-const ALL = "all";
+const SPOTS_PER_ROW = 3;
+const SPOT_ROWS = 2;
 
 interface SpotsSectionProps {
   title: string;
+  description?: string;
   guides: Guide[];
   groupBy: GroupBy;
   emptyMessage: string;
-}
-
-interface Group {
-  key: string;
-  label: string;
-  count: number;
-}
-
-function groupOf(guide: Guide, groupBy: GroupBy): Omit<Group, "count"> | null {
-  if (groupBy === "hero") {
-    return { key: guide.heroSlug, label: guide.heroName };
-  }
-  if (groupBy === "map") {
-    return { key: guide.mapSlug ?? "", label: guide.mapName ?? "Any map" };
-  }
-  return null;
+  expanded?: boolean;
+  moreHref?: string;
+  moreLabel?: string;
 }
 
 function groupKey(guide: Guide, groupBy: GroupBy): string {
-  return groupOf(guide, groupBy)?.key ?? "";
+  if (groupBy === "hero") {
+    return guide.heroSlug;
+  }
+  return groupBy === "map" ? (guide.mapSlug ?? "") : "";
 }
 
 export function SpotsSection({
   title,
+  description,
   guides,
   groupBy,
   emptyMessage,
+  expanded = false,
+  moreHref,
+  moreLabel = "All guides",
 }: SpotsSectionProps) {
   const [groupFilter, setGroupFilter] = useState<string>(ALL);
   const [kindFilter, setKindFilter] = useState<string>(ALL);
   const heroPortraits = useHeroPortraits();
   const mapVisuals = useMapVisuals();
 
-  const groups = new Map<string, Group>();
-  guides.forEach((guide) => {
-    const group = groupOf(guide, groupBy);
-    if (group) {
-      const known = groups.get(group.key);
-      groups.set(group.key, { ...group, count: (known?.count ?? 0) + 1 });
-    }
-  });
-  const sortedGroups = [...groups.values()].sort((first, second) =>
-    first.label.localeCompare(second.label),
-  );
-  const kinds = GUIDE_KINDS.filter((kind) =>
-    guides.some((guide) => guide.kind === kind),
-  );
   const visible = guides.filter(
     (guide) =>
       (groupFilter === ALL || groupKey(guide, groupBy) === groupFilter) &&
       (kindFilter === ALL || guide.kind === kindFilter),
   );
 
-  const groupLabel = groupBy === "hero" ? "Hero" : "Map";
-  const allGroupsLabel = groupBy === "hero" ? "All heroes" : "All maps";
-  const groupOptions: IconSelectOption<string>[] = [
-    {
-      value: ALL,
-      label: `${allGroupsLabel} (${guides.length})`,
-    },
-    ...sortedGroups.map((group) => ({
-      value: group.key,
-      label: `${group.label} (${group.count})`,
-      icon:
-        groupBy === "hero" ? (
-          <HeroPortrait
-            name={group.label}
-            url={heroPortraits[group.key] ?? null}
-            size={20}
-          />
-        ) : mapVisuals[group.key]?.mode ? (
-          <ModeIcon mode={mapVisuals[group.key].mode ?? "CONTROL"} />
-        ) : undefined,
-    })),
-  ];
-  const kindOptions: IconSelectOption<string>[] = [
-    { value: ALL, label: "All types" },
-    ...kinds.map((kind: GuideKind) => ({
-      value: kind,
-      label: `${GUIDE_KIND_LABELS[kind]} (${guides.filter((guide) => guide.kind === kind).length})`,
-    })),
-  ];
-  const showGroupSelect = groups.size > 1;
-  const showKindSelect = kinds.length > 1;
+  const groupOptions =
+    groupBy === "hero"
+      ? heroOptions(guides, heroPortraits)
+      : mapOptions(guides, mapVisuals);
+  const kindOptions = buildKindOptions(guides);
+  const filtered = groupFilter !== ALL || kindFilter !== ALL;
+
+  function changeGroup(value: string) {
+    setGroupFilter(value);
+  }
+
+  function changeKind(value: string) {
+    setKindFilter(value);
+  }
+
+  function resetFilters() {
+    changeGroup(ALL);
+    changeKind(ALL);
+  }
+  const showGroupSelect = groupBy !== "none" && groupOptions.length > 2;
+  const showKindSelect = kindOptions.length > 2;
 
   return (
-    <section className="section" aria-labelledby="spots-heading">
-      <div className="section__heading">
-        <h2 id="spots-heading">{title}</h2>
-      </div>
+    <section
+      className="section"
+      aria-labelledby={expanded ? undefined : "spots-heading"}
+      aria-label={expanded ? title : undefined}
+    >
+      {!expanded && (
+        <div className="section__heading">
+          <div className="section__title">
+            <h2 id="spots-heading">{title}</h2>
+            {description && (
+              <p className="muted section__description">{description}</p>
+            )}
+          </div>
+          {moreHref && guides.length > SPOTS_PER_ROW * SPOT_ROWS && (
+            <SectionLink to={moreHref}>{moreLabel}</SectionLink>
+          )}
+        </div>
+      )}
       {(showGroupSelect || showKindSelect) && (
         <div className="spot-filters">
           {showGroupSelect && (
             <IconSelect
-              label={groupLabel}
+              label={groupBy === "hero" ? "Hero" : "Map"}
               value={groupFilter}
               options={groupOptions}
               searchable
-              onChange={setGroupFilter}
+              onChange={changeGroup}
             />
           )}
           {showKindSelect && (
@@ -124,7 +115,7 @@ export function SpotsSection({
               label="Type"
               value={kindFilter}
               options={kindOptions}
-              onChange={setKindFilter}
+              onChange={changeKind}
             />
           )}
         </div>
@@ -132,15 +123,59 @@ export function SpotsSection({
       {guides.length === 0 ? (
         <EmptyState>{emptyMessage}</EmptyState>
       ) : visible.length === 0 ? (
-        <EmptyState>No spots match these filters.</EmptyState>
+        <EmptyState kind="no-match">
+          No spots match these filters.{" "}
+          <button type="button" className="link-button" onClick={resetFilters}>
+            Reset filters
+          </button>
+        </EmptyState>
       ) : (
-        <SpotRail
-          guides={visible}
-          showHero={groupBy === "hero"}
-          showMap={groupBy !== "hero"}
-          heroPortraits={heroPortraits}
-          mapVisuals={mapVisuals}
-        />
+        <>
+          {filtered && (
+            <p className="muted spot-count">
+              {visible.length} of {guides.length} spots
+            </p>
+          )}
+          {expanded ? (
+            <ul className="spot-grid">
+              {visible.map((guide, index) => (
+                <li
+                  key={guide.id}
+                  className="reveal"
+                  style={{ "--i": index } as CSSProperties}
+                >
+                  <SpotCard
+                    guide={guide}
+                    showHero={groupBy === "hero"}
+                    showMap={groupBy !== "hero"}
+                    heroPortraits={heroPortraits}
+                    mapVisuals={mapVisuals}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Carousel
+              items={visible.map((guide) => ({
+                key: guide.id,
+                content: (
+                  <SpotCard
+                    guide={guide}
+                    showHero={groupBy === "hero"}
+                    showMap={groupBy !== "hero"}
+                    heroPortraits={heroPortraits}
+                    mapVisuals={mapVisuals}
+                  />
+                ),
+              }))}
+              itemsPerView={SPOTS_PER_ROW}
+              rows={SPOT_ROWS}
+              previousLabel="Previous spots"
+              nextLabel="Next spots"
+              resetKey={`${groupFilter}|${kindFilter}`}
+            />
+          )}
+        </>
       )}
     </section>
   );

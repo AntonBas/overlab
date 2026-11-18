@@ -8,6 +8,7 @@ import gg.overlab.backend.collector.parser.ParsedAbility;
 import gg.overlab.backend.hero.Hero;
 import gg.overlab.backend.hero.HeroRepository;
 import gg.overlab.backend.hero.HeroRole;
+import gg.overlab.backend.hero.ability.AbilityControl;
 import gg.overlab.backend.hero.ability.HeroAbility;
 import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import java.util.List;
@@ -53,6 +54,25 @@ class AbilityImportWriterIntegrationTest {
         assertThat(counts.created()).isEqualTo(1);
         assertThat(abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test"))
                 .extracting(HeroAbility::getSlug).containsExactly("dash", "new-gun");
+    }
+
+    @Test
+    void movesTheCuratedControlToTheRenamedAbilityAndKeepsAbilitiesItCannotMove() {
+        writer.write("ability-test", List.of(parsed("old-dash", "Dash", 0), parsed("old-gun", "Old Gun", 1)),
+                url -> Optional.empty());
+        for (HeroAbility ability : abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test")) {
+            ability.setControl(AbilityControl.values()[0]);
+            abilityRepository.save(ability);
+        }
+
+        ImportCounts counts = writer.write("ability-test",
+                List.of(parsed("dash", "Dash", 0), parsed("new-gun", "New Gun", 1)), url -> Optional.empty());
+
+        assertThat(counts.removed()).isEqualTo(1);
+        List<HeroAbility> remaining = abilityRepository.findAllByHeroSlugOrderBySortOrderAsc("ability-test");
+        assertThat(remaining).extracting(HeroAbility::getSlug).containsExactlyInAnyOrder("dash", "new-gun", "old-gun");
+        assertThat(remaining.stream().filter(ability -> ability.getSlug().equals("dash")).findFirst().orElseThrow()
+                .getControl()).isEqualTo(AbilityControl.values()[0]);
     }
 
     @Test

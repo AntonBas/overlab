@@ -16,4 +16,10 @@ describe("useNoIndex", () => {
 
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
   });
+
+  it("adds nothing while it is inactive", () => {
+    renderHook(() => useNoIndex(false));
+
+    expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
+  });
 });

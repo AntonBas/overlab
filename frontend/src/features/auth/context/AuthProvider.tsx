@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { remainingSpinnerTime } from "../../../components/ui/spinnerTiming";
 import type { User } from "../../../types/user";
 import * as authApi from "../api/authApi";
 import { AuthContext } from "./authContext";
@@ -15,6 +16,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let holdTimer: number | undefined;
+    const startedAt = Date.now();
     authApi
       .fetchCurrentUser()
       .then((current) => {
@@ -29,11 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => {
         if (!cancelled) {
-          setLoading(false);
+          holdTimer = window.setTimeout(
+            () => setLoading(false),
+            remainingSpinnerTime(Date.now() - startedAt),
+          );
         }
       });
     return () => {
       cancelled = true;
+      window.clearTimeout(holdTimer);
     };
   }, []);
 

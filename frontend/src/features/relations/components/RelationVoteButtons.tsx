@@ -34,23 +34,23 @@ export function RelationVoteButtons({
     <span className="vote-buttons">
       <button
         type="button"
-        className="vote-buttons__button"
+        className="icon-button vote-buttons__button--up"
         aria-pressed={current === "UP"}
         aria-label={`Agree with ${relatedHeroName}`}
         title="I agree"
         onClick={() => vote("UP")}
       >
-        <ThumbsUp size={14} aria-hidden="true" />
+        <ThumbsUp size={16} aria-hidden="true" />
       </button>
       <button
         type="button"
-        className="vote-buttons__button"
+        className="icon-button vote-buttons__button--down"
         aria-pressed={current === "DOWN"}
         aria-label={`Disagree with ${relatedHeroName}`}
         title="I disagree"
         onClick={() => vote("DOWN")}
       >
-        <ThumbsDown size={14} aria-hidden="true" />
+        <ThumbsDown size={16} aria-hidden="true" />
       </button>
       {feedback.failure && (
         <span className="form-field__error" role="alert">

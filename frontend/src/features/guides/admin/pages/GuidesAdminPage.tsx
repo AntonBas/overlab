@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
@@ -47,29 +49,30 @@ export function GuidesAdminPage() {
 
   return (
     <>
-      <PageHeader
-        title="Guides"
-        actions={
+      <PageHeader title="Guides" />
+      <div className="table-search">
+        {heroes.data && (
+          <HeroSelect
+            label="Filter by hero"
+            value={filter}
+            heroes={heroes.data}
+            allLabel="All heroes"
+            onChange={setFilter}
+          />
+        )}
+        <div className="table-search__action">
           <button
             type="button"
             className="button"
             onClick={() => setEditing("new")}
           >
+            <Plus size={16} aria-hidden="true" />
             New guide
           </button>
-        }
-      />
-      {heroes.data && (
-        <HeroSelect
-          label="Filter by hero"
-          value={filter}
-          heroes={heroes.data}
-          allLabel="All heroes"
-          onChange={setFilter}
-        />
-      )}
+        </div>
+      </div>
       <StatusMessage error={removal.error} />
-      {guides.loading && <Spinner />}
+      {guides.loading && <Spinner label="Loading guides" />}
       {guides.error && (
         <ErrorMessage failure={guides.error} onRetry={guides.reload} />
       )}
@@ -103,22 +106,18 @@ export function GuidesAdminPage() {
             {
               header: "",
               render: (guide) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(guide)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(guide)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

@@ -3,7 +3,6 @@ package gg.overlab.backend.seo;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.MapService;
 import gg.overlab.backend.gamemap.dto.MapDto;
-import gg.overlab.backend.guide.GuidePath;
 import gg.overlab.backend.guide.GuideService;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.hero.HeroService;
@@ -19,9 +18,8 @@ public class SeoPageResolver {
     static final String SITE_NAME = StaticSeoPage.SITE_NAME;
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
-    private static final Pattern PAGE_PATH = Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)$");
-    private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
-    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+    private static final Pattern PAGE_PATH =
+            Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)(?:/(perks|counters|maps|guides))?$");
 
     private final HeroService heroService;
     private final MapService mapService;
@@ -39,18 +37,16 @@ public class SeoPageResolver {
     }
 
     public static String cacheKey(String requestedPath) {
-        String path = normalize(requestedPath);
-        Matcher matcher = PAGE_PATH.matcher(path);
-        if (matcher.matches() && "guides".equals(matcher.group(1))) {
-            return GuidePath.parseId(matcher.group(2)).map(id -> "/guides/" + id).orElse(path);
-        }
-        return path;
+        return normalize(requestedPath);
     }
 
     public Optional<SeoPage> resolve(String requestedPath) {
         String path = normalize(requestedPath);
         Optional<StaticSeoPage> fixed = StaticSeoPage.find(path);
         if (fixed.isPresent()) {
+            if ("/guides".equals(path) && contentBuilder.guideHub().isEmpty()) {
+                return Optional.empty();
+            }
             return fixed.map(this::staticPage);
         }
         Matcher matcher = PAGE_PATH.matcher(path);
@@ -59,6 +55,13 @@ public class SeoPageResolver {
         }
         String section = matcher.group(1);
         String key = matcher.group(2);
+        if (matcher.group(3) != null) {
+            return switch (section) {
+                case "heroes" -> heroSubPage(key, matcher.group(3));
+                case "maps" -> "guides".equals(matcher.group(3)) ? mapGuidesPage(key) : Optional.empty();
+                default -> Optional.empty();
+            };
+        }
         return switch (section) {
             case "heroes" -> heroPage(key);
             case "maps" -> mapPage(key);
@@ -84,7 +87,12 @@ public class SeoPageResolver {
     private List<SeoSection> staticSections(String path) {
         return switch (path) {
             case "/maps" -> contentBuilder.mapList();
+            case "/guides" -> contentBuilder.guideHub();
             case "/privacy", "/terms", "/cookies", "/business" -> List.of();
+            case "/stats" -> contentBuilder.statsOverview();
+            case "/counters" -> contentBuilder.countersOverview();
+            case "/perks" -> contentBuilder.perksOverview();
+            case "/changes" -> contentBuilder.changesOverview();
             default -> contentBuilder.heroList();
         };
     }
@@ -102,23 +110,93 @@ public class SeoPageResolver {
         });
     }
 
+    private Optional<SeoPage> heroSubPage(String slug, String kind) {
+        return heroService.findAll().stream().filter(hero -> hero.slug().equals(slug)).findFirst().flatMap(hero -> {
+            List<SeoSection> sections = switch (kind) {
+                case "perks" -> contentBuilder.heroPerks(hero);
+                case "counters" -> contentBuilder.heroCounters(hero);
+                case "guides" -> contentBuilder.heroGuides(hero);
+                default -> contentBuilder.heroMaps(hero);
+            };
+            if (sections.isEmpty()) {
+                return Optional.<SeoPage>empty();
+            }
+            String path = "/heroes/" + hero.slug() + "/" + kind;
+            String name = hero.name();
+            String title = switch (kind) {
+                case "perks" -> name + " perks: best Minor and Major perks";
+                case "counters" -> name + " counters and synergies";
+                case "guides" -> name + " guides: spots, setups and tips";
+                default -> "Best and worst maps for " + name;
+            };
+            String description = switch (kind) {
+                case "perks" -> "Best Overwatch " + name + " perks: every Minor and Major perk with a description,"
+                        + " a rating and why it is worth taking.";
+                case "counters" -> "Overwatch " + name + " counters: the heroes " + name + " is strong against,"
+                        + " the heroes that counter " + name + " and who works well with " + name + ".";
+                case "guides" -> "Overwatch " + name + " video guides: spots, setups, ultimates and tips for every"
+                        + " map.";
+                default -> "Best and worst Overwatch maps for " + name + ": win and pick rate on every map"
+                        + " compared with " + name + "'s average.";
+            };
+            String heading = switch (kind) {
+                case "perks" -> name + " perks";
+                case "counters" -> name + " counters and synergies";
+                case "guides" -> name + " guides";
+                default -> name + " maps";
+            };
+            String crumb = switch (kind) {
+                case "perks" -> "Perks";
+                case "counters" -> "Counters";
+                case "guides" -> "Guides";
+                default -> "Maps";
+            };
+            return Optional.of(new SeoPage(path, title, plain(description), "website", heading,
+                    List.of(breadcrumbList(List.of(new String[] {SITE_NAME, "/"},
+                            new String[] {"Heroes", "/heroes"},
+                            new String[] {name, "/heroes/" + hero.slug()},
+                            new String[] {crumb, path}))),
+                    sections));
+        });
+    }
+
+    private Optional<SeoPage> mapGuidesPage(String slug) {
+        try {
+            MapDto map = mapService.getBySlug(slug);
+            List<SeoSection> sections = contentBuilder.mapGuides(map);
+            if (sections.isEmpty()) {
+                return Optional.empty();
+            }
+            String path = "/maps/" + map.slug() + "/guides";
+            String description = "Overwatch " + map.name() + " video guides: spots, setups, ultimates and tips for"
+                    + " every hero on this map.";
+            return Optional.of(new SeoPage(path, map.name() + " guides: spots, setups and tips", plain(description),
+                    "website", map.name() + " guides",
+                    List.of(breadcrumbList(List.of(new String[] {SITE_NAME, "/"}, new String[] {"Maps", "/maps"},
+                            new String[] {map.name(), "/maps/" + map.slug()},
+                            new String[] {"Guides", path}))),
+                    sections));
+        } catch (EntityNotFoundException exception) {
+            return Optional.empty();
+        }
+    }
+
     private Optional<SeoPage> mapPage(String slug) {
         try {
             MapDto map = mapService.getBySlug(slug);
             String path = "/maps/" + map.slug();
             String description = map.name() + ": win, pick and ban rates of every Overwatch hero on this map.";
-            return Optional.of(new SeoPage(path, map.name(), description, "website", map.name(),
-                    List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
-                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name())));
+            String imagePath = map.imageUrl() == null || map.imageUrl().isBlank()
+                    || map.imageUrl().endsWith(".svg") || !map.imageUrl().startsWith("/") ? null : map.imageUrl();
+            return Optional.of(new SeoPage(path, map.name() + " Overwatch map: hero win and pick rates", description,
+                    "website", map.name(), List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
+                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name()), imagePath));
         } catch (EntityNotFoundException exception) {
             return Optional.empty();
         }
     }
 
     private Optional<SeoPage> guidePage(String key) {
-        if (GuidePath.parseId(key).isEmpty()) {
-            return Optional.empty();
-        }
         try {
             return Optional.of(toGuidePage(guideService.getPublishedByPath(key)));
         } catch (EntityNotFoundException exception) {
@@ -139,9 +217,7 @@ public class SeoPageResolver {
     }
 
     String plain(String text) {
-        String withoutLinks = LINK_MARKUP.matcher(text == null ? "" : text)
-                .replaceAll(match -> Matcher.quoteReplacement(match.group(1).replace('-', ' ')));
-        String readable = WHITESPACE.matcher(withoutLinks).replaceAll(" ").trim();
+        String readable = SeoContentBuilder.readable(text);
         return readable.length() > MAX_DESCRIPTION_LENGTH
                 ? readable.substring(0, MAX_DESCRIPTION_LENGTH - 1).stripTrailing() + "…" : readable;
     }

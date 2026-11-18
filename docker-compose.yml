@@ -5,6 +5,11 @@ services:
     build:
       context: .
       dockerfile: docker/caddy/Dockerfile
+      args:
+        VITE_SITE_URL: ${FRONTEND_URL:-http://localhost:5173}
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+        VITE_CONTROLLER_NAME: ${CONTROLLER_NAME:-}
+        VITE_CONTROLLER_ADDRESS: ${CONTROLLER_ADDRESS:-}
     container_name: overlab-edge
     restart: unless-stopped
     environment:
@@ -59,7 +64,7 @@ services:
       - overlab-net
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16-alpine@sha256:81e77a4833487b8132fe4b00bedd39dc3f74b8641e387f19312a48f7de218c2e
     container_name: overlab-postgres
     restart: unless-stopped
     environment:
@@ -80,7 +85,7 @@ services:
       - overlab-net
 
   redis:
-    image: redis:7-alpine
+    image: redis:7-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
     container_name: overlab-redis
     restart: unless-stopped
     ports:
@@ -106,13 +111,13 @@ services:
       - overlab-net
 
   prometheus:
-    image: prom/prometheus:v3.15.1
+    image: prom/prometheus:v3.16.0
     container_name: overlab-prometheus
     restart: unless-stopped
     ports:
       - "127.0.0.1:${PROMETHEUS_HOST_PORT:-9090}:9090"
     volumes:
-      - ./docker/prometheus/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheusdata:/prometheus
     networks:
       - overlab-net
@@ -121,15 +126,26 @@ services:
     image: grafana/grafana:11.6.16
     container_name: overlab-grafana
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - rm -rf /tmp/provisioning && cp -R /etc/grafana/provisioning-source /tmp/provisioning && sed -i "s|__TELEGRAM_CHAT_ID__|$$TELEGRAM_CHAT_ID|" /tmp/provisioning/alerting/contact-points.yml && exec /run.sh
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_PATHS_PROVISIONING: /tmp/provisioning
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: ${MAIL_HOST:-mailpit}:${MAIL_PORT:-1025}
+      GF_SMTP_FROM_ADDRESS: ${EMAIL_FROM:-noreply@localhost}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-000000:local-placeholder}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-0}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-alerts@localhost}
     ports:
       - "127.0.0.1:${GRAFANA_HOST_PORT:-3000}:3000"
     volumes:
       - grafanadata:/var/lib/grafana
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning-source:ro
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus

@@ -1,5 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import type { HeroChange } from "../../../types/stats";
 import { renderWithRouter } from "../../../test/render";
@@ -19,6 +20,7 @@ function change(overrides: Partial<HeroChange>): HeroChange {
     banRateBefore: 5,
     banRateAfter: 5,
     banRateChange: 0,
+    portraitUrl: null,
     roleChange: null,
     ...overrides,
   };
@@ -72,6 +74,24 @@ describe("ChangesTable", () => {
     await user.click(screen.getByRole("button", { name: /Ban rate/ }));
 
     expect(heroNames()).toEqual(["Genji", "Ana"]);
+  });
+
+  it("falls back to win rate sorting when the ban column disappears", async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderWithRouter(
+      <ChangesTable changes={changes} showBan />,
+    );
+    await user.click(screen.getByRole("button", { name: /Ban rate/ }));
+
+    rerender(
+      <MemoryRouter>
+        <ChangesTable changes={changes} showBan={false} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+      "WIN_CHANGE",
+    );
   });
 
   it("hides the ban column when not needed and handles an empty comparison", () => {

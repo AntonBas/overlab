@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -6,6 +6,7 @@ import {
   IconSelect,
   type IconSelectOption,
 } from "../../../components/ui/IconSelect";
+import { HeroHighlights } from "../../../components/ui/HeroHighlights";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
@@ -22,8 +23,8 @@ import {
   formatDateTime,
   formatPatchDate,
 } from "../../../utils/format";
+import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
-import { fetchHeroes } from "../../heroes";
 import { fetchPatches } from "../../patches";
 import { fetchComparison, fetchHistoryStart } from "../../stats";
 import { StatsFilters } from "../../stats";
@@ -31,7 +32,9 @@ import { isQuickPlay, toSearchParams } from "../../stats";
 import { useRegion } from "../../stats";
 import { useFilterState } from "../../stats";
 import { ChangesTable } from "../components/ChangesTable";
+import { changeHighlights } from "../utils/changeHighlights";
 import { periodRange } from "../utils/chart";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const PERIODS: Record<string, { label: string; days: number }> = {
   "7d": { label: "Last 7 days", days: 7 },
@@ -43,10 +46,18 @@ const PERIODS: Record<string, { label: string; days: number }> = {
 
 const PATCH_PREFIX = "patch:";
 const DEFAULT_VIEW = "7d";
+
+function isKnownViewShape(view: string): boolean {
+  return (
+    Object.hasOwn(PERIODS, view) ||
+    (view.startsWith(PATCH_PREFIX) &&
+      /^[a-z0-9]+(-[a-z0-9]+)*$/.test(view.slice(PATCH_PREFIX.length)))
+  );
+}
 const OTHER_SEASON = "other";
 const RECENT_SEASONS = 2;
 const RECENT_SELECTION = "recent";
-const PRESERVED_PARAMS = ["view", "season"];
+const PRESERVED_PARAMS = ["view", "season", ...SEARCH_PARAMS];
 
 interface PatchGroup {
   key: string;
@@ -92,10 +103,9 @@ function patchLabel(patch: Patch): string {
 }
 
 export function ChangesPage() {
-  usePageTitle("Overwatch hero win rate changes by patch");
-  usePageDescription(
-    "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",
-  );
+  const page = staticSeoPage("/changes");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -106,40 +116,45 @@ export function ChangesPage() {
     ),
   );
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") ?? DEFAULT_VIEW;
+  const requestedView = searchParams.get("view") ?? DEFAULT_VIEW;
+  const view = isKnownViewShape(requestedView) ? requestedView : DEFAULT_VIEW;
   const { region: defaultRegion } = useRegion();
-  const { filters, update: updateFilters } = useFilterState(
-    undefined,
-    PRESERVED_PARAMS,
-  );
-  const [search, setSearch] = useState("");
+  const {
+    filters,
+    update: updateFilters,
+    ready,
+  } = useFilterState(undefined, PRESERVED_PARAMS);
+  const [search, setSearch] = useUrlParam("q");
   const patches = useFetch(fetchPatches, []);
 
   const range = useMemo(
-    () => (PERIODS[view] ? periodRange(PERIODS[view].days) : null),
+    () =>
+      Object.hasOwn(PERIODS, view) ? periodRange(PERIODS[view].days) : null,
     [view],
   );
   const comparison = useFetch(
-    () =>
-      fetchComparison({
-        queue: filters.queue,
-        tier: filters.tier,
-        platform: filters.platform,
-        region: filters.region,
-        ...(view.startsWith(PATCH_PREFIX)
-          ? { patch: view.slice(PATCH_PREFIX.length) }
-          : (range ?? {})),
-      }),
+    (signal) =>
+      fetchComparison(
+        {
+          queue: filters.queue,
+          tier: filters.tier,
+          platform: filters.platform,
+          region: filters.region,
+          ...(view.startsWith(PATCH_PREFIX)
+            ? { patch: view.slice(PATCH_PREFIX.length) }
+            : (range ?? {})),
+        },
+        signal,
+      ),
     [
       filters.queue,
       filters.tier,
       filters.platform,
       filters.region,
-      filters.map,
       view,
       range,
     ],
-    { keepPrevious: true },
+    { keepPrevious: true, enabled: ready },
   );
   const historyStart = useFetch(
     () =>
@@ -150,10 +165,7 @@ export function ChangesPage() {
         filters.region,
       ),
     [filters.queue, filters.tier, filters.platform, filters.region],
-  );
-  const heroes = useFetch(fetchHeroes, []);
-  const portraits = Object.fromEntries(
-    (heroes.data ?? []).map((hero) => [hero.slug, hero.portraitUrl]),
+    { enabled: ready },
   );
   const activePatch = view.startsWith(PATCH_PREFIX)
     ? (patches.data ?? []).find(
@@ -234,6 +246,9 @@ export function ChangesPage() {
     if (nextSeason !== RECENT_SELECTION) {
       params.set("season", nextSeason);
     }
+    if (search !== "") {
+      params.set("q", search);
+    }
     setSearchParams(params);
   }
 
@@ -280,6 +295,15 @@ export function ChangesPage() {
           />
         }
       />
+      {comparisonData && !singleSnapshot && (
+        <HeroHighlights
+          items={changeHighlights(
+            comparisonData.heroes.filter(
+              (change) => filters.role === null || change.role === filters.role,
+            ),
+          )}
+        />
+      )}
       <StatsFilters
         filters={filters}
         onChange={updateFilters}
@@ -306,10 +330,10 @@ export function ChangesPage() {
           onChange={(next) => updateView({ view: next })}
         />
       </StatsFilters>
-      {comparison.loading && <TableSkeleton label="Loading comparison" />}
+      {comparison.loading && <TableSkeleton label="Loading comparison" tall />}
       {comparison.error &&
         (comparison.error.status === 404 ? (
-          <EmptyState>
+          <EmptyState kind="waiting">
             {activePatch && firstCapturedAt
               ? `Statistics collection started on ${formatDate(firstCapturedAt)}, after this patch, so it cannot be compared.`
               : historyStart.data && firstCapturedAt === null
@@ -333,7 +357,7 @@ export function ChangesPage() {
               : `${visibleChanges.length} heroes shown`}
           </p>
           {singleSnapshot ? (
-            <EmptyState>
+            <EmptyState kind="waiting">
               Only one snapshot is available so far (
               {formatDateTime(comparisonData.afterCapturedAt)}), so nothing has
               changed yet. Changes appear once Blizzard's numbers move and a new
@@ -343,7 +367,6 @@ export function ChangesPage() {
             <ChangesTable
               changes={visibleChanges}
               showBan={!isQuickPlay(filters)}
-              portraits={portraits}
             />
           )}
         </div>

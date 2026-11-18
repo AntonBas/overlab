@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { getConsent } from "../consent/consentStore";
 import { isExcludedFromAnalytics } from "../consent/analyticsExclusion";
 import { useConsent } from "../consent/useConsent";
 
@@ -28,7 +29,9 @@ export function AnalyticsLoader() {
       return;
     }
     window.overlabBeforeAnalyticsSend = (_type, payload) =>
-      isExcludedFromAnalytics(payload.url) ? null : payload;
+      getConsent().analytics && !isExcludedFromAnalytics(payload.url)
+        ? payload
+        : null;
     const script = document.createElement("script");
     script.defer = true;
     script.src = UMAMI_SCRIPT_URL;
@@ -39,7 +42,7 @@ export function AnalyticsLoader() {
     document.head.appendChild(script);
     return () => {
       script.remove();
-      delete window.overlabBeforeAnalyticsSend;
+      window.overlabBeforeAnalyticsSend = () => null;
     };
   }, [consent.analytics]);
 

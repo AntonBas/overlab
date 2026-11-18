@@ -85,7 +85,7 @@ describe("FavoriteButton", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Add Ana to favorites" }),
+      screen.getByRole("button", { name: "Add to favorites: Ana" }),
     );
 
     expect(screen.getByText("Login page")).toBeInTheDocument();
@@ -99,13 +99,31 @@ describe("FavoriteButton", () => {
     renderButton();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Add Ana to favorites" }),
+      await screen.findByRole("button", { name: "Add to favorites: Ana" }),
     );
 
     expect(
-      screen.getByRole("button", { name: "Remove Ana from favorites" }),
+      screen.getByRole("button", {
+        name: "Favorite: remove Ana from favorites",
+      }),
     ).toHaveAttribute("aria-pressed", "true");
     expect(addFavoriteHero).toHaveBeenCalledWith("ana");
+  });
+
+  it("sends only one request for rapid repeated clicks", async () => {
+    vi.mocked(addFavoriteHero).mockClear();
+    vi.mocked(addFavoriteHero).mockImplementation(
+      () => new Promise<void>(() => undefined),
+    );
+    renderButton();
+    const button = await screen.findByRole("button", {
+      name: "Add to favorites: Ana",
+    });
+
+    await userEvent.dblClick(button);
+
+    expect(addFavoriteHero).toHaveBeenCalledTimes(1);
+    expect(removeFavoriteHero).not.toHaveBeenCalled();
   });
 
   it("rolls the star back and shows the error when saving fails", async () => {
@@ -115,12 +133,12 @@ describe("FavoriteButton", () => {
     renderButton();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Add Ana to favorites" }),
+      await screen.findByRole("button", { name: "Add to favorites: Ana" }),
     );
 
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Add Ana to favorites" }),
+        screen.getByRole("button", { name: "Add to favorites: Ana" }),
       ).toHaveAttribute("aria-pressed", "false"),
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -148,12 +166,14 @@ describe("FavoriteButton", () => {
     renderButton();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Remove Ana from favorites" }),
+      await screen.findByRole("button", {
+        name: "Favorite: remove Ana from favorites",
+      }),
     );
 
     expect(removeFavoriteHero).toHaveBeenCalledWith("ana");
     expect(
-      screen.getByRole("button", { name: "Add Ana to favorites" }),
+      screen.getByRole("button", { name: "Add to favorites: Ana" }),
     ).toBeInTheDocument();
   });
 });

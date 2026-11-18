@@ -65,10 +65,15 @@ export function describeInterval(duration: string): string {
   if (!match) {
     return duration;
   }
-  const totalHours =
-    Number(match[1] ?? 0) +
-    Number(match[2] ?? 0) / 60 +
-    Number(match[3] ?? 0) / 3600;
+  const totalMinutes =
+    Number(match[1] ?? 0) * 60 +
+    Number(match[2] ?? 0) +
+    Number(match[3] ?? 0) / 60;
+  if (totalMinutes < 60 || totalMinutes % 60 !== 0) {
+    const minutes = Math.round(totalMinutes);
+    return minutes === 1 ? "minute" : `${minutes} minutes`;
+  }
+  const totalHours = totalMinutes / 60;
   if (totalHours >= 24 && totalHours % 24 === 0) {
     const days = totalHours / 24;
     return days === 1 ? "day" : `${days} days`;

@@ -1,9 +1,11 @@
 package gg.overlab.backend.stats;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,14 @@ public class SnapshotCheckService {
         repository.findAllByQueueAndPlatformAndRegionAndTier(queue, platform, region, tier)
                 .forEach(check -> byMap.put(check.getMapKey(), check.getLastCheckedAt()));
         return byMap;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Instant> latestChange() {
+        return Stream.of(GameQueue.values())
+                .map(repository::findLatestChange)
+                .flatMap(Optional::stream)
+                .max(Comparator.naturalOrder());
     }
 
     public static Instant latest(Instant snapshotTime, Optional<Instant> checkedAt) {

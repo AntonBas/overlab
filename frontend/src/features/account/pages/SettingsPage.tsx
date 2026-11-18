@@ -17,7 +17,7 @@ export function SettingsPage() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <Spinner />;
+    return <Spinner page label="Loading settings" />;
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: "/me/settings" }} />;

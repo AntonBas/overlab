@@ -15,6 +15,8 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 3000
   jpa:
     open-in-view: false
     hibernate:
@@ -25,6 +27,7 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD:}
       timeout: 500ms
       connect-timeout: 1s
       repositories:
@@ -59,7 +62,7 @@ app:
     base-url: ${MEDIA_BASE_URL:/media}
   auth:
     jwt-secret: ${JWT_SECRET:}
-    access-token-ttl: 15m
+    access-token-ttl: 5m
     refresh-token-ttl: 14d
     verification-token-ttl: 24h
     reset-token-ttl: 1h
@@ -80,6 +83,9 @@ management:
     web:
       exposure:
         include: health
+  info:
+    env:
+      enabled: true
   health:
     mail:
       enabled: false
@@ -87,9 +93,19 @@ management:
     health:
       probes:
         enabled: true
+      group:
+        readiness:
+          include: readinessState,db
   metrics:
+    distribution:
+      slo:
+        http.server.requests: 100ms,250ms,500ms,1s,2s,5s
     tags:
       application: ${spring.application.name}
+
+info:
+  app:
+    version: ${APP_VERSION:unknown}
 
 server:
   port: ${BACKEND_HOST_PORT:8080}

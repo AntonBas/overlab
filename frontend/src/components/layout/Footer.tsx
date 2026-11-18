@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { NAV_LINKS } from "./navLinks";
+import { FOOTER_LINKS } from "./navLinks";
 
 export function Footer() {
   const { pathname } = useLocation();
@@ -28,7 +28,7 @@ export function Footer() {
           </div>
           <nav className="site-footer__column" aria-label="Explore">
             <h2>Explore</h2>
-            {NAV_LINKS.map((link) => (
+            {FOOTER_LINKS.map((link) => (
               <Link key={link.to} to={link.to}>
                 {link.label}
               </Link>

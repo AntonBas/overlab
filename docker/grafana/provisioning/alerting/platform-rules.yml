@@ -1,0 +1,510 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: overlab-platform
+    folder: Overlab
+    interval: 1m
+    rules:
+      - uid: platform-backend-down
+        title: "Платформа: бекенд не відповідає"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up{job="overlab-backend"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 1
+        noDataState: Alerting
+        execErrState: Error
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus не бачить бекенд понад 2 хвилини або він зник з метрик. Що робити: перевір контейнер backend (docker compose ps, docker logs overlab-backend) і сайт."
+      - uid: platform-http-5xx
+        title: "Платформа: багато відповідей 5xx"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count[5m])), 0.1)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.05
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Понад 5% запитів за 5 хвилин закінчуються помилкою 5xx. Що робити: подивись логи бекенду, стан БД і Redis."
+      - uid: platform-latency-p95
+        title: "Платформа: повільні відповіді API"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{uri=~"/api/.*"}[10m])))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 2
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "95-й перцентиль часу відповіді API понад 2 секунди протягом 10 хвилин. Що робити: перевір БД, Redis і навантаження."
+      - uid: platform-db-pool-pending
+        title: "Платформа: запити чекають з'єднання з БД"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: max(hikaricp_connections_pending)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 3
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Більше 3 запитів чекають вільне з'єднання з БД понад 2 хвилини. Що робити: перевір, чи працює Postgres і чи немає довгих запитів."
+      - uid: platform-redis-fallback
+        title: "Платформа: кеш Redis недоступний"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(cache_fallback_total[5m]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Бекенд не може читати або писати кеш Redis понад 5 хвилин, сайт працює повільніше. Що робити: перевір контейнер redis і його пароль."
+      - uid: platform-audit-write-failed
+        title: "Платформа: запис аудиту не вдався"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(audit_write_failed_total[1h]))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "За останню годину не вдалося записати подію аудиту. Що робити: подивись помилки Failed to write audit entry у логах бекенду."
+      - uid: platform-mail-failed
+        title: "Платформа: лист не вдалося відправити"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(mail_failed_total[1h])) + (sum(increase(mail_dropped_total[1h])) or vector(0))
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "За останню годину листи не вдалося відправити або вони відкинуті. Що робити: перевір MAIL_HOST, MAIL_USERNAME, MAIL_PASSWORD і рядки Giving up у логах бекенду."
+      - uid: platform-disk-low
+        title: "Платформа: мало місця на диску"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: min(node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"})
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 0.15
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "На диску сервера лишилось менше 15% вільного місця. Що робити: почисти старі бекапи, образи Docker (docker image prune) і логи."
+      - uid: collector-never-succeeded
+        title: "Колектор: жодного успішного запуску"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: count(collector_last_success_timestamp_seconds{collector_job=~"daily-overview|weekly-maps"} != collector_last_success_timestamp_seconds{collector_job=~"daily-overview|weekly-maps"}) or vector(0)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+        noDataState: OK
+        execErrState: Error
+        for: 24h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Для щоденного або тижневого збору немає жодного успішного запуску. Що робити: відкрий адмінку, розділ Collector, і запусти завдання вручну."
+      - uid: backup-service-down
+        title: "Бекап: сервіс бекапу не відповідає"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up{job="backup"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 1
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus не бачить контейнер backup понад 5 хвилин. Що робити: перевір docker compose ps і docker logs backup."
+      - uid: backup-database-stale
+        title: "Бекап: свіжого дампу БД немає понад 36 годин"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: time() - backup_last_success_timestamp_seconds{kind="database"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 129600
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Остання успішна копія бази була понад 36 годин тому. Що робити: подивись docker logs контейнера backup (схема не готова, мало місця або помилка pg_dump)."
+      - uid: backup-offsite-stale
+        title: "Бекап: копії поза сервером немає понад 36 годин"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (time() - backup_last_success_timestamp_seconds{kind="offsite"}) and on() (backup_offsite_configured == 1)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 129600
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Restic не зміг скопіювати бекап у віддалене сховище понад 36 годин. Що робити: перевір RESTIC_REPOSITORY, ключі доступу і логи контейнера backup."
+      - uid: backup-restore-check-stale
+        title: "Бекап: перевірка відновлення не проходила понад 10 днів"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: time() - backup_last_success_timestamp_seconds{kind="restore_check"}
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 864000
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Тестове відновлення останнього дампу давно не проходило успішно. Що робити: подивись у логах backup повідомлення Restore check failed."
+
+  - orgId: 1
+    name: overlab-slo
+    folder: Overlab
+    interval: 1m
+    rules:
+      - uid: slo-availability-fast-burn
+        title: "SLO: доступність API горить швидко"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (sum(rate(http_server_requests_seconds_count{uri=~"/api/.*",status=~"5.."}[1h])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[1h])), 0.01)) and ((sum(rate(http_server_requests_seconds_count{uri=~"/api/.*",status=~"5.."}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[5m])), 0.01)) > 0.072)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.072
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Бюджет помилок доступності API (ціль 99.5%) згорає вдвічі швидше за 14 разів: понад 7.2% відповідей 5xx за годину і за останні 5 хвилин. Що робити: див. runbook, розділи про бекенд і базу даних."
+      - uid: slo-availability-slow-burn
+        title: "SLO: доступність API горить повільно"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (sum(rate(http_server_requests_seconds_count{uri=~"/api/.*",status=~"5.."}[6h])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[6h])), 0.01)) and ((sum(rate(http_server_requests_seconds_count{uri=~"/api/.*",status=~"5.."}[30m])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[30m])), 0.01)) > 0.03)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.03
+        noDataState: OK
+        execErrState: Error
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Бюджет помилок доступності API (ціль 99.5%) згорає в 6 разів швидше за норму: понад 3% відповідей 5xx за 6 годин і за останні 30 хвилин. Що робити: знайди причину в логах бекенда до того, як вичерпається місячний бюджет."
+      - uid: slo-latency-fast-burn
+        title: "SLO: швидкість API горить"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: (1 - sum(rate(http_server_requests_seconds_bucket{uri=~"/api/.*",le="0.5"}[1h])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[1h])), 0.01)) and ((1 - sum(rate(http_server_requests_seconds_bucket{uri=~"/api/.*",le="0.5"}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/.*"}[5m])), 0.01)) > 0.10)
+              instant: true
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              refId: C
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.1
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Понад 10% запитів до API повільніші за 500 мс за годину і за останні 5 хвилин (ціль: 95% швидше за 500 мс). Що робити: перевір БД, Redis, холодний кеш після перезапуску і навантаження."

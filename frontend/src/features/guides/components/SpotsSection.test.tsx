@@ -67,7 +67,7 @@ describe("SpotsSection", () => {
     expect(screen.queryByText("Illari pylon")).not.toBeInTheDocument();
   });
 
-  it("filters by type chosen in the select", async () => {
+  it("filters by the type select", async () => {
     renderSection("hero");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
@@ -105,5 +105,97 @@ describe("SpotsSection", () => {
     expect(
       within(screen.getByRole("region")).getByText("Nothing yet"),
     ).toBeInTheDocument();
+  });
+
+  it("offers to reset filters when nothing matches", async () => {
+    renderSection("hero");
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Hero" }));
+    await userEvent.click(screen.getByRole("option", { name: /^Ashe/ }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Type" }));
+    await userEvent.click(screen.getByRole("option", { name: /^Setup/ }));
+
+    expect(screen.getByText(/No spots match/)).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset filters" }),
+    );
+
+    expect(screen.getByText("Illari pylon")).toBeInTheDocument();
+    expect(screen.getByText("Ashe bob")).toBeInTheDocument();
+  });
+
+  it("puts every spot in one scrollable row", () => {
+    const many = Array.from({ length: 8 }, (_, index) =>
+      guide({ id: index + 1, title: `Spot ${index + 1}` }),
+    );
+    render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots & setups"
+          guides={many}
+          groupBy="none"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Spot 1")).toBeInTheDocument();
+    expect(screen.getByText("Spot 8")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Show all/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("lists every guide in a grid without a heading when expanded", () => {
+    render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Illari guides"
+          guides={guides}
+          groupBy="hero"
+          expanded
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("links to the full list only when there are more guides than shown", () => {
+    const many = Array.from({ length: 7 }, (_, index) =>
+      guide({ id: index + 10, title: `Spot ${index}` }),
+    );
+    const { rerender } = render(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots"
+          guides={many}
+          groupBy="map"
+          moreHref="/heroes/illari/guides"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("link", { name: "All guides" })).toHaveAttribute(
+      "href",
+      "/heroes/illari/guides",
+    );
+
+    rerender(
+      <MemoryRouter>
+        <SpotsSection
+          title="Spots"
+          guides={many.slice(0, 3)}
+          groupBy="map"
+          moreHref="/heroes/illari/guides"
+          emptyMessage="Nothing yet"
+        />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("link", { name: "All guides" }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@ package gg.overlab.backend.user.personal;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.gamemap.GameMap;
+import gg.overlab.backend.common.UserScopedLock;
 import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.gamemap.MapMapper;
 import gg.overlab.backend.hero.Hero;
@@ -18,11 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PersonalService {
 
+    private static final String LOCK_SCOPE = "favorites";
     public static final int MAX_FAVORITES_PER_KIND = 200;
 
     private final UserFavoriteRepository favoriteRepository;
     private final UserPreferenceRepository preferenceRepository;
     private final HeroRepository heroRepository;
+    private final UserScopedLock userScopedLock;
     private final GameMapRepository mapRepository;
     private final HeroMapper heroMapper;
     private final MapMapper mapMapper;
@@ -39,6 +42,7 @@ public class PersonalService {
     @Transactional
     public void addHeroFavorite(Long userId, String heroSlug) {
         Hero hero = findHero(heroSlug);
+        userScopedLock.acquire(LOCK_SCOPE, userId);
         if (favoriteRepository.existsByUserIdAndHeroSlug(userId, heroSlug)) {
             return;
         }
@@ -60,6 +64,7 @@ public class PersonalService {
     public void addMapFavorite(Long userId, String mapSlug) {
         GameMap map = mapRepository.findBySlug(mapSlug)
                 .orElseThrow(() -> new EntityNotFoundException("Map", mapSlug));
+        userScopedLock.acquire(LOCK_SCOPE, userId);
         if (favoriteRepository.existsByUserIdAndMapSlug(userId, mapSlug)) {
             return;
         }

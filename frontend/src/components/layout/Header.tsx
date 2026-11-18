@@ -1,11 +1,12 @@
 import clsx from "clsx";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../features/auth";
 import { useRegion } from "../../features/stats";
 import { REGIONS } from "../../features/stats";
 import type { Region } from "../../types/common";
+import { readRoleHint, readSessionHint } from "../../services/sessionHint";
 import { REGION_LABELS } from "../../utils/format";
 import { HeroSearch } from "./HeroSearch";
 import { NAV_LINKS } from "./navLinks";
@@ -14,6 +15,25 @@ export function Header() {
   const { user, loading, signOut } = useAuth();
   const { region, rememberRegion } = useRegion();
   const [menuOpen, setMenuOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+  const sessionExpected = loading && readSessionHint() === "active";
+  const adminShown = loading
+    ? sessionExpected && readRoleHint() === "ADMIN"
+    : user?.role === "ADMIN";
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        toggle.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -30,6 +50,7 @@ export function Header() {
         </Link>
         <button
           type="button"
+          ref={toggle}
           className="button button--ghost site-header__toggle"
           aria-expanded={menuOpen}
           aria-controls="site-menu"
@@ -62,7 +83,7 @@ export function Header() {
                   </NavLink>
                 </li>
               ))}
-              {user?.role === "ADMIN" && (
+              {adminShown && (
                 <li>
                   <NavLink
                     to="/admin"
@@ -76,42 +97,54 @@ export function Header() {
               )}
             </ul>
           </nav>
-          <HeroSearch />
-          <select
-            className="site-header__region"
-            aria-label="Region"
-            value={region}
-            onChange={(event) => rememberRegion(event.target.value as Region)}
-          >
-            {REGIONS.map((option) => (
-              <option key={option} value={option}>
-                {REGION_LABELS[option]}
-              </option>
-            ))}
-          </select>
-          <div className="site-header__account">
-            {!loading && user && (
-              <>
-                <Link className="nav__link" to="/me" title={user.displayName}>
-                  My Overlab
-                </Link>
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => void signOut()}
+          <div className="site-header__tools">
+            <HeroSearch />
+            <select
+              className="site-header__region"
+              aria-label="Region"
+              value={region}
+              onChange={(event) => rememberRegion(event.target.value as Region)}
+            >
+              {REGIONS.map((option) => (
+                <option key={option} value={option}>
+                  {REGION_LABELS[option]}
+                </option>
+              ))}
+            </select>
+            <div className="site-header__account">
+              {sessionExpected && (
+                <div
+                  className="site-header__account-placeholder"
+                  aria-hidden="true"
+                  inert
                 >
-                  Sign out
-                </button>
-              </>
-            )}
-            {!loading && !user && (
-              <Link
-                className="button button--ghost button--compact"
-                to="/login"
-              >
-                Sign in
-              </Link>
-            )}
+                  <span className="nav__link">My Overlab</span>
+                  <span className="button button--ghost">Sign out</span>
+                </div>
+              )}
+              {!loading && user && (
+                <>
+                  <Link className="nav__link" to="/me" title={user.displayName}>
+                    My Overlab
+                  </Link>
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    onClick={() => void signOut()}
+                  >
+                    Sign out
+                  </button>
+                </>
+              )}
+              {!loading && !user && (
+                <Link
+                  className="button button--compact site-header__signin"
+                  to="/login"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

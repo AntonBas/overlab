@@ -1,15 +1,19 @@
 interface TableSkeletonProps {
   rows?: number;
   label?: string;
+  tall?: boolean;
 }
 
 export function TableSkeleton({
   rows = 10,
   label = "Loading",
+  tall = false,
 }: TableSkeletonProps) {
   return (
     <div
-      className="table-wrap skeleton"
+      className={
+        tall ? "table-wrap skeleton skeleton--tall" : "table-wrap skeleton"
+      }
       role="status"
       aria-live="polite"
       aria-busy="true"

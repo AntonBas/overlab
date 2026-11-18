@@ -6,12 +6,13 @@ import { toFailure } from "../../../services/api";
 import { EmailLink } from "../../legal";
 import { contactEmail } from "../../legal";
 import { sendBusinessMessage } from "../api/businessApi";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const MIN_LENGTH = 10;
 const MAX_LENGTH = 2000;
 
 export function BusinessPage() {
-  usePageTitle("Sponsorship and business");
+  usePageTitle(staticSeoPage("/business").title);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");

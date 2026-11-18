@@ -1,5 +1,6 @@
 package gg.overlab.backend.feedback;
 
+import gg.overlab.backend.common.ScheduledJobLock;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
@@ -14,16 +15,23 @@ public class FeedbackRetentionJob {
 
     private final SiteFeedbackRepository repository;
     private final Duration retention;
+    private final ScheduledJobLock jobLock;
 
     public FeedbackRetentionJob(SiteFeedbackRepository repository,
-                                @Value("${app.feedback.retention:180d}") Duration retention) {
+                                @Value("${app.feedback.retention:180d}") Duration retention,
+                                ScheduledJobLock jobLock) {
         this.repository = repository;
         this.retention = retention;
+        this.jobLock = jobLock;
     }
 
     @Scheduled(cron = "0 40 3 * * *")
     @Transactional
     public void deleteProcessedFeedback() {
+        jobLock.runExclusively("feedback-retention", this::deleteResolvedFeedback);
+    }
+
+    private void deleteResolvedFeedback() {
         int deleted = repository.deleteResolvedBefore(FeedbackStatus.NEW, Instant.now().minus(retention));
         if (deleted > 0) {
             log.info("Deleted {} processed feedback messages older than {}", deleted, retention);

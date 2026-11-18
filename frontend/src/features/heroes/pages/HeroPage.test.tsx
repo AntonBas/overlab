@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { AxiosError, AxiosHeaders } from "axios";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -41,9 +42,6 @@ vi.mock("../../guides/api/guidesApi", () => ({
 vi.mock("../../stats/context/useRegion", () => ({
   useRegion: () => ({ region: "EUROPE" }),
 }));
-vi.mock("../../relations/hooks/useRelationFeedback", () => ({
-  useRelationFeedback: () => ({}),
-}));
 vi.mock("../../history/components/HeroHistorySection", () => ({
   HeroHistorySection: ({
     title,
@@ -61,8 +59,8 @@ vi.mock("../../history/components/HeroHistorySection", () => ({
 vi.mock("../../personal/components/FavoriteButton", () => ({
   FavoriteButton: () => <button type="button">Favorite</button>,
 }));
-vi.mock("../../relations/components/RelationTabs", () => ({
-  RelationTabs: () => <div>relation tabs</div>,
+vi.mock("../../relations/components/RelationsOverview", () => ({
+  RelationsOverview: () => <div>relation tabs</div>,
 }));
 vi.mock("../../abilities/components/AbilityList", () => ({
   AbilityList: () => <div>ability list</div>,
@@ -171,6 +169,36 @@ describe("HeroPage", () => {
         "No statistics have been collected for this hero yet.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("tells the visitor when a secondary section could not be loaded and retries it", async () => {
+    api.fetchPerks.mockRejectedValueOnce(failure(500));
+
+    renderPage();
+
+    expect(
+      await screen.findByText(
+        "Some sections of this page could not be loaded.",
+      ),
+    ).toBeInTheDocument();
+    const callsBefore = api.fetchPerks.mock.calls.length;
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(api.fetchPerks.mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+
+  it("keeps an unknown hero out of the search index", async () => {
+    api.fetchHero.mockRejectedValue(failure(404));
+
+    renderPage();
+
+    await screen.findByRole("alert");
+    await waitFor(() =>
+      expect(
+        document.head
+          .querySelector('meta[name="robots"]')
+          ?.getAttribute("content"),
+      ).toBe("noindex, nofollow"),
+    );
   });
 
   it("shows an error with retry when the hero cannot be loaded", async () => {

@@ -26,6 +26,7 @@ jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     environment: production
     steps:
       - name: Check the deploy settings
@@ -53,35 +54,46 @@ jobs:
             exit 1
           fi
 
-      - name: Require a green Security run
-        if: github.event_name == 'workflow_run'
+      - name: Require a green CI and Security run
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
           REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.event.inputs.ref || github.ref_name }}
+          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          for attempt in $(seq 1 60); do
-            result="$(gh run list --repo "$REPOSITORY" --workflow Security --commit "$SHA" --event push --limit 1 --json status,conclusion --jq '.[0] | (.status + " " + (.conclusion // ""))' || true)"
-            case "$result" in
-              "completed success")
-                echo "Security passed"
-                exit 0
-                ;;
-              completed*)
-                echo "::error::Security did not pass: $result"
+          if [ -n "$EVENT_SHA" ]; then
+            sha="$EVENT_SHA"
+          else
+            sha="$(gh api "repos/$REPOSITORY/commits/$REF" --jq .sha)"
+          fi
+          if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::Could not resolve $REF to a commit"
+            exit 1
+          fi
+          echo "VERIFIED_SHA=$sha" >> "$GITHUB_ENV"
+          for workflow in CI Security; do
+            for attempt in $(seq 1 60); do
+              result="$(gh run list --repo "$REPOSITORY" --workflow "$workflow" --commit "$sha" --limit 20 --json status,conclusion --jq '[.[] | .status + " " + (.conclusion // "")] | join(",")' || true)"
+              case "$result" in
+                *"completed success"*)
+                  echo "$workflow passed"
+                  break
+                  ;;
+                "" | *queued* | *in_progress* | *waiting* | *pending*)
+                  echo "$workflow has not finished yet ($attempt/60)"
+                  ;;
+                *)
+                  echo "::error::$workflow did not pass: $result"
+                  exit 1
+                  ;;
+              esac
+              if [ "$attempt" = "60" ]; then
+                echo "::error::$workflow did not finish in time"
                 exit 1
-                ;;
-              "")
-                echo "Security has not started yet ($attempt/60)"
-                ;;
-              *)
-                echo "Security is still running ($attempt/60)"
-                ;;
-            esac
-            sleep 20
+              fi
+              sleep 20
+            done
           done
-          echo "::error::Security did not finish in time"
-          exit 1
 
       - name: Configure SSH
         env:
@@ -96,11 +108,10 @@ jobs:
       - name: Update the server
         env:
           REF: ${{ github.event.inputs.ref || github.ref_name }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
-          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "$REF $SHA"
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "$REF $VERIFIED_SHA"
 
       - name: Wait for the site
         env:

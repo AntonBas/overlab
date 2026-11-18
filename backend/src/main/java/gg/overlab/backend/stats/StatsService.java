@@ -41,7 +41,7 @@ public class StatsService {
     }
 
     @Cacheable(value = CacheNames.STATS,
-            key = "'hero:' + #heroSlug + ':' + #queue + ':' + #tier + ':' + #platform + ':' + #region")
+            key = "'hero:' + #heroSlug + ':' + #queue + ':' + #tier + ':' + #platform + ':' + #region", sync = true)
     @Transactional(readOnly = true)
     public HeroMapStatsDto getHeroByMaps(String heroSlug, GameQueue queue, RankTier tier, Platform platform,
                                          Region region) {

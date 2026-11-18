@@ -5,12 +5,17 @@ import gg.overlab.backend.collector.client.PatchNotesClient;
 import gg.overlab.backend.collector.parser.ParsedPatch;
 import gg.overlab.backend.collector.parser.PatchNotesFormatException;
 import gg.overlab.backend.collector.parser.PatchNotesParser;
+import gg.overlab.backend.common.Pause;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.common.SlugService;
-import gg.overlab.backend.config.cache.EvictContentCaches;
+import gg.overlab.backend.config.async.AsyncConfig;
+import gg.overlab.backend.config.cache.CacheEviction;
+import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.UpstreamUnavailableException;
 import gg.overlab.backend.patch.Patch;
 import gg.overlab.backend.patch.PatchRepository;
 import gg.overlab.backend.patch.PatchService;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -19,16 +24,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestClientException;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PatchImportService {
 
     private final CollectorProperties properties;
@@ -38,8 +45,59 @@ public class PatchImportService {
     private final SlugService slugService;
     private final ApplicationEventPublisher eventPublisher;
     private final TransactionTemplate transactionTemplate;
+    private final TaskExecutor executor;
+    private final ScheduledJobLock jobLock;
+    private final CacheEviction cacheEviction;
+    private final AtomicBoolean running = new AtomicBoolean();
 
-    @EvictContentCaches
+    public PatchImportService(CollectorProperties properties, PatchNotesClient client, PatchNotesParser parser,
+                              PatchRepository patchRepository, SlugService slugService,
+                              ApplicationEventPublisher eventPublisher, TransactionTemplate transactionTemplate,
+                              @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor,
+                              ScheduledJobLock jobLock, CacheEviction cacheEviction) {
+        this.properties = properties;
+        this.client = client;
+        this.parser = parser;
+        this.patchRepository = patchRepository;
+        this.slugService = slugService;
+        this.eventPublisher = eventPublisher;
+        this.transactionTemplate = transactionTemplate;
+        this.executor = executor;
+        this.jobLock = jobLock;
+        this.cacheEviction = cacheEviction;
+    }
+
+    public void startAsync() {
+        if (!running.compareAndSet(false, true)) {
+            throw new ConflictException("Patch import is already running");
+        }
+        try {
+            executor.execute(this::runInBackground);
+        } catch (TaskRejectedException exception) {
+            running.set(false);
+            throw new ConflictException("Collector queue is full, the patch import was not started");
+        }
+    }
+
+    public boolean isStale(Duration threshold) {
+        return patchRepository.findAllByOrderByReleasedAtDesc().stream().findFirst()
+                .map(newest -> newest.getReleasedAt().isBefore(Instant.now().minus(threshold)))
+                .orElse(true);
+    }
+
+    private void runInBackground() {
+        try {
+            jobLock.callExclusively("patch-import", this::importNew)
+                    .filter(created -> created > 0)
+                    .ifPresent(created -> cacheEviction.evictAll());
+        } catch (RuntimeException exception) {
+            log.error("Patch import failed", exception);
+        } finally {
+            Pause.sleep(properties.pause());
+            running.set(false);
+        }
+    }
+
     public int importNew() {
         List<ParsedPatch> parsed;
         try {

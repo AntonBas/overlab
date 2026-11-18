@@ -1,10 +1,11 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../components/ui/PageHeader";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
-import { Spinner } from "../../../components/ui/Spinner";
+import { ListSkeleton } from "../../../components/ui/ListSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import {
@@ -15,12 +16,12 @@ import { usePageDescription } from "../../../hooks/usePageDescription";
 import { ROLES } from "../../stats";
 import { ROLE_LABELS } from "../../../utils/format";
 import { fetchHeroes } from "../api/heroesApi";
+import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function HeroesPage() {
-  usePageTitle("All Overwatch heroes: roles, abilities, perks");
-  usePageDescription(
-    "All Overwatch heroes with roles, abilities, perks, counters and synergies.",
-  );
+  const page = staticSeoPage("/heroes");
+  usePageTitle(page.title);
+  usePageDescription(page.description);
   useStructuredData(
     breadcrumbList(
       [
@@ -39,7 +40,9 @@ export function HeroesPage() {
         title="Heroes"
         subtitle="Perks, counters, synergies, map statistics and video guides"
       />
-      {heroes.loading && <Spinner page />}
+      {heroes.loading && (
+        <ListSkeleton kind="hero-tiles" label="Loading heroes" />
+      )}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}
@@ -50,14 +53,26 @@ export function HeroesPage() {
               <RoleBadge role={role} compact />
               {ROLE_LABELS[role]}
             </h2>
-            <ul className="chip-list chip-list--centered">
+            <ul className="hero-tiles">
               {data
                 .filter((hero) => hero.role === role)
-                .map((hero) => (
-                  <li key={hero.slug}>
-                    <Link className="chip" to={`/heroes/${hero.slug}`}>
-                      <HeroPortrait name={hero.name} url={hero.portraitUrl} />
-                      {hero.name}
+                .map((hero, index) => (
+                  <li
+                    key={hero.slug}
+                    className="reveal"
+                    style={{ "--i": index } as CSSProperties}
+                  >
+                    <Link
+                      className="hero-tile"
+                      data-role={hero.role.toLowerCase()}
+                      to={`/heroes/${hero.slug}`}
+                    >
+                      <HeroPortrait
+                        name={hero.name}
+                        url={hero.portraitUrl}
+                        size={56}
+                      />
+                      <span className="hero-tile__name">{hero.name}</span>
                       {hero.recentlyAdded && <NewBadge />}
                     </Link>
                   </li>

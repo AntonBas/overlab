@@ -35,11 +35,16 @@ function parse(raw: string | null): ConsentState {
     const value: unknown = JSON.parse(raw);
     if (typeof value === "object" && value !== null) {
       const choice = value as Partial<ConsentChoice>;
-      return {
-        analytics: choice.analytics === true,
-        advertising: choice.advertising === true,
-        decided: true,
-      };
+      if (
+        typeof choice.analytics === "boolean" &&
+        typeof choice.advertising === "boolean"
+      ) {
+        return {
+          analytics: choice.analytics,
+          advertising: choice.advertising,
+          decided: true,
+        };
+      }
     }
   } catch {
     return undecided;

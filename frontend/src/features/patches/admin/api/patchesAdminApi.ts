@@ -25,8 +25,8 @@ export async function deletePatch(id: number): Promise<void> {
   await api.delete(`/admin/patches/${id}`);
 }
 
-export async function importPatches(): Promise<{ created: number }> {
-  const { data } = await api.post<{ created: number }>(
+export async function importPatches(): Promise<{ started: boolean }> {
+  const { data } = await api.post<{ started: boolean }>(
     "/admin/collector/patches/import",
   );
   return data;

@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../../components/ui/FormField";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
@@ -18,8 +20,8 @@ import { DataTable } from "../../../../components/admin/DataTable";
 import { Drawer } from "../../../../components/admin/Drawer";
 import { TextAreaField } from "../../../../components/admin/Fields";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
 import { formatDateTime } from "../../../../utils/format";
 
 function toLocalInput(iso: string): string {
@@ -42,21 +44,19 @@ function PatchForm({ patch, onSaved, onClose }: PatchFormProps) {
     releasedAt: patch ? toLocalInput(patch.releasedAt) : "",
     notes: patch?.notes ?? "",
   };
-  const [values, setValues] = useState(initial);
-  const save = useSave();
-  useUnsavedChanges(JSON.stringify(values) !== JSON.stringify(initial));
-
-  function change(key: keyof typeof values, value: string) {
-    setValues((current) => ({ ...current, [key]: value }));
-  }
+  const { values, change, save } = useAdminForm(initial);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    const releasedAt = new Date(values.releasedAt);
+    if (Number.isNaN(releasedAt.getTime())) {
+      return;
+    }
     const payload = {
       version: values.version.trim(),
       slug: values.slug.trim() === "" ? null : values.slug.trim(),
       title: values.title.trim() === "" ? null : values.title.trim(),
-      releasedAt: new Date(values.releasedAt).toISOString(),
+      releasedAt: releasedAt.toISOString(),
       notes: values.notes.trim() === "" ? null : values.notes,
     };
     const saved = await save.run(
@@ -152,10 +152,10 @@ export function PatchesAdminPage() {
   }
 
   async function importFromBlizzard() {
-    const imported = await importing.run(importPatches, "Patches imported.");
-    if (imported) {
-      patches.reload();
-    }
+    await importing.run(
+      importPatches,
+      "Patch import started. New patches appear within a few minutes.",
+    );
   }
 
   return (
@@ -163,33 +163,34 @@ export function PatchesAdminPage() {
       <PageHeader
         title="Patches"
         actions={
-          <>
-            <button
-              type="button"
-              className="button button--ghost"
-              disabled={importing.saving}
-              onClick={() => void importFromBlizzard()}
-            >
-              Import from Blizzard
-            </button>
-            <button
-              type="button"
-              className="button"
-              onClick={() => setEditing("new")}
-            >
-              New patch
-            </button>
-          </>
+          <button
+            type="button"
+            className="button button--ghost"
+            disabled={importing.saving}
+            onClick={() => void importFromBlizzard()}
+          >
+            Import from Blizzard
+          </button>
         }
       />
       <StatusMessage error={importing.error} />
       <StatusMessage error={removal.error} />
-      {patches.loading && <Spinner />}
+      {patches.loading && <Spinner label="Loading patches" />}
       {patches.error && (
         <ErrorMessage failure={patches.error} onRetry={patches.reload} />
       )}
       {patches.data && (
         <DataTable
+          toolbar={
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={16} aria-hidden="true" />
+              New patch
+            </button>
+          }
           rows={patches.data}
           rowKey={(patch) => patch.id}
           emptyMessage="No patches yet."
@@ -212,22 +213,18 @@ export function PatchesAdminPage() {
             {
               header: "",
               render: (patch) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(patch)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(patch)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

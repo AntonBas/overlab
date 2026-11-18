@@ -1,17 +1,15 @@
 package gg.overlab.backend.user.token;
 
+import gg.overlab.backend.common.ScheduledJobLock;
+import gg.overlab.backend.common.Sha256;
 import gg.overlab.backend.exception.core.ConcurrentRefreshException;
 import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.user.User;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.HexFormat;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +31,7 @@ public class UserTokenService {
     private static final Duration REUSE_GRACE = Duration.ofSeconds(30);
 
     private final UserTokenRepository tokenRepository;
+    private final ScheduledJobLock jobLock;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
@@ -104,15 +103,14 @@ public class UserTokenService {
     @Scheduled(cron = "0 15 3 * * *")
     @Transactional
     public void deleteExpired() {
+        jobLock.runExclusively("token-cleanup", this::deleteTokensExpiredLongAgo);
+    }
+
+    private void deleteTokensExpiredLongAgo() {
         tokenRepository.deleteExpiredBefore(Instant.now().minus(Duration.ofDays(1)));
     }
 
     private String hash(String rawToken) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException(exception);
-        }
+        return Sha256.hex(rawToken);
     }
 }

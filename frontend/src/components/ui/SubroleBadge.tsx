@@ -3,29 +3,25 @@ import { humanize } from "../../utils/format";
 
 interface SubroleBadgeProps {
   subrole: string;
-  compact?: boolean;
 }
 
-export function SubroleBadge({ subrole, compact = false }: SubroleBadgeProps) {
-  const [iconFailed, setIconFailed] = useState(false);
+export function SubroleBadge({ subrole }: SubroleBadgeProps) {
+  const iconUrl = `/images/subroles/${subrole.toLowerCase()}.svg`;
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
   return (
     <span className="role-badge">
-      {!iconFailed && (
+      {failedUrl !== iconUrl && (
         <img
           className="subrole-icon"
-          src={`/images/subroles/${subrole.toLowerCase()}.svg`}
+          src={iconUrl}
           alt=""
           width={20}
           height={20}
-          onError={() => setIconFailed(true)}
+          onError={() => setFailedUrl(iconUrl)}
         />
       )}
-      {compact ? (
-        <span className="visually-hidden">{humanize(subrole)}</span>
-      ) : (
-        humanize(subrole)
-      )}
+      {humanize(subrole)}
     </span>
   );
 }

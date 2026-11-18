@@ -1,6 +1,8 @@
 import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { hero as heroFixture } from "../../../test/fixtures/heroes";
 import { renderWithRouter } from "../../../test/render";
+import type { HeroRole } from "../../../types/hero";
 
 vi.mock("../api/heroesApi", () => ({
   fetchHeroes: vi.fn(),
@@ -9,18 +11,20 @@ vi.mock("../api/heroesApi", () => ({
 import { fetchHeroes } from "../api/heroesApi";
 import { HeroesPage } from "./HeroesPage";
 
-function hero(slug: string, name: string, role: string, recentlyAdded = false) {
-  return {
+function hero(
+  slug: string,
+  name: string,
+  role: HeroRole,
+  recentlyAdded = false,
+) {
+  return heroFixture({
     slug,
     name,
     role,
     subrole: null,
     description: null,
-    strengths: null,
-    weaknesses: null,
-    portraitUrl: null,
     recentlyAdded,
-  };
+  });
 }
 
 function serverFailure() {
@@ -39,7 +43,7 @@ describe("HeroesPage", () => {
     vi.mocked(fetchHeroes).mockResolvedValue([
       hero("ana", "Ana", "SUPPORT"),
       hero("reaper", "Reaper", "DAMAGE"),
-    ] as never);
+    ]);
 
     renderWithRouter(<HeroesPage />, "/heroes");
 

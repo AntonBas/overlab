@@ -25,12 +25,12 @@ export function MyLibraryPage() {
   const personal = usePersonalData();
   const favorites = useFetch(
     () => (user ? fetchFavorites() : Promise.resolve(null)),
-    [user?.id, personal.favoriteHeroes, personal.favoriteMaps],
+    [user?.id, personal.favoriteHeroes.size, personal.favoriteMaps.size],
     { keepPrevious: true },
   );
 
   if (loading) {
-    return <Spinner page />;
+    return <Spinner page label="Loading your library" />;
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: "/me" }} />;
@@ -71,7 +71,7 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="favorite-grid__remove"
+                  className="icon-button icon-button--quiet favorite-grid__remove"
                   aria-label={`Remove ${hero.name}`}
                   title="Remove from favorites"
                   onClick={() => void personal.toggleHeroFavorite(hero.slug)}
@@ -98,7 +98,7 @@ export function MyLibraryPage() {
                 </span>
                 <button
                   type="button"
-                  className="favorite-grid__remove"
+                  className="icon-button icon-button--quiet favorite-grid__remove"
                   aria-label={`Remove ${map.name}`}
                   title="Remove from favorites"
                   onClick={() => void personal.toggleMapFavorite(map.slug)}
@@ -115,7 +115,24 @@ export function MyLibraryPage() {
 
         description="Applied when you open statistics without choosing filters."
       >
-        {personal.preferencesLoaded ? <PreferencesForm /> : <Spinner />}
+        {personal.preferencesFailed && (
+          <div className="notice notice--error" role="alert">
+            <p>Your saved filters could not be loaded.</p>
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={personal.reloadPreferences}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+        {!personal.preferencesFailed &&
+          (personal.preferencesLoaded ? (
+            <PreferencesForm />
+          ) : (
+            <Spinner label="Loading preferences" />
+          ))}
       </SettingsSection>
     </div>
   );

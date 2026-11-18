@@ -56,7 +56,7 @@
   align-items: center;
   gap: var(--space-12);
   padding: var(--space-8) var(--space-12);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--muted);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
@@ -66,7 +66,7 @@
 }
 
 .admin__link:hover {
-  background: var(--surface-2);
+  background: var(--hover-wash);
   color: var(--text);
 }
 
@@ -108,7 +108,8 @@
   grid-template-columns: auto 1fr;
   column-gap: var(--space-12);
   row-gap: var(--space-4);
-  align-items: center;
+  align-items: start;
+  align-content: start;
   height: 100%;
   padding: var(--space-16);
   background: var(--surface);
@@ -124,6 +125,7 @@
 .admin__card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
+  color: var(--text);
 }
 
 .admin__card-icon {
@@ -150,6 +152,13 @@
 
 .admin__content > .hero-select {
   margin-bottom: var(--space-16);
+}
+
+.admin__form .field__label {
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .admin__form .hero-select .icon-select {
@@ -215,6 +224,13 @@
   font-size: var(--font-size-md);
 }
 
+@media (max-width: 768px) {
+  .pagination .button {
+    min-height: 44px;
+    padding-inline: var(--space-16);
+  }
+}
+
 .dialog__actions {
   display: flex;
   justify-content: flex-end;
@@ -253,6 +269,18 @@
   background: color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
+.status-badge--warning {
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.status-badge--info {
+  color: var(--link);
+  border-color: color-mix(in srgb, var(--link) 40%, transparent);
+  background: color-mix(in srgb, var(--link) 12%, transparent);
+}
+
 .status-badge--action {
   font-family: inherit;
   cursor: pointer;
@@ -274,18 +302,6 @@
 .select-pill option {
   color: var(--text);
   background: var(--surface);
-}
-
-.select-pill--good {
-  color: var(--good);
-  border-color: color-mix(in srgb, var(--good) 40%, transparent);
-  background-color: color-mix(in srgb, var(--good) 12%, transparent);
-}
-
-.select-pill--bad {
-  color: var(--bad);
-  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
-  background-color: color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
 .select-pill--warning {
@@ -362,12 +378,6 @@
   background: var(--surface);
 }
 
-.admin__picker {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-12);
-}
-
 .admin .table thead th,
 .admin .field__label {
   text-transform: none;
@@ -409,4 +419,49 @@
 
 .section__header h2 {
   margin: 0;
+}
+
+.admin__content .settings-section + .settings-section {
+  margin-top: var(--space-20);
+}
+
+.audit-changes strong {
+  color: var(--muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.audit-changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-md);
+}
+
+.audit-changes del {
+  color: var(--bad);
+}
+
+.audit-changes ins {
+  text-decoration: none;
+  color: var(--good, inherit);
+}
+
+@media (min-width: 769px) {
+  .filters--compact {
+    gap: var(--space-12);
+  }
+
+  .filters--compact > * {
+    flex: 1 1 100px;
+    min-width: 0;
+  }
+
+  .filters--compact > :first-child {
+    flex-grow: 2;
+    flex-basis: 160px;
+  }
+
+  .filters--compact > .button {
+    flex: none;
+  }
 }

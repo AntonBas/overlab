@@ -113,4 +113,25 @@ describe("MapsPage", () => {
     expect(screen.getByRole("link", { name: /Havana/ })).toBeVisible();
     expect(screen.queryByRole("link", { name: /Busan/ })).toBeNull();
   });
+
+  it("reads the filters from the address", async () => {
+    renderWithRouter(<MapsPage />, "/maps?mode=ESCORT&q=hav");
+
+    expect(await screen.findByRole("link", { name: /Havana/ })).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: /Rialto/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("searchbox")).toHaveValue("hav");
+    expect(screen.getByRole("button", { name: "Escort" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("ignores an unknown mode in the address", async () => {
+    renderWithRouter(<MapsPage />, "/maps?mode=nonsense");
+
+    expect(await screen.findByRole("link", { name: /Busan/ })).toBeVisible();
+    expect(screen.getByRole("link", { name: /Rialto/ })).toBeVisible();
+  });
 });

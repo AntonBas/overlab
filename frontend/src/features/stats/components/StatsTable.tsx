@@ -6,6 +6,7 @@ import { RateBar } from "../../../components/ui/RateBar";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { NewBadge } from "../../../components/ui/NewBadge";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { useStuckHeader } from "../../../hooks/useStuckHeader";
 import type { SortDirection, StatsSort } from "../../../types/common";
 import type { HeroStat } from "../../../types/stats";
 
@@ -33,6 +34,7 @@ export function StatsTable({
   onSort,
   heroLinkSuffix = "",
 }: StatsTableProps) {
+  const { sentinelRef, stuck } = useStuckHeader();
   const columns: Column[] = [
     { sort: "WIN_RATE", label: "Win rate" },
     { sort: "PICK_RATE", label: "Pick rate" },
@@ -60,7 +62,12 @@ export function StatsTable({
   }
 
   return (
-    <div className="table-wrap">
+    <div className="table-wrap table-wrap--ranking" data-stuck={stuck}>
+      <div
+        ref={sentinelRef}
+        className="table-wrap__sentinel"
+        aria-hidden="true"
+      />
       <table className="table">
         <thead>
           <tr>
@@ -92,7 +99,7 @@ export function StatsTable({
         </thead>
         <tbody>
           {heroes.map((hero) => (
-            <tr key={hero.heroSlug}>
+            <tr key={hero.heroSlug} data-role={hero.role.toLowerCase()}>
               <th scope="row">
                 <span className="table__hero">
                   <HeroPortrait name={hero.heroName} url={hero.portraitUrl} />
@@ -103,16 +110,25 @@ export function StatsTable({
                   {hero.recentlyAdded && <NewBadge />}
                 </span>
               </th>
-              <td>
+              <td
+                className={clsx({ "table__col--sorted": sort === "WIN_RATE" })}
+              >
                 <RateBar value={hero.winRate} tone="win" />
                 {showDelta && <DeltaValue value={hero.winRateDelta} />}
               </td>
-              <td>
+              <td
+                className={clsx({ "table__col--sorted": sort === "PICK_RATE" })}
+              >
                 <RateBar value={hero.pickRate} tone="pick" max={40} />
                 {showDelta && <DeltaValue value={hero.pickRateDelta} />}
               </td>
               {showBan && (
-                <td className={clsx({ muted: hero.banRate === null })}>
+                <td
+                  className={clsx({
+                    muted: hero.banRate === null,
+                    "table__col--sorted": sort === "BAN_RATE",
+                  })}
+                >
                   <RateBar value={hero.banRate} tone="ban" max={50} />
                 </td>
               )}

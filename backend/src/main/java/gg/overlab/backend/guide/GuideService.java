@@ -12,8 +12,11 @@ import gg.overlab.backend.gamemap.GameMapRepository;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.guide.dto.GuideRequest;
 import gg.overlab.backend.hero.Hero;
+import gg.overlab.backend.hero.ability.HeroAbilityRepository;
 import gg.overlab.backend.hero.HeroRepository;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class GuideService {
     private final GuideRepository guideRepository;
     private final HeroRepository heroRepository;
     private final GameMapRepository gameMapRepository;
+    private final HeroAbilityRepository abilityRepository;
     private final GuideMapper guideMapper;
     private final SlugService slugService;
     private final AuditService auditService;
@@ -51,15 +55,44 @@ public class GuideService {
         return guides.stream().map(guideMapper::toDto).toList();
     }
 
-    @Cacheable(value = CacheNames.CONTENT,
-            key = "'guide:' + T(gg.overlab.backend.guide.GuidePath).idOf(#path)")
+    @Cacheable(value = CacheNames.CONTENT, key = "'guide:' + #path")
     @Transactional(readOnly = true)
     public GuideDto getPublishedByPath(String path) {
-        Long id = GuidePath.idOf(path);
-        return guideRepository.findWithDetailsById(id)
+        return findBySlugOrLegacyId(path)
                 .filter(Guide::isPublished)
                 .map(guideMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Guide", path));
+    }
+
+    private Optional<Guide> findBySlugOrLegacyId(String path) {
+        Optional<Guide> bySlug = guideRepository.findWithDetailsBySlug(path);
+        if (bySlug.isPresent()) {
+            return bySlug;
+        }
+        return GuidePath.legacyId(path).flatMap(guideRepository::findWithDetailsById);
+    }
+
+    private String generateSlug(GuideRequest request) {
+        String title = request.title();
+        List<String> candidates = new ArrayList<>();
+        candidates.add(title);
+        candidates.add(withPrefix(request.heroSlug(), title));
+        if (StringUtils.hasText(request.mapSlug())) {
+            candidates.add(withPrefix(request.mapSlug(), candidates.getLast()));
+        }
+        List<String> distinct = candidates.stream().distinct().toList();
+        for (String candidate : distinct.subList(0, distinct.size() - 1)) {
+            String slug = slugService.generate(candidate);
+            if (slug.length() <= MAX_SLUG_LENGTH && !guideRepository.existsBySlug(slug)) {
+                return slug;
+            }
+        }
+        return slugService.generateUnique(distinct.getLast(), MAX_SLUG_LENGTH, guideRepository::existsBySlug);
+    }
+
+    private String withPrefix(String prefixSlug, String text) {
+        String normalizedText = "-" + slugService.generate(text) + "-";
+        return normalizedText.contains("-" + prefixSlug + "-") ? text : prefixSlug + " " + text;
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +106,7 @@ public class GuideService {
         Guide guide = new Guide();
         guide.setSlug(StringUtils.hasText(request.slug())
                 ? requireFreeSlug(request.slug(), null)
-                : slugService.generateUnique(request.title(), MAX_SLUG_LENGTH, guideRepository::existsBySlug));
+                : generateSlug(request));
         apply(guide, request);
         GuideDto created = guideMapper.toDto(guideRepository.save(guide));
         auditService.logCreate(AuditEntityType.GUIDE, created.id(), created);
@@ -121,7 +154,11 @@ public class GuideService {
         guide.setEndSeconds(request.endSeconds());
         guide.setKind(request.kind() == null ? GuideKind.TIP : request.kind());
         guide.setSide(request.side() == null ? GuideSide.BOTH : request.side());
-        guide.setAbilitySlug(StringUtils.hasText(request.abilitySlug()) ? request.abilitySlug() : null);
+        String abilitySlug = StringUtils.hasText(request.abilitySlug()) ? request.abilitySlug() : null;
+        if (abilitySlug != null && !abilityRepository.existsByHeroIdAndSlug(hero.getId(), abilitySlug)) {
+            throw new BadRequestException("The ability does not belong to the chosen hero");
+        }
+        guide.setAbilitySlug(abilitySlug);
         guide.setDescription(request.description());
         guide.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         guide.setPublished(Boolean.TRUE.equals(request.published()));

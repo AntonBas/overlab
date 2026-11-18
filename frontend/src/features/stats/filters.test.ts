@@ -35,6 +35,15 @@ describe("parseFilters", () => {
     });
   });
 
+  it("treats an unknown role as all roles and drops a map that is not a slug", () => {
+    const filters = parseFilters(
+      new URLSearchParams("role=healer&map=../../x"),
+    );
+
+    expect(filters.role).toBeNull();
+    expect(filters.map).toBe(DEFAULT_FILTERS.map);
+  });
+
   it("ignores values it does not know", () => {
     const filters = parseFilters(
       new URLSearchParams(
@@ -55,6 +64,18 @@ describe("parseFilters", () => {
 
     expect(filters.queue).toBe("QUICK_PLAY");
     expect(filters.tier).toBe("ALL");
+  });
+
+  it("does not sort Quick Play by a ban rate it does not have", () => {
+    const quickPlay = parseFilters(
+      new URLSearchParams("queue=quick_play&sort=ban_rate"),
+    );
+    const competitive = parseFilters(
+      new URLSearchParams("queue=competitive&sort=ban_rate"),
+    );
+
+    expect(quickPlay.sort).toBe("PICK_RATE");
+    expect(competitive.sort).toBe("BAN_RATE");
   });
 });
 

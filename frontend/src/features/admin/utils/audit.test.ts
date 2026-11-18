@@ -15,6 +15,7 @@ describe("audit formatting", () => {
   it("describes the actor", () => {
     expect(describeActor(null, null)).toBe("System");
     expect(describeActor(9, "ADMIN")).toBe("User #9 (Admin)");
+    expect(describeActor(9, "ADMIN", "Kullow")).toBe("Kullow (Admin)");
   });
 
   it("describes the entity", () => {

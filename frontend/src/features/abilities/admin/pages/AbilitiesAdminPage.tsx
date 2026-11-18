@@ -39,7 +39,7 @@ function AbilityRows({ heroSlug }: { heroSlug: string }) {
   const save = useSave();
 
   if (abilities.loading) {
-    return <Spinner />;
+    return <Spinner label="Loading abilities" />;
   }
   if (abilities.error || !abilities.data) {
     return abilities.error ? (
@@ -122,7 +122,7 @@ export function AbilitiesAdminPage() {
   return (
     <>
       <PageHeader title="Abilities" />
-      {heroes.loading && <Spinner />}
+      {heroes.loading && <Spinner label="Loading abilities" />}
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}

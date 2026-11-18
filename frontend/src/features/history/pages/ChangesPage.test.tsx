@@ -10,9 +10,6 @@ vi.mock("../../stats/api/statsApi", () => ({
   fetchHistoryStart: vi.fn(),
 }));
 vi.mock("../../patches/api/patchesApi", () => ({ fetchPatches: vi.fn() }));
-vi.mock("../../heroes/api/heroesApi", () => ({
-  fetchHeroes: vi.fn(() => Promise.resolve([])),
-}));
 
 import { fetchPatches } from "../../patches";
 import { fetchComparison, fetchHistoryStart } from "../../stats";
@@ -103,6 +100,12 @@ describe("ChangesPage", () => {
     expect(labelsIn(list).slice(0, 2)).toEqual(["Last 7 days", "Last 30 days"]);
   });
 
+  it("reads the hero search from the address", async () => {
+    renderPage("/changes?q=zzz");
+
+    expect(await screen.findByRole("searchbox")).toHaveValue("zzz");
+  });
+
   it("offers a rank filter in Competitive and requests the chosen rank", async () => {
     renderPage("/changes?tier=gold");
 
@@ -112,6 +115,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ queue: "COMPETITIVE", tier: "GOLD" }),
+        expect.any(AbortSignal),
       ),
     );
   });
@@ -122,6 +126,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ queue: "QUICK_PLAY", tier: "ALL" }),
+        expect.any(AbortSignal),
       ),
     );
     expect(screen.queryByRole("combobox", { name: "Rank" })).toBeNull();
@@ -239,6 +244,7 @@ describe("ChangesPage", () => {
     await waitFor(() =>
       expect(fetchComparison).toHaveBeenLastCalledWith(
         expect.objectContaining({ platform: "CONSOLE", region: "ASIA" }),
+        expect.any(AbortSignal),
       ),
     );
   });
@@ -277,6 +283,7 @@ describe("ChangesPage", () => {
           banRateBefore: 5,
           banRateAfter: 5,
           banRateChange: 0,
+          portraitUrl: null,
           roleChange: null,
         },
       ],
@@ -320,6 +327,7 @@ describe("ChangesPage", () => {
       banRateBefore: 5,
       banRateAfter: 5,
       banRateChange: 0,
+      portraitUrl: null,
       roleChange: null,
     });
     vi.mocked(fetchComparison).mockResolvedValue({

@@ -6,6 +6,7 @@ import { renderWithRouter } from "../../../test/render";
 
 vi.mock("../api/guidesApi", () => ({
   fetchGuide: vi.fn(),
+  fetchGuides: vi.fn(() => Promise.resolve([])),
 }));
 vi.mock("../../../hooks/useCatalog", () => ({
   useHeroPortraits: () => ({}),
@@ -50,7 +51,7 @@ describe("GuidePage", () => {
   });
 
   it("shows the guide with hero, map, video and description", async () => {
-    vi.mocked(fetchGuide).mockResolvedValue(guide as never);
+    vi.mocked(fetchGuide).mockResolvedValue(guide);
 
     renderGuide();
 
@@ -63,19 +64,53 @@ describe("GuidePage", () => {
     expect(fetchGuide).toHaveBeenCalledWith("ana-nade-spot");
   });
 
+  it("moves an old id-prefixed address to the slug address", async () => {
+    vi.mocked(fetchGuide).mockResolvedValue(guide);
+
+    renderWithRouter(
+      <Routes>
+        <Route path="/guides/:path" element={<GuidePage />} />
+      </Routes>,
+      "/guides/15-ana-nade-spot",
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Ana nade spot" }),
+    ).toBeInTheDocument();
+    expect(fetchGuide).toHaveBeenCalledWith("15-ana-nade-spot");
+  });
+
   it("omits the map and description when the guide has none", async () => {
     vi.mocked(fetchGuide).mockResolvedValue({
       ...guide,
       mapSlug: null,
       mapName: null,
       description: "",
-    } as never);
+    });
 
     renderGuide();
 
     await screen.findByRole("heading", { name: "Ana nade spot" });
     expect(screen.queryByText("Numbani")).not.toBeInTheDocument();
     expect(screen.queryByText("on")).not.toBeInTheDocument();
+  });
+
+  it("keeps an unknown guide out of the search index", async () => {
+    vi.mocked(fetchGuide).mockRejectedValue(
+      Object.assign(new Error("missing"), {
+        isAxiosError: true,
+        response: { status: 404, data: { message: "missing" } },
+      }),
+    );
+
+    renderGuide();
+
+    await screen.findByRole("alert");
+    expect(
+      document.head
+        .querySelector('meta[name="robots"]')
+        ?.getAttribute("content"),
+    ).toBe("noindex, nofollow");
   });
 
   it("shows an error with retry when the guide cannot be loaded", async () => {

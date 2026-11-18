@@ -25,7 +25,7 @@ public class StatsFreshnessService {
     private final HeroStatRepository heroStatRepository;
     private final SnapshotCheckService snapshotCheckService;
 
-    @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()")
+    @Cacheable(value = CacheNames.STATS, key = "'freshness:' + #filter.cacheKey()", sync = true)
     @Transactional(readOnly = true)
     public DataFreshnessDto freshness(StatsFilter filter) {
         List<Instant> times = heroStatRepository.findRecentCaptureTimes(filter.queue(), currentGameFormat.get(),

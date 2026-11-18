@@ -55,7 +55,7 @@ describe("UsersAdminPage", () => {
     renderWithRouter(<UsersAdminPage />, "/admin/users");
 
     expect(await screen.findByText("ana@overlab.gg")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Active" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /^Active/ })).toHaveLength(1);
   });
 
   it("blocks a user after confirmation", async () => {
@@ -63,7 +63,7 @@ describe("UsersAdminPage", () => {
     renderWithRouter(<UsersAdminPage />, "/admin/users");
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Active" }),
+      await screen.findByRole("button", { name: /^Active/ }),
     );
     await userEvent.click(
       screen.getByRole("dialog").querySelector("button.button--danger")!,

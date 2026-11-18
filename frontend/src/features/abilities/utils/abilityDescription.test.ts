@@ -24,4 +24,9 @@ describe("formatAbilityDescription", () => {
       ),
     ).toBe("Press secondary fire to lock on, then secondary fire to fire.");
   });
+
+  it("does not rewrite a lower-case continuation of the sentence", () => {
+    const text = "Shoot the target. primary fire is the main attack.";
+    expect(formatAbilityDescription(text)).toBe(text);
+  });
 });

@@ -4,5 +4,6 @@ public enum UserTokenType {
     EMAIL_VERIFICATION,
     PASSWORD_RESET,
     EMAIL_CHANGE,
+    ACCOUNT_DELETION,
     REFRESH
 }

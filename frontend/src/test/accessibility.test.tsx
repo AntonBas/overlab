@@ -23,6 +23,8 @@ import { RelatedHeroes } from "../features/relations";
 import { ChangesTable } from "../features/history";
 import { LineChart } from "../features/history";
 import { StatsTable } from "../features/stats";
+import { DataTable } from "../components/admin/DataTable";
+import { IconSelect } from "../components/ui/IconSelect";
 
 function inRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -114,11 +116,40 @@ describe("accessibility", () => {
               banRateBefore: null,
               banRateAfter: null,
               banRateChange: null,
+              portraitUrl: null,
               roleChange: null,
             },
           ]}
         />
       </>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("icon select has no violations", async () => {
+    const { container } = render(
+      <IconSelect
+        label="Hero"
+        value="ana"
+        options={[
+          { value: "ana", label: "Ana" },
+          { value: "mei", label: "Mei" },
+        ]}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("admin data table has no violations", async () => {
+    const { container } = render(
+      <DataTable
+        rows={[{ id: 1, name: "Ana" }]}
+        rowKey={(row) => row.id}
+        columns={[{ header: "Name", render: (row) => row.name }]}
+        searchLabel="Search heroes"
+        matches={(row, query) => row.name.includes(query)}
+      />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

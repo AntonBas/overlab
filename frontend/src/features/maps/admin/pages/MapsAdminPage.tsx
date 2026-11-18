@@ -1,3 +1,4 @@
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../../components/ui/PageHeader";
@@ -19,8 +20,7 @@ import { Drawer } from "../../../../components/admin/Drawer";
 import { SelectField } from "../../../../components/admin/Fields";
 import { ImageUploadField } from "../../../../components/admin/ImageUploadField";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
-import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 
 const MODES: MapMode[] = [
   "CONTROL",
@@ -40,9 +40,8 @@ function MapForm({
   onSaved: () => void;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<string>(map.mode ?? "");
-  const save = useSave();
-  useUnsavedChanges(mode !== (map.mode ?? ""));
+  const { values, change, save } = useAdminForm({ mode: map.mode ?? "" });
+  const { mode } = values;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -66,7 +65,7 @@ function MapForm({
         name="mode"
         value={mode}
         error={save.fieldErrors.mode}
-        onChange={(event) => setMode(event.target.value)}
+        onChange={(event) => change("mode", event.target.value)}
       >
         <option value="">Unknown</option>
         {MODES.map((value) => (
@@ -113,7 +112,7 @@ export function MapsAdminPage() {
   return (
     <>
       <PageHeader title="Maps" />
-      {maps.loading && <Spinner />}
+      {maps.loading && <Spinner label="Loading maps" />}
       {maps.error && (
         <ErrorMessage failure={maps.error} onRetry={maps.reload} />
       )}
@@ -142,13 +141,13 @@ export function MapsAdminPage() {
             {
               header: "",
               render: (map) => (
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => setEditing(map.slug)}
-                >
-                  Edit
-                </button>
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
+                    onClick={() => setEditing(map.slug)}
+                  />
+                </RowActions>
               ),
             },
           ]}

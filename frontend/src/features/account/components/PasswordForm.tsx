@@ -41,7 +41,7 @@ export function PasswordForm() {
         required
         minLength={8}
         maxLength={72}
-        hint="8 to 72 characters"
+        hint="At least 8 characters, at most 72 bytes (letters outside A-Z take 2 bytes)"
         value={newPassword}
         error={save.fieldErrors.newPassword}
         onChange={(event) => setNewPassword(event.target.value)}

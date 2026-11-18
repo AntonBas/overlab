@@ -3,6 +3,7 @@ package gg.overlab.backend.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -123,6 +124,10 @@ class AuditIntegrationTest {
         AuditLog update = entry(AuditAction.UPDATE);
         assertThat(update.getChanges()).containsOnlyKeys("recommendation");
         assertThat(update.getChanges().get("recommendation")).isEqualTo(Map.of("from", "RECOMMENDED", "to", "AVOID"));
+
+        mockMvc.perform(get("/api/admin/audit").cookie(adminCookie).param("actorId", String.valueOf(adminId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].actorName").value("Audit Admin"));
     }
 
     @Test

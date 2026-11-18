@@ -93,7 +93,7 @@ public class SnapshotRecorder {
         return check;
     }
 
-    private String signatureOf(GameQueue queue, List<BlizzardRatesResponse.HeroRate> rates) {
+    static String signatureOf(GameQueue queue, List<BlizzardRatesResponse.HeroRate> rates) {
         return SnapshotSignature.of(rates.stream()
                 .map(rate -> new SnapshotSignature.Entry(rate.id(), rate.cells().winrate(),
                         rate.cells().pickrate(), queue == GameQueue.COMPETITIVE ? rate.cells().banrate() : null))

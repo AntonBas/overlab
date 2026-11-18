@@ -3,6 +3,7 @@ package gg.overlab.backend.hero.relation.feedback;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
 import gg.overlab.backend.hero.relation.HeroRelation;
+import gg.overlab.backend.common.UserScopedLock;
 import gg.overlab.backend.hero.relation.HeroRelationRepository;
 import gg.overlab.backend.hero.relation.RelationType;
 import gg.overlab.backend.hero.relation.feedback.dto.RelationVoteDto;
@@ -18,11 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RelationFeedbackService {
 
+    private static final String LOCK_SCOPE = "relation-votes";
     public static final int MAX_VOTES_PER_USER = 1000;
     public static final int MAX_SUMMARY_ROWS = 200;
 
     private final HeroRelationRepository relationRepository;
     private final RelationVoteRepository voteRepository;
+    private final UserScopedLock userScopedLock;
 
     @Transactional(readOnly = true)
     public List<RelationVoteDto> votes(Long userId) {
@@ -32,6 +35,7 @@ public class RelationFeedbackService {
     @Transactional
     public void vote(Long userId, RelationVoteRequest request) {
         HeroRelation relation = requireRelation(request.heroSlug(), request.relatedHeroSlug(), request.type());
+        userScopedLock.acquire(LOCK_SCOPE, userId);
         RelationVote vote = voteRepository.findByRelationIdAndUserId(relation.getId(), userId).orElse(null);
         if (vote == null) {
             if (voteRepository.countByUser(userId) >= MAX_VOTES_PER_USER) {

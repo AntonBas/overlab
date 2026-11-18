@@ -1,3 +1,5 @@
+import { GoogleLogo } from "../components/GoogleLogo";
+import { FormError } from "../../../components/ui/FormError";
 import { useState, type FormEvent } from "react";
 import {
   Link,
@@ -92,11 +94,7 @@ export function LoginPage() {
         <Link className="auth-link auth-link--aside" to="/forgot-password">
           Forgot your password?
         </Link>
-        {error && !unverified && (
-          <p className="form__error" role="alert">
-            {error}
-          </p>
-        )}
+        {error && !unverified && <FormError>{error}</FormError>}
         {unverified && (
           <div className="auth-alert" role="alert">
             <p>
@@ -105,7 +103,7 @@ export function LoginPage() {
             </p>
             <button
               type="button"
-              className="auth-alert__action"
+              className="link-button auth-alert__action"
               onClick={resend}
             >
               Send the confirmation email again
@@ -119,6 +117,7 @@ export function LoginPage() {
       </form>
       <div className="auth-card__divider">or</div>
       <a className="button button--ghost" href="/oauth2/authorization/google">
+        <GoogleLogo />
         Continue with Google
       </a>
       <p className="auth-card__switch">

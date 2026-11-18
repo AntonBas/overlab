@@ -1,6 +1,12 @@
 package gg.overlab.backend.collector;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import gg.overlab.backend.collector.client.BlizzardRatesResponse;
+import gg.overlab.backend.common.ScheduledJobLock;
 import gg.overlab.backend.stats.GameFormat;
 import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
@@ -10,10 +16,31 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import org.mockito.ArgumentMatchers;
 
 public final class CollectorFixtures {
 
     private CollectorFixtures() {
+    }
+
+    public static ScheduledJobLock openLock() {
+        ScheduledJobLock lock = mock(ScheduledJobLock.class);
+        when(lock.runExclusively(anyString(), any(Runnable.class))).thenAnswer(invocation -> {
+            invocation.<Runnable>getArgument(1).run();
+            return true;
+        });
+        when(lock.callExclusively(anyString(), ArgumentMatchers.<Supplier<Object>>any())).thenAnswer(invocation ->
+                Optional.ofNullable(invocation.<Supplier<Object>>getArgument(1).get()));
+        return lock;
+    }
+
+    public static ScheduledJobLock heldLock() {
+        ScheduledJobLock lock = mock(ScheduledJobLock.class);
+        when(lock.runExclusively(anyString(), any(Runnable.class))).thenReturn(false);
+        when(lock.callExclusively(anyString(), ArgumentMatchers.<Supplier<Object>>any())).thenReturn(Optional.empty());
+        return lock;
     }
 
     public static CollectorProperties properties(int maxAttempts, CollectorJob... jobs) {

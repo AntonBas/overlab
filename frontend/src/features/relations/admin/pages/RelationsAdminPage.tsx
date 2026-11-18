@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../../components/ui/PageHeader";
@@ -22,8 +24,8 @@ import { HeroLabel } from "../../../heroes/admin";
 import { HeroSelect } from "../../../heroes/admin";
 import { StatusMessage } from "../../../../components/admin/StatusMessage";
 import { useHeroOptions } from "../../../heroes/admin";
+import { useAdminForm } from "../../../../components/admin/useAdminForm";
 import { useSave } from "../../../../components/admin/useSave";
-import { useUnsavedChanges } from "../../../../components/admin/unsavedChanges";
 import type { AdminHero } from "../../../heroes/admin";
 import type { HeroRelation, RelationType } from "../types";
 import { describeRelationConflict } from "../utils/relations";
@@ -45,24 +47,18 @@ function RelationForm({
   onSaved,
   onClose,
 }: RelationFormProps) {
-  const [heroSlug, setHeroSlug] = useState(relation?.heroSlug ?? defaultHero);
-  const [relatedHeroSlug, setRelatedHeroSlug] = useState(
-    relation?.relatedHeroSlug ?? "",
-  );
-  const [type, setType] = useState<RelationType>(relation?.type ?? "COUNTER");
-  const [note, setNote] = useState(relation?.note ?? "");
-  const save = useSave();
+  const { values, change, save } = useAdminForm({
+    heroSlug: relation?.heroSlug ?? defaultHero,
+    relatedHeroSlug: relation?.relatedHeroSlug ?? "",
+    type: relation?.type ?? "COUNTER",
+    note: relation?.note ?? "",
+  });
+  const { heroSlug, relatedHeroSlug, type, note } = values;
   const conflict = describeRelationConflict(
     { heroSlug, relatedHeroSlug, type },
     existing,
     relation?.id ?? null,
   );
-  const dirty =
-    heroSlug !== (relation?.heroSlug ?? defaultHero) ||
-    relatedHeroSlug !== (relation?.relatedHeroSlug ?? "") ||
-    type !== (relation?.type ?? "COUNTER") ||
-    note !== (relation?.note ?? "");
-  useUnsavedChanges(dirty);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -92,7 +88,7 @@ function RelationForm({
         label="Type"
         name="type"
         value={type}
-        onChange={(event) => setType(event.target.value as RelationType)}
+        onChange={(event) => change("type", event.target.value as RelationType)}
       >
         <option value="COUNTER">
           Counter (the hero is strong against the related hero)
@@ -105,7 +101,7 @@ function RelationForm({
         heroes={heroes}
         placeholder="Choose a hero"
         error={save.fieldErrors.heroSlug}
-        onChange={setHeroSlug}
+        onChange={(value) => change("heroSlug", value)}
       />
       <HeroSelect
         label="Related hero"
@@ -113,7 +109,7 @@ function RelationForm({
         heroes={heroes}
         placeholder="Choose a hero"
         error={save.fieldErrors.relatedHeroSlug}
-        onChange={setRelatedHeroSlug}
+        onChange={(value) => change("relatedHeroSlug", value)}
       />
       <TextAreaField
         label="Note"
@@ -121,7 +117,7 @@ function RelationForm({
         rows={2}
         value={note}
         error={save.fieldErrors.note}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => change("note", event.target.value)}
       />
       {conflict && <p className="notice notice--error">{conflict}</p>}
       <StatusMessage error={save.error} />
@@ -151,11 +147,12 @@ export function RelationsAdminPage() {
   usePageTitle("Admin: counters and synergies");
   const heroes = useHeroOptions();
   const [filter, setFilter] = useState("");
-  const relations = useFetch(
-    () => fetchRelations(filter || undefined),
+  const everything = useFetch(() => fetchRelations(), []);
+  const filtered = useFetch(
+    () => (filter ? fetchRelations(filter) : Promise.resolve(null)),
     [filter],
   );
-  const everything = useFetch(() => fetchRelations(), []);
+  const relations = filter ? filtered : everything;
   const [editing, setEditing] = useState<HeroRelation | "new" | null>(null);
   const [deleting, setDeleting] = useState<HeroRelation | null>(null);
   const removal = useSave();
@@ -163,7 +160,7 @@ export function RelationsAdminPage() {
   const label = (slug: string) => names.get(slug) ?? slug;
 
   function reload() {
-    relations.reload();
+    filtered.reload();
     everything.reload();
   }
 
@@ -183,29 +180,30 @@ export function RelationsAdminPage() {
 
   return (
     <>
-      <PageHeader
-        title="Counters and synergies"
-        actions={
+      <PageHeader title="Counters and synergies" />
+      <div className="table-search">
+        {heroes.data && (
+          <HeroSelect
+            label="Filter by hero"
+            value={filter}
+            heroes={heroes.data}
+            allLabel="All heroes"
+            onChange={setFilter}
+          />
+        )}
+        <div className="table-search__action">
           <button
             type="button"
             className="button"
             onClick={() => setEditing("new")}
           >
+            <Plus size={16} aria-hidden="true" />
             New relation
           </button>
-        }
-      />
-      {heroes.data && (
-        <HeroSelect
-          label="Filter by hero"
-          value={filter}
-          heroes={heroes.data}
-          allLabel="All heroes"
-          onChange={setFilter}
-        />
-      )}
+        </div>
+      </div>
       <StatusMessage error={removal.error} />
-      {relations.loading && <Spinner />}
+      {relations.loading && <Spinner label="Loading relations" />}
       {relations.error && (
         <ErrorMessage failure={relations.error} onRetry={relations.reload} />
       )}
@@ -240,22 +238,18 @@ export function RelationsAdminPage() {
             {
               header: "",
               render: (relation) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(relation)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(relation)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

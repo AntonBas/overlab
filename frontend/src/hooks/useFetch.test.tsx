@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { AxiosError, AxiosHeaders } from "axios";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useFetch } from "./useFetch";
 
 describe("useFetch", () => {
@@ -13,6 +13,22 @@ describe("useFetch", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toBe("ready");
     expect(result.current.error).toBeNull();
+  });
+
+  it("waits until it is enabled before requesting", async () => {
+    const fetcher = vi.fn(() => Promise.resolve("ready"));
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useFetch(fetcher, [], { enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(true);
+
+    rerender({ enabled: true });
+
+    await waitFor(() => expect(result.current.data).toBe("ready"));
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
   it("exposes a failure instead of throwing", async () => {
@@ -90,5 +106,48 @@ describe("useFetch", () => {
     await act(async () => release("second result"));
     await waitFor(() => expect(result.current.data).toBe("second result"));
     expect(result.current.stale).toBe(false);
+  });
+
+  describe("spinner timing", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("shows data immediately when the answer is fast", async () => {
+      vi.useFakeTimers();
+      const { result } = renderHook(() =>
+        useFetch(() => Promise.resolve("fast"), []),
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(50);
+      });
+      expect(result.current.loading).toBe(false);
+      expect(result.current.data).toBe("fast");
+    });
+
+    it("keeps the spinner for a minimum time once it became visible", async () => {
+      vi.useFakeTimers();
+      const { result } = renderHook(() =>
+        useFetch(
+          () =>
+            new Promise<string>((resolve) => {
+              setTimeout(() => resolve("late"), 250);
+            }),
+          [],
+        ),
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+      expect(result.current.loading).toBe(true);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      expect(result.current.loading).toBe(false);
+      expect(result.current.data).toBe("late");
+    });
   });
 });

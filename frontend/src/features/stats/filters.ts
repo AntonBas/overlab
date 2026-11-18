@@ -127,6 +127,8 @@ export function applyCoverage(
   };
 }
 
+const MAP_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
 function pick<T extends string>(
   raw: string | null,
   allowed: readonly T[],
@@ -136,11 +138,18 @@ function pick<T extends string>(
   return match ?? fallback;
 }
 
+function sortFor(queue: GameQueue, sort: StatsSort): StatsSort {
+  return queue === "QUICK_PLAY" && sort === "BAN_RATE"
+    ? DEFAULT_FILTERS.sort
+    : sort;
+}
+
 export function parseFilters(
   params: URLSearchParams,
   defaultRegion: Region = DEFAULT_FILTERS.region,
 ): StatsFilters {
   const rawRole = params.get("role");
+  const rawMap = params.get("map");
   const queue = pick(params.get("queue"), QUEUES, DEFAULT_FILTERS.queue);
   return {
     queue,
@@ -148,11 +157,11 @@ export function parseFilters(
       queue === "QUICK_PLAY"
         ? "ALL"
         : pick(params.get("tier"), TIERS, DEFAULT_FILTERS.tier),
-    map: params.get("map") || DEFAULT_FILTERS.map,
+    map: rawMap && MAP_SLUG_PATTERN.test(rawMap) ? rawMap : DEFAULT_FILTERS.map,
     platform: pick(params.get("platform"), PLATFORMS, DEFAULT_FILTERS.platform),
     region: pick(params.get("region"), REGIONS, defaultRegion),
-    role: rawRole ? pick(rawRole, ROLES, ROLES[0]) : null,
-    sort: pick(params.get("sort"), SORTS, DEFAULT_FILTERS.sort),
+    role: ROLES.find((role) => role === rawRole?.toUpperCase()) ?? null,
+    sort: sortFor(queue, pick(params.get("sort"), SORTS, DEFAULT_FILTERS.sort)),
     direction: pick(
       params.get("direction"),
       DIRECTIONS,

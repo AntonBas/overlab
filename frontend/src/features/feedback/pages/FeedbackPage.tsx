@@ -17,7 +17,10 @@ const TYPES: { value: FeedbackType; label: string }[] = [
 ];
 
 function sitePath(value: string | null): string | null {
-  return value !== null && value.startsWith("/") && !value.startsWith("//")
+  return value !== null &&
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\")
     ? value
     : null;
 }
@@ -71,7 +74,7 @@ export function FeedbackPage() {
       <form className="form settings-section" onSubmit={submit}>
         {from && (
           <p className="feedback-origin">
-            About page <code>{from}</code>
+            Sent from <code>{from}</code>
           </p>
         )}
         <div className="form-field">

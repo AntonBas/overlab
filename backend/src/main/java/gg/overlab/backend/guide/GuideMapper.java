@@ -13,7 +13,7 @@ public class GuideMapper {
         return new GuideDto(
                 guide.getId(),
                 guide.getSlug(),
-                GuidePath.of(guide.getId(), guide.getSlug()),
+                guide.getSlug(),
                 guide.getHero().getSlug(),
                 guide.getHero().getName(),
                 hasMap ? guide.getMap().getSlug() : null,

@@ -15,5 +15,7 @@ public interface HeroAbilityRepository extends JpaRepository<HeroAbility, Long> 
     @EntityGraph(attributePaths = "hero")
     List<HeroAbility> findAllByHeroSlugOrderBySortOrderAsc(String heroSlug);
 
+    boolean existsByHeroIdAndSlug(Long heroId, String slug);
+
     Optional<HeroAbility> findByHeroIdAndSlug(Long heroId, String slug);
 }

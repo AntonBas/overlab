@@ -25,12 +25,13 @@ export interface CollectorRun {
 }
 
 export type AuditAction =
-  "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "PASSWORD_CHANGE";
+  "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "PASSWORD_CHANGE";
 
 export interface AuditEntry {
   id: number;
   occurredAt: string;
   actorId: number | null;
+  actorName: string | null;
   actorRole: string | null;
   action: AuditAction;
   entityType: string;

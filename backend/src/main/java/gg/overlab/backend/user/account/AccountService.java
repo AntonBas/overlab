@@ -8,6 +8,7 @@ import gg.overlab.backend.config.security.UserRole;
 import gg.overlab.backend.exception.core.BadRequestException;
 import gg.overlab.backend.exception.core.ConflictException;
 import gg.overlab.backend.exception.core.EntityNotFoundException;
+import gg.overlab.backend.exception.core.InvalidTokenException;
 import gg.overlab.backend.feedback.FeedbackService;
 import gg.overlab.backend.notification.EmailService;
 import gg.overlab.backend.user.User;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AccountService {
 
+    public static final String ACCOUNT_DELETION_REQUEST = "account-deletion";
     private static final String WRONG_PASSWORD = "Current password is incorrect";
 
     private final UserRepository userRepository;
@@ -88,6 +90,8 @@ public class AccountService {
         User user = load(userId);
         if (user.getPasswordHash() != null) {
             requirePassword(user, request.password());
+        } else {
+            requireDeletionToken(user, request.deletionToken());
         }
         if (user.getRole() == UserRole.ADMIN && user.isEnabled() && isLastActiveAdmin(user)) {
             throw new ConflictException("The last administrator cannot be deleted");
@@ -96,6 +100,30 @@ public class AccountService {
         auditLogRepository.anonymizeActor(user.getId());
         auditLogRepository.anonymizeUserEntity(String.valueOf(user.getId()));
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public void requestDeletionConfirmation(Long userId) {
+        User user = load(userId);
+        if (user.getPasswordHash() != null) {
+            throw new BadRequestException("This account has a password, confirm the deletion with it");
+        }
+        if (loginAttemptLimiter.isMailThrottled(ACCOUNT_DELETION_REQUEST, user.getEmail())) {
+            return;
+        }
+        tokenService.revokeAll(user, UserTokenType.ACCOUNT_DELETION);
+        String token = tokenService.issue(user, UserTokenType.ACCOUNT_DELETION, properties.resetTokenTtl());
+        emailService.sendAccountDeletion(user.toEmailRecipient(), token);
+    }
+
+    private void requireDeletionToken(User user, String deletionToken) {
+        if (deletionToken == null || deletionToken.isBlank()) {
+            throw new BadRequestException("Confirm the deletion with the link we emailed you");
+        }
+        User owner = tokenService.consume(deletionToken.trim(), UserTokenType.ACCOUNT_DELETION);
+        if (!owner.getId().equals(user.getId())) {
+            throw new InvalidTokenException();
+        }
     }
 
     private boolean isLastActiveAdmin(User user) {
@@ -123,6 +151,5 @@ public class AccountService {
             loginAttemptLimiter.recordFailure(user.getEmail());
             throw new BadRequestException(WRONG_PASSWORD);
         }
-        loginAttemptLimiter.reset(user.getEmail());
     }
 }

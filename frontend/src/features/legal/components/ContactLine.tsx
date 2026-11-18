@@ -6,7 +6,7 @@ export function ContactLine() {
   if (!contactEmail) {
     return (
       <p>
-        Contact: use the form on the <Link to="/business">business page</Link>.
+        Contact: use the <Link to="/feedback">feedback form</Link>.
       </p>
     );
   }

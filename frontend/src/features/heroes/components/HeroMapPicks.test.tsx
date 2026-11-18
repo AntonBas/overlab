@@ -49,7 +49,7 @@ describe("HeroMapPicks", () => {
   it("shows the best maps first with links that select the map on the hero page", async () => {
     renderWithRouter(<HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />);
 
-    const gain = await screen.findByRole("region", { name: "by gain" });
+    const gain = await screen.findByRole("region", { name: /maps$/ });
 
     expect(
       screen.getByRole("heading", { name: "Best maps for Ana" }),
@@ -63,11 +63,11 @@ describe("HeroMapPicks", () => {
 
   it("switches to the worst maps", async () => {
     renderWithRouter(<HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />);
-    await screen.findByRole("region", { name: "by gain" });
+    await screen.findByRole("region", { name: /maps$/ });
 
     await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
 
-    const drop = screen.getByRole("region", { name: "by gain" });
+    const drop = screen.getByRole("region", { name: /maps$/ });
     expect(
       screen.getByRole("heading", { name: "Worst maps for Ana" }),
     ).toBeInTheDocument();
@@ -95,14 +95,12 @@ describe("HeroMapPicks", () => {
     renderWithRouter(
       <HeroMapPicks heroName="Ana" maps={allAbove} linkSuffix="" />,
     );
-    await screen.findByRole("region", { name: "by gain" });
+    await screen.findByRole("region", { name: /maps$/ });
 
     await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
 
     expect(
-      within(screen.getByRole("region", { name: "by gain" })).getByText(
-        "Rialto",
-      ),
+      within(screen.getByRole("region", { name: /maps$/ })).getByText("Rialto"),
     ).toBeInTheDocument();
   });
 
@@ -115,7 +113,7 @@ describe("HeroMapPicks", () => {
       />,
     );
 
-    const gain = await screen.findByRole("region", { name: "by gain" });
+    const gain = await screen.findByRole("region", { name: /maps$/ });
 
     expect(within(gain).getByRole("link", { name: /Busan/ })).toHaveAttribute(
       "href",
@@ -125,16 +123,11 @@ describe("HeroMapPicks", () => {
 
   it("shows the placeholder image for a map without a picture", async () => {
     const { container } = renderWithRouter(
-      <HeroMapPicks
-        heroName="Ana"
-        maps={[maps[1], entry({ mapSlug: "rialto", winRateDelta: -4 })].slice(
-          0,
-          1,
-        )}
-        linkSuffix=""
-      />,
+      <HeroMapPicks heroName="Ana" maps={maps} linkSuffix="" />,
     );
-    await screen.findByRole("region", { name: "by gain" });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Show all maps" }),
+    );
 
     expect(
       container.querySelector('img[src="/images/map-placeholder.svg"]'),
@@ -150,15 +143,15 @@ describe("HeroMapPicks", () => {
       }),
     );
     renderWithRouter(<HeroMapPicks heroName="Ana" maps={many} linkSuffix="" />);
-    const list = await screen.findByRole("region", { name: "by gain" });
+    const list = await screen.findByRole("region", { name: /maps$/ });
     expect(within(list).getAllByRole("link")).toHaveLength(4);
 
     await userEvent.click(screen.getByRole("button", { name: "Worst maps" }));
     await userEvent.click(
-      screen.getByRole("button", { name: "Show all 8 maps" }),
+      screen.getByRole("button", { name: "Show all maps" }),
     );
 
-    const names = within(screen.getByRole("region", { name: "by gain" }))
+    const names = within(screen.getByRole("region", { name: /maps$/ }))
       .getAllByRole("link")
       .map((link) => link.textContent);
     expect(names).toHaveLength(8);

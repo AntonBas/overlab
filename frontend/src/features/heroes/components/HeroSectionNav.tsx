@@ -1,19 +1,27 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { HeroPortrait } from "../../../components/ui/HeroPortrait";
+import { FavoriteButton } from "../../personal";
+import { preferredScrollBehavior } from "../../../utils/motion";
+import { holdElementInView } from "../../../utils/restoreScroll";
 
 interface HeroSectionNavProps {
   sections: { id: string; label: string }[];
+  hero?: { slug: string; name: string; portraitUrl: string | null };
 }
 
 function scrollToSection(id: string) {
   document
     .getElementById(id)
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    ?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" });
 }
 
-export function HeroSectionNav({ sections }: HeroSectionNavProps) {
+export function HeroSectionNav({ sections, hero }: HeroSectionNavProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [stuck, setStuck] = useState(false);
+  const nav = useRef<HTMLElement>(null);
   const hashHandled = useRef(false);
+  const releaseHold = useRef<(() => void) | null>(null);
   const sectionKey = sections.map((section) => section.id).join(",");
 
   useEffect(() => {
@@ -21,11 +29,33 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
     const match = sectionKey
       .split(",")
       .find((sectionId) => sectionId === `hero-${target}`);
-    if (!hashHandled.current && match) {
+    if (!hashHandled.current && match && document.getElementById(match)) {
       hashHandled.current = true;
-      scrollToSection(match);
+      releaseHold.current = holdElementInView(() =>
+        document.getElementById(match),
+      );
     }
   }, [sectionKey]);
+
+  useEffect(() => () => releaseHold.current?.(), []);
+
+  useEffect(() => {
+    function update() {
+      const element = nav.current;
+      if (!element) {
+        return;
+      }
+      const stickyTop = parseFloat(getComputedStyle(element).top) || 0;
+      setStuck(element.getBoundingClientRect().top <= stickyTop + 1);
+    }
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") {
@@ -48,7 +78,7 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
           setActiveId(first);
         }
       },
-      { rootMargin: "-80px 0px -60% 0px" },
+      { rootMargin: "-120px 0px -60% 0px" },
     );
     sectionKey.split(",").forEach((sectionId) => {
       const element = document.getElementById(sectionId);
@@ -64,7 +94,19 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
   }
 
   return (
-    <nav className="section-nav" aria-label="Hero sections">
+    <nav ref={nav} className="section-nav" aria-label="Hero sections">
+      {hero && stuck && (
+        <span className="section-nav__identity">
+          <HeroPortrait name={hero.name} url={hero.portraitUrl} size={26} />
+          <strong>{hero.name}</strong>
+          <FavoriteButton
+            compact
+            kind="hero"
+            slug={hero.slug}
+            name={hero.name}
+          />
+        </span>
+      )}
       {sections.map((section) => (
         <button
           key={section.id}
@@ -74,6 +116,8 @@ export function HeroSectionNav({ sections }: HeroSectionNavProps) {
           })}
           aria-current={activeId === section.id ? "true" : undefined}
           onClick={() => {
+            releaseHold.current?.();
+            releaseHold.current = null;
             const url = new URL(window.location.href);
             url.hash = section.id.replace("hero-", "");
             window.history.replaceState(window.history.state, "", url);

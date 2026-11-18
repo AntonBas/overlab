@@ -1,4 +1,5 @@
 import { api } from "../../../services/api";
+import { cachedGet } from "../../../services/requestCache";
 import type {
   GameQueue,
   Platform,
@@ -27,15 +28,16 @@ export async function fetchFreshness(
   return data;
 }
 
-export async function fetchCoverage(): Promise<CoverageEntry[]> {
-  const { data } = await api.get<CoverageEntry[]>("/stats/coverage");
-  return data;
+export function fetchCoverage(): Promise<CoverageEntry[]> {
+  return cachedGet<CoverageEntry[]>("/stats/coverage");
 }
 
 export async function fetchStats(
   filters: StatsFilters,
+  signal?: AbortSignal,
 ): Promise<StatsSnapshot> {
   const { data } = await api.get<StatsSnapshot>("/stats", {
+    signal,
     params: {
       queue: filters.queue,
       tier: filters.tier,
@@ -92,9 +94,11 @@ export interface ComparisonParams extends HeroStatsParams {
 
 export async function fetchComparison(
   params: ComparisonParams,
+  signal?: AbortSignal,
 ): Promise<StatsComparison> {
   const { data } = await api.get<StatsComparison>("/stats/compare", {
     params,
+    signal,
   });
   return data;
 }

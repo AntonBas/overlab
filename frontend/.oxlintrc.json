@@ -28,7 +28,8 @@
   "overrides": [
     {
       "files": [
-        "src/routes/AppRoutes.tsx"
+        "src/routes/AppRoutes.tsx",
+        "src/test/fixtures/**"
       ],
       "rules": {
         "no-restricted-imports": "off"

@@ -1,3 +1,4 @@
+import { EmptyState } from "../../../components/ui/EmptyState";
 import { useState } from "react";
 import { FormField } from "../../../components/ui/FormField";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -5,6 +6,7 @@ import { PageHeader } from "../../../components/ui/PageHeader";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
+import { useResettingPage } from "../../../hooks/useResettingPage";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { formatDateTime, humanize } from "../../../utils/format";
 import { fetchAuditLog } from "../api/adminApi";
@@ -20,7 +22,6 @@ const ACTIONS: AuditAction[] = [
   "UPDATE",
   "DELETE",
   "LOGIN",
-  "LOGOUT",
   "PASSWORD_CHANGE",
 ];
 
@@ -29,7 +30,6 @@ const ACTION_TONES: Record<AuditAction, "good" | "bad" | "info" | "neutral"> = {
   UPDATE: "info",
   DELETE: "bad",
   LOGIN: "neutral",
-  LOGOUT: "neutral",
   PASSWORD_CHANGE: "neutral",
 };
 
@@ -38,17 +38,17 @@ const EMPTY: Omit<AuditFilters, "page"> = {};
 export function AuditAdminPage() {
   usePageTitle("Admin: audit log");
   const [fields, setFields] = useState(EMPTY);
-  const [page, setPage] = useState(0);
   const applied = useDebouncedValue(fields, 400);
+  const [page, setPage] = useResettingPage(applied);
   const log = useFetch(
     () => fetchAuditLog({ ...applied, page }),
     [applied, page],
+    { keepPrevious: true },
   );
   const filtered = Object.values(fields).some(Boolean);
 
   function change(key: keyof typeof fields, value: string) {
     setFields((current) => ({ ...current, [key]: value }));
-    setPage(0);
   }
 
   return (
@@ -102,17 +102,16 @@ export function AuditAdminPage() {
             className="button button--ghost"
             onClick={() => {
               setFields(EMPTY);
-              setPage(0);
             }}
           >
             Reset
           </button>
         )}
       </div>
-      {log.loading && <Spinner />}
+      {log.loading && <Spinner label="Loading audit log" />}
       {log.error && <ErrorMessage failure={log.error} onRetry={log.reload} />}
       {log.data && log.data.content.length === 0 && (
-        <p className="notice">No entries match these filters.</p>
+        <EmptyState kind="no-match">No entries match these filters.</EmptyState>
       )}
       {log.data && log.data.content.length > 0 && (
         <div className="table-wrap">
@@ -133,7 +132,11 @@ export function AuditAdminPage() {
                     {formatDateTime(entry.occurredAt)}
                   </td>
                   <td data-label="Actor">
-                    {describeActor(entry.actorId, entry.actorRole)}
+                    {describeActor(
+                      entry.actorId,
+                      entry.actorRole,
+                      entry.actorName,
+                    )}
                   </td>
                   <td data-label="Action">
                     <StatusBadge

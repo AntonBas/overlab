@@ -10,9 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
 
-    @Query("select t from UserToken t join fetch t.user where t.tokenHash = :hash and t.type = :type")
-    Optional<UserToken> findByHashAndType(@Param("hash") String hash, @Param("type") UserTokenType type);
-
     @Query("select t from UserToken t join fetch t.user where t.tokenHash = :hash and t.type in :types")
     Optional<UserToken> findByHashAndTypeIn(@Param("hash") String hash,
                                             @Param("types") Collection<UserTokenType> types);

@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithRouter } from "../../../test/render";
 import type { Preferences } from "../../../types/user";
@@ -8,6 +9,7 @@ vi.mock("../../personal/context/usePersonalData", () => ({
   usePersonalData: () => ({ preferences }),
 }));
 
+import { RegionProvider } from "../context/RegionProvider";
 import { useFilterState } from "./useFilterState";
 
 function Probe() {
@@ -58,5 +60,38 @@ describe("useFilterState saved defaults", () => {
     await waitFor(() =>
       expect(screen.getByText("QUICK_PLAY ALL EUROPE")).toBeInTheDocument(),
     );
+  });
+});
+
+function RegionProbe() {
+  const { filters, update, key } = useFilterState();
+  return (
+    <>
+      <p data-testid="key">{key}</p>
+      <p>{filters.region}</p>
+      <button type="button" onClick={() => update({ region: "ASIA" })}>
+        Choose Asia
+      </button>
+    </>
+  );
+}
+
+describe("useFilterState region", () => {
+  it("changes the fetch key when the chosen region becomes the saved default", async () => {
+    preferences = null;
+    renderWithRouter(
+      <RegionProvider>
+        <RegionProbe />
+      </RegionProvider>,
+      "/stats",
+    );
+    const before = screen.getByTestId("key").textContent;
+
+    await userEvent.click(screen.getByRole("button", { name: "Choose Asia" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("key").textContent).not.toBe(before),
+    );
+    expect(screen.getByText("ASIA")).toBeInTheDocument();
   });
 });

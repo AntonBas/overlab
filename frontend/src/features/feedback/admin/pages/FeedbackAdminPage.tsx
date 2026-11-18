@@ -17,6 +17,12 @@ import { formatDateTime } from "../../../../utils/format";
 
 const STATUSES: FeedbackStatus[] = ["NEW", "RESOLVED", "DISMISSED"];
 
+const STATUS_LABELS: Record<FeedbackStatus, string> = {
+  NEW: "New",
+  RESOLVED: "Resolved",
+  DISMISSED: "Dismissed",
+};
+
 const TYPE_LABELS: Record<FeedbackType, string> = {
   INACCURACY: "Inaccuracy",
   BUG: "Bug",
@@ -66,7 +72,7 @@ export function FeedbackAdminPage() {
           >
             {STATUSES.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {STATUS_LABELS[option]}
               </option>
             ))}
           </select>
@@ -74,7 +80,7 @@ export function FeedbackAdminPage() {
         {messages.error && (
           <ErrorMessage failure={messages.error} onRetry={messages.reload} />
         )}
-        {messages.loading && <Spinner />}
+        {messages.loading && <Spinner label="Loading feedback" />}
         {messages.data && (
           <DataTable
             rows={messages.data}
@@ -115,6 +121,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Resolve message ${row.id}`}
                         onClick={() => void change(row, "RESOLVED")}
                       >
                         Resolve
@@ -124,6 +131,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Dismiss message ${row.id}`}
                         onClick={() => void change(row, "DISMISSED")}
                       >
                         Dismiss
@@ -133,6 +141,7 @@ export function FeedbackAdminPage() {
                       <button
                         type="button"
                         className="button button--ghost"
+                        aria-label={`Reopen message ${row.id}`}
                         onClick={() => void change(row, "NEW")}
                       >
                         Reopen
@@ -152,7 +161,7 @@ export function FeedbackAdminPage() {
         {summary.error && (
           <ErrorMessage failure={summary.error} onRetry={summary.reload} />
         )}
-        {summary.loading && <Spinner />}
+        {summary.loading && <Spinner label="Loading summary" />}
         {summary.data && (
           <DataTable
             rows={summary.data}

@@ -8,7 +8,6 @@ import type {
   RelatedHero,
 } from "../../../types/hero";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
-import { CategoryChip } from "./CategoryChip";
 import { RelatedHeroes } from "./RelatedHeroes";
 
 type RelationTabId = "strong" | "struggles" | "synergies";
@@ -28,6 +27,8 @@ interface RelationTabsProps {
   categories?: HeroCategory[];
   feedback?: RelationFeedback;
   heroName?: string;
+  description?: string;
+  showHeading?: boolean;
 }
 
 const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
@@ -36,14 +37,19 @@ const MATCHUP_TYPES: Record<RelationTabId, CategoryMatchupType> = {
   synergies: "WORKS_WITH",
 };
 
+const NO_MATCHUPS: CategoryMatchup[] = [];
+const NO_CATEGORIES: HeroCategory[] = [];
+
 export function RelationTabs({
   strongAgainst,
   counteredBy,
   synergies,
-  categoryMatchups = [],
-  categories = [],
+  categoryMatchups = NO_MATCHUPS,
+  categories = NO_CATEGORIES,
   feedback,
   heroName,
+  description,
+  showHeading = true,
 }: RelationTabsProps) {
   const baseId = useId();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -106,13 +112,25 @@ export function RelationTabs({
     document.getElementById(`${baseId}-tab-${target.id}`)?.focus();
   }
 
+  const groups = active.matchups.flatMap((matchup) => {
+    const category = categoriesBySlug.get(matchup.categorySlug);
+    return category ? [{ category, note: matchup.note }] : [];
+  });
+
   return (
     <section className="section">
-      <h2>
-        {heroName
-          ? `${heroName} counters and synergies`
-          : "Counters and synergies"}
-      </h2>
+      {showHeading && (
+        <div className="section__heading">
+          <h2>
+            {heroName
+              ? `${heroName} counters and synergies`
+              : "Counters and synergies"}
+          </h2>
+        </div>
+      )}
+      {description && (
+        <p className="muted section__description">{description}</p>
+      )}
       <div
         className="segmented"
         role="tablist"
@@ -152,29 +170,11 @@ export function RelationTabs({
         aria-labelledby={`${baseId}-tab-${active.id}`}
         className="relation-tabs__panel"
       >
-        {active.matchups.length > 0 && (
-          <ul
-            className={clsx(
-              "matchup__list",
-              "relation-tabs__chips",
-              `relation-tabs__chips--${active.id}`,
-            )}
-          >
-            {active.matchups.map((matchup) => {
-              const category = categoriesBySlug.get(matchup.categorySlug);
-              return category ? (
-                <CategoryChip
-                  key={matchup.categorySlug}
-                  category={category}
-                  matchup={matchup}
-                />
-              ) : null;
-            })}
-          </ul>
-        )}
-        {active.heroes.length > 0 && (
+        {active.heroes.length + groups.length > 0 && (
           <RelatedHeroes
+            key={active.id}
             heroes={active.heroes}
+            groups={groups}
             type={active.id === "synergies" ? "SYNERGY" : "COUNTER"}
             feedback={feedback}
           />

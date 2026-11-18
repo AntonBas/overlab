@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -5,6 +6,7 @@ import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { useStuckHeader } from "../../../hooks/useStuckHeader";
 import type { HeroChange } from "../../../types/stats";
 import { ROLE_LABELS, formatDate, formatPercent } from "../../../utils/format";
 import { sortChanges, type ChangeSort } from "../utils/changes";
@@ -12,7 +14,6 @@ import { sortChanges, type ChangeSort } from "../utils/changes";
 interface ChangesTableProps {
   changes: HeroChange[];
   showBan: boolean;
-  portraits?: Record<string, string | null>;
 }
 
 const DELTA_TITLE = "Change between the two snapshots";
@@ -34,20 +35,19 @@ function ChangeCell({ before, after, change }: ChangeCellProps) {
   );
 }
 
-export function ChangesTable({
-  changes,
-  showBan,
-  portraits = {},
-}: ChangesTableProps) {
+export function ChangesTable({ changes, showBan }: ChangesTableProps) {
+  const { sentinelRef, stuck } = useStuckHeader();
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
+  const activeSort: ChangeSort =
+    !showBan && sort === "BAN_CHANGE" ? "WIN_CHANGE" : sort;
   const rows = useMemo(
-    () => sortChanges(changes, sort, descending),
-    [changes, sort, descending],
+    () => sortChanges(changes, activeSort, descending),
+    [changes, activeSort, descending],
   );
 
   function toggle(next: ChangeSort) {
-    if (next === sort) {
+    if (next === activeSort) {
       setDescending((current) => !current);
     } else {
       setSort(next);
@@ -56,14 +56,14 @@ export function ChangesTable({
   }
 
   function ariaSort(column: ChangeSort): "ascending" | "descending" | "none" {
-    if (column !== sort) {
+    if (column !== activeSort) {
       return "none";
     }
     return descending ? "descending" : "ascending";
   }
 
   function icon(column: ChangeSort) {
-    if (column !== sort) {
+    if (column !== activeSort) {
       return <ArrowUpDown size={14} aria-hidden="true" />;
     }
     return descending ? (
@@ -74,7 +74,9 @@ export function ChangesTable({
   }
 
   if (changes.length === 0) {
-    return <EmptyState>No heroes match these filters.</EmptyState>;
+    return (
+      <EmptyState kind="no-match">No heroes match these filters.</EmptyState>
+    );
   }
 
   const sortOptions: { value: ChangeSort; label: string }[] = [
@@ -90,7 +92,7 @@ export function ChangesTable({
         <label className="table-sort__field">
           <span className="field__label">Sort by</span>
           <select
-            value={sort}
+            value={activeSort}
             onChange={(event) => toggle(event.target.value as ChangeSort)}
           >
             {sortOptions.map((option) => (
@@ -113,7 +115,12 @@ export function ChangesTable({
           )}
         </button>
       </div>
-      <div className="table-wrap">
+      <div className="table-wrap table-wrap--ranking" data-stuck={stuck}>
+        <div
+          ref={sentinelRef}
+          className="table-wrap__sentinel"
+          aria-hidden="true"
+        />
         <table className="table table--cards">
           <thead>
             <tr>
@@ -159,12 +166,12 @@ export function ChangesTable({
           </thead>
           <tbody>
             {rows.map((change) => (
-              <tr key={change.heroSlug}>
+              <tr key={change.heroSlug} data-role={change.role.toLowerCase()}>
                 <th scope="row">
                   <span className="table__hero">
                     <HeroPortrait
                       name={change.heroName}
-                      url={portraits[change.heroSlug] ?? null}
+                      url={change.portraitUrl}
                     />
                     <RoleBadge role={change.role} compact />
                     <Link to={`/heroes/${change.heroSlug}`}>
@@ -180,14 +187,24 @@ export function ChangesTable({
                     )}
                   </span>
                 </th>
-                <td data-label="Win rate">
+                <td
+                  data-label="Win rate"
+                  className={clsx({
+                    "table__col--sorted": activeSort === "WIN_CHANGE",
+                  })}
+                >
                   <ChangeCell
                     before={change.winRateBefore}
                     after={change.winRateAfter}
                     change={change.winRateChange}
                   />
                 </td>
-                <td data-label="Pick rate">
+                <td
+                  data-label="Pick rate"
+                  className={clsx({
+                    "table__col--sorted": activeSort === "PICK_CHANGE",
+                  })}
+                >
                   <ChangeCell
                     before={change.pickRateBefore}
                     after={change.pickRateAfter}
@@ -195,7 +212,12 @@ export function ChangesTable({
                   />
                 </td>
                 {showBan && (
-                  <td data-label="Ban rate">
+                  <td
+                    data-label="Ban rate"
+                    className={clsx({
+                      "table__col--sorted": activeSort === "BAN_CHANGE",
+                    })}
+                  >
                     {change.banRateBefore === null ||
                     change.banRateAfter === null ? (
                       "-"

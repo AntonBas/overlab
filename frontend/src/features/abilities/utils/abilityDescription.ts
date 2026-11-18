@@ -1,4 +1,5 @@
-const FIRE_LABEL = /(^|[.!?]\s+)(primary|secondary) fire\s+(?=[A-Z])/gi;
+const FIRE_LABEL =
+  /(^|[.!?]\s+)(primary|secondary|Primary|Secondary|PRIMARY|SECONDARY) (?:fire|Fire|FIRE)\s+(?=[A-Z])/g;
 const SHOUTING_FIRE = /\b(PRIMARY|SECONDARY) FIRE\b/g;
 
 function capitalize(word: string): string {

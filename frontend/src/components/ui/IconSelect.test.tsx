@@ -53,4 +53,13 @@ describe("IconSelect", () => {
     expect(screen.queryAllByRole("option")).toHaveLength(0);
     expect(screen.getByText("Nothing found")).toBeInTheDocument();
   });
+
+  it("renders a disabled placeholder instead of crashing without options", () => {
+    render(
+      <IconSelect label="Rank" value="gold" options={[]} onChange={vi.fn()} />,
+    );
+
+    expect(screen.getByRole("combobox")).toBeDisabled();
+    expect(screen.getByText("No options")).toBeInTheDocument();
+  });
 });
