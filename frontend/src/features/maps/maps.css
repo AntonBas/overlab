@@ -267,18 +267,51 @@
   height: 56px;
 }
 
-.map-best-picks-placeholder {
+.map-best-picks-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
   min-height: 1457px;
 }
 
 @media (min-width: 568px) {
-  .map-best-picks-placeholder {
+  .map-best-picks-skeleton {
     min-height: 960px;
   }
 }
 
 @media (min-width: 844px) {
-  .map-best-picks-placeholder {
+  .map-best-picks-skeleton {
     min-height: 518px;
   }
+}
+
+.map-best-picks-skeleton__title {
+  flex: none;
+  width: min(320px, 70%);
+  height: 28px;
+  border-radius: var(--radius);
+}
+
+.map-best-picks-skeleton .highlights {
+  flex: 1;
+  grid-auto-rows: 1fr;
+  margin-bottom: 0;
+}
+
+.map-best-picks-skeleton__title,
+.map-best-picks-skeleton__card {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-2) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  border: 1px solid var(--border);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.map-best-picks-skeleton__card {
+  border-radius: var(--radius);
 }
