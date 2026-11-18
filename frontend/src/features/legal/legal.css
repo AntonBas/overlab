@@ -82,7 +82,7 @@
   border-radius: 6px;
   background: var(--surface-2);
   color: var(--text);
-  font-size: 0.85em;
+  font-size: max(0.85em, var(--font-size-xs));
 }
 
 .email-copy {
