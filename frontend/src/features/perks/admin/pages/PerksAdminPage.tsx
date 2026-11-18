@@ -228,19 +228,33 @@ export function PerksAdminPage() {
       {heroes.error && (
         <ErrorMessage failure={heroes.error} onRetry={heroes.reload} />
       )}
-      {heroes.data && (
-        <HeroSelect
-          label="Hero"
-          value={heroSlug}
-          heroes={heroes.data}
-          placeholder="Choose a hero"
-          onChange={(slug) => {
-            setHeroSlug(slug);
-            setEditing(null);
-            removal.reset();
-          }}
-        />
-      )}
+      <div className="table-search">
+        {heroes.data && (
+          <HeroSelect
+            label="Hero"
+            value={heroSlug}
+            heroes={heroes.data}
+            placeholder="Choose a hero"
+            onChange={(slug) => {
+              setHeroSlug(slug);
+              setEditing(null);
+              removal.reset();
+            }}
+          />
+        )}
+        {heroSlug && (
+          <div className="table-search__action">
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={16} aria-hidden="true" />
+              New perk
+            </button>
+          </div>
+        )}
+      </div>
       <StatusMessage error={removal.error} />
       {heroSlug && perks.loading && <Spinner label="Loading perks" />}
       {perks.error && (
@@ -248,18 +262,6 @@ export function PerksAdminPage() {
       )}
       {heroSlug && perks.data && (
         <DataTable
-          toolbar={
-            heroSlug ? (
-              <button
-                type="button"
-                className="button"
-                onClick={() => setEditing("new")}
-              >
-                <Plus size={16} aria-hidden="true" />
-                New perk
-              </button>
-            ) : undefined
-          }
           rows={perks.data}
           rowKey={(perk) => perk.id}
           emptyMessage="This hero has no perks yet."
