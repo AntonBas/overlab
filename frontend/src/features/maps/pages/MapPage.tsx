@@ -42,7 +42,7 @@ const INITIAL_HERO_ROWS = 10;
 
 export function MapPage() {
   const { slug = "" } = useParams();
-  const { filters, update, changeSort, key } = useFilterState(
+  const { filters, update, changeSort, ready, key } = useFilterState(
     slug,
     SEARCH_PARAMS,
   );
@@ -51,6 +51,7 @@ export function MapPage() {
   useNoIndex(map.error?.status === 404);
   const stats = useFetch((signal) => fetchStats(filters, signal), [key, slug], {
     keepPrevious: true,
+    enabled: ready,
   });
   const picksKey = `${filters.queue}|${filters.tier}|${filters.platform}|${filters.region}|${slug}`;
   const allRolesStats = useFetch(
@@ -59,7 +60,7 @@ export function MapPage() {
         ? Promise.resolve(null)
         : fetchStats({ ...filters, role: null }),
     [picksKey, filters.role === null],
-    { keepPrevious: true },
+    { keepPrevious: true, enabled: ready },
   );
   const guides = useFetch(() => fetchGuides({ map: slug }), [slug]);
   const maps = useFetch(fetchMaps, []);

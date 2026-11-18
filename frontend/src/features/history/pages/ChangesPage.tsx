@@ -119,10 +119,11 @@ export function ChangesPage() {
   const requestedView = searchParams.get("view") ?? DEFAULT_VIEW;
   const view = isKnownViewShape(requestedView) ? requestedView : DEFAULT_VIEW;
   const { region: defaultRegion } = useRegion();
-  const { filters, update: updateFilters } = useFilterState(
-    undefined,
-    PRESERVED_PARAMS,
-  );
+  const {
+    filters,
+    update: updateFilters,
+    ready,
+  } = useFilterState(undefined, PRESERVED_PARAMS);
   const [search, setSearch] = useUrlParam("q");
   const patches = useFetch(fetchPatches, []);
 
@@ -153,7 +154,7 @@ export function ChangesPage() {
       view,
       range,
     ],
-    { keepPrevious: true },
+    { keepPrevious: true, enabled: ready },
   );
   const historyStart = useFetch(
     () =>
@@ -164,6 +165,7 @@ export function ChangesPage() {
         filters.region,
       ),
     [filters.queue, filters.tier, filters.platform, filters.region],
+    { enabled: ready },
   );
   const activePatch = view.startsWith(PATCH_PREFIX)
     ? (patches.data ?? []).find(
@@ -328,7 +330,7 @@ export function ChangesPage() {
           onChange={(next) => updateView({ view: next })}
         />
       </StatsFilters>
-      {comparison.loading && <TableSkeleton label="Loading comparison" />}
+      {comparison.loading && <TableSkeleton label="Loading comparison" tall />}
       {comparison.error &&
         (comparison.error.status === 404 ? (
           <EmptyState kind="waiting">

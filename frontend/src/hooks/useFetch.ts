@@ -18,6 +18,7 @@ interface Settled<T> {
 
 interface FetchOptions {
   keepPrevious?: boolean;
+  enabled?: boolean;
 }
 
 export function useFetch<T>(
@@ -35,7 +36,12 @@ export function useFetch<T>(
     fetcherRef.current = fetcher;
   });
 
+  const enabled = options.enabled ?? true;
+
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const abort = new AbortController();
     const startedAt = Date.now();
     let holdTimer: number | undefined;
@@ -67,7 +73,7 @@ export function useFetch<T>(
       abort.abort();
       window.clearTimeout(holdTimer);
     };
-  }, [key, options.keepPrevious]);
+  }, [key, options.keepPrevious, enabled]);
 
   const reload = useCallback(() => setVersion((current) => current + 1), []);
   const current = settled?.key === key ? settled : null;

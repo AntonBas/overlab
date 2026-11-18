@@ -16,6 +16,7 @@ const personal = vi.hoisted(() => ({
   favoriteMaps: new Set<string>(["numbani"]),
   preferencesLoaded: true,
   preferencesFailed: false,
+  preferencesPending: false,
   reloadPreferences: vi.fn(),
 }));
 

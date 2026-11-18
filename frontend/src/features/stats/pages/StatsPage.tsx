@@ -37,7 +37,7 @@ export function StatsPage() {
       window.location.origin,
     ),
   );
-  const { filters, update, changeSort, key } = useFilterState(
+  const { filters, update, changeSort, ready, key } = useFilterState(
     undefined,
     SEARCH_PARAMS,
   );
@@ -45,6 +45,7 @@ export function StatsPage() {
   const maps = useFetch(fetchMaps, []);
   const stats = useFetch((signal) => fetchStats(filters, signal), [key], {
     keepPrevious: true,
+    enabled: ready,
   });
 
   const showDelta = filters.map !== ALL_MAPS;
@@ -101,7 +102,7 @@ export function StatsPage() {
         search={search}
         onSearchChange={setSearch}
       />
-      {stats.loading && <TableSkeleton label="Loading statistics" />}
+      {stats.loading && <TableSkeleton label="Loading statistics" tall />}
       {stats.error &&
         (stats.error.status === 404 ? (
           <EmptyState kind="waiting">

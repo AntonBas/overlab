@@ -7,6 +7,7 @@ export interface PersonalDataValue {
   preferences: Preferences | null;
   preferencesLoaded: boolean;
   preferencesFailed: boolean;
+  preferencesPending: boolean;
   reloadPreferences: () => void;
   failure: string | null;
   toggleHeroFavorite: (slug: string) => Promise<void>;
@@ -20,6 +21,7 @@ export const EMPTY_PERSONAL_DATA: PersonalDataValue = {
   preferences: null,
   preferencesLoaded: false,
   preferencesFailed: false,
+  preferencesPending: false,
   reloadPreferences: () => undefined,
   failure: null,
   toggleHeroFavorite: () => Promise.resolve(),

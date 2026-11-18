@@ -15,6 +15,22 @@ describe("useFetch", () => {
     expect(result.current.error).toBeNull();
   });
 
+  it("waits until it is enabled before requesting", async () => {
+    const fetcher = vi.fn(() => Promise.resolve("ready"));
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useFetch(fetcher, [], { enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(true);
+
+    rerender({ enabled: true });
+
+    await waitFor(() => expect(result.current.data).toBe("ready"));
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it("exposes a failure instead of throwing", async () => {
     const config = { headers: new AxiosHeaders() };
     const failure = new AxiosError("bad", "ERR", config, null, {

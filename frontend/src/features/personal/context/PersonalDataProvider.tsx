@@ -8,6 +8,7 @@ import {
 } from "react";
 import { toFailure } from "../../../services/api";
 import type { Preferences } from "../../../types/user";
+import { readSessionHint } from "../../../services/sessionHint";
 import { useAuth } from "../../auth";
 import * as personalApi from "../api/personalApi";
 import { PersonalDataContext } from "./personalDataContext";
@@ -33,7 +34,7 @@ const EMPTY_STATE: PersonalState = {
 };
 
 export function PersonalDataProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const userId = user?.id ?? null;
   const [stored, setStored] = useState<PersonalState>(EMPTY_STATE);
   const [failure, setFailure] = useState<string | null>(null);
@@ -99,6 +100,10 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [userId, preferencesAttempt]);
+
+  const preferencesPending = authLoading
+    ? readSessionHint() === "active"
+    : userId !== null && !state.preferencesLoaded && !state.preferencesFailed;
 
   const reloadPreferences = useCallback(
     () => setPreferencesAttempt((attempt) => attempt + 1),
@@ -175,6 +180,7 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
       preferences: state.preferences,
       preferencesLoaded: state.preferencesLoaded,
       preferencesFailed: state.preferencesFailed,
+      preferencesPending,
       reloadPreferences,
       failure,
       toggleHeroFavorite,
@@ -183,6 +189,7 @@ export function PersonalDataProvider({ children }: { children: ReactNode }) {
     }),
     [
       state,
+      preferencesPending,
       failure,
       reloadPreferences,
       toggleHeroFavorite,
