@@ -73,6 +73,13 @@
   gap: var(--space-12);
 }
 
+.site-header__account-placeholder {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  visibility: hidden;
+}
+
 .site-header__region {
   flex-shrink: 0;
   padding-block: var(--space-6);
@@ -444,4 +451,8 @@
   .site-header__tools {
     display: contents;
   }
+}
+
+.app:has(.list-skeleton, .skeleton--tall, .spinner--page) .site-footer {
+  visibility: hidden;
 }

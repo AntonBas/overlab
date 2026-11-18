@@ -273,6 +273,10 @@
   }
 }
 
+.skeleton--tall {
+  min-height: 100vh;
+}
+
 .skeleton__row {
   height: 45px;
   border-bottom: 1px solid var(--border);
@@ -1026,6 +1030,7 @@
 }
 
 .list-skeleton {
+  min-height: 100vh;
   animation: spinner-in 0.25s ease 0.2s both;
 }
 

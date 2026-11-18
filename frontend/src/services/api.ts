@@ -1,6 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import type { ApiErrorBody } from "../types/common";
-import { readSessionHint, writeSessionHint } from "./sessionHint";
+import {
+  readSessionHint,
+  writeRoleHint,
+  writeSessionHint,
+} from "./sessionHint";
 
 export interface RequestFailure {
   status: number;
@@ -83,8 +87,11 @@ api.interceptors.response.use((response) => {
   const url = response.config.url ?? "";
   if (url.startsWith("/auth/login") || url.startsWith("/auth/me")) {
     writeSessionHint("active");
+    const role: unknown = response.data?.role;
+    writeRoleHint(typeof role === "string" ? role : null);
   } else if (url.startsWith("/auth/logout")) {
     writeSessionHint("ended");
+    writeRoleHint(null);
   }
   return response;
 });

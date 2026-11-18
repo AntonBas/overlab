@@ -6,6 +6,7 @@ import { useAuth } from "../../features/auth";
 import { useRegion } from "../../features/stats";
 import { REGIONS } from "../../features/stats";
 import type { Region } from "../../types/common";
+import { readRoleHint, readSessionHint } from "../../services/sessionHint";
 import { REGION_LABELS } from "../../utils/format";
 import { HeroSearch } from "./HeroSearch";
 import { NAV_LINKS } from "./navLinks";
@@ -15,6 +16,10 @@ export function Header() {
   const { region, rememberRegion } = useRegion();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
+  const sessionExpected = loading && readSessionHint() === "active";
+  const adminShown = loading
+    ? sessionExpected && readRoleHint() === "ADMIN"
+    : user?.role === "ADMIN";
 
   useEffect(() => {
     if (!menuOpen) {
@@ -78,7 +83,7 @@ export function Header() {
                   </NavLink>
                 </li>
               ))}
-              {user?.role === "ADMIN" && (
+              {adminShown && (
                 <li>
                   <NavLink
                     to="/admin"
@@ -107,6 +112,16 @@ export function Header() {
               ))}
             </select>
             <div className="site-header__account">
+              {sessionExpected && (
+                <div
+                  className="site-header__account-placeholder"
+                  aria-hidden="true"
+                  inert
+                >
+                  <span className="nav__link">My Overlab</span>
+                  <span className="button button--ghost">Sign out</span>
+                </div>
+              )}
               {!loading && user && (
                 <>
                   <Link className="nav__link" to="/me" title={user.displayName}>

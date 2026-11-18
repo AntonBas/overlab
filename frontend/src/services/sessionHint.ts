@@ -18,3 +18,25 @@ export function writeSessionHint(hint: Hint): void {
     return;
   }
 }
+
+const ROLE_STORAGE_KEY = "overlab.role";
+
+export function readRoleHint(): string | null {
+  try {
+    return window.localStorage.getItem(ROLE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function writeRoleHint(role: string | null): void {
+  try {
+    if (role === null) {
+      window.localStorage.removeItem(ROLE_STORAGE_KEY);
+    } else {
+      window.localStorage.setItem(ROLE_STORAGE_KEY, role);
+    }
+  } catch {
+    return;
+  }
+}
