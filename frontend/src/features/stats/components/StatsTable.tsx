@@ -103,16 +103,25 @@ export function StatsTable({
                   {hero.recentlyAdded && <NewBadge />}
                 </span>
               </th>
-              <td>
+              <td
+                className={clsx({ "table__col--sorted": sort === "WIN_RATE" })}
+              >
                 <RateBar value={hero.winRate} tone="win" />
                 {showDelta && <DeltaValue value={hero.winRateDelta} />}
               </td>
-              <td>
+              <td
+                className={clsx({ "table__col--sorted": sort === "PICK_RATE" })}
+              >
                 <RateBar value={hero.pickRate} tone="pick" max={40} />
                 {showDelta && <DeltaValue value={hero.pickRateDelta} />}
               </td>
               {showBan && (
-                <td className={clsx({ muted: hero.banRate === null })}>
+                <td
+                  className={clsx({
+                    muted: hero.banRate === null,
+                    "table__col--sorted": sort === "BAN_RATE",
+                  })}
+                >
                   <RateBar value={hero.banRate} tone="ban" max={50} />
                 </td>
               )}

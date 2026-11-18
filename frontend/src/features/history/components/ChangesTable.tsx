@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -71,7 +72,9 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
   }
 
   if (changes.length === 0) {
-    return <EmptyState>No heroes match these filters.</EmptyState>;
+    return (
+      <EmptyState kind="no-match">No heroes match these filters.</EmptyState>
+    );
   }
 
   const sortOptions: { value: ChangeSort; label: string }[] = [
@@ -177,14 +180,24 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
                     )}
                   </span>
                 </th>
-                <td data-label="Win rate">
+                <td
+                  data-label="Win rate"
+                  className={clsx({
+                    "table__col--sorted": activeSort === "WIN_CHANGE",
+                  })}
+                >
                   <ChangeCell
                     before={change.winRateBefore}
                     after={change.winRateAfter}
                     change={change.winRateChange}
                   />
                 </td>
-                <td data-label="Pick rate">
+                <td
+                  data-label="Pick rate"
+                  className={clsx({
+                    "table__col--sorted": activeSort === "PICK_CHANGE",
+                  })}
+                >
                   <ChangeCell
                     before={change.pickRateBefore}
                     after={change.pickRateAfter}
@@ -192,7 +205,12 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
                   />
                 </td>
                 {showBan && (
-                  <td data-label="Ban rate">
+                  <td
+                    data-label="Ban rate"
+                    className={clsx({
+                      "table__col--sorted": activeSort === "BAN_CHANGE",
+                    })}
+                  >
                     {change.banRateBefore === null ||
                     change.banRateAfter === null ? (
                       "-"

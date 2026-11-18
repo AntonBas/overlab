@@ -394,6 +394,41 @@ select:disabled {
   background: color-mix(in srgb, var(--row-role) 8%, transparent);
 }
 
+.table-wrap--ranking th[aria-sort="ascending"],
+.table-wrap--ranking th[aria-sort="descending"] {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+  color: var(--accent-text);
+}
+
+.table-wrap--ranking .table__col--sorted {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+@media (min-width: 769px) {
+  .table-wrap--ranking {
+    overflow: visible;
+  }
+
+  .table-wrap--ranking thead th {
+    position: sticky;
+    top: var(--header-height, 0px);
+    z-index: 2;
+  }
+
+  .table-wrap--ranking thead th:first-child {
+    border-top-left-radius: calc(var(--radius-lg) - 1px);
+  }
+
+  .table-wrap--ranking thead th:last-child {
+    border-top-right-radius: calc(var(--radius-lg) - 1px);
+  }
+
+  .table-wrap--ranking tbody tr:last-child > * {
+    border-bottom-left-radius: calc(var(--radius-lg) - 1px);
+    border-bottom-right-radius: calc(var(--radius-lg) - 1px);
+  }
+}
+
 .table-wrap--ranking .table__hero::before {
   content: counter(ranking-row);
   min-width: 1.5em;

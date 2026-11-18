@@ -67,6 +67,42 @@
   background: var(--bar-win);
 }
 
+.rate-bar__fill--loss {
+  background: var(--bad);
+}
+
+.rate-bar__track--centered {
+  position: relative;
+  overflow: visible;
+}
+
+.rate-bar__track--centered::before {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  content: "";
+  background: var(--muted);
+  opacity: 0.55;
+}
+
+.rate-bar__fill--centered {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: auto;
+  border-radius: 3px;
+}
+
+.rate-bar__value--above {
+  color: var(--good);
+}
+
+.rate-bar__value--below {
+  color: var(--bad);
+}
+
 .rate-bar__fill--pick {
   background: var(--bar-pick);
 }
