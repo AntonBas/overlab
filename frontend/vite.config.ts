@@ -29,6 +29,17 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("node_modules/axios")) {
             return "axios";
           }
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+          if (
+            id.includes("/src/components/ui/") ||
+            id.includes("/src/hooks/") ||
+            id.includes("/src/services/") ||
+            id.includes("/src/utils/")
+          ) {
+            return "shared";
+          }
           return undefined;
         },
       },
