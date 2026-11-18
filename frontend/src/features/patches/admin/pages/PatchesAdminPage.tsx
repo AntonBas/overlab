@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { FormField } from "../../../../components/ui/FormField";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
@@ -161,23 +163,14 @@ export function PatchesAdminPage() {
       <PageHeader
         title="Patches"
         actions={
-          <>
-            <button
-              type="button"
-              className="button button--ghost"
-              disabled={importing.saving}
-              onClick={() => void importFromBlizzard()}
-            >
-              Import from Blizzard
-            </button>
-            <button
-              type="button"
-              className="button"
-              onClick={() => setEditing("new")}
-            >
-              New patch
-            </button>
-          </>
+          <button
+            type="button"
+            className="button button--ghost"
+            disabled={importing.saving}
+            onClick={() => void importFromBlizzard()}
+          >
+            Import from Blizzard
+          </button>
         }
       />
       <StatusMessage error={importing.error} />
@@ -188,6 +181,16 @@ export function PatchesAdminPage() {
       )}
       {patches.data && (
         <DataTable
+          toolbar={
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={16} aria-hidden="true" />
+              New patch
+            </button>
+          }
           rows={patches.data}
           rowKey={(patch) => patch.id}
           emptyMessage="No patches yet."
@@ -210,22 +213,18 @@ export function PatchesAdminPage() {
             {
               header: "",
               render: (patch) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(patch)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost button--danger-ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(patch)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

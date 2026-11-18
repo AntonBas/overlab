@@ -1,3 +1,4 @@
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { HeroPortrait } from "../../../../components/ui/HeroPortrait";
@@ -146,14 +147,13 @@ export function HeroesAdminPage() {
             {
               header: "",
               render: (hero) => (
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  aria-label={`Edit ${hero.name}`}
-                  onClick={() => setEditing(hero.slug)}
-                >
-                  Edit
-                </button>
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label={`Edit ${hero.name}`}
+                    onClick={() => setEditing(hero.slug)}
+                  />
+                </RowActions>
               ),
             },
           ]}

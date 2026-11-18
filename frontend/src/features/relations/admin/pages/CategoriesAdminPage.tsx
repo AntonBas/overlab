@@ -1,3 +1,4 @@
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { FormField } from "../../../../components/ui/FormField";
@@ -384,22 +385,18 @@ export function CategoriesAdminPage() {
               {
                 header: "",
                 render: (category) => (
-                  <div className="form__actions">
-                    <button
-                      type="button"
-                      className="button button--ghost"
+                  <RowActions>
+                    <RowAction
+                      kind="edit"
+                      label="Edit"
                       onClick={() => setEditingCategory(category)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="button button--ghost button--danger-ghost"
+                    />
+                    <RowAction
+                      kind="delete"
+                      label="Delete"
                       onClick={() => setDeletingCategory(category)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                    />
+                  </RowActions>
                 ),
               },
             ]}
@@ -438,22 +435,18 @@ export function CategoriesAdminPage() {
               {
                 header: "",
                 render: (matchup) => (
-                  <div className="form__actions">
-                    <button
-                      type="button"
-                      className="button button--ghost"
+                  <RowActions>
+                    <RowAction
+                      kind="edit"
+                      label="Edit"
                       onClick={() => setEditingMatchup(matchup)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="button button--ghost button--danger-ghost"
+                    />
+                    <RowAction
+                      kind="delete"
+                      label="Delete"
                       onClick={() => setDeletingMatchup(matchup)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                    />
+                  </RowActions>
                 ),
               },
             ]}

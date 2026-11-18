@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../../components/ui/PageHeader";
@@ -178,18 +180,7 @@ export function RelationsAdminPage() {
 
   return (
     <>
-      <PageHeader
-        title="Counters and synergies"
-        actions={
-          <button
-            type="button"
-            className="button"
-            onClick={() => setEditing("new")}
-          >
-            New relation
-          </button>
-        }
-      />
+      <PageHeader title="Counters and synergies" />
       {heroes.data && (
         <HeroSelect
           label="Filter by hero"
@@ -206,6 +197,16 @@ export function RelationsAdminPage() {
       )}
       {relations.data && (
         <DataTable
+          toolbar={
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={16} aria-hidden="true" />
+              New relation
+            </button>
+          }
           rows={relations.data}
           rowKey={(relation) => relation.id}
           emptyMessage="No relations yet."
@@ -235,22 +236,18 @@ export function RelationsAdminPage() {
             {
               header: "",
               render: (relation) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(relation)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost button--danger-ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(relation)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

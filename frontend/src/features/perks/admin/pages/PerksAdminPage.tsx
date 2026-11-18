@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../../components/ui/PageHeader";
@@ -207,30 +209,19 @@ export function PerksAdminPage() {
       <PageHeader
         title="Perks"
         actions={
-          <>
-            <button
-              type="button"
-              className="button button--ghost"
-              disabled={importing.saving}
-              onClick={() =>
-                importing.run(
-                  importPerks,
-                  "Import started. It takes a few minutes; reload the list afterwards.",
-                )
-              }
-            >
-              Import from Blizzard
-            </button>
-            {heroSlug && (
-              <button
-                type="button"
-                className="button"
-                onClick={() => setEditing("new")}
-              >
-                New perk
-              </button>
-            )}
-          </>
+          <button
+            type="button"
+            className="button button--ghost"
+            disabled={importing.saving}
+            onClick={() =>
+              importing.run(
+                importPerks,
+                "Import started. It takes a few minutes; reload the list afterwards.",
+              )
+            }
+          >
+            Import from Blizzard
+          </button>
         }
       />
       <StatusMessage error={importing.error} />
@@ -257,6 +248,18 @@ export function PerksAdminPage() {
       )}
       {heroSlug && perks.data && (
         <DataTable
+          toolbar={
+            heroSlug ? (
+              <button
+                type="button"
+                className="button"
+                onClick={() => setEditing("new")}
+              >
+                <Plus size={16} aria-hidden="true" />
+                New perk
+              </button>
+            ) : undefined
+          }
           rows={perks.data}
           rowKey={(perk) => perk.id}
           emptyMessage="This hero has no perks yet."
@@ -284,22 +287,18 @@ export function PerksAdminPage() {
             {
               header: "",
               render: (perk) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(perk)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost button--danger-ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(perk)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

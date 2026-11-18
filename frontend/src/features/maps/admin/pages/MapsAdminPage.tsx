@@ -1,3 +1,4 @@
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
 import { PageHeader } from "../../../../components/ui/PageHeader";
@@ -140,13 +141,13 @@ export function MapsAdminPage() {
             {
               header: "",
               render: (map) => (
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => setEditing(map.slug)}
-                >
-                  Edit
-                </button>
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
+                    onClick={() => setEditing(map.slug)}
+                  />
+                </RowActions>
               ),
             },
           ]}

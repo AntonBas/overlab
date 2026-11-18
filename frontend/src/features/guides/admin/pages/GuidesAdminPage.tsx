@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { RowAction, RowActions } from "../../../../components/admin/RowActions";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ErrorMessage } from "../../../../components/ui/ErrorMessage";
@@ -47,18 +49,7 @@ export function GuidesAdminPage() {
 
   return (
     <>
-      <PageHeader
-        title="Guides"
-        actions={
-          <button
-            type="button"
-            className="button"
-            onClick={() => setEditing("new")}
-          >
-            New guide
-          </button>
-        }
-      />
+      <PageHeader title="Guides" />
       {heroes.data && (
         <HeroSelect
           label="Filter by hero"
@@ -75,6 +66,16 @@ export function GuidesAdminPage() {
       )}
       {guides.data && (
         <DataTable
+          toolbar={
+            <button
+              type="button"
+              className="button"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={16} aria-hidden="true" />
+              New guide
+            </button>
+          }
           rows={rows}
           rowKey={(guide) => guide.id}
           emptyMessage="No guides yet."
@@ -103,22 +104,18 @@ export function GuidesAdminPage() {
             {
               header: "",
               render: (guide) => (
-                <div className="form__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
+                <RowActions>
+                  <RowAction
+                    kind="edit"
+                    label="Edit"
                     onClick={() => setEditing(guide)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--ghost button--danger-ghost"
+                  />
+                  <RowAction
+                    kind="delete"
+                    label="Delete"
                     onClick={() => setDeleting(guide)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  />
+                </RowActions>
               ),
             },
           ]}

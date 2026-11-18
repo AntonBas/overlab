@@ -15,6 +15,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   searchLabel?: string;
   matches?: (row: T, query: string) => boolean;
+  toolbar?: ReactNode;
 }
 
 export function DataTable<T>({
@@ -25,6 +26,7 @@ export function DataTable<T>({
   emptyMessage = "Nothing here yet.",
   searchLabel,
   matches,
+  toolbar,
 }: DataTableProps<T>) {
   const [requestedPage, setPage] = useState(0);
   const [query, setQuery] = useState("");
@@ -37,34 +39,47 @@ export function DataTable<T>({
   const page = Math.min(requestedPage, totalPages - 1);
 
   if (rows.length === 0) {
-    return <EmptyState>{emptyMessage}</EmptyState>;
+    return (
+      <>
+        {toolbar && <div className="table-toolbar">{toolbar}</div>}
+        <EmptyState>{emptyMessage}</EmptyState>
+      </>
+    );
   }
 
   const visible = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
     <>
-      {searchable && (
+      {(searchable || toolbar) && (
         <div className="table-search">
-          <input
-            type="search"
-            value={query}
-            placeholder={searchLabel}
-            aria-label={searchLabel}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(0);
-            }}
-          />
-          <span className="muted table-count">
-            {filtered.length} of {rows.length}
-          </span>
+          {searchable && (
+            <>
+              <input
+                type="search"
+                value={query}
+                placeholder={searchLabel}
+                aria-label={searchLabel}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(0);
+                }}
+              />
+              <span className="muted table-count">
+                {filtered.length} of {rows.length}
+              </span>
+            </>
+          )}
+          {toolbar && <div className="table-search__action">{toolbar}</div>}
         </div>
       )}
       {filtered.length === 0 && (
         <EmptyState kind="no-match">Nothing matches.</EmptyState>
       )}
-      <div className="table-wrap" hidden={filtered.length === 0}>
+      <div
+        className="table-wrap table-wrap--sticky"
+        hidden={filtered.length === 0}
+      >
         <table className="table table--cards">
           <thead>
             <tr>
