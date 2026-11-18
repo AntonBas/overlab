@@ -103,7 +103,11 @@ export function PerksPage() {
         onOnlyFavoritesChange={setOnlyFavorites}
       />
       {visibleHeroes.length === 0 ? (
-        <EmptyState>
+        <EmptyState
+          kind={
+            onlyFavorites && favoriteHeroes.size === 0 ? "empty" : "no-match"
+          }
+        >
           {onlyFavorites && favoriteHeroes.size === 0
             ? "You have no favorite heroes yet. Use the star on a hero card to add one."
             : "No heroes match the filters."}

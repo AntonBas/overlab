@@ -1026,11 +1026,6 @@
   stroke: var(--bad);
 }
 
-.flask-icon--empty .flask-icon__flask {
-  stroke: var(--muted);
-  stroke-dasharray: 4 5;
-}
-
 .list-skeleton {
   animation: spinner-in 0.25s ease 0.2s both;
 }

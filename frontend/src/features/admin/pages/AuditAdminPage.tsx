@@ -1,3 +1,4 @@
+import { EmptyState } from "../../../components/ui/EmptyState";
 import { useState } from "react";
 import { FormField } from "../../../components/ui/FormField";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
@@ -110,7 +111,7 @@ export function AuditAdminPage() {
       {log.loading && <Spinner label="Loading audit log" />}
       {log.error && <ErrorMessage failure={log.error} onRetry={log.reload} />}
       {log.data && log.data.content.length === 0 && (
-        <p className="notice">No entries match these filters.</p>
+        <EmptyState kind="no-match">No entries match these filters.</EmptyState>
       )}
       {log.data && log.data.content.length > 0 && (
         <div className="table-wrap">

@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Clock } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -213,10 +212,7 @@ export function HeroHistorySection({
         </div>
       )}
       {history.data && !enough && (
-        <EmptyState
-          icon={<Clock size={26} />}
-          title="Not enough data for a chart yet"
-        >
+        <EmptyState kind="waiting" title="Not enough data for a chart yet">
           {points.length === 1
             ? `Statistics have been collected since ${formatDateTime(points[0].capturedAt)}.`
             : "History appears as daily statistics are collected."}

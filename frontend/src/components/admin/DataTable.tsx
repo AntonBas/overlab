@@ -61,7 +61,9 @@ export function DataTable<T>({
           </span>
         </div>
       )}
-      {filtered.length === 0 && <EmptyState>Nothing matches.</EmptyState>}
+      {filtered.length === 0 && (
+        <EmptyState kind="no-match">Nothing matches.</EmptyState>
+      )}
       <div className="table-wrap" hidden={filtered.length === 0}>
         <table className="table table--cards">
           <thead>

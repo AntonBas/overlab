@@ -1,3 +1,4 @@
+import { EmptyState } from "../../../components/ui/EmptyState";
 import clsx from "clsx";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { ModeIcon } from "../../../components/ui/ModeIcon";
@@ -134,7 +135,9 @@ export function MapsPage() {
             </div>
           </FiltersPanel>
           {matching.length === 0 && (
-            <p className="muted">No maps match these filters.</p>
+            <EmptyState kind="no-match">
+              No maps match these filters.
+            </EmptyState>
           )}
           {groupByMode(matching).map(([label, group]) => (
             <section key={label} className="section map-section">

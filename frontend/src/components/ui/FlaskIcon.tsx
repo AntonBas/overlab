@@ -1,11 +1,7 @@
-interface FlaskIconProps {
-  variant: "error" | "empty";
-}
-
-export function FlaskIcon({ variant }: FlaskIconProps) {
+export function FlaskIcon() {
   return (
     <svg
-      className={`flask-icon flask-icon--${variant}`}
+      className="flask-icon flask-icon--error"
       width="56"
       height="56"
       viewBox="0 0 64 64"
@@ -26,15 +22,13 @@ export function FlaskIcon({ variant }: FlaskIconProps) {
         strokeWidth="4"
         strokeLinejoin="round"
       />
-      {variant === "error" && (
-        <path
-          className="flask-icon__crack"
-          d="M22 36l6 4 4-6 5 5 5-4"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      )}
+      <path
+        className="flask-icon__crack"
+        d="M22 36l6 4 4-6 5 5 5-4"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

@@ -1,3 +1,4 @@
+import { EmptyState } from "../../../components/ui/EmptyState";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { FormField } from "../../../components/ui/FormField";
@@ -220,7 +221,7 @@ export function UsersAdminPage() {
         <ErrorMessage failure={users.error} onRetry={users.reload} />
       )}
       {users.data && users.data.content.length === 0 && (
-        <p className="notice">No users match this search.</p>
+        <EmptyState kind="no-match">No users match this search.</EmptyState>
       )}
       {users.data && users.data.content.length > 0 && (
         <div className="table-wrap">

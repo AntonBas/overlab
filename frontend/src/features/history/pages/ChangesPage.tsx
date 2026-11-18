@@ -331,7 +331,7 @@ export function ChangesPage() {
       {comparison.loading && <TableSkeleton label="Loading comparison" />}
       {comparison.error &&
         (comparison.error.status === 404 ? (
-          <EmptyState>
+          <EmptyState kind="waiting">
             {activePatch && firstCapturedAt
               ? `Statistics collection started on ${formatDate(firstCapturedAt)}, after this patch, so it cannot be compared.`
               : historyStart.data && firstCapturedAt === null
@@ -355,7 +355,7 @@ export function ChangesPage() {
               : `${visibleChanges.length} heroes shown`}
           </p>
           {singleSnapshot ? (
-            <EmptyState>
+            <EmptyState kind="waiting">
               Only one snapshot is available so far (
               {formatDateTime(comparisonData.afterCapturedAt)}), so nothing has
               changed yet. Changes appear once Blizzard's numbers move and a new

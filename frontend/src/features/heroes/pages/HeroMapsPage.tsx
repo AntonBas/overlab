@@ -77,7 +77,7 @@ export function HeroMapsPage() {
       {stats.loading && !stats.data && <Spinner label="Loading statistics" />}
       {stats.error &&
         (stats.error.status === 404 ? (
-          <EmptyState>
+          <EmptyState kind="waiting">
             No statistics have been collected for this hero yet.
           </EmptyState>
         ) : (

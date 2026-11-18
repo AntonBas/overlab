@@ -29,7 +29,7 @@ export function ErrorMessage({ failure, onRetry }: ErrorMessageProps) {
   }
   return (
     <div className="notice notice--error notice--centered" role="alert">
-      <FlaskIcon variant="error" />
+      <FlaskIcon />
       <p>{describeFailure(failure)}</p>
       {onRetry &&
         (failure.network ||

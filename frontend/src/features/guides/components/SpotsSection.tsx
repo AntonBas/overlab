@@ -122,7 +122,7 @@ export function SpotsSection({
       {guides.length === 0 ? (
         <EmptyState>{emptyMessage}</EmptyState>
       ) : visible.length === 0 ? (
-        <EmptyState>
+        <EmptyState kind="no-match">
           No spots match these filters.{" "}
           <button type="button" className="link-button" onClick={resetFilters}>
             Reset filters

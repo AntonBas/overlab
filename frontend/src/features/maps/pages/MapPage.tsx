@@ -206,7 +206,7 @@ export function MapPage() {
         {stats.loading && <TableSkeleton label="Loading statistics" />}
         {stats.error &&
           (stats.error.status === 404 ? (
-            <EmptyState>
+            <EmptyState kind="waiting">
               No statistics have been collected for this map yet.
             </EmptyState>
           ) : (
@@ -223,7 +223,9 @@ export function MapPage() {
                 : `${visibleHeroes.length} heroes shown`}
             </p>
             {visibleHeroes.length === 0 ? (
-              <EmptyState>No heroes match these filters.</EmptyState>
+              <EmptyState kind="no-match">
+                No heroes match these filters.
+              </EmptyState>
             ) : (
               <StatsTable
                 heroes={shownHeroes}

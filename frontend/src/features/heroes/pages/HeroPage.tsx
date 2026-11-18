@@ -215,7 +215,7 @@ export function HeroPage() {
           {stats.loading && <Spinner label="Loading statistics" />}
           {stats.error &&
             (stats.error.status === 404 ? (
-              <EmptyState>
+              <EmptyState kind="waiting">
                 No statistics have been collected for this hero yet.
               </EmptyState>
             ) : (
