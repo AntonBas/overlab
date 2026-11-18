@@ -266,3 +266,19 @@
   width: 56px;
   height: 56px;
 }
+
+.map-best-picks-placeholder {
+  min-height: 1457px;
+}
+
+@media (min-width: 568px) {
+  .map-best-picks-placeholder {
+    min-height: 960px;
+  }
+}
+
+@media (min-width: 844px) {
+  .map-best-picks-placeholder {
+    min-height: 518px;
+  }
+}

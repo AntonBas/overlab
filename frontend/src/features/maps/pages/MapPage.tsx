@@ -141,6 +141,12 @@ export function MapPage() {
           />
         </div>
       </section>
+      {!stats.data && stats.loading && (
+        <div
+          className="section map-best-picks-placeholder"
+          aria-hidden="true"
+        />
+      )}
       {stats.data && (
         <MapBestPicks
           heroes={pickHeroes}

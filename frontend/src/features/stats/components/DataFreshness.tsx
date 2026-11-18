@@ -8,6 +8,8 @@ import type {
 import { fetchFreshness } from "../api/statsApi";
 import { describeFreshness } from "../utils/freshness";
 
+const PENDING_TEXT = "Blizzard last changed these numbers on 30 Sep 2026.";
+
 interface DataFreshnessProps {
   queue: GameQueue;
   tier: RankTier;
@@ -27,5 +29,12 @@ export function DataFreshness({
     { keepPrevious: true },
   );
   const text = freshness.data ? describeFreshness(freshness.data) : null;
+  if (freshness.loading && !freshness.data) {
+    return (
+      <span className="freshness freshness--pending" aria-hidden="true">
+        {PENDING_TEXT}
+      </span>
+    );
+  }
   return text ? <span className="freshness">{text}</span> : null;
 }
