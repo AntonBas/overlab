@@ -1,3 +1,4 @@
+import { FormError } from "../ui/FormError";
 import { useRef, useState, type ChangeEvent } from "react";
 import { toFailure } from "../../services/api";
 
@@ -84,11 +85,7 @@ export function ImageUploadField({
           </button>
         )}
       </div>
-      {error && (
-        <p className="form__error" role="alert">
-          {error}
-        </p>
-      )}
+      {error && <FormError>{error}</FormError>}
     </div>
   );
 }

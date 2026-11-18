@@ -1,3 +1,5 @@
+import { PasswordChecklist } from "../components/PasswordChecklist";
+import { FormError } from "../../../components/ui/FormError";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
@@ -89,7 +91,6 @@ export function RegisterPage() {
           required
           minLength={8}
           maxLength={72}
-          hint="At least 8 characters, at most 72 bytes (letters outside A-Z take 2 bytes)"
           value={password}
           error={fieldErrors.password}
           onChange={(event) => setPassword(event.target.value)}
@@ -105,11 +106,8 @@ export function RegisterPage() {
           error={fieldErrors.confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
         />
-        {error && (
-          <p className="form__error" role="alert">
-            {error}
-          </p>
-        )}
+        <PasswordChecklist password={password} confirmation={confirmPassword} />
+        {error && <FormError>{error}</FormError>}
         <button type="submit" className="button" disabled={submitting}>
           {submitting ? "Creating..." : "Create account"}
         </button>

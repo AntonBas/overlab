@@ -1,3 +1,4 @@
+import { FormError } from "../../../components/ui/FormError";
 import { useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Spinner } from "../../../components/ui/Spinner";
@@ -37,12 +38,12 @@ export function VerifyEmailPage() {
         </p>
       )}
       {result.error && (
-        <p className="form__error" role="alert">
+        <FormError>
           {token === ""
             ? "This confirmation link is incomplete."
             : "This confirmation link is invalid or has expired."}{" "}
           <Link to="/login">Sign in</Link> to request a new one.
-        </p>
+        </FormError>
       )}
     </AuthLayout>
   );

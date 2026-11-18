@@ -1,3 +1,4 @@
+import { FormError } from "../../../components/ui/FormError";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { StatusMessage } from "../../../components/admin/StatusMessage";
 import { useSave } from "../../../components/admin/useSave";
@@ -45,9 +46,7 @@ export function ConfirmDeletionPage() {
     <div className="settings">
       <PageHeader title="Confirm account deletion" />
       {token === "" ? (
-        <p className="form__error" role="alert">
-          This confirmation link is incomplete.
-        </p>
+        <FormError>This confirmation link is incomplete.</FormError>
       ) : (
         <>
           <p>

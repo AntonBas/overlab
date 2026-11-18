@@ -1,3 +1,4 @@
+import { FormError } from "../../../components/ui/FormError";
 import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FormField } from "../../../components/ui/FormField";
@@ -79,12 +80,12 @@ export function ResetPasswordPage() {
           onChange={(event) => setPassword(event.target.value)}
         />
         {error && (
-          <p className="form__error" role="alert">
+          <FormError>
             {error}{" "}
             <Link className="auth-link" to="/forgot-password">
               Request a new link
             </Link>
-          </p>
+          </FormError>
         )}
         <button type="submit" className="button" disabled={submitting}>
           Change password
