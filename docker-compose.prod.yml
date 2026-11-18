@@ -172,7 +172,7 @@ services:
       - overlab-net
 
   node-exporter:
-    image: prom/node-exporter:v1.9.1
+    image: prom/node-exporter:v1.12.1
     restart: unless-stopped
     command: ["--path.rootfs=/host", "--collector.disable-defaults", "--collector.filesystem"]
     mem_limit: 64m

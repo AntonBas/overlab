@@ -22,7 +22,7 @@ for (const file of readdirSync(ASSETS_DIRECTORY)) {
   }
   const gzippedKb =
     gzipSync(readFileSync(join(ASSETS_DIRECTORY, file))).length / 1024;
-  const chunkName = file.slice(0, file.lastIndexOf("-"));
+  const chunkName = file.slice(0, file.indexOf("-"));
   const budget = file.startsWith("index-")
     ? ENTRY_BUDGET_KB
     : (CHUNK_BUDGETS_KB[chunkName] ?? CHUNK_BUDGET_KB);
