@@ -34,7 +34,7 @@ class SeoPageResolverTest {
             assertThat(page.heading()).isEqualTo("Hero statistics");
             assertThat(page.path()).isEqualTo("/stats");
         });
-        assertThat(resolver.resolve("/")).hasValueSatisfying(page -> assertThat(page.title()).isEqualTo("Overlab"));
+        assertThat(resolver.resolve("/")).hasValueSatisfying(page -> assertThat(page.title()).isEqualTo("Overlab: Overwatch hero statistics"));
     }
 
     @Test

@@ -89,6 +89,10 @@ public class SeoPageResolver {
             case "/maps" -> contentBuilder.mapList();
             case "/guides" -> contentBuilder.guideHub();
             case "/privacy", "/terms", "/cookies", "/business" -> List.of();
+            case "/stats" -> contentBuilder.statsOverview();
+            case "/counters" -> contentBuilder.countersOverview();
+            case "/perks" -> contentBuilder.perksOverview();
+            case "/changes" -> contentBuilder.changesOverview();
             default -> contentBuilder.heroList();
         };
     }
@@ -182,9 +186,11 @@ public class SeoPageResolver {
             MapDto map = mapService.getBySlug(slug);
             String path = "/maps/" + map.slug();
             String description = map.name() + ": win, pick and ban rates of every Overwatch hero on this map.";
-            return Optional.of(new SeoPage(path, map.name(), description, "website", map.name(),
-                    List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
-                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name())));
+            String imagePath = map.imageUrl() == null || map.imageUrl().isBlank()
+                    || map.imageUrl().endsWith(".svg") || !map.imageUrl().startsWith("/") ? null : map.imageUrl();
+            return Optional.of(new SeoPage(path, map.name() + " Overwatch map: hero win and pick rates", description,
+                    "website", map.name(), List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
+                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name()), imagePath));
         } catch (EntityNotFoundException exception) {
             return Optional.empty();
         }

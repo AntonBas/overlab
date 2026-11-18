@@ -76,6 +76,53 @@ public class SeoContentBuilder {
         return List.of(new SeoSection("Heroes", items));
     }
 
+    List<SeoSection> statsOverview() {
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "What the statistics show", List.of(
+                SeoItem.plain("Win rate: the share of games a hero wins."),
+                SeoItem.plain("Pick rate: how often a hero is chosen."),
+                SeoItem.plain("Ban rate: how often a hero is banned in Competitive."),
+                SeoItem.plain("Filter by rank, map, region and platform.")));
+        add(sections, "Hero statistics", heroService.findAll().stream()
+                .map(hero -> SeoItem.link(hero.name() + " win, pick and ban rates", "/heroes/" + hero.slug()))
+                .toList());
+        return sections;
+    }
+
+    List<SeoSection> countersOverview() {
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "Counters and synergies by hero", heroService.findAll().stream()
+                .filter(hero -> !heroCounters(hero).isEmpty())
+                .map(hero -> SeoItem.link(hero.name() + " counters and synergies",
+                        "/heroes/" + hero.slug() + "/counters"))
+                .toList());
+        if (sections.isEmpty()) {
+            return heroList();
+        }
+        add(sections, "About this data", List.of(SeoItem.plain(
+                "Counters and synergies are curated recommendations, not statistics.")));
+        return sections;
+    }
+
+    List<SeoSection> perksOverview() {
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "Perks by hero", heroService.findAll().stream()
+                .filter(hero -> !heroPerks(hero).isEmpty())
+                .map(hero -> SeoItem.link(hero.name() + " perks", "/heroes/" + hero.slug() + "/perks"))
+                .toList());
+        return sections.isEmpty() ? heroList() : sections;
+    }
+
+    List<SeoSection> changesOverview() {
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "What changed", List.of(
+                SeoItem.plain("Heroes that gained or lost win rate between patches."),
+                SeoItem.plain("Heroes that gained or lost pick rate between patches."),
+                SeoItem.plain("Trends over the last weeks.")));
+        sections.addAll(heroList());
+        return sections;
+    }
+
     List<SeoSection> mapList() {
         List<SeoItem> items = mapService.findAll().stream()
                 .map(map -> SeoItem.link(map.name() + modeSuffix(map.mode()), "/maps/" + map.slug()))

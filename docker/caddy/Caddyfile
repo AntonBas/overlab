@@ -41,6 +41,9 @@
 			Disallow: /login
 			Disallow: /register
 			Disallow: /confirm-deletion
+			Disallow: /verify-email
+			Disallow: /forgot-password
+			Disallow: /reset-password
 			Disallow: /oauth2/
 			Sitemap: {scheme}://{hostport}/sitemap.xml
 			ROBOTS 200
@@ -157,6 +160,7 @@
 
 	@appShell not path /assets/* /api/* /media/* /oauth2/* /login/oauth2/* /sitemap.xml /robots.txt
 	header @appShell Cache-Control "no-cache"
+	header @appShell Vary User-Agent
 
 	root * /srv
 
