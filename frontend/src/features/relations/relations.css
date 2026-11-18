@@ -151,41 +151,6 @@
   }
 }
 
-.category-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-6);
-  min-height: 32px;
-  margin: var(--space-4) var(--space-4) 0 0;
-  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-12);
-  border: 1px dashed var(--column-color);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--column-color) 12%, transparent);
-  color: var(--text);
-  font: inherit;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  cursor: help;
-}
-
-.category-chip:hover,
-.category-chip:focus-visible,
-.category-chip--open {
-  border-style: solid;
-}
-
-.category-chip__count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-size: var(--font-size-xs);
-}
-
 .category-tip {
   max-width: min(420px, 90vw);
 }
@@ -613,7 +578,15 @@
 }
 
 .relation-avatar--category {
-  --role-color: var(--row-tone, var(--border));
+  --role-color: var(--row-tone, var(--column-color, var(--border)));
+}
+
+button.relation-avatar {
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
 }
 
 .category-mosaic {

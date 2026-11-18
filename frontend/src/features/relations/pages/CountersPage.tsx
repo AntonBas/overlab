@@ -24,7 +24,7 @@ import { fetchHeroes } from "../../heroes";
 import { HeroFilterBar } from "../../heroes/components/HeroFilterBar";
 import { useHeroListView } from "../../heroes/hooks/useHeroListView";
 import { fetchAllRelations, fetchHeroCategories } from "../api/relationsApi";
-import { CategoryChip } from "../components/CategoryChip";
+import { CategoryAvatar } from "../components/CategoryAvatar";
 import { RelationAvatar } from "../components/RelationAvatar";
 import {
   bindRelationFeedback,
@@ -223,11 +223,12 @@ export function CountersPage() {
                                 matchup.categorySlug,
                               );
                               return category ? (
-                                <CategoryChip
-                                  key={matchup.categorySlug}
-                                  category={category}
-                                  matchup={matchup}
-                                />
+                                <li key={matchup.categorySlug}>
+                                  <CategoryAvatar
+                                    category={category}
+                                    matchup={matchup}
+                                  />
+                                </li>
                               ) : null;
                             })}
                             {related.map((relatedHero) => (
