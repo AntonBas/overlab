@@ -74,7 +74,8 @@
   border-radius: var(--radius);
   transition:
     transform 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .hero-tile[data-role="tank"] {
@@ -91,9 +92,17 @@
 
 .hero-tile:hover,
 .hero-tile:focus-visible {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: var(--role-color);
+  box-shadow: 0 8px 18px -6px var(--role-color);
   color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-tile:hover,
+  .hero-tile:focus-visible {
+    transform: none;
+  }
 }
 
 .hero-tile .portrait {
@@ -182,6 +191,9 @@
 }
 
 .section-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-sm);
   padding: var(--space-4) var(--space-12);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -261,6 +273,7 @@
 
 .hero-page .section > h2::before,
 .hero-page .section__heading > h2::before,
+.hero-page .section__title > h2::before,
 .hero-page h2[id]::before {
   content: "";
   width: 4px;
@@ -713,4 +726,8 @@
   .hero-page .section-nav__link {
     flex: none;
   }
+}
+
+.hero-tile__count {
+  font-size: var(--font-size-xs);
 }

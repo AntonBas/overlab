@@ -228,13 +228,17 @@
   }
 }
 
-.button--compact {
-  padding: var(--space-6) 14px;
+.button--compact,
+.table td .button {
+  min-height: var(--control-height-sm);
+  padding: var(--space-4) var(--space-12);
+  font-size: var(--font-size-md);
 }
 
-.table td .button {
-  padding: 5px var(--space-12);
-  font-size: 0.875rem;
+@media (pointer: coarse) {
+  .button--compact {
+    min-height: 44px;
+  }
 }
 
 .table thead th {
