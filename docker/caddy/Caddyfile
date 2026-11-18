@@ -89,16 +89,18 @@
 
 	@staticHtmlBot {
 		header_regexp userAgent User-Agent (?i)(googlebot|google-inspectiontool|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal|bingbot|adidxbot|duckduckbot|yandexbot|baiduspider|applebot|slurp|seznambot)
-		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps)|maps/[a-z0-9-]+|guides/[A-Za-z0-9-]+)/?$
+		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|guides|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps|guides)|maps/[a-z0-9-]+|maps/[a-z0-9-]+/guides|guides/[A-Za-z0-9-]+)/?$
 	}
 	handle @staticHtmlBot {
+		header Cache-Control "public, max-age=300"
 		rewrite * /api/seo/preview?path={http.request.uri.path}
 		reverse_proxy backend:8080 {
 			header_down Vary User-Agent
+			header_down -Cache-Control
 		}
 	}
 
-	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|counters|maps))?)/?$
+	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|counters|maps|guides))?)/?$
 	@heroOnMapPage path_regexp heroOnMapPage ^/(maps/[^/]+)/[^/]+/?$
 
 	handle @entityPage {
@@ -163,7 +165,7 @@
 		file_server
 	}
 
-	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps)|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
+	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps|guides)|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
 	handle @appRoute {
 		rewrite * /index.html
 		file_server

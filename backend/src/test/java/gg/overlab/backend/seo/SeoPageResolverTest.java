@@ -136,4 +136,48 @@ class SeoPageResolverTest {
         assertThat(SeoPageResolver.cacheKey("/heroes/ana/")).isEqualTo("/heroes/ana");
         assertThat(SeoPageResolver.cacheKey(null)).isEqualTo("/");
     }
+
+    @Test
+    void buildsHeroAndMapGuidePagesOnlyWhenTheyHaveGuides() {
+        HeroDto ana = hero("ana", "Ana", null);
+        MapDto busan = new MapDto("busan", "Busan", null, null);
+        when(heroService.findAll()).thenReturn(List.of(ana, hero("zarya", "Zarya", null)));
+        when(mapService.getBySlug("busan")).thenReturn(busan);
+        List<SeoSection> content = List.of(new SeoSection("Ana video guides", List.of(SeoItem.plain("Sleep dart"))));
+        when(contentBuilder.heroGuides(ana)).thenReturn(content);
+        when(contentBuilder.heroGuides(hero("zarya", "Zarya", null))).thenReturn(List.of());
+        when(contentBuilder.mapGuides(busan)).thenReturn(content);
+
+        assertThat(resolver.resolve("/heroes/ana/guides")).hasValueSatisfying(page -> {
+            assertThat(page.path()).isEqualTo("/heroes/ana/guides");
+            assertThat(page.title()).isEqualTo("Ana guides: spots, setups and tips");
+            assertThat(page.structuredData().getFirst()).contains("BreadcrumbList", "/heroes/ana/guides");
+        });
+        assertThat(resolver.resolve("/heroes/zarya/guides")).isEmpty();
+        assertThat(resolver.resolve("/maps/busan/guides")).hasValueSatisfying(page -> {
+            assertThat(page.title()).isEqualTo("Busan guides: spots, setups and tips");
+            assertThat(page.heading()).isEqualTo("Busan guides");
+            assertThat(page.structuredData().getFirst()).contains("/maps/busan/guides");
+        });
+        assertThat(resolver.resolve("/maps/busan/perks")).isEmpty();
+    }
+
+    @Test
+    void buildsTheGuideHubPageFromTheStaticPageDefinition() {
+        List<SeoSection> content = List.of(new SeoSection("Guides by hero", List.of(SeoItem.plain("Ana guides (2)"))));
+        when(contentBuilder.guideHub()).thenReturn(content);
+
+        assertThat(resolver.resolve("/guides")).hasValueSatisfying(page -> {
+            assertThat(page.path()).isEqualTo("/guides");
+            assertThat(page.heading()).isEqualTo("Guides");
+            assertThat(page.sections()).isEqualTo(content);
+        });
+    }
+
+    @Test
+    void hidesTheGuideHubWhileThereAreNoGuides() {
+        when(contentBuilder.guideHub()).thenReturn(List.of());
+
+        assertThat(resolver.resolve("/guides")).isEmpty();
+    }
 }

@@ -18,6 +18,53 @@ import org.junit.jupiter.api.Test;
 
 class SitemapServiceTest {
 
+    @Test
+    void listsGuideListPagesOnlyForHeroesAndMapsThatHaveGuides() {
+        HeroDto ana = new HeroDto("ana", "Ana", null, null, null, null, null, null, false);
+        HeroDto zarya = new HeroDto("zarya", "Zarya", null, null, null, null, null, null, false);
+        MapDto busan = new MapDto("busan", "Busan", null, null);
+        MapDto nepal = new MapDto("nepal", "Nepal", null, null);
+        GuideDto guide = new GuideDto(7L, "sleep-dart", "7-sleep-dart", "ana", "Ana", "busan", "Busan", "Sleep dart",
+                "abc123", 0, null, null, null, null, null, null, 0, true, Instant.parse("2026-11-12T10:00:00Z"));
+        when(heroService.findAll()).thenReturn(List.of(ana, zarya));
+        when(mapService.findAll()).thenReturn(List.of(busan, nepal));
+        when(guideService.findPublished(null, null)).thenReturn(List.of(guide));
+        when(guideService.findPublished("ana", null)).thenReturn(List.of(guide, guide));
+        when(guideService.findPublished("zarya", null)).thenReturn(List.of(guide));
+        when(guideService.findPublished(null, "busan")).thenReturn(List.of(guide, guide));
+        when(guideService.findPublished(null, "nepal")).thenReturn(List.of());
+        when(contentBuilder.heroPerks(ana)).thenReturn(List.of());
+        when(contentBuilder.heroCounters(ana)).thenReturn(List.of());
+        when(contentBuilder.heroMaps(ana)).thenReturn(List.of());
+        when(contentBuilder.heroPerks(zarya)).thenReturn(List.of());
+        when(contentBuilder.heroCounters(zarya)).thenReturn(List.of());
+        when(contentBuilder.heroMaps(zarya)).thenReturn(List.of());
+        when(snapshotCheckService.latestChange()).thenReturn(Optional.empty());
+
+        String xml = new SitemapService(heroService, mapService, guideService, contentBuilder,
+                new SiteUrl("https://example.com/"), snapshotCheckService).build();
+
+        assertThat(xml).contains(
+                "<loc>https://example.com/heroes/ana/guides</loc><lastmod>2026-11-12T10:00:00Z</lastmod>",
+                "<loc>https://example.com/maps/busan/guides</loc><lastmod>2026-11-12T10:00:00Z</lastmod>");
+        assertThat(xml).doesNotContain("/heroes/zarya/guides", "/maps/nepal/guides");
+    }
+
+    @Test
+    void leavesOutTheGuideHubUntilThereIsAGuide() {
+        when(heroService.findAll()).thenReturn(List.of());
+        when(mapService.findAll()).thenReturn(List.of());
+        when(guideService.findPublished(null, null)).thenReturn(List.of());
+        when(snapshotCheckService.latestChange()).thenReturn(Optional.empty());
+
+        String xml = new SitemapService(heroService, mapService, guideService, contentBuilder,
+                new SiteUrl("https://example.com/"), snapshotCheckService).build();
+
+        assertThat(xml).doesNotContain("https://example.com/guides<");
+        assertThat(xml).contains("<loc>https://example.com/maps</loc>");
+    }
+
+
     private final HeroService heroService = mock(HeroService.class);
     private final MapService mapService = mock(MapService.class);
     private final GuideService guideService = mock(GuideService.class);

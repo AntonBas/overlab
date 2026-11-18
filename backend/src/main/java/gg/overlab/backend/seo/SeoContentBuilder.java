@@ -1,6 +1,9 @@
 package gg.overlab.backend.seo;
 
 import gg.overlab.backend.gamemap.MapMode;
+import gg.overlab.backend.gamemap.dto.MapDto;
+import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.gamemap.MapService;
 import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.ability.AbilityService;
@@ -20,6 +23,9 @@ import gg.overlab.backend.stats.dto.HeroMapStatDto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +37,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SeoContentBuilder {
 
+    static final int MIN_GUIDES_FOR_LIST = 2;
+    private static final int LATEST_GUIDES = 10;
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     private static final Pattern LIST_MARKER = Pattern.compile("^[-*•\\s]+");
@@ -41,11 +49,13 @@ public class SeoContentBuilder {
     private final PerkService perkService;
     private final HeroRelationService relationService;
     private final StatsService statsService;
+    private final GuideService guideService;
 
     public SeoContentBuilder(HeroService heroService, MapService mapService, AbilityService abilityService,
                              PerkService perkService, HeroRelationService relationService,
-                             StatsService statsService) {
+                             StatsService statsService, GuideService guideService) {
         this.statsService = statsService;
+        this.guideService = guideService;
         this.heroService = heroService;
         this.mapService = mapService;
         this.abilityService = abilityService;
@@ -150,6 +160,76 @@ public class SeoContentBuilder {
                     List.of(SeoItem.link(hero.name() + " stats, counters and best maps", "/heroes/" + hero.slug())));
         }
         return sections;
+    }
+
+    List<SeoSection> heroGuides(HeroDto hero) {
+        List<SeoSection> sections = new ArrayList<>();
+        List<GuideDto> guides = guideService.findPublished(hero.slug(), null);
+        if (guides.size() < MIN_GUIDES_FOR_LIST) {
+            return sections;
+        }
+        add(sections, hero.name() + " video guides", guides.stream()
+                .map(guide -> guideItem(guide, guide.mapName())).toList());
+        if (!sections.isEmpty()) {
+            add(sections, "More about " + hero.name(),
+                    List.of(SeoItem.link(hero.name() + " stats, perks, counters and best maps",
+                            "/heroes/" + hero.slug())));
+        }
+        return sections;
+    }
+
+    List<SeoSection> mapGuides(MapDto map) {
+        List<SeoSection> sections = new ArrayList<>();
+        List<GuideDto> guides = guideService.findPublished(null, map.slug());
+        if (guides.size() < MIN_GUIDES_FOR_LIST) {
+            return sections;
+        }
+        add(sections, map.name() + " video guides", guides.stream()
+                .map(guide -> guideItem(guide, guide.heroName())).toList());
+        if (!sections.isEmpty()) {
+            add(sections, "More about " + map.name(),
+                    List.of(SeoItem.link(map.name() + " hero statistics", "/maps/" + map.slug())));
+        }
+        return sections;
+    }
+
+    List<SeoSection> guideHub() {
+        List<GuideDto> guides = guideService.findPublished(null, null);
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, "Latest guides", guides.stream()
+                .sorted(Comparator.comparing(GuideDto::createdAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(LATEST_GUIDES)
+                .map(guide -> guideItem(guide, guide.heroName())).toList());
+        add(sections, "Guides by hero", groupItems(guides, GuideDto::heroSlug, GuideDto::heroName, "/heroes/"));
+        add(sections, "Guides by map", groupItems(guides, GuideDto::mapSlug, GuideDto::mapName, "/maps/"));
+        return sections;
+    }
+
+    private List<SeoItem> groupItems(List<GuideDto> guides, Function<GuideDto, String> slugOf,
+                                     Function<GuideDto, String> nameOf, String basePath) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        Map<String, String> names = new LinkedHashMap<>();
+        Map<String, String> firstPaths = new LinkedHashMap<>();
+        for (GuideDto guide : guides) {
+            String slug = slugOf.apply(guide);
+            if (slug == null) {
+                continue;
+            }
+            counts.merge(slug, 1, Integer::sum);
+            names.putIfAbsent(slug, nameOf.apply(guide));
+            firstPaths.putIfAbsent(slug, guide.path());
+        }
+        return counts.keySet().stream()
+                .sorted(Comparator.comparing(names::get))
+                .map(slug -> counts.get(slug) >= MIN_GUIDES_FOR_LIST
+                        ? SeoItem.link(names.get(slug) + " guides (" + counts.get(slug) + ")",
+                                basePath + slug + "/guides")
+                        : SeoItem.link(names.get(slug) + " guide", "/guides/" + firstPaths.get(slug)))
+                .toList();
+    }
+
+    private SeoItem guideItem(GuideDto guide, String context) {
+        return SeoItem.link(guide.title() + (context == null ? "" : " (" + context + ")"), "/guides/" + guide.path());
     }
 
     List<SeoSection> mapDetails(String modeLabel) {
