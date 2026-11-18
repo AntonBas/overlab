@@ -48,18 +48,76 @@ describe("LineChart", () => {
     ).toHaveAccessibleName("Win rate: from 47.1% on 1 Oct to 49.3% on 8 Oct");
   });
 
-  it("offers the same data as a table", async () => {
-    const user = userEvent.setup();
+  it("keeps the same data available as a table for assistive technology", () => {
     render(<LineChart title="Win rate" tone="win" points={points} />);
-
-    await user.click(screen.getByRole("button", { name: "Show table" }));
 
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "49.3%" })).toBeInTheDocument();
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Show chart" }),
+      screen.queryByRole("button", { name: "Show table" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("pins the tooltip on click so its value can be copied", async () => {
+    mockPlotBox();
+    const user = userEvent.setup();
+    const writeText = vi.spyOn(navigator.clipboard, "writeText");
+    const { container } = render(
+      <LineChart
+        title="Win rate"
+        subject="Ana"
+        tone="win"
+        points={threePoints}
+      />,
+    );
+    const svg = screen.getByRole("group", { name: /^Win rate: from/ });
+
+    fireEvent(
+      svg,
+      new MouseEvent("pointerdown", {
+        bubbles: true,
+        clientX: 342,
+        clientY: 50,
+      }),
+    );
+    fireEvent(
+      svg,
+      new MouseEvent("pointerleave", {
+        bubbles: false,
+        clientX: 0,
+        clientY: 0,
+      }),
+    );
+
+    expect(
+      container.querySelector(".chart__tooltip--pinned"),
+    ).toHaveTextContent("48.0%");
+    await user.click(screen.getByRole("button", { name: "Copy" }));
+
+    expect(writeText).toHaveBeenCalledWith("2 Oct 2026: 48.0% Ana Win rate");
+    expect(
+      await screen.findByRole("button", { name: "Copied" }),
     ).toBeInTheDocument();
+  });
+
+  it("unpins the tooltip with Escape", () => {
+    mockPlotBox();
+    const { container } = render(
+      <LineChart title="Win rate" tone="win" points={threePoints} />,
+    );
+    const svg = screen.getByRole("group", { name: /^Win rate: from/ });
+
+    fireEvent(
+      svg,
+      new MouseEvent("pointerdown", {
+        bubbles: true,
+        clientX: 342,
+        clientY: 50,
+      }),
+    );
+    fireEvent.keyDown(svg, { key: "Escape" });
+
+    expect(container.querySelector(".chart__tooltip")).toBeNull();
   });
 
   it("marks only the patches inside the plotted range", () => {

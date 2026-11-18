@@ -1,8 +1,13 @@
 import clsx from "clsx";
+import { Clock } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { CollectedAt } from "../../../components/ui/CollectedAt";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
+import {
+  IconSelect,
+  type IconSelectOption,
+} from "../../../components/ui/IconSelect";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useFetch } from "../../../hooks/useFetch";
 import type { GameQueue, Region } from "../../../types/common";
@@ -69,6 +74,10 @@ function changeTone(metric: Metric, change: number): "up" | "down" | "flat" {
 
 const DEFAULT_PERIOD_ID: HistoryPeriodId = "30d";
 
+const PERIOD_OPTIONS: IconSelectOption<HistoryPeriodId>[] = HISTORY_PERIODS.map(
+  (entry) => ({ value: entry.id, label: entry.label }),
+);
+
 export interface CurrentStats {
   winRate: number;
   pickRate: number;
@@ -82,6 +91,7 @@ interface HeroHistorySectionProps {
   queue: GameQueue;
   region: Region;
   title?: string;
+  subject?: string;
   current?: CurrentStats | null;
   headerAction?: ReactNode;
   children?: ReactNode;
@@ -93,6 +103,7 @@ export function HeroHistorySection({
   queue,
   region,
   title = "History",
+  subject,
   current = null,
   headerAction,
   children,
@@ -132,6 +143,16 @@ export function HeroHistorySection({
   const markers = buildPatchMarkers(patches.data ?? []);
   const seasonAt = buildSeasonLookup(patches.data ?? []);
   const enough = series.length >= 2;
+
+  const periodSwitch = (
+    <IconSelect
+      label="Period"
+      hideLabel
+      value={periodId}
+      options={PERIOD_OPTIONS}
+      onChange={setPeriodId}
+    />
+  );
 
   return (
     <section className="section" aria-labelledby="history-heading">
@@ -180,36 +201,25 @@ export function HeroHistorySection({
             );
           })}
         </div>
-        <div
-          className="segmented segmented--quiet"
-          role="group"
-          aria-label="Period"
-        >
-          {HISTORY_PERIODS.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              className={clsx("segmented__item", {
-                "segmented__item--active": entry.id === periodId,
-              })}
-              aria-pressed={entry.id === periodId}
-              onClick={() => setPeriodId(entry.id)}
-            >
-              {entry.label}
-            </button>
-          ))}
-        </div>
       </div>
       {history.loading && <Spinner label="Loading history" />}
       {history.error && (
         <ErrorMessage failure={history.error} onRetry={history.reload} />
       )}
       {history.data && !enough && (
-        <EmptyState>
-          Not enough data for a chart yet.
+        <div className="chart__caption">
+          <strong>{metric.label}</strong>
+          <div className="chart__controls">{periodSwitch}</div>
+        </div>
+      )}
+      {history.data && !enough && (
+        <EmptyState
+          icon={<Clock size={26} />}
+          title="Not enough data for a chart yet"
+        >
           {points.length === 1
-            ? ` Statistics have been collected since ${formatDateTime(points[0].capturedAt)}.`
-            : " Statistics are collected daily, so history appears over time."}
+            ? `Statistics have been collected since ${formatDateTime(points[0].capturedAt)}.`
+            : "History appears as daily statistics are collected."}
         </EmptyState>
       )}
       {history.data && enough && (
@@ -223,6 +233,8 @@ export function HeroHistorySection({
             points={series}
             markers={markers}
             seasonAt={seasonAt}
+            controls={periodSwitch}
+            subject={subject}
           />
         </div>
       )}
@@ -234,7 +246,8 @@ export function HeroHistorySection({
             Checked <CollectedAt value={current.capturedAt} />.
           </>
         )}{" "}
-        Dashed lines mark patch releases, hollow dots mark hotfixes.
+        Dashed lines mark patch releases, hollow dots mark hotfixes. Click a
+        point to pin it and copy the value.
         {!mapSlug && (
           <>
             {" "}

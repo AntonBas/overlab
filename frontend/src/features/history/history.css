@@ -69,8 +69,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-12);
   margin-bottom: var(--space-4);
+}
+
+.chart__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-left: auto;
 }
 
 .chart__svg {
@@ -175,6 +184,31 @@
   font-size: var(--font-size-md);
   pointer-events: none;
   white-space: nowrap;
+}
+
+.chart__tooltip--pinned {
+  pointer-events: auto;
+  user-select: text;
+  cursor: auto;
+}
+
+.chart__tooltip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
+.chart__tooltip .chart__copy {
+  min-height: 26px;
+  padding: 0 var(--space-8);
+  font-size: var(--font-size-xs);
+}
+
+@media (pointer: coarse) {
+  .chart__tooltip .chart__copy {
+    min-height: 36px;
+  }
 }
 
 .chart__tooltip--start {

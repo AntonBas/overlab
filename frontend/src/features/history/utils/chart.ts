@@ -80,9 +80,10 @@ export function nearestDotIndex(
 }
 
 export const HISTORY_PERIODS = [
-  { id: "30d", label: "30 days", days: 30 },
-  { id: "90d", label: "90 days", days: 90 },
-  { id: "365d", label: "Year", days: 365 },
+  { id: "7d", label: "Last 7 days", days: 7 },
+  { id: "30d", label: "Last 30 days", days: 30 },
+  { id: "90d", label: "Last 90 days", days: 90 },
+  { id: "365d", label: "Last year", days: 365 },
 ] as const;
 
 export type HistoryPeriodId = (typeof HISTORY_PERIODS)[number]["id"];

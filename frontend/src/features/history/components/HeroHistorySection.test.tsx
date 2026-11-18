@@ -46,6 +46,22 @@ describe("HeroHistorySection", () => {
     expect(await screen.findByText(/Not enough data/)).toBeInTheDocument();
   });
 
+  it("lets the period be changed even when there is no data to chart", async () => {
+    renderWithRouter(
+      <HeroHistorySection slug="ana" queue="COMPETITIVE" region="EUROPE" />,
+    );
+
+    await screen.findByText(/Not enough data/);
+    await userEvent.click(screen.getByRole("combobox", { name: "Period" }));
+    await userEvent.click(screen.getByRole("option", { name: "Last 7 days" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("combobox", { name: "Period" }),
+      ).toHaveTextContent("Last 7 days"),
+    );
+  });
+
   it("asks for all maps without a map", async () => {
     renderWithRouter(
       <HeroHistorySection slug="ana" queue="COMPETITIVE" region="EUROPE" />,
