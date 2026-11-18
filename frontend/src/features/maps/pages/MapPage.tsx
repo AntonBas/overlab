@@ -141,6 +141,22 @@ export function MapPage() {
           />
         </div>
       </section>
+      {!stats.data && stats.loading && (
+        <section
+          className="section map-best-picks-skeleton"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <span className="visually-hidden">Loading best picks...</span>
+          <div className="map-best-picks-skeleton__title" aria-hidden="true" />
+          <div className="highlights" aria-hidden="true">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="map-best-picks-skeleton__card" />
+            ))}
+          </div>
+        </section>
+      )}
       {stats.data && (
         <MapBestPicks
           heroes={pickHeroes}

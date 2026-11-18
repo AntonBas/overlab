@@ -51,8 +51,15 @@ describe("DataFreshness", () => {
     fetchFreshnessMock.mockRejectedValue(new Error("boom"));
 
     const { container } = renderNote();
-    await vi.waitFor(() => expect(fetchFreshnessMock).toHaveBeenCalled());
+    await vi.waitFor(() => expect(container).toBeEmptyDOMElement());
+  });
 
-    expect(container).toBeEmptyDOMElement();
+  it("holds the space of the note while the request is pending", () => {
+    fetchFreshnessMock.mockReturnValue(new Promise(() => undefined));
+
+    const { container } = renderNote();
+
+    const placeholder = container.querySelector(".freshness--pending");
+    expect(placeholder).toHaveAttribute("aria-hidden", "true");
   });
 });

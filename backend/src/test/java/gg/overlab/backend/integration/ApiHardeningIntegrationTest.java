@@ -25,11 +25,15 @@ class ApiHardeningIntegrationTest {
     @Autowired
     private WebApplicationContext context;
 
+    private static final long WINDOW_MILLIS = 60_000;
+    private static final long LATEST_SAFE_START_MILLIS = 50_000;
+
     private MockMvc mockMvc;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws InterruptedException {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        startAwayFromTheWindowBoundary();
     }
 
     @Test
@@ -98,6 +102,13 @@ class ApiHardeningIntegrationTest {
                             .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, method)
                             .with(uniqueClient()))
                     .andExpect(status().isOk());
+        }
+    }
+
+    private void startAwayFromTheWindowBoundary() throws InterruptedException {
+        long elapsed = System.currentTimeMillis() % WINDOW_MILLIS;
+        if (elapsed > LATEST_SAFE_START_MILLIS) {
+            Thread.sleep(WINDOW_MILLIS - elapsed + 200);
         }
     }
 
