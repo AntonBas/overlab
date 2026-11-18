@@ -50,6 +50,12 @@
     position: sticky;
     top: 0;
   }
+
+  .site-header__inner {
+    width: max-content;
+    min-width: min(1080px, 100%);
+    max-width: 100%;
+  }
 }
 
 .site-header__inner {
