@@ -50,15 +50,27 @@ export function GuidesAdminPage() {
   return (
     <>
       <PageHeader title="Guides" />
-      {heroes.data && (
-        <HeroSelect
-          label="Filter by hero"
-          value={filter}
-          heroes={heroes.data}
-          allLabel="All heroes"
-          onChange={setFilter}
-        />
-      )}
+      <div className="table-search">
+        {heroes.data && (
+          <HeroSelect
+            label="Filter by hero"
+            value={filter}
+            heroes={heroes.data}
+            allLabel="All heroes"
+            onChange={setFilter}
+          />
+        )}
+        <div className="table-search__action">
+          <button
+            type="button"
+            className="button"
+            onClick={() => setEditing("new")}
+          >
+            <Plus size={16} aria-hidden="true" />
+            New guide
+          </button>
+        </div>
+      </div>
       <StatusMessage error={removal.error} />
       {guides.loading && <Spinner label="Loading guides" />}
       {guides.error && (
@@ -66,16 +78,6 @@ export function GuidesAdminPage() {
       )}
       {guides.data && (
         <DataTable
-          toolbar={
-            <button
-              type="button"
-              className="button"
-              onClick={() => setEditing("new")}
-            >
-              <Plus size={16} aria-hidden="true" />
-              New guide
-            </button>
-          }
           rows={rows}
           rowKey={(guide) => guide.id}
           emptyMessage="No guides yet."

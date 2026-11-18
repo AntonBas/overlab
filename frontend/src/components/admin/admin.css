@@ -11,7 +11,8 @@
 
 .table-search {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: var(--space-12);
   margin-bottom: var(--space-12);
 }

@@ -181,15 +181,27 @@ export function RelationsAdminPage() {
   return (
     <>
       <PageHeader title="Counters and synergies" />
-      {heroes.data && (
-        <HeroSelect
-          label="Filter by hero"
-          value={filter}
-          heroes={heroes.data}
-          allLabel="All heroes"
-          onChange={setFilter}
-        />
-      )}
+      <div className="table-search">
+        {heroes.data && (
+          <HeroSelect
+            label="Filter by hero"
+            value={filter}
+            heroes={heroes.data}
+            allLabel="All heroes"
+            onChange={setFilter}
+          />
+        )}
+        <div className="table-search__action">
+          <button
+            type="button"
+            className="button"
+            onClick={() => setEditing("new")}
+          >
+            <Plus size={16} aria-hidden="true" />
+            New relation
+          </button>
+        </div>
+      </div>
       <StatusMessage error={removal.error} />
       {relations.loading && <Spinner label="Loading relations" />}
       {relations.error && (
@@ -197,16 +209,6 @@ export function RelationsAdminPage() {
       )}
       {relations.data && (
         <DataTable
-          toolbar={
-            <button
-              type="button"
-              className="button"
-              onClick={() => setEditing("new")}
-            >
-              <Plus size={16} aria-hidden="true" />
-              New relation
-            </button>
-          }
           rows={relations.data}
           rowKey={(relation) => relation.id}
           emptyMessage="No relations yet."
