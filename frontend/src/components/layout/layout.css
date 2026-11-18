@@ -122,21 +122,28 @@
 
 .site-header__signin {
   border: 0;
-  background: linear-gradient(
-    135deg,
-    var(--accent),
-    color-mix(in srgb, var(--accent) 60%, var(--bar-ban))
-  );
+  background: var(--accent);
   color: var(--accent-contrast);
   font-weight: var(--font-weight-semibold);
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .site-header__signin:hover {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent) 88%, white),
-    color-mix(in srgb, var(--accent) 55%, var(--bar-ban))
-  );
+  background: color-mix(in srgb, var(--accent) 82%, white);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.site-header__signin:active {
+  background: color-mix(in srgb, var(--accent) 90%, black);
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header__signin {
+    transition: none;
+  }
 }
 
 .site-footer {
