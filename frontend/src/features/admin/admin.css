@@ -224,6 +224,13 @@
   font-size: var(--font-size-md);
 }
 
+@media (max-width: 768px) {
+  .pagination .button {
+    min-height: 44px;
+    padding-inline: var(--space-16);
+  }
+}
+
 .dialog__actions {
   display: flex;
   justify-content: flex-end;

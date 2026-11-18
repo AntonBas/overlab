@@ -206,3 +206,15 @@ body.drawer-open {
   flex: none;
   white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .table-search__action {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .table-search__action .button {
+    flex: 1;
+    justify-content: center;
+  }
+}
