@@ -55,7 +55,7 @@
 .map-card__name {
   position: absolute;
   inset: auto 0 0 0;
-  padding: 40px var(--space-16) var(--space-16);
+  padding: var(--space-40) var(--space-16) var(--space-16);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   background: linear-gradient(transparent, rgb(0 0 0 / 0.85));
@@ -237,7 +237,7 @@
 }
 
 .map-section .map-card__name {
-  padding: 32px var(--space-12) var(--space-12);
+  padding: var(--space-32) var(--space-12) var(--space-12);
   font-size: var(--font-size-xl);
 }
 

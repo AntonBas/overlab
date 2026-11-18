@@ -339,7 +339,7 @@
 }
 
 .kpi__change {
-  padding: 2px 8px;
+  padding: var(--space-2) var(--space-8);
   border-radius: 999px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);

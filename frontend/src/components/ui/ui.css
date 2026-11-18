@@ -1189,7 +1189,7 @@
 
 .form-alert svg {
   flex: none;
-  margin-top: 2px;
+  margin-top: var(--space-2);
 }
 
 .form-alert p {
