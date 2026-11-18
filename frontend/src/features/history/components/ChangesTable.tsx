@@ -6,6 +6,7 @@ import { DeltaValue } from "../../../components/ui/DeltaValue";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
+import { useStuckHeader } from "../../../hooks/useStuckHeader";
 import type { HeroChange } from "../../../types/stats";
 import { ROLE_LABELS, formatDate, formatPercent } from "../../../utils/format";
 import { sortChanges, type ChangeSort } from "../utils/changes";
@@ -35,6 +36,7 @@ function ChangeCell({ before, after, change }: ChangeCellProps) {
 }
 
 export function ChangesTable({ changes, showBan }: ChangesTableProps) {
+  const { sentinelRef, stuck } = useStuckHeader();
   const [sort, setSort] = useState<ChangeSort>("WIN_CHANGE");
   const [descending, setDescending] = useState(true);
   const activeSort: ChangeSort =
@@ -113,7 +115,12 @@ export function ChangesTable({ changes, showBan }: ChangesTableProps) {
           )}
         </button>
       </div>
-      <div className="table-wrap table-wrap--ranking">
+      <div className="table-wrap table-wrap--ranking" data-stuck={stuck}>
+        <div
+          ref={sentinelRef}
+          className="table-wrap__sentinel"
+          aria-hidden="true"
+        />
         <table className="table table--cards">
           <thead>
             <tr>

@@ -425,12 +425,27 @@ select:disabled {
     z-index: 2;
   }
 
+  .table-wrap__sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
   .table-wrap--ranking thead th:first-child {
     border-top-left-radius: calc(var(--radius-lg) - 1px);
   }
 
   .table-wrap--ranking thead th:last-child {
     border-top-right-radius: calc(var(--radius-lg) - 1px);
+  }
+
+  .table-wrap--ranking[data-stuck="true"] thead th:first-child,
+  .table-wrap--ranking[data-stuck="true"] thead th:last-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 
   .table-wrap--ranking tbody tr:last-child > * {
