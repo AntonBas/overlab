@@ -1202,3 +1202,39 @@
     animation: none;
   }
 }
+.segmented--slide {
+  position: relative;
+}
+
+.segmented--slide::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--seg-w, 0);
+  content: "";
+  background: var(--accent);
+  transform: translateX(var(--seg-x, 0));
+  pointer-events: none;
+}
+
+.segmented--slide.segmented--animate::before {
+  transition:
+    transform 0.25s cubic-bezier(0.3, 0.8, 0.3, 1),
+    width 0.25s cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+
+.segmented--slide .segmented__item {
+  position: relative;
+  z-index: 1;
+}
+
+.segmented--slide .segmented__item--active {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented--slide.segmented--animate::before {
+    transition: none;
+  }
+}
