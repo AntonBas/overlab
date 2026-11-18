@@ -20,7 +20,7 @@ describe("CookieBanner", () => {
 
   it("shows until a choice is made and starts with optional cookies off", () => {
     renderBanner();
-    expect(screen.getByText(/only the cookies needed/i)).toBeInTheDocument();
+    expect(screen.getByText(/only essential cookies/i)).toBeInTheDocument();
     expect(getConsent()).toEqual({
       analytics: false,
       advertising: false,
@@ -38,7 +38,7 @@ describe("CookieBanner", () => {
       advertising: false,
       decided: true,
     });
-    expect(screen.queryByText(/only the cookies needed/i)).toBeNull();
+    expect(screen.queryByText(/only essential cookies/i)).toBeNull();
   });
 
   it("stores acceptance of all categories", async () => {
