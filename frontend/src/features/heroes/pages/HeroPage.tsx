@@ -41,7 +41,7 @@ import { HeroSectionNav } from "../components/HeroSectionNav";
 import { HeroTraits } from "../components/HeroTraits";
 import { heroBackdropUrl, useHeroBackdrop } from "../../../utils/heroBackdrop";
 import { PerkList } from "../../perks";
-import { RelationsOverview } from "../../relations";
+import { HeroCategoryChips, RelationsOverview } from "../../relations";
 import { useHeroQueue } from "../hooks/useHeroQueue";
 import { heroPageDescription, heroPageTitle } from "../utils/heroSeo";
 
@@ -152,6 +152,10 @@ export function HeroPage() {
                 {hero.data.recentlyAdded ? <NewBadge /> : null}
               </h1>
               <RoleTags role={hero.data.role} subrole={hero.data.subrole} />
+              <HeroCategoryChips
+                heroSlug={hero.data.slug}
+                categories={categories.data?.categories}
+              />
             </div>
           </div>
           <div className="hero-tags__stats">

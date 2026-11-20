@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
-import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { Tooltip } from "../../../components/ui/Tooltip";
 import type { CategoryMatchup, HeroCategory } from "../../../types/hero";
+import { categoryStyleOf } from "../utils/categoryStyle";
 import { CategoryTip } from "./CategoryTip";
-
-const MOSAIC_HEROES = 4;
 
 interface CategoryAvatarProps {
   category: HeroCategory;
@@ -13,28 +11,22 @@ interface CategoryAvatarProps {
 }
 
 export function CategoryAvatar({ category, matchup, to }: CategoryAvatarProps) {
+  const { icon: Icon, group } = categoryStyleOf(category.slug);
   return (
     <Tooltip
       interactive
       mount="open"
       role="dialog"
       label={`${category.name}: heroes`}
-      tipClassName="perk-tip perk-tip--interactive category-tip"
+      tipClassName={`perk-tip perk-tip--interactive category-tip category-tip--${group}`}
       content={<CategoryTip category={category} matchup={matchup} />}
     >
       {({ describedBy }) => {
         const content = (
           <>
-            <span className="relation-avatar__image category-mosaic">
-              {category.heroes.slice(0, MOSAIC_HEROES).map((hero) => (
-                <HeroPortrait
-                  key={hero.slug}
-                  name={hero.name}
-                  url={hero.portraitUrl}
-                  size={16}
-                />
-              ))}
-              <span className="category-mosaic__count">
+            <span className="category-icon">
+              <Icon className="category-icon__glyph" aria-hidden="true" />
+              <span className="category-icon__count">
                 {category.heroes.length}
               </span>
             </span>
@@ -45,6 +37,7 @@ export function CategoryAvatar({ category, matchup, to }: CategoryAvatarProps) {
         return to ? (
           <Link
             className={className}
+            data-group={group}
             to={to}
             title={category.name}
             aria-describedby={describedBy}
@@ -55,6 +48,7 @@ export function CategoryAvatar({ category, matchup, to }: CategoryAvatarProps) {
           <button
             type="button"
             className={className}
+            data-group={group}
             title={category.name}
             aria-describedby={describedBy}
           >

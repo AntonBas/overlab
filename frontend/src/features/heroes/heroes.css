@@ -517,7 +517,8 @@
   .hero-header__actions,
   .hero-header .hero-tags__stats,
   .hero-header .stat-chips,
-  .hero-header .role-tags {
+  .hero-header .role-tags,
+  .hero-header .hero-categories {
     justify-content: center;
   }
 }
