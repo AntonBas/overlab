@@ -8,6 +8,7 @@ import type { HeroCategory, RelatedHero } from "../../../types/hero";
 import type { RelationKind } from "../api/relationFeedbackApi";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
 import { ROLE_LABELS } from "../../../utils/format";
+import { CATEGORY_GROUP_LABELS, categoryStyleOf } from "../utils/categoryStyle";
 import { splitRelationNote } from "../utils/relationNote";
 import { RelationVoteButtons } from "./RelationVoteButtons";
 
@@ -22,8 +23,6 @@ interface RelatedHeroesProps {
   type: RelationKind;
   feedback?: RelationFeedback;
 }
-
-const STACK_SIZE = 4;
 
 function NoteBlocks({ note }: { note: string | null }) {
   if (!note) {
@@ -52,17 +51,24 @@ function NoteBlocks({ note }: { note: string | null }) {
 
 function GroupDetail({ group }: { group: RelatedGroup }) {
   const { category } = group;
+  const { icon: Icon, group: styleGroup } = categoryStyleOf(category.slug);
   return (
     <div
       className="relation-detail relation-detail--group"
+      data-group={styleGroup}
       role="region"
       aria-label={`${category.name} group`}
     >
       <div className="relation-detail__header">
-        <span className="relation-detail__pill">Hero group</span>
-        <span className="muted">
-          {category.heroes.length}{" "}
-          {category.heroes.length === 1 ? "hero" : "heroes"}
+        <span className="category-icon category-icon--large">
+          <Icon className="category-icon__glyph" aria-hidden="true" />
+        </span>
+        <span className="relation-detail__title">
+          <span className="relation-detail__name">{category.name}</span>
+          <span className="relation-detail__meta">
+            {CATEGORY_GROUP_LABELS[styleGroup]} · {category.heroes.length}{" "}
+            {category.heroes.length === 1 ? "hero" : "heroes"}
+          </span>
         </span>
       </div>
       <NoteBlocks note={group.note ?? category.description} />
@@ -71,7 +77,10 @@ function GroupDetail({ group }: { group: RelatedGroup }) {
           {category.heroes.map((member) => (
             <Link
               key={member.slug}
-              className="relation-detail__member"
+              className={clsx(
+                "relation-detail__member",
+                `relation-detail__member--${member.role.toLowerCase()}`,
+              )}
               to={`/heroes/${member.slug}`}
             >
               <HeroPortrait
@@ -112,69 +121,87 @@ export function RelatedHeroes({
 
   return (
     <div className="related-heroes">
-      <ul className="related-heroes__tiles">
-        {groups.map((group) => {
-          const key = `group:${group.category.slug}`;
-          return (
-            <li key={key}>
-              <button
-                type="button"
-                className={clsx("related-tile", "related-tile--group", {
-                  "related-tile--active": key === selectedKey,
-                })}
-                aria-pressed={key === selectedKey}
-                onClick={() => setSelectedKey(key)}
-              >
-                <span className="related-tile__stack">
-                  {group.category.heroes.slice(0, STACK_SIZE).map((member) => (
+      {groups.length > 0 && (
+        <div className="related-heroes__section">
+          {heroes.length > 0 && (
+            <span className="related-heroes__label">Hero types</span>
+          )}
+          <ul className="related-heroes__tiles">
+            {groups.map((group) => {
+              const key = `group:${group.category.slug}`;
+              const { icon: Icon, group: styleGroup } = categoryStyleOf(
+                group.category.slug,
+              );
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    className={clsx("related-tile", "related-tile--group", {
+                      "related-tile--active": key === selectedKey,
+                    })}
+                    data-group={styleGroup}
+                    aria-pressed={key === selectedKey}
+                    onClick={() => setSelectedKey(key)}
+                  >
+                    <span className="category-icon category-icon--tile">
+                      <Icon
+                        className="category-icon__glyph"
+                        aria-hidden="true"
+                      />
+                      <span className="category-icon__count">
+                        {group.category.heroes.length}
+                      </span>
+                    </span>
+                    <span className="related-tile__name">
+                      {group.category.name}
+                    </span>
+                    <span className="related-tile__kind">
+                      {CATEGORY_GROUP_LABELS[styleGroup]}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {heroes.length > 0 && (
+        <div className="related-heroes__section">
+          {groups.length > 0 && (
+            <span className="related-heroes__label">Heroes</span>
+          )}
+          <ul className="related-heroes__tiles">
+            {heroes.map((entry) => {
+              const key = `hero:${entry.slug}`;
+              const active = hero ? entry.slug === hero.slug : false;
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    className={clsx(
+                      "related-tile",
+                      `related-tile--${entry.role.toLowerCase()}`,
+                      { "related-tile--active": active },
+                    )}
+                    aria-pressed={active}
+                    onClick={() => setSelectedKey(key)}
+                  >
                     <HeroPortrait
-                      key={member.slug}
-                      name=""
-                      url={member.portraitUrl}
-                      size={26}
+                      name={entry.name}
+                      url={entry.portraitUrl}
+                      size={60}
                     />
-                  ))}
-                  <span className="related-tile__count">
-                    {group.category.heroes.length}
-                  </span>
-                </span>
-                <span className="related-tile__name">
-                  {group.category.name}
-                </span>
-                <span className="related-tile__kind">Group</span>
-              </button>
-            </li>
-          );
-        })}
-        {heroes.map((entry) => {
-          const key = `hero:${entry.slug}`;
-          const active = hero ? entry.slug === hero.slug : false;
-          return (
-            <li key={key}>
-              <button
-                type="button"
-                className={clsx(
-                  "related-tile",
-                  `related-tile--${entry.role.toLowerCase()}`,
-                  { "related-tile--active": active },
-                )}
-                aria-pressed={active}
-                onClick={() => setSelectedKey(key)}
-              >
-                <HeroPortrait
-                  name={entry.name}
-                  url={entry.portraitUrl}
-                  size={60}
-                />
-                <span className="related-tile__name">{entry.name}</span>
-                <span className="related-tile__kind">
-                  {ROLE_LABELS[entry.role]}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                    <span className="related-tile__name">{entry.name}</span>
+                    <span className="related-tile__kind">
+                      {ROLE_LABELS[entry.role]}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
       {selectedGroup && <GroupDetail group={selectedGroup} />}
       {hero && (
         <div

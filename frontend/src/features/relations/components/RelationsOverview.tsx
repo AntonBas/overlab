@@ -1,5 +1,11 @@
 import { SectionLink } from "../../../components/ui/SectionLink";
 import clsx from "clsx";
+import {
+  Handshake,
+  TrendingDown,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { CategoryAvatar } from "./CategoryAvatar";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
@@ -29,6 +35,12 @@ interface OverviewRow {
 }
 
 const HEROES_PER_ROW = 6;
+
+const ROW_ICONS: Record<string, LucideIcon> = {
+  strong: TrendingUp,
+  struggles: TrendingDown,
+  synergies: Handshake,
+};
 const NO_CATEGORIES: HeroCategory[] = [];
 const NO_MATCHUPS: CategoryMatchup[] = [];
 
@@ -90,6 +102,7 @@ export function RelationsOverview({
       <ul className="relations-overview">
         {rows.map((row) => {
           const hidden = Math.max(0, row.heroes.length - HEROES_PER_ROW);
+          const RowIcon = ROW_ICONS[row.key];
           return (
             <li
               key={row.key}
@@ -98,7 +111,13 @@ export function RelationsOverview({
                 `relations-overview__row--${row.key}`,
               )}
             >
-              <span className="relations-overview__label">{row.label}</span>
+              <span className="relations-overview__label">
+                <RowIcon
+                  className="relations-overview__label-icon"
+                  aria-hidden="true"
+                />
+                {row.label}
+              </span>
               <span className="relations-overview__heroes">
                 {row.groups.map((group) => (
                   <CategoryAvatar
@@ -108,6 +127,12 @@ export function RelationsOverview({
                     to={moreHref}
                   />
                 ))}
+                {row.groups.length > 0 && row.heroes.length > 0 && (
+                  <span
+                    className="relations-overview__divider"
+                    aria-hidden="true"
+                  />
+                )}
                 {row.heroes.slice(0, HEROES_PER_ROW).map((hero) => (
                   <Link
                     key={hero.slug}
