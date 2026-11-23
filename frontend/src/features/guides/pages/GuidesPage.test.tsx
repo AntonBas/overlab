@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { guide } from "../../../test/fixtures/guides";
 import { renderWithRouter } from "../../../test/render";
@@ -120,9 +120,10 @@ describe("GuidesPage", () => {
 
     await screen.findByText("No guides yet.");
 
-    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      "noindex, nofollow",
+    await waitFor(() =>
+      expect(
+        document.head.querySelector('meta[name="robots"]'),
+      ).toHaveAttribute("content", "noindex, nofollow"),
     );
   });
 

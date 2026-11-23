@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { guide as fixtureGuide } from "../../../test/fixtures/guides";
@@ -106,11 +106,13 @@ describe("GuidePage", () => {
     renderGuide();
 
     await screen.findByRole("alert");
-    expect(
-      document.head
-        .querySelector('meta[name="robots"]')
-        ?.getAttribute("content"),
-    ).toBe("noindex, nofollow");
+    await waitFor(() =>
+      expect(
+        document.head
+          .querySelector('meta[name="robots"]')
+          ?.getAttribute("content"),
+      ).toBe("noindex, nofollow"),
+    );
   });
 
   it("shows an error with retry when the guide cannot be loaded", async () => {
