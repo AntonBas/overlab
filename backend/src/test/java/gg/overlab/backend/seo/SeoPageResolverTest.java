@@ -39,6 +39,21 @@ class SeoPageResolverTest {
     }
 
     @Test
+    void usesTheHeroPortraitAsTheSharingImageOnHeroPages() {
+        when(heroService.findAll()).thenReturn(List.of(
+                new HeroDto("ana", "Ana", null, null, "d", null, null, "/media/heroes/ana.webp", false),
+                new HeroDto("bob", "Bob", null, null, "d", null, null, "/media/heroes/bob.svg", false)));
+
+        SeoPage ana = resolver.resolve("/heroes/ana").orElseThrow();
+        SeoPage bob = resolver.resolve("/heroes/bob").orElseThrow();
+
+        assertThat(ana.imagePath()).isEqualTo("/media/heroes/ana.webp");
+        assertThat(ana.squareImage()).isTrue();
+        assertThat(bob.imagePath()).isNull();
+        assertThat(bob.squareImage()).isFalse();
+    }
+
+    @Test
     void rejectsUnknownAndServicePaths() {
         assertThat(resolver.resolve("/login")).isEmpty();
         assertThat(resolver.resolve("/admin/users")).isEmpty();

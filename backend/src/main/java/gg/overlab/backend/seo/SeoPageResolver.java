@@ -108,7 +108,8 @@ public class SeoPageResolver {
                     ? lead : lead + " " + hero.description();
             return new SeoPage(path, hero.name() + " stats, perks, counters and best maps", plain(detail),
                     "website", hero.name(),
-                    List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")), contentBuilder.heroDetails(hero));
+                    List.of(breadcrumbs(path, hero.name(), "/heroes", "Heroes")), contentBuilder.heroDetails(hero),
+                    imagePath(hero.portraitUrl()), imagePath(hero.portraitUrl()) != null);
         });
     }
 
@@ -158,7 +159,7 @@ public class SeoPageResolver {
                             new String[] {"Heroes", "/heroes"},
                             new String[] {name, "/heroes/" + hero.slug()},
                             new String[] {crumb, path}))),
-                    sections));
+                    sections, imagePath(hero.portraitUrl()), imagePath(hero.portraitUrl()) != null));
         });
     }
 
@@ -190,14 +191,17 @@ public class SeoPageResolver {
             String modePart = map.mode() == null ? "" : " " + contentBuilder.modeLabel(map.mode());
             String description = map.name() + " Overwatch" + modePart + " map: win, pick and ban rates of every hero"
                     + " on it, plus the best and worst picks. Updated from Blizzard public data.";
-            String imagePath = map.imageUrl() == null || map.imageUrl().isBlank()
-                    || map.imageUrl().endsWith(".svg") || !map.imageUrl().startsWith("/") ? null : map.imageUrl();
+            String imagePath = imagePath(map.imageUrl());
             return Optional.of(new SeoPage(path, map.name() + " map: hero win and pick rates", description,
                     "website", map.name(), List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
                     contentBuilder.mapDetails(map), imagePath));
         } catch (EntityNotFoundException exception) {
             return Optional.empty();
         }
+    }
+
+    private String imagePath(String url) {
+        return url == null || url.isBlank() || url.endsWith(".svg") || !url.startsWith("/") ? null : url;
     }
 
     private Optional<SeoPage> guidePage(String key) {
