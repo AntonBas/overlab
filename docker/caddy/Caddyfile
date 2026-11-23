@@ -15,6 +15,24 @@
 	@notSvgMedia not path /media/*.svg
 	header @notSvgMedia Content-Security-Policy "default-src 'self'; script-src 'self' https://cloud.umami.is; style-src 'self'; img-src 'self' data: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://cloud.umami.is https://gateway.umami.is https://*.ingest.de.sentry.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
+	@legacyStatsWithQuery {
+		path /stats /stats/
+		expression {http.request.uri.query} != ""
+	}
+	redir @legacyStatsWithQuery /?{http.request.uri.query} permanent
+
+	@legacyStats path /stats /stats/
+	redir @legacyStats / permanent
+
+	@heroOnMap {
+		path_regexp heroOnMap ^/maps/[^/]+/([^/]+)/?$
+		not path /maps/*/guides /maps/*/guides/
+	}
+	redir @heroOnMap /heroes/{re.heroOnMap.1} permanent
+
+	@legacyPatches path /patches /patches/*
+	redir @legacyPatches /changes permanent
+
 	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
 	handle @uploads {
 		request_body {
@@ -33,11 +51,26 @@
 	handle @robots {
 		header Content-Type text/plain
 		respond <<ROBOTS
+			User-agent: GPTBot
+			User-agent: ChatGPT-User
+			User-agent: OAI-SearchBot
+			User-agent: ClaudeBot
+			User-agent: Claude-Web
+			User-agent: anthropic-ai
+			User-agent: PerplexityBot
+			User-agent: Google-Extended
+			User-agent: Applebot-Extended
+			User-agent: CCBot
+			User-agent: Bytespider
+			User-agent: Meta-ExternalAgent
+			Disallow: /
+
 			User-agent: *
 			Disallow: /admin
 			Disallow: /feedback
 			Disallow: /api/
-			Disallow: /me
+			Disallow: /me$
+			Disallow: /me/
 			Disallow: /login
 			Disallow: /register
 			Disallow: /confirm-deletion
@@ -92,7 +125,7 @@
 
 	@staticHtmlBot {
 		header_regexp userAgent User-Agent (?i)(googlebot|google-inspectiontool|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal|bingbot|adidxbot|duckduckbot|yandexbot|baiduspider|applebot|slurp|seznambot)
-		path_regexp ^/(|stats|heroes|counters|perks|changes|maps|guides|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps|guides)|maps/[a-z0-9-]+|maps/[a-z0-9-]+/guides|guides/[A-Za-z0-9-]+)/?$
+		path_regexp ^/(|heroes|counters|perks|changes|maps|guides|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps|guides)|maps/[a-z0-9-]+|maps/[a-z0-9-]+/guides|guides/[A-Za-z0-9-]+)/?$
 	}
 	handle @staticHtmlBot {
 		header Cache-Control "public, max-age=300"
@@ -104,7 +137,6 @@
 	}
 
 	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|counters|maps|guides))?)/?$
-	@heroOnMapPage path_regexp heroOnMapPage ^/(maps/[^/]+)/[^/]+/?$
 
 	handle @entityPage {
 		rewrite * /api/seo/exists?path=/{http.regexp.entityPage.1}
@@ -117,26 +149,6 @@
 			}
 			@pageMissing status 404
 			handle_response @pageMissing {
-				root * /srv
-				rewrite * /index.html
-				file_server {
-					status 404
-				}
-			}
-		}
-	}
-
-	handle @heroOnMapPage {
-		rewrite * /api/seo/exists?path=/{http.regexp.heroOnMapPage.1}
-		reverse_proxy backend:8080 {
-			@mapFound status 2xx
-			handle_response @mapFound {
-				root * /srv
-				rewrite * /index.html
-				file_server
-			}
-			@mapMissing status 404
-			handle_response @mapMissing {
 				root * /srv
 				rewrite * /index.html
 				file_server {
@@ -169,7 +181,7 @@
 		file_server
 	}
 
-	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps|guides)|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
+	@appRoute path_regexp ^/(|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps|guides)|counters|perks|changes|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
 	handle @appRoute {
 		rewrite * /index.html
 		file_server

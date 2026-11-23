@@ -8,20 +8,13 @@ import gg.overlab.backend.gamemap.MapService;
 import gg.overlab.backend.hero.HeroService;
 import gg.overlab.backend.hero.ability.AbilityService;
 import gg.overlab.backend.hero.dto.HeroDto;
+import gg.overlab.backend.hero.perk.PerkRecommendation;
 import gg.overlab.backend.hero.perk.PerkService;
+import gg.overlab.backend.hero.perk.PerkSlot;
 import gg.overlab.backend.hero.perk.dto.PerkDto;
 import gg.overlab.backend.hero.relation.HeroRelationService;
 import gg.overlab.backend.hero.relation.dto.HeroCountersDto;
 import gg.overlab.backend.hero.relation.dto.RelatedHeroDto;
-import gg.overlab.backend.exception.core.EntityNotFoundException;
-import gg.overlab.backend.stats.GameQueue;
-import gg.overlab.backend.stats.Platform;
-import gg.overlab.backend.stats.RankTier;
-import gg.overlab.backend.stats.Region;
-import gg.overlab.backend.stats.StatsService;
-import gg.overlab.backend.stats.dto.HeroMapStatDto;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,13 +42,13 @@ public class SeoContentBuilder {
     private final AbilityService abilityService;
     private final PerkService perkService;
     private final HeroRelationService relationService;
-    private final StatsService statsService;
+    private final SeoStatsContent statsContent;
     private final GuideService guideService;
 
     public SeoContentBuilder(HeroService heroService, MapService mapService, AbilityService abilityService,
                              PerkService perkService, HeroRelationService relationService,
-                             StatsService statsService, GuideService guideService) {
-        this.statsService = statsService;
+                             SeoStatsContent statsContent, GuideService guideService) {
+        this.statsContent = statsContent;
         this.guideService = guideService;
         this.heroService = heroService;
         this.mapService = mapService;
@@ -83,9 +77,14 @@ public class SeoContentBuilder {
                 SeoItem.plain("Pick rate: how often a hero is chosen."),
                 SeoItem.plain("Ban rate: how often a hero is banned in Competitive."),
                 SeoItem.plain("Filter by rank, map, region and platform.")));
-        add(sections, "Hero statistics", heroService.findAll().stream()
-                .map(hero -> SeoItem.link(hero.name() + " win, pick and ban rates", "/heroes/" + hero.slug()))
-                .toList());
+        List<SeoSection> statistics = statsContent.overview();
+        if (statistics.isEmpty()) {
+            add(sections, "Hero statistics", heroService.findAll().stream()
+                    .map(hero -> SeoItem.link(hero.name() + " win, pick and ban rates", "/heroes/" + hero.slug()))
+                    .toList());
+        } else {
+            sections.addAll(statistics);
+        }
         return sections;
     }
 
@@ -119,6 +118,7 @@ public class SeoContentBuilder {
                 SeoItem.plain("Heroes that gained or lost win rate between patches."),
                 SeoItem.plain("Heroes that gained or lost pick rate between patches."),
                 SeoItem.plain("Trends over the last weeks.")));
+        sections.addAll(statsContent.latestPatchChanges());
         sections.addAll(heroList());
         return sections;
     }
@@ -132,6 +132,7 @@ public class SeoContentBuilder {
 
     List<SeoSection> heroDetails(HeroDto hero) {
         List<SeoSection> sections = new ArrayList<>();
+        statsContent.heroRates(hero).ifPresent(sections::add);
         add(sections, "Strengths", lines(hero.strengths()));
         add(sections, "Weaknesses", lines(hero.weaknesses()));
         add(sections, "Abilities", abilityService.findByHero(hero.slug()).stream()
@@ -143,49 +144,29 @@ public class SeoContentBuilder {
     }
 
     List<SeoSection> heroCounters(HeroDto hero) {
-        List<SeoSection> sections = relationSections(hero);
-        if (!sections.isEmpty()) {
-            add(sections, "More about " + hero.name(),
-                    List.of(SeoItem.link(hero.name() + " stats, perks and best maps", "/heroes/" + hero.slug())));
+        List<SeoSection> relations = relationSections(hero);
+        if (relations.isEmpty()) {
+            return relations;
         }
+        List<SeoSection> sections = new ArrayList<>();
+        add(sections, hero.name() + " counters at a glance", List.of(SeoItem.plain(hero.name()
+                + " counters and synergies, curated by Overlab: " + relations.stream()
+                .map(section -> section.heading() + " (" + section.items().size() + ")")
+                .collect(Collectors.joining("; ")) + ".")));
+        sections.addAll(relations);
+        add(sections, "More about " + hero.name(),
+                List.of(SeoItem.link(hero.name() + " stats, perks and best maps", "/heroes/" + hero.slug())));
         return sections;
     }
 
     List<SeoSection> heroMaps(HeroDto hero) {
-        List<HeroMapStatDto> maps;
-        try {
-            maps = statsService.getHeroByMaps(hero.slug(), GameQueue.COMPETITIVE, RankTier.ALL, Platform.PC,
-                    Region.EUROPE).maps().stream().filter(map -> map.winRateDelta() != null).toList();
-        } catch (EntityNotFoundException exception) {
-            return List.of();
+        List<SeoSection> sections = new ArrayList<>(statsContent.heroMapRankings(hero));
+        if (sections.isEmpty()) {
+            return sections;
         }
-        if (maps.isEmpty()) {
-            return List.of();
-        }
-        List<HeroMapStatDto> ranked = maps.stream()
-                .sorted(Comparator.comparing(HeroMapStatDto::winRateDelta).reversed()).toList();
-        int shown = Math.min(5, ranked.size());
-        List<SeoSection> sections = new ArrayList<>();
-        add(sections, "Best maps for " + hero.name(), ranked.subList(0, shown).stream().map(this::mapItem).toList());
-        add(sections, "Weakest maps for " + hero.name(),
-                ranked.reversed().subList(0, shown).stream().map(this::mapItem).toList());
         add(sections, "More about " + hero.name(),
                 List.of(SeoItem.link(hero.name() + " stats, perks and counters", "/heroes/" + hero.slug())));
         return sections;
-    }
-
-    private SeoItem mapItem(HeroMapStatDto map) {
-        return SeoItem.link(map.mapName() + modeSuffix(map.mode()) + ": " + percent(map.winRate()) + " win rate ("
-                + signed(map.winRateDelta()) + " compared with the hero's average)", "/maps/" + map.mapSlug());
-    }
-
-    private String percent(BigDecimal value) {
-        return value == null ? "n/a" : value.setScale(1, RoundingMode.HALF_UP) + "%";
-    }
-
-    private String signed(BigDecimal value) {
-        BigDecimal rounded = value.setScale(1, RoundingMode.HALF_UP);
-        return (rounded.signum() > 0 ? "+" : "") + rounded;
     }
 
     private List<SeoSection> relationSections(HeroDto hero) {
@@ -200,13 +181,25 @@ public class SeoContentBuilder {
 
     List<SeoSection> heroPerks(HeroDto hero) {
         List<SeoSection> sections = new ArrayList<>();
-        add(sections, "Best " + hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
-                .map(this::perkItem).toList());
-        if (!sections.isEmpty()) {
+        List<PerkDto> perks = perkService.findByHero(hero.slug());
+        if (!perks.isEmpty()) {
+            add(sections, hero.name() + " perks overview", List.of(SeoItem.plain(perkSummary(hero, perks))));
+        }
+        add(sections, "Best " + hero.name() + " perks", perks.stream().map(this::perkItem).toList());
+        if (!perks.isEmpty()) {
             add(sections, "More about " + hero.name(),
                     List.of(SeoItem.link(hero.name() + " stats, counters and best maps", "/heroes/" + hero.slug())));
         }
         return sections;
+    }
+
+    private String perkSummary(HeroDto hero, List<PerkDto> perks) {
+        long minor = perks.stream().filter(perk -> perk.slot() == PerkSlot.MINOR).count();
+        long major = perks.stream().filter(perk -> perk.slot() == PerkSlot.MAJOR).count();
+        List<String> recommended = perks.stream()
+                .filter(perk -> perk.recommendation() == PerkRecommendation.RECOMMENDED).map(PerkDto::name).toList();
+        return hero.name() + " has " + perks.size() + " perks: " + minor + " Minor and " + major + " Major."
+                + (recommended.isEmpty() ? "" : " Recommended: " + String.join(", ", recommended) + ".");
     }
 
     List<SeoSection> heroGuides(HeroDto hero) {
@@ -279,9 +272,19 @@ public class SeoContentBuilder {
         return SeoItem.link(guide.title() + (context == null ? "" : " (" + context + ")"), "/guides/" + guide.path());
     }
 
-    List<SeoSection> mapDetails(String modeLabel) {
-        return modeLabel == null ? List.of()
-                : List.of(new SeoSection("Game mode", List.of(SeoItem.plain(modeLabel))));
+    List<SeoSection> mapDetails(MapDto map) {
+        List<SeoSection> sections = new ArrayList<>();
+        if (map.mode() != null) {
+            add(sections, "Game mode", List.of(SeoItem.plain(map.mode().name())));
+        }
+        List<SeoSection> rankings = statsContent.mapRankings(map);
+        if (rankings.isEmpty()) {
+            return sections;
+        }
+        sections.addAll(rankings);
+        add(sections, "More statistics", List.of(SeoItem.link("Hero statistics on all maps", "/"),
+                SeoItem.link("All Overwatch maps", "/maps")));
+        return sections;
     }
 
     private void add(List<SeoSection> sections, String heading, List<SeoItem> items) {
@@ -319,7 +322,7 @@ public class SeoContentBuilder {
                 .toList();
     }
 
-    private String modeSuffix(MapMode mode) {
+    static String modeSuffix(MapMode mode) {
         return mode == null ? "" : " (" + modeName(mode.name()) + ")";
     }
 
@@ -327,7 +330,11 @@ public class SeoContentBuilder {
         return hero.role() == null ? "hero" : hero.role().name().toLowerCase(Locale.ROOT);
     }
 
-    private String modeName(String constant) {
+    String modeLabel(MapMode mode) {
+        return modeName(mode.name());
+    }
+
+    static String modeName(String constant) {
         String lower = constant.toLowerCase(Locale.ROOT).replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }

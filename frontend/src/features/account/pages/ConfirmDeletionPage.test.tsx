@@ -24,7 +24,7 @@ function renderPage(route: string) {
   return renderWithRouter(
     <Routes>
       <Route path="/login" element={<p>login page</p>} />
-      <Route path="/stats" element={<p>stats page</p>} />
+      <Route path="/" element={<p>home page</p>} />
       <Route path="/confirm-deletion" element={<ConfirmDeletionPage />} />
     </Routes>,
     route,
@@ -49,7 +49,7 @@ describe("ConfirmDeletionPage", () => {
     );
 
     expect(deleteAccount).toHaveBeenCalledWith(null, "abc");
-    expect(await screen.findByText("stats page")).toBeInTheDocument();
+    expect(await screen.findByText("home page")).toBeInTheDocument();
   });
 
   it("asks a signed out visitor to sign in first", () => {

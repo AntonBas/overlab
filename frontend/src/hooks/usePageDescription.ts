@@ -32,10 +32,12 @@ export function usePageDescription(description: string | null | undefined) {
     }
     const previous = metaContent('meta[name="description"]');
     const previousOg = metaContent('meta[property="og:description"]');
+    const previousTwitter = metaContent('meta[name="twitter:description"]');
     const previousUrl = metaContent('meta[property="og:url"]');
     const pageUrl = `${window.location.origin}${window.location.pathname}`;
     setMeta('meta[name="description"]', description);
     setMeta('meta[property="og:description"]', description);
+    setMeta('meta[name="twitter:description"]', description);
     setMeta('meta[property="og:url"]', pageUrl);
 
     const canonical = document.createElement("link");
@@ -46,6 +48,7 @@ export function usePageDescription(description: string | null | undefined) {
     return () => {
       setMeta('meta[name="description"]', previous);
       setMeta('meta[property="og:description"]', previousOg);
+      setMeta('meta[name="twitter:description"]', previousTwitter);
       setMeta('meta[property="og:url"]', previousUrl);
       canonical.remove();
     };

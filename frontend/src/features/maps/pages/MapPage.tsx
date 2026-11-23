@@ -26,6 +26,7 @@ import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
 import { MAP_MODE_LABELS, TIER_LABELS } from "../../../utils/format";
 import { fetchGuides } from "../../guides";
+import { mapPageDescription, mapPageTitle } from "../utils/mapSeo";
 import { FavoriteButton } from "../../personal";
 import { SpotsSection } from "../../guides";
 import { fetchStats } from "../../stats";
@@ -86,11 +87,9 @@ export function MapPage() {
   const shownHeroes = showAllHeroes
     ? visibleHeroes
     : visibleHeroes.slice(0, INITIAL_HERO_ROWS);
-  usePageTitle(map.data?.name);
+  usePageTitle(map.data ? mapPageTitle(map.data.name) : null);
   usePageDescription(
-    map.data
-      ? `${map.data.name}: win, pick and ban rates of every Overwatch hero on this map.`
-      : null,
+    map.data ? mapPageDescription(map.data.name, map.data.mode) : null,
   );
   useStructuredData(
     map.data

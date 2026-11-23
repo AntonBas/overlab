@@ -75,6 +75,7 @@ export function Header() {
                 <li key={link.to}>
                   <NavLink
                     to={link.to}
+                    end={link.to === "/"}
                     className={({ isActive }) =>
                       clsx("nav__link", { "nav__link--active": isActive })
                     }

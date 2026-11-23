@@ -89,14 +89,15 @@ class SitemapServiceTest {
         String xml = new SitemapService(heroService, mapService, guideService, contentBuilder,
                 new SiteUrl("https://example.com/"), snapshotCheckService).build();
 
-        assertThat(xml).contains("<loc>https://example.com/stats</loc>", "<loc>https://example.com/perks</loc>",
+        assertThat(xml).contains("<loc>https://example.com/</loc><lastmod>2026-11-10T04:00:00Z</lastmod>",
+                "<loc>https://example.com/perks</loc>",
                 "<loc>https://example.com/heroes/ana</loc>", "<loc>https://example.com/maps/busan</loc>",
                 "<loc>https://example.com/heroes</loc>", "<loc>https://example.com/counters</loc>",
                 "<loc>https://example.com/guides/7-sleep-dart</loc>",
                 "<loc>https://example.com/heroes/ana/perks</loc>",
                 "<loc>https://example.com/heroes/ana/counters</loc>");
         assertThat(xml).doesNotContain("/heroes/ana/maps");
-        assertThat(xml).doesNotContain("//stats");
+        assertThat(xml).doesNotContain("/stats</loc>");
         assertThat(xml).contains("<loc>https://example.com/heroes/ana</loc><lastmod>2026-11-10T04:00:00Z</lastmod>",
                 "<loc>https://example.com/maps/busan</loc><lastmod>2026-11-10T04:00:00Z</lastmod>");
     }
