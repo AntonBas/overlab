@@ -24,6 +24,12 @@
 	@legacyStats path /stats /stats/
 	redir @legacyStats / permanent
 
+	@heroOnMap {
+		path_regexp heroOnMap ^/maps/[^/]+/([^/]+)/?$
+		not path /maps/*/guides /maps/*/guides/
+	}
+	redir @heroOnMap /heroes/{re.heroOnMap.1} permanent
+
 	@legacyPatches path /patches /patches/*
 	redir @legacyPatches /changes permanent
 
@@ -45,6 +51,20 @@
 	handle @robots {
 		header Content-Type text/plain
 		respond <<ROBOTS
+			User-agent: GPTBot
+			User-agent: ChatGPT-User
+			User-agent: OAI-SearchBot
+			User-agent: ClaudeBot
+			User-agent: Claude-Web
+			User-agent: anthropic-ai
+			User-agent: PerplexityBot
+			User-agent: Google-Extended
+			User-agent: Applebot-Extended
+			User-agent: CCBot
+			User-agent: Bytespider
+			User-agent: Meta-ExternalAgent
+			Disallow: /
+
 			User-agent: *
 			Disallow: /admin
 			Disallow: /feedback
@@ -117,7 +137,6 @@
 	}
 
 	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|counters|maps|guides))?)/?$
-	@heroOnMapPage path_regexp heroOnMapPage ^/(maps/[^/]+)/[^/]+/?$
 
 	handle @entityPage {
 		rewrite * /api/seo/exists?path=/{http.regexp.entityPage.1}
@@ -130,26 +149,6 @@
 			}
 			@pageMissing status 404
 			handle_response @pageMissing {
-				root * /srv
-				rewrite * /index.html
-				file_server {
-					status 404
-				}
-			}
-		}
-	}
-
-	handle @heroOnMapPage {
-		rewrite * /api/seo/exists?path=/{http.regexp.heroOnMapPage.1}
-		reverse_proxy backend:8080 {
-			@mapFound status 2xx
-			handle_response @mapFound {
-				root * /srv
-				rewrite * /index.html
-				file_server
-			}
-			@mapMissing status 404
-			handle_response @mapMissing {
 				root * /srv
 				rewrite * /index.html
 				file_server {

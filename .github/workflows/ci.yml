@@ -122,6 +122,8 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/stats")" = "301 $base/"
           test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/stats?tier=emerald")" = "301 $base/?tier=emerald"
           test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/patches")" = "301 $base/changes"
+          echo "$robots" | grep -qx 'User-agent: GPTBot'
+          test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/maps/route-66/ana")" = "301 $base/heroes/ana"
           curl -fsS -A "Googlebot/2.1" "$base/" | grep -q '<h1>Hero statistics</h1>'
       - name: Audit the pages that do not need collected statistics
         run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.preview.json
