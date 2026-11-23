@@ -2,7 +2,7 @@ import type { MapMode } from "../../../types/map";
 import { MAP_MODE_LABELS } from "../../../utils/format";
 
 export function mapPageTitle(name: string): string {
-  return `${name} Overwatch map: hero win and pick rates`;
+  return `${name} map: hero win and pick rates`;
 }
 
 export function mapPageDescription(

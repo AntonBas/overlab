@@ -4,7 +4,7 @@ import { mapPageDescription, mapPageTitle } from "./mapSeo";
 describe("mapSeo", () => {
   it("builds the title shared with the server prerender", () => {
     expect(mapPageTitle("Route 66")).toBe(
-      "Route 66 Overwatch map: hero win and pick rates",
+      "Route 66 map: hero win and pick rates",
     );
   });
 

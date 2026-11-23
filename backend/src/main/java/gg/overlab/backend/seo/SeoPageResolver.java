@@ -192,7 +192,7 @@ public class SeoPageResolver {
                     + " on it, plus the best and worst picks. Updated from Blizzard public data.";
             String imagePath = map.imageUrl() == null || map.imageUrl().isBlank()
                     || map.imageUrl().endsWith(".svg") || !map.imageUrl().startsWith("/") ? null : map.imageUrl();
-            return Optional.of(new SeoPage(path, map.name() + " Overwatch map: hero win and pick rates", description,
+            return Optional.of(new SeoPage(path, map.name() + " map: hero win and pick rates", description,
                     "website", map.name(), List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
                     contentBuilder.mapDetails(map), imagePath));
         } catch (EntityNotFoundException exception) {
