@@ -25,7 +25,7 @@ export function NotFound({ alert = false }: NotFoundProps) {
         <Link className="button" to="/heroes">
           Go to heroes
         </Link>
-        <Link className="button button--ghost" to="/stats">
+        <Link className="button button--ghost" to="/">
           Statistics
         </Link>
       </div>

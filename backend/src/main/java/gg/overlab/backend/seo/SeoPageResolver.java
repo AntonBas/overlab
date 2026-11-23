@@ -78,8 +78,10 @@ public class SeoPageResolver {
     }
 
     private SeoPage staticPage(StaticSeoPage page) {
-        List<String> data = "/".equals(page.path()) ? List.of(websiteData())
-                : List.of(breadcrumbs(page.path(), page.heading()));
+        List<String> data = switch (page.path()) {
+            case "/" -> List.of(websiteData(), datasetData(page));
+            default -> List.of(breadcrumbs(page.path(), page.heading()));
+        };
         return new SeoPage(page.path(), page.title(), page.description(), "website", page.heading(), data,
                 staticSections(page.path()));
     }
@@ -89,7 +91,7 @@ public class SeoPageResolver {
             case "/maps" -> contentBuilder.mapList();
             case "/guides" -> contentBuilder.guideHub();
             case "/privacy", "/terms", "/cookies", "/business" -> List.of();
-            case "/stats" -> contentBuilder.statsOverview();
+            case "/" -> contentBuilder.statsOverview();
             case "/counters" -> contentBuilder.countersOverview();
             case "/perks" -> contentBuilder.perksOverview();
             case "/changes" -> contentBuilder.changesOverview();
@@ -227,6 +229,17 @@ public class SeoPageResolver {
     private String websiteData() {
         return "{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":" + JsonText.quote(SITE_NAME)
                 + ",\"url\":" + JsonText.quote(siteUrl.absolute("/")) + "}";
+    }
+
+    private String datasetData(StaticSeoPage page) {
+        return "{\"@context\":\"https://schema.org\",\"@type\":\"Dataset\",\"name\":"
+                + JsonText.quote("Overwatch hero win, pick and ban rates")
+                + ",\"description\":" + JsonText.quote(page.description())
+                + ",\"url\":" + JsonText.quote(siteUrl.absolute(page.path()))
+                + ",\"isAccessibleForFree\":true"
+                + ",\"variableMeasured\":[\"Win rate\",\"Pick rate\",\"Ban rate\"]"
+                + ",\"creator\":{\"@type\":\"Organization\",\"name\":" + JsonText.quote(SITE_NAME)
+                + ",\"url\":" + JsonText.quote(siteUrl.absolute("/")) + "}}";
     }
 
     private String breadcrumbs(String path, String title) {

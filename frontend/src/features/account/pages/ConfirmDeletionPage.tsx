@@ -38,7 +38,7 @@ export function ConfirmDeletionPage() {
     );
     if (deleted) {
       replaceUser(null);
-      navigate("/stats", { replace: true });
+      navigate("/", { replace: true });
     }
   }
 

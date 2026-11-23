@@ -23,7 +23,7 @@ describe("NotFoundPage", () => {
     );
     expect(screen.getByRole("link", { name: "Statistics" })).toHaveAttribute(
       "href",
-      "/stats",
+      "/",
     );
   });
 });

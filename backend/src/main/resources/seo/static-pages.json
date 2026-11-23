@@ -1,13 +1,6 @@
 [
   {
     "path": "/",
-    "title": "Overlab: Overwatch hero statistics",
-    "description": "Overwatch hero statistics by map and rank: win, pick and ban rates, perks, counters and video guides. Unofficial fan site.",
-    "heading": "Overlab",
-    "navigation": false
-  },
-  {
-    "path": "/stats",
     "title": "Overwatch hero win, pick and ban rates",
     "description": "Overwatch hero win, pick and ban rates by rank, map, region and platform. Competitive and Quick Play, updated from Blizzard public data.",
     "heading": "Hero statistics",

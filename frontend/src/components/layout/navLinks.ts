@@ -1,5 +1,5 @@
 export const NAV_LINKS = [
-  { to: "/stats", label: "Statistics" },
+  { to: "/", label: "Statistics" },
   { to: "/heroes", label: "Heroes" },
   { to: "/perks", label: "Perks" },
   { to: "/counters", label: "Counters" },
@@ -8,7 +8,7 @@ export const NAV_LINKS = [
 ] as const;
 
 export const FOOTER_LINKS = [
-  { to: "/stats", label: "Statistics" },
+  { to: "/", label: "Statistics" },
   { to: "/heroes", label: "Heroes" },
   { to: "/perks", label: "Perks" },
   { to: "/counters", label: "Counters" },

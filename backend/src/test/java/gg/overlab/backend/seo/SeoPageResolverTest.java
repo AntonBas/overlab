@@ -29,12 +29,13 @@ class SeoPageResolverTest {
 
     @Test
     void resolvesStaticPagesAndIgnoresTrailingSlash() {
-        assertThat(resolver.resolve("/stats/")).hasValueSatisfying(page -> {
+        assertThat(resolver.resolve("/")).hasValueSatisfying(page -> {
             assertThat(page.title()).isEqualTo("Overwatch hero win, pick and ban rates");
             assertThat(page.heading()).isEqualTo("Hero statistics");
-            assertThat(page.path()).isEqualTo("/stats");
+            assertThat(page.path()).isEqualTo("/");
         });
-        assertThat(resolver.resolve("/")).hasValueSatisfying(page -> assertThat(page.title()).isEqualTo("Overlab: Overwatch hero statistics"));
+        assertThat(resolver.resolve("/heroes/")).hasValueSatisfying(page -> assertThat(page.path()).isEqualTo("/heroes"));
+        assertThat(resolver.resolve("/stats")).isEmpty();
     }
 
     @Test
@@ -100,6 +101,14 @@ class SeoPageResolverTest {
         assertThat(resolver.resolve("/heroes/ana/maps")).hasValueSatisfying(page -> {
             assertThat(page.title()).isEqualTo("Best and worst maps for Ana");
             assertThat(page.heading()).isEqualTo("Ana maps");
+        });
+    }
+
+    @Test
+    void addsWebsiteAndDatasetDataToTheHomePage() {
+        assertThat(resolver.resolve("/")).hasValueSatisfying(page -> {
+            assertThat(page.structuredData()).anyMatch(json -> json.contains("\"@type\":\"WebSite\""));
+            assertThat(page.structuredData()).anyMatch(json -> json.contains("\"@type\":\"Dataset\""));
         });
     }
 

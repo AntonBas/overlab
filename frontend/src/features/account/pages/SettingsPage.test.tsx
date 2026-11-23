@@ -36,7 +36,7 @@ function renderSettings() {
     <Routes>
       <Route path="/me/settings" element={<SettingsPage />} />
       <Route path="/login" element={<p>login page</p>} />
-      <Route path="/stats" element={<p>stats page</p>} />
+      <Route path="/" element={<p>home page</p>} />
     </Routes>,
     "/me/settings",
   );
@@ -115,7 +115,7 @@ describe("SettingsPage", () => {
     await userEvent.click(confirm);
 
     expect(deleteAccount).toHaveBeenCalledWith("secret-password", null);
-    expect(await screen.findByText("stats page")).toBeInTheDocument();
+    expect(await screen.findByText("home page")).toBeInTheDocument();
     expect(replaceUser).toHaveBeenCalledWith(null);
   });
 });

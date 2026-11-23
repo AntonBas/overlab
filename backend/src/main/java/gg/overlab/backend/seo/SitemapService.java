@@ -45,7 +45,7 @@ public class SitemapService {
         boolean hasGuides = !guideService.findPublished(null, null).isEmpty();
         StaticSeoPage.navigationPages().stream()
                 .filter(page -> hasGuides || !"/guides".equals(page.path()))
-                .forEach(page -> appendUrl(xml, page.path(), "/stats".equals(page.path()) ? statsChanged : null));
+                .forEach(page -> appendUrl(xml, page.path(), "/".equals(page.path()) ? statsChanged : null));
         for (HeroDto hero : heroService.findAll()) {
             String heroPath = "/heroes/" + hero.slug();
             appendUrl(xml, heroPath, statsChanged);

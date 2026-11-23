@@ -22,7 +22,7 @@ export function DeleteAccount() {
     );
     if (deleted) {
       replaceUser(null);
-      navigate("/stats", { replace: true });
+      navigate("/", { replace: true });
     }
   }
 

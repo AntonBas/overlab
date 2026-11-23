@@ -15,7 +15,7 @@ public class SeoHtmlRenderer {
     }
 
     public String render(SeoPage page) {
-        boolean home = "/".equals(page.path()) || SeoPageResolver.SITE_NAME.equals(page.title());
+        boolean home = SeoPageResolver.SITE_NAME.equals(page.title());
         String title = home ? page.title() : page.title() + " | " + SeoPageResolver.SITE_NAME;
         String url = siteUrl.absolute(page.path());
         boolean customImage = page.imagePath() != null;

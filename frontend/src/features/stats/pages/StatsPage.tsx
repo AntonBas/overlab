@@ -7,10 +7,6 @@ import { QueueToggle } from "../../../components/ui/QueueToggle";
 import { TableSkeleton } from "../../../components/ui/TableSkeleton";
 import { useFetch } from "../../../hooks/useFetch";
 import { usePageTitle } from "../../../hooks/usePageTitle";
-import {
-  breadcrumbList,
-  useStructuredData,
-} from "../../../hooks/useStructuredData";
 import { usePageDescription } from "../../../hooks/usePageDescription";
 import { SEARCH_PARAMS, useUrlParam } from "../../../hooks/useUrlParam";
 import { matchesName } from "../../../utils/search";
@@ -25,18 +21,9 @@ import { statsHighlights } from "../utils/highlights";
 import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 export function StatsPage() {
-  const page = staticSeoPage("/stats");
+  const page = staticSeoPage("/");
   usePageTitle(page.title);
   usePageDescription(page.description);
-  useStructuredData(
-    breadcrumbList(
-      [
-        { name: "Overlab", path: "/" },
-        { name: "Hero statistics", path: "/stats" },
-      ],
-      window.location.origin,
-    ),
-  );
   const { filters, update, changeSort, ready, key } = useFilterState(
     undefined,
     SEARCH_PARAMS,

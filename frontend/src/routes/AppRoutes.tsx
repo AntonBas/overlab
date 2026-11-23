@@ -3,6 +3,7 @@ import { lazyNamed } from "./lazyNamed";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
 import { HeroOnMapRedirect } from "../features/heroes/pages/HeroOnMapRedirect";
+import { StatsRedirect } from "../features/stats/pages/StatsRedirect";
 import { StatsPage } from "../features/stats";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
@@ -181,8 +182,8 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Navigate to="/stats" replace />} />
-        <Route path="stats" element={<StatsPage />} />
+        <Route index element={<StatsPage />} />
+        <Route path="stats" element={<StatsRedirect />} />
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
         <Route path="counters" element={<CountersPage />} />
