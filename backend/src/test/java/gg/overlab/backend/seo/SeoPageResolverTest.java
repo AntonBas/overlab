@@ -108,7 +108,7 @@ class SeoPageResolverTest {
         when(mapService.getBySlug("busan")).thenReturn(new MapDto("busan", "Busan", null, null));
 
         assertThat(resolver.resolve("/maps/busan")).hasValueSatisfying(page ->
-                assertThat(page.description()).startsWith("Busan: win, pick and ban rates"));
+                assertThat(page.description()).startsWith("Busan Overwatch map: win, pick and ban rates"));
     }
 
     @Test

@@ -9,49 +9,49 @@
   {
     "path": "/stats",
     "title": "Overwatch hero win, pick and ban rates",
-    "description": "Overwatch hero win, pick and ban rates by rank, map, region and platform, updated from Blizzard public data.",
+    "description": "Overwatch hero win, pick and ban rates by rank, map, region and platform. Competitive and Quick Play, updated from Blizzard public data.",
     "heading": "Hero statistics",
     "navigation": true
   },
   {
     "path": "/heroes",
     "title": "All Overwatch heroes: roles, abilities, perks",
-    "description": "All Overwatch heroes with roles, abilities, perks, counters and synergies.",
+    "description": "All Overwatch heroes by role (tank, damage, support) with abilities, perks, counters and synergies, plus win, pick and ban rates.",
     "heading": "Heroes",
     "navigation": true
   },
   {
     "path": "/counters",
     "title": "Overwatch counters and synergies for every hero",
-    "description": "Curated Overwatch counter picks and synergies for every hero, with short explanations.",
+    "description": "Curated Overwatch counter picks and synergies for every hero: who each hero is strong against, who counters it and who works well with it.",
     "heading": "Counters",
     "navigation": true
   },
   {
     "path": "/perks",
     "title": "Overwatch hero perks: every Minor and Major perk",
-    "description": "Every Overwatch hero perk in one place, with Minor and Major slots and descriptions.",
+    "description": "Every Overwatch hero perk in one place: Minor and Major slots, descriptions and which perks are worth taking for each hero.",
     "heading": "Perks",
     "navigation": true
   },
   {
     "path": "/maps",
     "title": "Overwatch maps: hero win rates by map",
-    "description": "Overwatch maps by game mode, with hero win, pick and ban rates on each map.",
+    "description": "Overwatch maps grouped by game mode, with hero win, pick and ban rates on every map and the best and worst picks for each.",
     "heading": "Maps",
     "navigation": true
   },
   {
     "path": "/guides",
     "title": "Overwatch video guides: spots, setups and tips",
-    "description": "Short Overwatch video guides with positions, setups, ultimates and tips, for every hero and map.",
+    "description": "Short Overwatch video guides with positions, setups, ultimates and tips for every hero and map, sorted by hero and by map.",
     "heading": "Guides",
     "navigation": true
   },
   {
     "path": "/changes",
     "title": "Overwatch hero win rate changes by patch",
-    "description": "See which Overwatch heroes gained or lost win and pick rate between patches and over the last weeks.",
+    "description": "See which Overwatch heroes gained or lost win rate and pick rate between patches and over the last weeks, hero by hero.",
     "heading": "What changed",
     "navigation": true
   },

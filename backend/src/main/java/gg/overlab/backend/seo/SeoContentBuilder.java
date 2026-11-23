@@ -19,7 +19,10 @@ import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
 import gg.overlab.backend.stats.StatsService;
+import gg.overlab.backend.stats.StatsSort;
 import gg.overlab.backend.stats.dto.HeroMapStatDto;
+import gg.overlab.backend.stats.dto.HeroStatDto;
+import gg.overlab.backend.stats.dto.StatsFilter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
@@ -39,6 +42,8 @@ public class SeoContentBuilder {
 
     static final int MIN_GUIDES_FOR_LIST = 2;
     private static final int LATEST_GUIDES = 10;
+    private static final int TOP_HEROES = 5;
+    private static final BigDecimal MIN_PICK_RATE = new BigDecimal("3");
     private static final Pattern LINK_MARKUP = Pattern.compile("\\[\\[[^\\]/]+/([^\\]]+)]]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
     private static final Pattern LIST_MARKER = Pattern.compile("^[-*•\\s]+");
@@ -83,9 +88,20 @@ public class SeoContentBuilder {
                 SeoItem.plain("Pick rate: how often a hero is chosen."),
                 SeoItem.plain("Ban rate: how often a hero is banned in Competitive."),
                 SeoItem.plain("Filter by rank, map, region and platform.")));
-        add(sections, "Hero statistics", heroService.findAll().stream()
-                .map(hero -> SeoItem.link(hero.name() + " win, pick and ban rates", "/heroes/" + hero.slug()))
-                .toList());
+        List<HeroStatDto> heroes = competitiveHeroes(StatsFilter.ALL_MAPS);
+        if (heroes.isEmpty()) {
+            add(sections, "Hero statistics", heroService.findAll().stream()
+                    .map(hero -> SeoItem.link(hero.name() + " win, pick and ban rates", "/heroes/" + hero.slug()))
+                    .toList());
+            return sections;
+        }
+        List<HeroStatDto> regulars = heroes.stream().filter(this::isRegularlyPicked).toList();
+        add(sections, "Highest win rate in Competitive", topItems(regulars, HeroStatDto::winRate));
+        add(sections, "Most picked heroes", topItems(heroes, HeroStatDto::pickRate));
+        add(sections, "Most banned heroes", topItems(heroes.stream().filter(hero -> hero.banRate() != null).toList(),
+                HeroStatDto::banRate));
+        add(sections, "All heroes: win, pick and ban rates (Competitive, all ranks)",
+                heroes.stream().map(this::heroRatesItem).toList());
         return sections;
     }
 
@@ -132,6 +148,9 @@ public class SeoContentBuilder {
 
     List<SeoSection> heroDetails(HeroDto hero) {
         List<SeoSection> sections = new ArrayList<>();
+        competitiveHeroes(StatsFilter.ALL_MAPS).stream().filter(stat -> stat.heroSlug().equals(hero.slug()))
+                .findFirst().ifPresent(stat -> add(sections, hero.name() + " statistics", List.of(SeoItem.plain(
+                        hero.name() + " in Competitive, all ranks: " + ratesText(stat) + "."))));
         add(sections, "Strengths", lines(hero.strengths()));
         add(sections, "Weaknesses", lines(hero.weaknesses()));
         add(sections, "Abilities", abilityService.findByHero(hero.slug()).stream()
@@ -279,9 +298,61 @@ public class SeoContentBuilder {
         return SeoItem.link(guide.title() + (context == null ? "" : " (" + context + ")"), "/guides/" + guide.path());
     }
 
-    List<SeoSection> mapDetails(String modeLabel) {
-        return modeLabel == null ? List.of()
-                : List.of(new SeoSection("Game mode", List.of(SeoItem.plain(modeLabel))));
+    List<SeoSection> mapDetails(MapDto map) {
+        List<SeoSection> sections = new ArrayList<>();
+        if (map.mode() != null) {
+            add(sections, "Game mode", List.of(SeoItem.plain(map.mode().name())));
+        }
+        List<HeroStatDto> heroes = competitiveHeroes(map.slug()).stream()
+                .filter(hero -> hero.winRateDelta() != null && isRegularlyPicked(hero)).toList();
+        if (heroes.isEmpty()) {
+            return sections;
+        }
+        add(sections, "Biggest win rate gain on " + map.name(),
+                topMapItems(heroes, HeroStatDto::winRateDelta, true));
+        add(sections, "Highest win rate on " + map.name(), topMapItems(heroes, HeroStatDto::winRate, true));
+        add(sections, "Weakest picks on " + map.name(), topMapItems(heroes, HeroStatDto::winRateDelta, false));
+        add(sections, "More statistics", List.of(SeoItem.link("Hero statistics on all maps", "/stats"),
+                SeoItem.link("All Overwatch maps", "/maps")));
+        return sections;
+    }
+
+    private List<HeroStatDto> competitiveHeroes(String mapSlug) {
+        try {
+            return statsService.getStats(StatsFilter.of(GameQueue.COMPETITIVE, RankTier.ALL, mapSlug,
+                    Platform.PC, Region.EUROPE), null, StatsSort.PICK_RATE, true).heroes();
+        } catch (EntityNotFoundException exception) {
+            return List.of();
+        }
+    }
+
+    private boolean isRegularlyPicked(HeroStatDto hero) {
+        return hero.pickRate() != null && hero.pickRate().compareTo(MIN_PICK_RATE) >= 0;
+    }
+
+    private List<SeoItem> topItems(List<HeroStatDto> heroes, Function<HeroStatDto, BigDecimal> rate) {
+        return heroes.stream().filter(hero -> rate.apply(hero) != null)
+                .sorted(Comparator.comparing(rate, Comparator.<BigDecimal>reverseOrder()))
+                .limit(TOP_HEROES).map(this::heroRatesItem).toList();
+    }
+
+    private List<SeoItem> topMapItems(List<HeroStatDto> heroes, Function<HeroStatDto, BigDecimal> rate,
+                                      boolean highestFirst) {
+        Comparator<BigDecimal> order = highestFirst ? Comparator.reverseOrder() : Comparator.naturalOrder();
+        return heroes.stream().sorted(Comparator.comparing(rate, order)).limit(TOP_HEROES)
+                .map(hero -> SeoItem.link(hero.heroName() + ": " + percent(hero.winRate()) + " win rate ("
+                        + signed(hero.winRateDelta()) + " compared with the hero's average), "
+                        + percent(hero.pickRate()) + " pick rate", "/heroes/" + hero.heroSlug()))
+                .toList();
+    }
+
+    private SeoItem heroRatesItem(HeroStatDto hero) {
+        return SeoItem.link(hero.heroName() + ": " + ratesText(hero), "/heroes/" + hero.heroSlug());
+    }
+
+    private String ratesText(HeroStatDto hero) {
+        String ban = hero.banRate() == null ? "" : ", " + percent(hero.banRate()) + " ban rate";
+        return percent(hero.winRate()) + " win rate, " + percent(hero.pickRate()) + " pick rate" + ban;
     }
 
     private void add(List<SeoSection> sections, String heading, List<SeoItem> items) {
@@ -325,6 +396,10 @@ public class SeoContentBuilder {
 
     private String roleName(HeroDto hero) {
         return hero.role() == null ? "hero" : hero.role().name().toLowerCase(Locale.ROOT);
+    }
+
+    String modeLabel(MapMode mode) {
+        return modeName(mode.name());
     }
 
     private String modeName(String constant) {

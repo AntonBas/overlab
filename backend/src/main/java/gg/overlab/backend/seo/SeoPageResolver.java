@@ -185,12 +185,14 @@ public class SeoPageResolver {
         try {
             MapDto map = mapService.getBySlug(slug);
             String path = "/maps/" + map.slug();
-            String description = map.name() + ": win, pick and ban rates of every Overwatch hero on this map.";
+            String modePart = map.mode() == null ? "" : " " + contentBuilder.modeLabel(map.mode());
+            String description = map.name() + " Overwatch" + modePart + " map: win, pick and ban rates of every hero"
+                    + " on it, plus the best and worst picks. Updated from Blizzard public data.";
             String imagePath = map.imageUrl() == null || map.imageUrl().isBlank()
                     || map.imageUrl().endsWith(".svg") || !map.imageUrl().startsWith("/") ? null : map.imageUrl();
             return Optional.of(new SeoPage(path, map.name() + " Overwatch map: hero win and pick rates", description,
                     "website", map.name(), List.of(breadcrumbs(path, map.name(), "/maps", "Maps")),
-                    contentBuilder.mapDetails(map.mode() == null ? null : map.mode().name()), imagePath));
+                    contentBuilder.mapDetails(map), imagePath));
         } catch (EntityNotFoundException exception) {
             return Optional.empty();
         }
