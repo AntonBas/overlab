@@ -33,6 +33,19 @@
 	@legacyPatches path /patches /patches/*
 	redir @legacyPatches /changes permanent
 
+	@trailingSlashWithQuery {
+		path_regexp trailingSlash ^(/.+)/$
+		not path /api/* /oauth2/* /login/oauth2/* /media/* /assets/*
+		expression {http.request.uri.query} != ""
+	}
+	redir @trailingSlashWithQuery {re.trailingSlash.1}?{http.request.uri.query} permanent
+
+	@trailingSlash {
+		path_regexp trailingSlash ^(/.+)/$
+		not path /api/* /oauth2/* /login/oauth2/* /media/* /assets/*
+	}
+	redir @trailingSlash {re.trailingSlash.1} permanent
+
 	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
 	handle @uploads {
 		request_body {
