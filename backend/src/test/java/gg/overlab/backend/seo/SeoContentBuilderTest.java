@@ -30,7 +30,12 @@ import gg.overlab.backend.stats.GameQueue;
 import gg.overlab.backend.stats.Platform;
 import gg.overlab.backend.stats.RankTier;
 import gg.overlab.backend.stats.Region;
+import gg.overlab.backend.patch.PatchService;
+import gg.overlab.backend.patch.dto.PatchDto;
+import gg.overlab.backend.stats.StatsHistoryService;
 import gg.overlab.backend.stats.StatsService;
+import gg.overlab.backend.stats.dto.HeroChangeDto;
+import gg.overlab.backend.stats.dto.StatsComparisonDto;
 import gg.overlab.backend.stats.dto.HeroStatDto;
 import gg.overlab.backend.stats.dto.StatsSnapshotDto;
 import java.math.BigDecimal;
@@ -47,9 +52,11 @@ class SeoContentBuilderTest {
     private final HeroRelationService relationService = mock(HeroRelationService.class);
     private final StatsService statsService = mock(StatsService.class);
     private final GuideService guideService = mock(GuideService.class);
+    private final StatsHistoryService historyService = mock(StatsHistoryService.class);
+    private final PatchService patchService = mock(PatchService.class);
     private final SeoContentBuilder builder =
             new SeoContentBuilder(heroService, mapService, abilityService, perkService, relationService,
-                    statsService, guideService);
+                    new SeoStatsContent(statsService, historyService, patchService), guideService);
 
     private HeroDto hero() {
         return new HeroDto("ana", "Ana", HeroRole.SUPPORT, "tactician", "d",
@@ -126,7 +133,7 @@ class SeoContentBuilderTest {
 
         assertThat(section.heading()).isEqualTo("Ana statistics");
         assertThat(section.items().getFirst().text()).isEqualTo(
-                "Ana in Competitive, all ranks: 46.5% win rate, 32.4% pick rate, 11.9% ban rate.");
+                "Ana in Competitive, all ranks, PC, Europe: 46.5% win rate, 32.4% pick rate, 11.9% ban rate.");
     }
 
     @Test
@@ -137,9 +144,11 @@ class SeoContentBuilderTest {
 
         List<SeoSection> sections = builder.statsOverview();
 
-        assertThat(sections).extracting(SeoSection::heading).contains("Highest win rate in Competitive",
-                "Most picked heroes", "Most banned heroes");
-        SeoSection highest = sections.stream().filter(section -> section.heading().startsWith("Highest")).findFirst()
+        assertThat(sections).extracting(SeoSection::heading).contains("About these numbers", "Most picked heroes", "Most banned heroes");
+        assertThat(sections).extracting(SeoSection::heading).anyMatch(heading -> heading.startsWith("Highest win rate"));
+        assertThat(sections).extracting(SeoSection::heading).contains(
+                "Most picked heroes");
+        SeoSection highest = sections.stream().filter(section -> section.heading().startsWith("Highest win rate (")).findFirst()
                 .orElseThrow();
         assertThat(highest.items().getFirst().path()).isEqualTo("/heroes/genji");
         assertThat(sections.getLast().items()).hasSize(3);
@@ -177,6 +186,65 @@ class SeoContentBuilderTest {
         assertThat(builder.mapDetails(new MapDto("x", "X", MapMode.PUSH, null))).extracting(SeoSection::heading)
                 .containsExactly("Game mode");
         assertThat(builder.mapDetails(new MapDto("x", "X", null, null))).isEmpty();
+    }
+
+    @Test
+    void listsTheBiggestWinRateMovesAfterTheLatestPatch() {
+        PatchDto patch = new PatchDto(1L, "7.1", "7-1", "Season 7", 7, Instant.now(), null);
+        when(patchService.findAll()).thenReturn(List.of(patch));
+        HeroChangeDto up = change("genji", "Genji", "50.0", "53.0", "3.0", "10.0");
+        HeroChangeDto down = change("ana", "Ana", "50.0", "47.0", "-3.0", "10.0");
+        HeroChangeDto rare = change("venture", "Venture", "40.0", "60.0", "20.0", "1.0");
+        when(historyService.compareAroundPatch(any(), eq("7-1"))).thenReturn(new StatsComparisonDto(Instant.now(),
+                Instant.now(), GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE,
+                List.of(up, down, rare)));
+        when(heroService.findAll()).thenReturn(List.of(hero()));
+
+        List<SeoSection> sections = builder.changesOverview();
+
+        assertThat(sections).extracting(SeoSection::heading).contains("Biggest win rate gains after Season 7",
+                "Biggest win rate drops after Season 7");
+        assertThat(sections.get(1).items()).extracting(SeoItem::text)
+                .containsExactly("Genji: 50.0% to 53.0% win rate (+3.0)");
+        assertThat(sections.get(2).items()).extracting(SeoItem::text)
+                .containsExactly("Ana: 50.0% to 47.0% win rate (-3.0)");
+    }
+
+    @Test
+    void keepsTheChangesPageStaticWithoutPatchesOrSnapshots() {
+        when(heroService.findAll()).thenReturn(List.of(hero()));
+        when(patchService.findAll()).thenReturn(List.of());
+
+        assertThat(builder.changesOverview()).extracting(SeoSection::heading).containsExactly("What changed", "Heroes");
+
+        when(patchService.findAll()).thenReturn(List.of(new PatchDto(1L, "7.1", "7-1", null, 7, Instant.now(), null)));
+        when(historyService.compareAroundPatch(any(), eq("7-1")))
+                .thenThrow(new EntityNotFoundException("Statistics snapshot", "x"));
+
+        assertThat(builder.changesOverview()).extracting(SeoSection::heading).containsExactly("What changed", "Heroes");
+    }
+
+    @Test
+    void summarisesPerksAndCountersAtTheTopOfTheirPages() {
+        when(perkService.findByHero("ana")).thenReturn(List.of(
+                new PerkDto(1L, "ana", "Sharp Eye", "Better aim", PerkSlot.MINOR, PerkPosition.LEFT,
+                        PerkRecommendation.RECOMMENDED, null, null, false),
+                new PerkDto(2L, "ana", "Big Dart", "More damage", PerkSlot.MAJOR, PerkPosition.LEFT,
+                        PerkRecommendation.OPTIONAL, null, null, false)));
+        when(relationService.getCounters("ana")).thenReturn(new HeroCountersDto(
+                List.of(new RelatedHeroDto("doomfist", "Doomfist", HeroRole.DAMAGE, null, null)), List.of()));
+        when(relationService.getSynergies("ana")).thenReturn(List.of());
+
+        assertThat(builder.heroPerks(hero()).getFirst().items().getFirst().text())
+                .isEqualTo("Ana has 2 perks: 1 Minor and 1 Major. Recommended: Sharp Eye.");
+        assertThat(builder.heroCounters(hero()).getFirst().items().getFirst().text())
+                .isEqualTo("Ana counters and synergies, curated by Overlab: Heroes Ana is strong against (1).");
+    }
+
+    private HeroChangeDto change(String slug, String name, String before, String after, String change,
+                                 String pickAfter) {
+        return new HeroChangeDto(slug, name, HeroRole.SUPPORT, new BigDecimal(before), new BigDecimal(after),
+                new BigDecimal(change), null, new BigDecimal(pickAfter), null, null, null, null, null, null);
     }
 
     @Test
