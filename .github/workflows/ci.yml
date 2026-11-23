@@ -112,6 +112,17 @@ jobs:
           JWT_SECRET: ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci
           GRAFANA_ADMIN_PASSWORD: ci
         run: docker compose up -d --build --wait postgres redis backend edge
+      - name: Check the crawler-facing edge rules
+        run: |
+          base=http://localhost:5173
+          robots=$(curl -fsS "$base/robots.txt")
+          echo "$robots" | grep -qx 'Disallow: /me\$'
+          echo "$robots" | grep -qx 'Disallow: /me/'
+          if echo "$robots" | grep -qx 'Disallow: /me'; then exit 1; fi
+          test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/stats")" = "301 $base/"
+          test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/stats?tier=emerald")" = "301 $base/?tier=emerald"
+          test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/patches")" = "301 $base/changes"
+          curl -fsS -A "Googlebot/2.1" "$base/" | grep -q '<h1>Hero statistics</h1>'
       - name: Audit the pages that do not need collected statistics
         run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.preview.json
       - name: Show the stack logs when the audit fails
