@@ -36,7 +36,7 @@ public class SeoHtmlRenderer {
             meta(html, "property", "og:image:width", "1200");
             meta(html, "property", "og:image:height", "630");
         }
-        meta(html, "name", "twitter:card", "summary_large_image");
+        meta(html, "name", "twitter:card", page.squareImage() ? "summary" : "summary_large_image");
         meta(html, "name", "twitter:title", title);
         meta(html, "name", "twitter:description", page.description());
         meta(html, "name", "twitter:image", image);

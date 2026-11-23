@@ -25,6 +25,18 @@ class SeoHtmlRendererTest {
     }
 
     @Test
+    void usesTheSquareImageWithASummaryCard() {
+        SeoPage page = new SeoPage("/heroes/ana", "Ana", "d", "website", "Ana", List.of(), List.of(),
+                "/media/heroes/ana.webp", true);
+
+        String html = renderer.render(page);
+
+        assertThat(html).contains("property=\"og:image\" content=\"https://example.com/media/heroes/ana.webp\"",
+                "name=\"twitter:card\" content=\"summary\"");
+        assertThat(html).doesNotContain("summary_large_image");
+    }
+
+    @Test
     void homePageKeepsPlainSiteTitleAndRootCanonical() {
         String html = renderer.render(new SeoPage("/", "Overlab", "d", "website", "Overlab", List.of(), List.of()));
 
