@@ -15,6 +15,12 @@
 	@notSvgMedia not path /media/*.svg
 	header @notSvgMedia Content-Security-Policy "default-src 'self'; script-src 'self' https://cloud.umami.is; style-src 'self'; img-src 'self' data: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://cloud.umami.is https://gateway.umami.is https://*.ingest.de.sentry.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
+	@home path /
+	redir @home /stats permanent
+
+	@legacyPatches path /patches /patches/*
+	redir @legacyPatches /changes permanent
+
 	@uploads path /api/admin/maps/*/image /api/admin/perks/*/icon
 	handle @uploads {
 		request_body {
@@ -37,7 +43,8 @@
 			Disallow: /admin
 			Disallow: /feedback
 			Disallow: /api/
-			Disallow: /me
+			Disallow: /me$
+			Disallow: /me/
 			Disallow: /login
 			Disallow: /register
 			Disallow: /confirm-deletion
@@ -169,7 +176,7 @@
 		file_server
 	}
 
-	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps|guides)|counters|perks|changes|patches(/.*)?|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
+	@appRoute path_regexp ^/(|stats|heroes|heroes/[^/]+|heroes/[^/]+/(perks|counters|maps|guides)|counters|perks|changes|maps|maps/[^/]+|maps/[^/]+/[^/]+|guides|guides/[^/]+|feedback|business|privacy|terms|cookies|me|me/settings|confirm-deletion|login|register|verify-email|forgot-password|reset-password|admin(/.*)?)/?$
 	handle @appRoute {
 		rewrite * /index.html
 		file_server
