@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HeroPortrait } from "../../../components/ui/HeroPortrait";
 import { RoleBadge } from "../../../components/ui/RoleBadge";
@@ -10,6 +9,11 @@ import type { RelationFeedback } from "../hooks/useRelationFeedback";
 import { ROLE_LABELS } from "../../../utils/format";
 import { CATEGORY_GROUP_LABELS, categoryStyleOf } from "../utils/categoryStyle";
 import { splitRelationNote } from "../utils/relationNote";
+import {
+  countersPath,
+  relationPath,
+  type RelationTabId,
+} from "../utils/relationPaths";
 import { RelationVoteButtons } from "./RelationVoteButtons";
 
 export interface RelatedGroup {
@@ -18,6 +22,9 @@ export interface RelatedGroup {
 }
 
 interface RelatedHeroesProps {
+  heroSlug: string;
+  tab: RelationTabId;
+  selectedSlug?: string;
   heroes: RelatedHero[];
   groups?: RelatedGroup[];
   type: RelationKind;
@@ -81,7 +88,7 @@ function GroupDetail({ group }: { group: RelatedGroup }) {
                 "relation-detail__member",
                 `relation-detail__member--${member.role.toLowerCase()}`,
               )}
-              to={`/heroes/${member.slug}`}
+              to={countersPath(member.slug)}
             >
               <HeroPortrait
                 name={member.name}
@@ -100,20 +107,19 @@ function GroupDetail({ group }: { group: RelatedGroup }) {
 const NO_GROUPS: RelatedGroup[] = [];
 
 export function RelatedHeroes({
+  heroSlug,
+  tab,
+  selectedSlug,
   heroes,
   groups = NO_GROUPS,
   type,
   feedback,
 }: RelatedHeroesProps) {
-  const [selectedKey, setSelectedKey] = useState(
-    heroes[0] ? `hero:${heroes[0].slug}` : `group:${groups[0]?.category.slug}`,
-  );
-  const selectedHero = heroes.find(
-    (hero) => `hero:${hero.slug}` === selectedKey,
-  );
-  const selectedGroup = groups.find(
-    (group) => `group:${group.category.slug}` === selectedKey,
-  );
+  const selectedHero = heroes.find((hero) => hero.slug === selectedSlug);
+  const selectedGroup = selectedHero
+    ? undefined
+    : (groups.find((group) => group.category.slug === selectedSlug) ??
+      (heroes.length === 0 ? groups[0] : undefined));
   const hero = selectedGroup ? undefined : (selectedHero ?? heroes[0]);
   if (!hero && !selectedGroup) {
     return null;
@@ -128,20 +134,20 @@ export function RelatedHeroes({
           )}
           <ul className="related-heroes__tiles">
             {groups.map((group) => {
-              const key = `group:${group.category.slug}`;
+              const active =
+                group.category.slug === selectedGroup?.category.slug;
               const { icon: Icon, group: styleGroup } = categoryStyleOf(
                 group.category.slug,
               );
               return (
-                <li key={key}>
-                  <button
-                    type="button"
+                <li key={group.category.slug}>
+                  <Link
                     className={clsx("related-tile", "related-tile--group", {
-                      "related-tile--active": key === selectedKey,
+                      "related-tile--active": active,
                     })}
                     data-group={styleGroup}
-                    aria-pressed={key === selectedKey}
-                    onClick={() => setSelectedKey(key)}
+                    aria-current={active ? "true" : undefined}
+                    to={relationPath(heroSlug, tab, group.category.slug)}
                   >
                     <span className="category-icon category-icon--tile">
                       <Icon
@@ -158,7 +164,7 @@ export function RelatedHeroes({
                     <span className="related-tile__kind">
                       {CATEGORY_GROUP_LABELS[styleGroup]}
                     </span>
-                  </button>
+                  </Link>
                 </li>
               );
             })}
@@ -172,19 +178,17 @@ export function RelatedHeroes({
           )}
           <ul className="related-heroes__tiles">
             {heroes.map((entry) => {
-              const key = `hero:${entry.slug}`;
               const active = hero ? entry.slug === hero.slug : false;
               return (
-                <li key={key}>
-                  <button
-                    type="button"
+                <li key={entry.slug}>
+                  <Link
                     className={clsx(
                       "related-tile",
                       `related-tile--${entry.role.toLowerCase()}`,
                       { "related-tile--active": active },
                     )}
-                    aria-pressed={active}
-                    onClick={() => setSelectedKey(key)}
+                    aria-current={active ? "true" : undefined}
+                    to={relationPath(heroSlug, tab, entry.slug)}
                   >
                     <HeroPortrait
                       name={entry.name}
@@ -195,7 +199,7 @@ export function RelatedHeroes({
                     <span className="related-tile__kind">
                       {ROLE_LABELS[entry.role]}
                     </span>
-                  </button>
+                  </Link>
                 </li>
               );
             })}
@@ -215,7 +219,10 @@ export function RelatedHeroes({
           <div className="relation-detail__header">
             <HeroPortrait name={hero.name} url={hero.portraitUrl} size={40} />
             <RoleBadge role={hero.role} compact />
-            <Link className="relation-detail__name" to={`/heroes/${hero.slug}`}>
+            <Link
+              className="relation-detail__name"
+              to={countersPath(hero.slug)}
+            >
               {hero.name}
             </Link>
             {feedback && (

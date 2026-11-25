@@ -16,8 +16,10 @@ import type {
   RelatedHero,
 } from "../../../types/hero";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
+import { relationPath, type RelationTabId } from "../utils/relationPaths";
 
 interface RelationsOverviewProps {
+  heroSlug: string;
   heroName: string;
   strongAgainst: RelatedHero[];
   counteredBy: RelatedHero[];
@@ -28,7 +30,7 @@ interface RelationsOverviewProps {
 }
 
 interface OverviewRow {
-  key: string;
+  key: RelationTabId;
   label: string;
   groups: { category: HeroCategory; matchup: CategoryMatchup }[];
   heroes: RelatedHero[];
@@ -36,7 +38,7 @@ interface OverviewRow {
 
 const HEROES_PER_ROW = 6;
 
-const ROW_ICONS: Record<string, LucideIcon> = {
+const ROW_ICONS: Record<RelationTabId, LucideIcon> = {
   strong: TrendingUp,
   struggles: TrendingDown,
   synergies: Handshake,
@@ -45,6 +47,7 @@ const NO_CATEGORIES: HeroCategory[] = [];
 const NO_MATCHUPS: CategoryMatchup[] = [];
 
 export function RelationsOverview({
+  heroSlug,
   heroName,
   strongAgainst,
   counteredBy,
@@ -58,7 +61,7 @@ export function RelationsOverview({
   );
 
   function buildRow(
-    key: string,
+    key: RelationTabId,
     label: string,
     type: CategoryMatchupType,
     heroes: RelatedHero[],
@@ -124,7 +127,7 @@ export function RelationsOverview({
                     key={group.category.slug}
                     category={group.category}
                     matchup={group.matchup}
-                    to={moreHref}
+                    to={relationPath(heroSlug, row.key, group.category.slug)}
                   />
                 ))}
                 {row.groups.length > 0 && row.heroes.length > 0 && (
@@ -140,7 +143,7 @@ export function RelationsOverview({
                       "relation-avatar",
                       `relation-avatar--${hero.role.toLowerCase()}`,
                     )}
-                    to={`/heroes/${hero.slug}`}
+                    to={relationPath(heroSlug, row.key, hero.slug)}
                     title={hero.name}
                   >
                     <span className="relation-avatar__image">
@@ -154,7 +157,10 @@ export function RelationsOverview({
                   </Link>
                 ))}
                 {hidden > 0 && (
-                  <Link className="relations-overview__more" to={moreHref}>
+                  <Link
+                    className="relations-overview__more"
+                    to={relationPath(heroSlug, row.key)}
+                  >
                     +{hidden}
                   </Link>
                 )}

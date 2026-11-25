@@ -20,6 +20,7 @@ describe("RelationsOverview", () => {
     render(
       <MemoryRouter>
         <RelationsOverview
+          heroSlug="mauga"
           heroName="Mauga"
           strongAgainst={many}
           counteredBy={[]}
@@ -35,7 +36,11 @@ describe("RelationsOverview", () => {
     expect(screen.queryByText("Hero 6")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "+3" })).toHaveAttribute(
       "href",
-      "/heroes/mauga/counters",
+      "/heroes/mauga/counters/strong-against",
+    );
+    expect(screen.getByRole("link", { name: /Hero 0/ })).toHaveAttribute(
+      "href",
+      "/heroes/mauga/counters/strong-against/hero-0",
     );
     expect(screen.getByRole("link", { name: "All counters" })).toHaveAttribute(
       "href",

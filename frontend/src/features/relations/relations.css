@@ -348,6 +348,7 @@
 
 .related-tile {
   --tile-role: var(--border);
+  text-decoration: none;
   display: grid;
   justify-items: center;
   gap: var(--space-6);
