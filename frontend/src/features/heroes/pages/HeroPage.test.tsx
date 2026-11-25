@@ -154,9 +154,7 @@ describe("HeroPage", () => {
     expect(await screen.findByText("relation tabs")).toBeInTheDocument();
     expect(await screen.findByText("map picks")).toBeInTheDocument();
     expect(await screen.findByText("spots")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Abilities" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abilities" })).toBeInTheDocument();
   });
 
   it("explains when no statistics were collected for the hero", async () => {

@@ -11,11 +11,17 @@ import { RelationVoteButtons } from "./RelationVoteButtons";
 
 interface RelationAvatarProps {
   hero: RelatedHero;
+  to: string;
   type: RelationKind;
   feedback: RelationFeedback;
 }
 
-export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
+export function RelationAvatar({
+  hero,
+  to,
+  type,
+  feedback,
+}: RelationAvatarProps) {
   return (
     <li>
       <Tooltip
@@ -53,7 +59,7 @@ export function RelationAvatar({ hero, type, feedback }: RelationAvatarProps) {
               "relation-avatar",
               `relation-avatar--${hero.role.toLowerCase()}`,
             )}
-            to={`/heroes/${hero.slug}`}
+            to={to}
             title={hero.name}
             aria-describedby={describedBy}
           >

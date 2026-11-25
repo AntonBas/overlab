@@ -189,7 +189,7 @@ describe("CountersPage", () => {
     renderPage();
     await screen.findAllByText("Strong against");
 
-    const chip = screen.getByRole("button", { name: /Dive/ });
+    const chip = screen.getByRole("link", { name: /Dive/ });
     expect(chip).toHaveTextContent("2");
     fireEvent.mouseEnter(chip.parentElement as Element);
 
@@ -204,7 +204,7 @@ describe("CountersPage", () => {
     renderPage();
     await screen.findAllByText("Strong against");
 
-    const chip = screen.getByRole("button", { name: /Dive/ });
+    const chip = screen.getByRole("link", { name: /Dive/ });
     chip.focus();
     const popover = await screen.findByRole("dialog");
 

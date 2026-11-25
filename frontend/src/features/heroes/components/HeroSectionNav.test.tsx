@@ -46,10 +46,10 @@ describe("HeroSectionNav", () => {
     expect(nav).toHaveTextContent("Ana");
   });
 
-  it("lists the sections as buttons", () => {
+  it("lists the sections as links", () => {
     pretendNavIsAt(500);
     renderWithRouter(<HeroSectionNav sections={sections} hero={hero} />);
 
-    expect(screen.getByRole("button", { name: "Maps" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Maps" })).toBeInTheDocument();
   });
 });

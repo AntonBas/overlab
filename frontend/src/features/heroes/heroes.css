@@ -191,6 +191,7 @@
 }
 
 .section-nav__link {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   min-height: var(--control-height-sm);

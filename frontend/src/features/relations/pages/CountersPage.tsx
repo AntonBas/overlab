@@ -31,23 +31,27 @@ import {
   useRelationVotes,
 } from "../hooks/useRelationFeedback";
 import { withoutCoveredHeroes } from "../utils/categoryCoverage";
+import { relationPath } from "../utils/relationPaths";
 import { staticSeoPage } from "../../../utils/staticSeoPages";
 
 const COLUMNS = [
   {
     key: "counters",
+    tab: "strong",
     label: "Strong against",
     matchupType: "STRONG_AGAINST",
     relationKind: "COUNTER",
   },
   {
     key: "counteredBy",
+    tab: "struggles",
     label: "Struggles against",
     matchupType: "WEAK_AGAINST",
     relationKind: "COUNTER",
   },
   {
     key: "synergies",
+    tab: "synergies",
     label: "Works well with",
     matchupType: "WORKS_WITH",
     relationKind: "SYNERGY",
@@ -231,6 +235,11 @@ export function CountersPage() {
                                   <CategoryAvatar
                                     category={category}
                                     matchup={matchup}
+                                    to={relationPath(
+                                      hero.slug,
+                                      column.tab,
+                                      category.slug,
+                                    )}
                                   />
                                 </li>
                               ) : null;
@@ -239,6 +248,11 @@ export function CountersPage() {
                               <RelationAvatar
                                 key={relatedHero.slug}
                                 hero={relatedHero}
+                                to={relationPath(
+                                  hero.slug,
+                                  column.tab,
+                                  relatedHero.slug,
+                                )}
                                 type={column.relationKind}
                                 feedback={bindRelationFeedback(
                                   relationVotes,

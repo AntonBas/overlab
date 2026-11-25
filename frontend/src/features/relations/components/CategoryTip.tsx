@@ -7,6 +7,7 @@ import type {
 } from "../../../types/hero";
 import { AbilityText } from "../../abilities";
 import { CATEGORY_GROUP_LABELS, categoryStyleOf } from "../utils/categoryStyle";
+import { countersPath } from "../utils/relationPaths";
 
 const MATCHUP_LABELS: Record<CategoryMatchupType, string> = {
   STRONG_AGAINST: "Strong against",
@@ -83,7 +84,7 @@ export function CategoryTip({ category, matchup }: CategoryTipProps) {
           <Link
             key={hero.slug}
             className={`category-tip__hero category-tip__hero--${hero.role.toLowerCase()}`}
-            to={`/heroes/${hero.slug}`}
+            to={countersPath(hero.slug)}
           >
             <HeroPortrait name={hero.name} url={hero.portraitUrl} size={24} />
             {hero.name}
