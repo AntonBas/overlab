@@ -159,6 +159,25 @@ public class SeoContentBuilder {
         return sections;
     }
 
+    List<SeoSection> heroCounterTab(HeroDto hero, String tab) {
+        List<SeoSection> sections = new ArrayList<>();
+        switch (tab) {
+            case "strong-against" -> add(sections, "Heroes " + hero.name() + " is strong against",
+                    relatedItems(relationService.getCounters(hero.slug()).counters()));
+            case "struggles-against" -> add(sections, "Heroes that counter " + hero.name(),
+                    relatedItems(relationService.getCounters(hero.slug()).counteredBy()));
+            default -> add(sections, "Heroes that work well with " + hero.name(),
+                    relatedItems(relationService.getSynergies(hero.slug())));
+        }
+        if (sections.isEmpty()) {
+            return sections;
+        }
+        add(sections, "More about " + hero.name(), List.of(
+                SeoItem.link(hero.name() + " counters and synergies", "/heroes/" + hero.slug() + "/counters"),
+                SeoItem.link(hero.name() + " stats, perks and best maps", "/heroes/" + hero.slug())));
+        return sections;
+    }
+
     List<SeoSection> heroMaps(HeroDto hero) {
         List<SeoSection> sections = new ArrayList<>(statsContent.heroMapRankings(hero));
         if (sections.isEmpty()) {
