@@ -73,6 +73,8 @@ describe("accessibility", () => {
           ]}
         />
         <RelatedHeroes
+          heroSlug="ana"
+          tab="strong"
           type="COUNTER"
           heroes={[
             {

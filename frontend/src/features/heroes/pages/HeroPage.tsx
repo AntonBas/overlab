@@ -251,6 +251,7 @@ export function HeroPage() {
       {hasRelations && counters.data && synergies.data && (
         <div id="hero-counters">
           <RelationsOverview
+            heroSlug={slug}
             strongAgainst={counters.data.counters}
             counteredBy={counters.data.counteredBy}
             synergies={synergies.data}

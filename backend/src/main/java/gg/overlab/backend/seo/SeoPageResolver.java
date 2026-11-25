@@ -6,6 +6,7 @@ import gg.overlab.backend.gamemap.dto.MapDto;
 import gg.overlab.backend.guide.GuideService;
 import gg.overlab.backend.guide.dto.GuideDto;
 import gg.overlab.backend.hero.HeroService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -19,7 +20,8 @@ public class SeoPageResolver {
 
     private static final int MAX_DESCRIPTION_LENGTH = 160;
     private static final Pattern PAGE_PATH =
-            Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)(?:/(perks|counters|maps|guides))?$");
+            Pattern.compile("^/(heroes|maps|guides)/([A-Za-z0-9-]+)(?:/(perks|counters|maps|guides)"
+                    + "(?:/(strong-against|struggles-against|synergies)(?:/[A-Za-z0-9-]+)?)?)?$");
 
     private final HeroService heroService;
     private final MapService mapService;
@@ -55,9 +57,12 @@ public class SeoPageResolver {
         }
         String section = matcher.group(1);
         String key = matcher.group(2);
+        if (matcher.group(4) != null && !"counters".equals(matcher.group(3))) {
+            return Optional.empty();
+        }
         if (matcher.group(3) != null) {
             return switch (section) {
-                case "heroes" -> heroSubPage(key, matcher.group(3));
+                case "heroes" -> heroSubPage(key, matcher.group(3), matcher.group(4));
                 case "maps" -> "guides".equals(matcher.group(3)) ? mapGuidesPage(key) : Optional.empty();
                 default -> Optional.empty();
             };
@@ -113,30 +118,35 @@ public class SeoPageResolver {
         });
     }
 
-    private Optional<SeoPage> heroSubPage(String slug, String kind) {
+    private Optional<SeoPage> heroSubPage(String slug, String kind, String counterTab) {
         return heroService.findAll().stream().filter(hero -> hero.slug().equals(slug)).findFirst().flatMap(hero -> {
             List<SeoSection> sections = switch (kind) {
                 case "perks" -> contentBuilder.heroPerks(hero);
-                case "counters" -> contentBuilder.heroCounters(hero);
+                case "counters" -> counterTab == null
+                        ? contentBuilder.heroCounters(hero)
+                        : contentBuilder.heroCounterTab(hero, counterTab);
                 case "guides" -> contentBuilder.heroGuides(hero);
                 default -> contentBuilder.heroMaps(hero);
             };
             if (sections.isEmpty()) {
                 return Optional.<SeoPage>empty();
             }
-            String path = "/heroes/" + hero.slug() + "/" + kind;
+            String path = "/heroes/" + hero.slug() + "/" + kind + (counterTab == null ? "" : "/" + counterTab);
             String name = hero.name();
             String title = switch (kind) {
                 case "perks" -> name + " perks: best Minor and Major perks";
-                case "counters" -> name + " counters and synergies";
+                case "counters" -> counterTab == null ? name + " counters and synergies"
+                        : counterTabTitle(name, counterTab);
                 case "guides" -> name + " guides: spots, setups and tips";
                 default -> "Best and worst maps for " + name;
             };
             String description = switch (kind) {
                 case "perks" -> "Best Overwatch " + name + " perks: every Minor and Major perk with a description,"
                         + " a rating and why it is worth taking.";
-                case "counters" -> "Overwatch " + name + " counters: the heroes " + name + " is strong against,"
-                        + " the heroes that counter " + name + " and who works well with " + name + ".";
+                case "counters" -> counterTab == null
+                        ? "Overwatch " + name + " counters: the heroes " + name + " is strong against,"
+                        + " the heroes that counter " + name + " and who works well with " + name + "."
+                        : counterTabDescription(name, counterTab);
                 case "guides" -> "Overwatch " + name + " video guides: spots, setups, ultimates and tips for every"
                         + " map.";
                 default -> "Best and worst Overwatch maps for " + name + ": win and pick rate on every map"
@@ -144,7 +154,8 @@ public class SeoPageResolver {
             };
             String heading = switch (kind) {
                 case "perks" -> name + " perks";
-                case "counters" -> name + " counters and synergies";
+                case "counters" -> counterTab == null ? name + " counters and synergies"
+                        : counterTabTitle(name, counterTab);
                 case "guides" -> name + " guides";
                 default -> name + " maps";
             };
@@ -154,13 +165,37 @@ public class SeoPageResolver {
                 case "guides" -> "Guides";
                 default -> "Maps";
             };
+            List<String[]> crumbs = new ArrayList<>(List.of(new String[] {SITE_NAME, "/"},
+                    new String[] {"Heroes", "/heroes"},
+                    new String[] {name, "/heroes/" + hero.slug()}));
+            if (counterTab == null) {
+                crumbs.add(new String[] {crumb, path});
+            } else {
+                crumbs.add(new String[] {crumb, "/heroes/" + hero.slug() + "/counters"});
+                crumbs.add(new String[] {counterTabTitle(name, counterTab), path});
+            }
             return Optional.of(new SeoPage(path, title, plain(description), "website", heading,
-                    List.of(breadcrumbList(List.of(new String[] {SITE_NAME, "/"},
-                            new String[] {"Heroes", "/heroes"},
-                            new String[] {name, "/heroes/" + hero.slug()},
-                            new String[] {crumb, path}))),
+                    List.of(breadcrumbList(crumbs)),
                     sections, imagePath(hero.portraitUrl()), imagePath(hero.portraitUrl()) != null));
         });
+    }
+
+    private static String counterTabTitle(String name, String counterTab) {
+        return switch (counterTab) {
+            case "strong-against" -> "Heroes " + name + " is strong against";
+            case "struggles-against" -> "Heroes that counter " + name;
+            default -> name + " synergies";
+        };
+    }
+
+    private static String counterTabDescription(String name, String counterTab) {
+        return switch (counterTab) {
+            case "strong-against" -> "Overwatch " + name + " counters: the heroes " + name + " is strong against"
+                    + " and why.";
+            case "struggles-against" -> "Overwatch heroes that counter " + name + ": who " + name + " struggles"
+                    + " against and why.";
+            default -> "Overwatch " + name + " synergies: the heroes that work well with " + name + " and why.";
+        };
     }
 
     private Optional<SeoPage> mapGuidesPage(String slug) {

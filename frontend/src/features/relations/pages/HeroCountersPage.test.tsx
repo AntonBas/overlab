@@ -39,7 +39,10 @@ const mauga = {
 function renderPage() {
   return renderWithRouter(
     <Routes>
-      <Route path="/heroes/:slug/counters" element={<HeroCountersPage />} />
+      <Route
+        path="/heroes/:slug/counters/:tab?/:related?"
+        element={<HeroCountersPage />}
+      />
     </Routes>,
     "/heroes/mauga/counters",
   );

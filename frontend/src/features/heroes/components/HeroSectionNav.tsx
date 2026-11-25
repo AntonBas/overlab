@@ -108,14 +108,15 @@ export function HeroSectionNav({ sections, hero }: HeroSectionNavProps) {
         </span>
       )}
       {sections.map((section) => (
-        <button
+        <a
           key={section.id}
-          type="button"
+          href={`#${section.id.replace("hero-", "")}`}
           className={clsx("section-nav__link", {
             "section-nav__link--active": activeId === section.id,
           })}
           aria-current={activeId === section.id ? "true" : undefined}
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             releaseHold.current?.();
             releaseHold.current = null;
             const url = new URL(window.location.href);
@@ -126,7 +127,7 @@ export function HeroSectionNav({ sections, hero }: HeroSectionNavProps) {
           }}
         >
           {section.label}
-        </button>
+        </a>
       ))}
     </nav>
   );

@@ -187,7 +187,10 @@ export function AppRoutes() {
         <Route path="heroes" element={<HeroesPage />} />
         <Route path="heroes/:slug" element={<HeroPage />} />
         <Route path="counters" element={<CountersPage />} />
-        <Route path="heroes/:slug/counters" element={<HeroCountersPage />} />
+        <Route
+          path="heroes/:slug/counters/:tab?/:related?"
+          element={<HeroCountersPage />}
+        />
         <Route path="heroes/:slug/maps" element={<HeroMapsPage />} />
         <Route path="perks" element={<PerksPage />} />
         <Route path="heroes/:slug/perks" element={<HeroPerksPage />} />

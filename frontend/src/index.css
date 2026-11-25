@@ -272,6 +272,7 @@ select:disabled {
 }
 
 .segmented__item {
+  text-decoration: none;
   display: inline-flex;
   flex: none;
   align-items: center;

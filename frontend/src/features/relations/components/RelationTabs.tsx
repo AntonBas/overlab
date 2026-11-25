@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useId, type KeyboardEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import type {
   CategoryMatchup,
   CategoryMatchupType,
@@ -8,9 +8,12 @@ import type {
   RelatedHero,
 } from "../../../types/hero";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
+import {
+  relationPath,
+  relationTabIdOf,
+  type RelationTabId,
+} from "../utils/relationPaths";
 import { RelatedHeroes } from "./RelatedHeroes";
-
-type RelationTabId = "strong" | "struggles" | "synergies";
 
 interface RelationTab {
   id: RelationTabId;
@@ -20,6 +23,7 @@ interface RelationTab {
 }
 
 interface RelationTabsProps {
+  heroSlug: string;
   strongAgainst: RelatedHero[];
   counteredBy: RelatedHero[];
   synergies: RelatedHero[];
@@ -41,6 +45,7 @@ const NO_MATCHUPS: CategoryMatchup[] = [];
 const NO_CATEGORIES: HeroCategory[] = [];
 
 export function RelationTabs({
+  heroSlug,
   strongAgainst,
   counteredBy,
   synergies,
@@ -52,7 +57,8 @@ export function RelationTabs({
   showHeading = true,
 }: RelationTabsProps) {
   const baseId = useId();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { tab: requestedTab, related: requestedRelated } = useParams();
   const categoriesBySlug = new Map(
     categories.map((category) => [category.slug, category]),
   );
@@ -90,25 +96,14 @@ export function RelationTabs({
     return null;
   }
 
-  const requested = searchParams.get("tab");
+  const requested = relationTabIdOf(requestedTab);
   const active = tabs.find((tab) => tab.id === requested) ?? tabs[0];
-
-  function select(id: RelationTabId) {
-    setSearchParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        next.set("tab", id);
-        return next;
-      },
-      { replace: true },
-    );
-  }
 
   function move(event: KeyboardEvent, offset: number) {
     event.preventDefault();
     const index = tabs.findIndex((tab) => tab.id === active.id);
     const target = tabs[(index + offset + tabs.length) % tabs.length];
-    select(target.id);
+    navigate(relationPath(heroSlug, target.id));
     document.getElementById(`${baseId}-tab-${target.id}`)?.focus();
   }
 
@@ -137,10 +132,10 @@ export function RelationTabs({
         aria-label="Counters and synergies"
       >
         {tabs.map((tab) => (
-          <button
+          <Link
             key={tab.id}
             id={`${baseId}-tab-${tab.id}`}
-            type="button"
+            to={relationPath(heroSlug, tab.id)}
             role="tab"
             className={clsx("segmented__item", {
               "segmented__item--active": tab.id === active.id,
@@ -148,7 +143,6 @@ export function RelationTabs({
             aria-selected={tab.id === active.id}
             aria-controls={`${baseId}-panel`}
             tabIndex={tab.id === active.id ? 0 : -1}
-            onClick={() => select(tab.id)}
             onKeyDown={(event) => {
               if (event.key === "ArrowRight") {
                 move(event, 1);
@@ -161,7 +155,7 @@ export function RelationTabs({
             <span className="segmented__count">
               {tab.heroes.length + tab.matchups.length}
             </span>
-          </button>
+          </Link>
         ))}
       </div>
       <div
@@ -173,6 +167,9 @@ export function RelationTabs({
         {active.heroes.length + groups.length > 0 && (
           <RelatedHeroes
             key={active.id}
+            heroSlug={heroSlug}
+            tab={active.id}
+            selectedSlug={requestedRelated}
             heroes={active.heroes}
             groups={groups}
             type={active.id === "synergies" ? "SYNERGY" : "COUNTER"}
