@@ -30,7 +30,6 @@ import {
   bindRelationFeedback,
   useRelationVotes,
 } from "../hooks/useRelationFeedback";
-import { withoutCoveredHeroes } from "../utils/categoryCoverage";
 import { relationPath } from "../utils/relationPaths";
 import { staticSeoPage } from "../../../utils/staticSeoPages";
 
@@ -209,11 +208,7 @@ export function CountersPage() {
                     const categoryMatchups = (
                       matchupsByHero.get(hero.slug) ?? []
                     ).filter((matchup) => matchup.type === column.matchupType);
-                    const related = withoutCoveredHeroes(
-                      entry?.[column.key] ?? [],
-                      categoryMatchups,
-                      categoriesBySlug,
-                    );
+                    const related = entry?.[column.key] ?? [];
                     return (
                       <div
                         key={column.key}

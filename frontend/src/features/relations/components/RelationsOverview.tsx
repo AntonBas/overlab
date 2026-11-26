@@ -15,7 +15,6 @@ import type {
   HeroCategory,
   RelatedHero,
 } from "../../../types/hero";
-import { withoutCoveredHeroes } from "../utils/categoryCoverage";
 import { relationPath, type RelationTabId } from "../utils/relationPaths";
 
 interface RelationsOverviewProps {
@@ -77,7 +76,7 @@ export function RelationsOverview({
         const category = categoriesBySlug.get(matchup.categorySlug);
         return category ? [{ category, matchup }] : [];
       }),
-      heroes: withoutCoveredHeroes(heroes, matchups, categoriesBySlug),
+      heroes,
     };
   }
 

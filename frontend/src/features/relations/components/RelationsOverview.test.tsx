@@ -47,4 +47,48 @@ describe("RelationsOverview", () => {
       "/heroes/mauga/counters",
     );
   });
+
+  it("shows an individual hero even when a category of the row includes them", () => {
+    render(
+      <MemoryRouter>
+        <RelationsOverview
+          heroSlug="mauga"
+          heroName="Mauga"
+          strongAgainst={[]}
+          counteredBy={[hero(1)]}
+          synergies={[]}
+          categories={[
+            {
+              slug: "control",
+              name: "Crowd control",
+              description: null,
+              heroes: [
+                {
+                  slug: "hero-1",
+                  name: "Hero 1",
+                  role: "TANK",
+                  portraitUrl: null,
+                },
+              ],
+            },
+          ]}
+          categoryMatchups={[
+            {
+              heroSlug: "mauga",
+              categorySlug: "control",
+              type: "WEAK_AGAINST",
+              note: null,
+            },
+          ]}
+          moreHref="/heroes/mauga/counters"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(
+      document.querySelector(
+        'a.relation-avatar[href="/heroes/mauga/counters/struggles-against/hero-1"]',
+      ),
+    ).toBeInTheDocument();
+  });
 });
