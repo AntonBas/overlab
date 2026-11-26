@@ -186,6 +186,28 @@ describe("MapPage", () => {
     expect(screen.getByRole("table")).not.toHaveTextContent("Reinhardt");
   });
 
+  it("keeps the best picks on screen while the data for a chosen role is loading", async () => {
+    const rein = heroStat({
+      heroSlug: "rein",
+      heroName: "Reinhardt",
+      role: "TANK",
+      winRate: 53,
+      winRateDelta: 2,
+      pickRate: 20,
+    });
+    fetchStatsMock.mockResolvedValue(snapshot({ heroes: [rein] }));
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByRole("region", { name: "tank picks" });
+
+    fetchStatsMock.mockReturnValue(new Promise(() => undefined));
+    await user.click(screen.getByRole("button", { name: "Damage" }));
+
+    expect(
+      screen.getByRole("region", { name: "tank picks" }),
+    ).toBeInTheDocument();
+  });
+
   it("switches to the worst picks of the map", async () => {
     fetchStatsMock.mockResolvedValue(
       snapshot({
