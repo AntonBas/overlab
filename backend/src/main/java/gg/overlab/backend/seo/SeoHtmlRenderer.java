@@ -1,5 +1,6 @@
 package gg.overlab.backend.seo;
 
+import gg.overlab.backend.guide.GuideService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
@@ -9,9 +10,11 @@ public class SeoHtmlRenderer {
     private static final String DISCLAIMER =
             "Overlab is an unofficial fan site and is not affiliated with Blizzard Entertainment.";
     private final SiteUrl siteUrl;
+    private final GuideService guideService;
 
-    public SeoHtmlRenderer(SiteUrl siteUrl) {
+    public SeoHtmlRenderer(SiteUrl siteUrl, GuideService guideService) {
         this.siteUrl = siteUrl;
+        this.guideService = guideService;
     }
 
     public String render(SeoPage page) {
@@ -46,7 +49,10 @@ public class SeoHtmlRenderer {
                 .append("<p>").append(escape(page.description())).append("</p>\n");
         page.sections().forEach(section -> appendSection(html, section));
         html.append("<nav>\n");
-        StaticSeoPage.navigationPages().forEach(link -> html.append("<a href=\"")
+        boolean hasGuides = !guideService.findPublished(null, null).isEmpty();
+        StaticSeoPage.navigationPages().stream()
+                .filter(link -> hasGuides || !"/guides".equals(link.path()))
+                .forEach(link -> html.append("<a href=\"")
                 .append(escape(siteUrl.absolute(link.path()))).append("\">")
                 .append(escape(link.heading())).append("</a>\n"));
         return html.append("</nav>\n<p>").append(escape(DISCLAIMER)).append("</p>\n</body>\n</html>\n").toString();

@@ -1,13 +1,19 @@
 package gg.overlab.backend.seo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import gg.overlab.backend.guide.GuideService;
+import gg.overlab.backend.guide.dto.GuideDto;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class SeoHtmlRendererTest {
 
-    private final SeoHtmlRenderer renderer = new SeoHtmlRenderer(new SiteUrl("https://example.com/"));
+    private final GuideService guideService = mock(GuideService.class);
+    private final SeoHtmlRenderer renderer =
+            new SeoHtmlRenderer(new SiteUrl("https://example.com/"), guideService);
 
     @Test
     void rendersMetadataCanonicalAndStructuredData() {
@@ -22,6 +28,18 @@ class SeoHtmlRendererTest {
                 "name=\"twitter:card\" content=\"summary_large_image\"",
                 "<script type=\"application/ld+json\">{\"@type\":\"BreadcrumbList\"}</script>",
                 "not affiliated with Blizzard Entertainment");
+    }
+
+    @Test
+    void linksTheGuidesHubOnlyWhenThereArePublishedGuides() {
+        SeoPage page = new SeoPage("/maps/busan", "Busan", "d", "website", "Busan", List.of(), List.of());
+
+        assertThat(renderer.render(page)).doesNotContain("https://example.com/guides\"")
+                .contains("https://example.com/maps\"");
+
+        when(guideService.findPublished(null, null)).thenReturn(List.of(mock(GuideDto.class)));
+
+        assertThat(renderer.render(page)).contains("https://example.com/guides\"");
     }
 
     @Test

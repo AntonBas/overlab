@@ -97,14 +97,15 @@ class SeoContentBuilderTest {
         List<SeoSection> sections = builder.heroDetails(hero());
 
         assertThat(sections).extracting(SeoSection::heading).containsExactly("Strengths", "Weaknesses", "Abilities",
-                "Best Ana perks", "Heroes Ana is strong against");
+                "Ana perks", "Ana counters and synergies");
         assertThat(sections.get(0).items()).extracting(SeoItem::text)
                 .containsExactly("Heals from range", "Strong against doomfist");
         assertThat(sections.get(2).items().getFirst().text()).isEqualTo("Sleep Dart: Puts an reinhardt to sleep");
-        assertThat(sections.get(3).items().getFirst().text())
-                .isEqualTo("Minor perk: Sharp Eye (Recommended): Better aim Take it on ranged maps");
-        assertThat(sections.get(4).items().getFirst())
-                .isEqualTo(SeoItem.link("Doomfist: Stuns him", "/heroes/doomfist"));
+        assertThat(sections.get(3).items()).containsExactly(
+                SeoItem.plain("Ana has 1 perks: 1 Minor and 0 Major. Recommended: Sharp Eye."),
+                SeoItem.link("All Ana perks with descriptions", "/heroes/ana/perks"));
+        assertThat(sections.get(4).items()).containsExactly(SeoItem.plain("Strong against: Doomfist"),
+                SeoItem.link("All Ana counters and synergies with explanations", "/heroes/ana/counters"));
     }
 
     private HeroStatDto stat(String slug, String name, String win, String pick, String ban, String delta) {
@@ -113,12 +114,18 @@ class SeoContentBuilderTest {
                 null, false);
     }
 
+    private void stubNoMapStatistics() {
+        when(statsService.getHeroByMaps(any(), any(), any(), any(), any()))
+                .thenThrow(new EntityNotFoundException("Statistics", "x"));
+    }
+
     private void stubStatistics(HeroStatDto... heroes) {
         when(statsService.getStats(any(), any(), any(), eq(true))).thenReturn(new StatsSnapshotDto(Instant.now(),
                 GameQueue.COMPETITIVE, RankTier.ALL, "all-maps", Platform.PC, Region.EUROPE, List.of(heroes)));
     }
 
     private void stubNoStatistics() {
+        stubNoMapStatistics();
         when(statsService.getStats(any(), any(), any(), eq(true)))
                 .thenThrow(new EntityNotFoundException("Statistics", "x"));
     }
@@ -126,6 +133,7 @@ class SeoContentBuilderTest {
     @Test
     void addsCompetitiveRatesToTheHeroPage() {
         stubStatistics(stat("ana", "Ana", "46.5", "32.4", "11.9", null));
+        stubNoMapStatistics();
         when(relationService.getCounters("ana")).thenReturn(new HeroCountersDto(List.of(), List.of()));
         when(relationService.getSynergies("ana")).thenReturn(List.of());
 
