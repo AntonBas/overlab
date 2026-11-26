@@ -1,6 +1,7 @@
 import {
   CirclePlus,
   Crosshair,
+  Footprints,
   Hand,
   HeartOff,
   HeartPulse,
@@ -34,6 +35,7 @@ interface CategoryStyle {
 
 const CATEGORY_STYLES: Record<string, CategoryStyle> = {
   dive: { icon: Rocket, group: "playstyle" },
+  flank: { icon: Footprints, group: "playstyle" },
   brawl: { icon: Swords, group: "playstyle" },
   poke: { icon: Crosshair, group: "playstyle" },
   "tank-poke": { icon: ShieldAlert, group: "playstyle" },

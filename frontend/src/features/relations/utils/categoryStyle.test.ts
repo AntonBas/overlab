@@ -3,7 +3,7 @@ import { KNOWN_CATEGORY_SLUGS, categoryStyleOf } from "./categoryStyle";
 
 describe("categoryStyleOf", () => {
   it("covers every category of the hero roster", () => {
-    expect(KNOWN_CATEGORY_SLUGS).toHaveLength(21);
+    expect(KNOWN_CATEGORY_SLUGS).toHaveLength(22);
   });
 
   it("gives each known category its own group", () => {
