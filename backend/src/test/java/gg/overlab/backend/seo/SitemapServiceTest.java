@@ -98,6 +98,7 @@ class SitemapServiceTest {
                 "<loc>https://example.com/heroes/ana/counters</loc>");
         assertThat(xml).doesNotContain("/heroes/ana/maps");
         assertThat(xml).doesNotContain("/stats</loc>");
+        assertThat(xml).doesNotContain("/counters/");
         assertThat(xml).contains("<loc>https://example.com/heroes/ana</loc><lastmod>2026-11-10T04:00:00Z</lastmod>",
                 "<loc>https://example.com/maps/busan</loc><lastmod>2026-11-10T04:00:00Z</lastmod>");
     }

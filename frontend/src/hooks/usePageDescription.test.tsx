@@ -55,6 +55,14 @@ describe("usePageDescription", () => {
     expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
   });
 
+  it("points the canonical link at the given path", () => {
+    renderHook(() => usePageDescription("Custom text", "/heroes/ana/counters"));
+
+    expect(
+      document.head.querySelector('link[rel="canonical"]'),
+    ).toHaveAttribute("href", `${window.location.origin}/heroes/ana/counters`);
+  });
+
   it("does nothing without a description", () => {
     renderHook(() => usePageDescription(null));
 

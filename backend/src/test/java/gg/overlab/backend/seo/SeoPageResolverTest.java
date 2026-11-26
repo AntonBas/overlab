@@ -120,7 +120,7 @@ class SeoPageResolverTest {
     }
 
     @Test
-    void buildsAPageForEveryCountersTab() {
+    void pointsEveryCountersTabToTheCountersPage() {
         HeroDto ana = hero("ana", "Ana", null);
         when(heroService.findAll()).thenReturn(List.of(ana));
         List<SeoSection> content = List.of(new SeoSection("Section", List.of(SeoItem.plain("Item"))));
@@ -128,10 +128,10 @@ class SeoPageResolverTest {
 
         assertThat(resolver.resolve("/heroes/ana/counters/struggles-against")).hasValueSatisfying(page -> {
             assertThat(page.title()).isEqualTo("Heroes that counter Ana");
-            assertThat(page.path()).isEqualTo("/heroes/ana/counters/struggles-against");
+            assertThat(page.path()).isEqualTo("/heroes/ana/counters");
         });
         assertThat(resolver.resolve("/heroes/ana/counters/struggles-against/zarya")).hasValueSatisfying(page ->
-                assertThat(page.path()).isEqualTo("/heroes/ana/counters/struggles-against"));
+                assertThat(page.path()).isEqualTo("/heroes/ana/counters"));
         assertThat(resolver.resolve("/heroes/ana/counters/synergies")).isEmpty();
         assertThat(resolver.resolve("/heroes/ana/counters/zarya")).isEmpty();
         assertThat(resolver.resolve("/heroes/ana/perks/synergies")).isEmpty();

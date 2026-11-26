@@ -174,7 +174,8 @@ public class SeoPageResolver {
                 crumbs.add(new String[] {crumb, "/heroes/" + hero.slug() + "/counters"});
                 crumbs.add(new String[] {counterTabTitle(name, counterTab), path});
             }
-            return Optional.of(new SeoPage(path, title, plain(description), "website", heading,
+            String canonicalPath = counterTab == null ? path : "/heroes/" + hero.slug() + "/counters";
+            return Optional.of(new SeoPage(canonicalPath, title, plain(description), "website", heading,
                     List.of(breadcrumbList(crumbs)),
                     sections, imagePath(hero.portraitUrl()), imagePath(hero.portraitUrl()) != null));
         });

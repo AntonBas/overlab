@@ -20,6 +20,7 @@ import { RelationTabs } from "../components/RelationTabs";
 import { useRelationFeedback } from "../hooks/useRelationFeedback";
 import {
   RELATION_TAB_SLUGS,
+  countersPath,
   relationTabIdOf,
   type RelationTabId,
 } from "../utils/relationPaths";
@@ -62,7 +63,10 @@ export function HeroCountersPage() {
   useNoIndex(hero.error?.status === 404);
   const tabId = relationTabIdOf(tab);
   usePageTitle(name ? counterTabTitle(name, tabId) : undefined);
-  usePageDescription(name ? counterTabDescription(name, tabId) : null);
+  usePageDescription(
+    name ? counterTabDescription(name, tabId) : null,
+    countersPath(slug),
+  );
   useStructuredData(
     name
       ? breadcrumbList(
