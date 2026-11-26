@@ -127,6 +127,8 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/heroes/ana/?x=1")" = "301 $base/heroes/ana?x=1"
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/api/heroes/")" != "301"
           test "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/maps/route-66/ana")" = "301 $base/heroes/ana"
+          tab=$(curl -s -A "Googlebot/2.1" "$base/heroes/ana/counters/synergies")
+          if echo "$tab" | grep -q 'id="root"'; then exit 1; fi
           curl -fsS -A "Googlebot/2.1" "$base/" | grep -q '<h1>Hero statistics</h1>'
       - name: Audit the pages that do not need collected statistics
         run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.preview.json
