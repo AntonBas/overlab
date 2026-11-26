@@ -138,7 +138,7 @@
 
 	@staticHtmlBot {
 		header_regexp userAgent User-Agent (?i)(googlebot|google-inspectiontool|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|slack-imgproxy|whatsapp|linkedinbot|pinterestbot|skypeuripreview|vkshare|viber|redditbot|mastodon|bluesky|signal|bingbot|adidxbot|duckduckbot|yandexbot|baiduspider|applebot|slurp|seznambot)
-		path_regexp ^/(|heroes|counters|perks|changes|maps|guides|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps|guides)|maps/[a-z0-9-]+|maps/[a-z0-9-]+/guides|guides/[A-Za-z0-9-]+)/?$
+		path_regexp ^/(|heroes|counters|perks|changes|maps|guides|privacy|terms|cookies|business|heroes/[a-z0-9-]+|heroes/[a-z0-9-]+/(?:perks|counters|maps|guides)|heroes/[a-z0-9-]+/counters/(?:strong-against|struggles-against|synergies)(?:/[a-z0-9-]+)?|maps/[a-z0-9-]+|maps/[a-z0-9-]+/guides|guides/[A-Za-z0-9-]+)/?$
 	}
 	handle @staticHtmlBot {
 		header Cache-Control "public, max-age=300"
@@ -149,7 +149,7 @@
 		}
 	}
 
-	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|counters|maps|guides))?)/?$
+	@entityPage path_regexp entityPage ^/((?:heroes|maps|guides)/[^/]+(?:/(?:perks|maps|guides|counters(?:/(?:strong-against|struggles-against|synergies)(?:/[^/]+)?)?))?)/?$
 
 	handle @entityPage {
 		rewrite * /api/seo/exists?path=/{http.regexp.entityPage.1}

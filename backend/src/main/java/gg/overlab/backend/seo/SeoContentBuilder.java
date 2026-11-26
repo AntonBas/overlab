@@ -137,10 +137,42 @@ public class SeoContentBuilder {
         add(sections, "Weaknesses", lines(hero.weaknesses()));
         add(sections, "Abilities", abilityService.findByHero(hero.slug()).stream()
                 .map(ability -> SeoItem.plain(ability.name() + ": " + readable(ability.description()))).toList());
-        add(sections, "Best " + hero.name() + " perks", perkService.findByHero(hero.slug()).stream()
-                .map(this::perkItem).toList());
-        sections.addAll(relationSections(hero));
+        add(sections, hero.name() + " perks", perkSummaryItems(hero));
+        add(sections, hero.name() + " counters and synergies", relationSummaryItems(hero));
+        if (!statsContent.heroMapRankings(hero).isEmpty()) {
+            add(sections, hero.name() + " maps", List.of(SeoItem.link("Best and worst maps for " + hero.name(),
+                    "/heroes/" + hero.slug() + "/maps")));
+        }
         return sections;
+    }
+
+    private List<SeoItem> perkSummaryItems(HeroDto hero) {
+        List<PerkDto> perks = perkService.findByHero(hero.slug());
+        if (perks.isEmpty()) {
+            return List.of();
+        }
+        return List.of(SeoItem.plain(perkSummary(hero, perks)), SeoItem.link(
+                "All " + hero.name() + " perks with descriptions", "/heroes/" + hero.slug() + "/perks"));
+    }
+
+    private List<SeoItem> relationSummaryItems(HeroDto hero) {
+        HeroCountersDto counters = relationService.getCounters(hero.slug());
+        List<SeoItem> items = new ArrayList<>();
+        addNames(items, "Strong against", counters.counters());
+        addNames(items, "Countered by", counters.counteredBy());
+        addNames(items, "Works well with", relationService.getSynergies(hero.slug()));
+        if (!items.isEmpty()) {
+            items.add(SeoItem.link("All " + hero.name() + " counters and synergies with explanations",
+                    "/heroes/" + hero.slug() + "/counters"));
+        }
+        return items;
+    }
+
+    private void addNames(List<SeoItem> items, String label, List<RelatedHeroDto> heroes) {
+        if (!heroes.isEmpty()) {
+            items.add(SeoItem.plain(label + ": "
+                    + heroes.stream().map(RelatedHeroDto::name).collect(Collectors.joining(", "))));
+        }
     }
 
     List<SeoSection> heroCounters(HeroDto hero) {

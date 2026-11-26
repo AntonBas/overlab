@@ -25,7 +25,10 @@ export function plainDescription(text: string | null | undefined): string {
     : readable;
 }
 
-export function usePageDescription(description: string | null | undefined) {
+export function usePageDescription(
+  description: string | null | undefined,
+  canonicalPath?: string,
+) {
   useEffect(() => {
     if (!description) {
       return undefined;
@@ -34,7 +37,7 @@ export function usePageDescription(description: string | null | undefined) {
     const previousOg = metaContent('meta[property="og:description"]');
     const previousTwitter = metaContent('meta[name="twitter:description"]');
     const previousUrl = metaContent('meta[property="og:url"]');
-    const pageUrl = `${window.location.origin}${window.location.pathname}`;
+    const pageUrl = `${window.location.origin}${canonicalPath ?? window.location.pathname}`;
     setMeta('meta[name="description"]', description);
     setMeta('meta[property="og:description"]', description);
     setMeta('meta[name="twitter:description"]', description);
@@ -52,5 +55,5 @@ export function usePageDescription(description: string | null | undefined) {
       setMeta('meta[property="og:url"]', previousUrl);
       canonical.remove();
     };
-  }, [description]);
+  }, [description, canonicalPath]);
 }

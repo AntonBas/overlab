@@ -1,8 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
+import { fetchGuides } from "../../features/guides";
+import { useFetch } from "../../hooks/useFetch";
 import { FOOTER_LINKS } from "./navLinks";
 
 export function Footer() {
   const { pathname } = useLocation();
+  const guides = useFetch(() => fetchGuides(), []);
+  const hasGuides = (guides.data?.length ?? 0) > 0;
+  const exploreLinks = FOOTER_LINKS.filter(
+    (link) => hasGuides || link.to !== "/guides",
+  );
   const feedbackPath = pathname.startsWith("/feedback")
     ? "/feedback"
     : `/feedback?from=${encodeURIComponent(pathname)}`;
@@ -28,7 +35,7 @@ export function Footer() {
           </div>
           <nav className="site-footer__column" aria-label="Explore">
             <h2>Explore</h2>
-            {FOOTER_LINKS.map((link) => (
+            {exploreLinks.map((link) => (
               <Link key={link.to} to={link.to}>
                 {link.label}
               </Link>

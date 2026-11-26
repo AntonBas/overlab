@@ -54,11 +54,6 @@ public class SitemapService {
             }
             if (!contentBuilder.heroCounters(hero).isEmpty()) {
                 appendUrl(xml, heroPath + "/counters", statsChanged);
-                for (String tab : List.of("strong-against", "struggles-against", "synergies")) {
-                    if (!contentBuilder.heroCounterTab(hero, tab).isEmpty()) {
-                        appendUrl(xml, heroPath + "/counters/" + tab, statsChanged);
-                    }
-                }
             }
             if (!contentBuilder.heroMaps(hero).isEmpty()) {
                 appendUrl(xml, heroPath + "/maps", statsChanged);
