@@ -7,6 +7,7 @@ import type { HeroCategory, RelatedHero } from "../../../types/hero";
 import type { RelationKind } from "../api/relationFeedbackApi";
 import type { RelationFeedback } from "../hooks/useRelationFeedback";
 import { ROLE_LABELS } from "../../../utils/format";
+import { KEEP_SCROLL_STATE } from "../../../utils/keepScroll";
 import { CATEGORY_GROUP_LABELS, categoryStyleOf } from "../utils/categoryStyle";
 import { splitRelationNote } from "../utils/relationNote";
 import {
@@ -148,6 +149,7 @@ export function RelatedHeroes({
                     data-group={styleGroup}
                     aria-current={active ? "true" : undefined}
                     to={relationPath(heroSlug, tab, group.category.slug)}
+                    state={KEEP_SCROLL_STATE}
                   >
                     <span className="category-icon category-icon--tile">
                       <Icon
@@ -189,6 +191,7 @@ export function RelatedHeroes({
                     )}
                     aria-current={active ? "true" : undefined}
                     to={relationPath(heroSlug, tab, entry.slug)}
+                    state={KEEP_SCROLL_STATE}
                   >
                     <HeroPortrait
                       name={entry.name}

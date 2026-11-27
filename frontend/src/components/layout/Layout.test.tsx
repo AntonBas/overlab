@@ -17,6 +17,7 @@ vi.mock("../../features/legal", () => ({
   ErrorReportingLoader: () => null,
 }));
 
+import { KEEP_SCROLL_STATE } from "../../utils/keepScroll";
 import { Layout } from "./Layout";
 
 function Broken(): never {
@@ -44,6 +45,9 @@ function renderLayout() {
                 <p>home page</p>
                 <Link to="/other">go other</Link>
                 <Link to="/broken">go broken</Link>
+                <Link to="/other" state={KEEP_SCROLL_STATE}>
+                  select item
+                </Link>
               </>
             }
           />
@@ -90,6 +94,16 @@ describe("Layout", () => {
     expect(await screen.findByText("other page")).toBeInTheDocument();
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
     expect(screen.getByRole("main")).toHaveFocus();
+  });
+
+  it("keeps the scroll position when a link only changes the selection", async () => {
+    const user = userEvent.setup();
+    renderLayout();
+
+    await user.click(screen.getByRole("link", { name: "select item" }));
+
+    expect(await screen.findByText("other page")).toBeInTheDocument();
+    expect(window.scrollTo).not.toHaveBeenCalled();
   });
 
   it("shows an error for a crashed page and keeps the header", async () => {

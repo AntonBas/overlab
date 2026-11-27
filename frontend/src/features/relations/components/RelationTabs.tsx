@@ -13,6 +13,7 @@ import {
   relationTabIdOf,
   type RelationTabId,
 } from "../utils/relationPaths";
+import { KEEP_SCROLL_STATE } from "../../../utils/keepScroll";
 import { RelatedHeroes } from "./RelatedHeroes";
 
 interface RelationTab {
@@ -103,7 +104,7 @@ export function RelationTabs({
     event.preventDefault();
     const index = tabs.findIndex((tab) => tab.id === active.id);
     const target = tabs[(index + offset + tabs.length) % tabs.length];
-    navigate(relationPath(heroSlug, target.id));
+    navigate(relationPath(heroSlug, target.id), { state: KEEP_SCROLL_STATE });
     document.getElementById(`${baseId}-tab-${target.id}`)?.focus();
   }
 
@@ -136,6 +137,7 @@ export function RelationTabs({
             key={tab.id}
             id={`${baseId}-tab-${tab.id}`}
             to={relationPath(heroSlug, tab.id)}
+            state={KEEP_SCROLL_STATE}
             role="tab"
             className={clsx("segmented__item", {
               "segmented__item--active": tab.id === active.id,

@@ -67,8 +67,14 @@ export function MapPage() {
   const maps = useFetch(fetchMaps, []);
   const [search, setSearch] = useUrlParam("q");
   const heroes = stats.data?.heroes ?? [];
-  const pickHeroes =
-    filters.role === null ? heroes : (allRolesStats.data?.heroes ?? []);
+  const unfilteredStats = stats.stale ? null : stats.data;
+  const loadedPicks =
+    filters.role === null ? unfilteredStats : allRolesStats.data;
+  const [lastPicks, setLastPicks] = useState(loadedPicks);
+  if (loadedPicks && loadedPicks !== lastPicks) {
+    setLastPicks(loadedPicks);
+  }
+  const pickHeroes = (loadedPicks ?? lastPicks)?.heroes ?? [];
   const visibleHeroes = heroes.filter((hero) =>
     matchesName(hero.heroName, search),
   );

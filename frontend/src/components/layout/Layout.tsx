@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 import { AnalyticsLoader, ErrorReportingLoader } from "../../features/legal";
 import { CookieBanner } from "../../features/legal";
 import { useSegmentedIndicator } from "../../hooks/useSegmentedIndicator";
+import { keepsScroll } from "../../utils/keepScroll";
 import { prefersReducedMotion } from "../../utils/motion";
 import { restoreScroll } from "../../utils/restoreScroll";
 import { BackToTop } from "../ui/BackToTop";
@@ -36,6 +37,10 @@ export function Layout() {
       return;
     }
     previousPathname.current = location.pathname;
+    if (navigationType !== "POP" && keepsScroll(location.state)) {
+      scrollPositions.current.set(location.key, window.scrollY);
+      return;
+    }
     if (!prefersReducedMotion()) {
       content.current?.animate?.(
         [
@@ -55,7 +60,7 @@ export function Layout() {
       return;
     }
     return restoreScroll(restoredPosition);
-  }, [location.pathname, location.key, navigationType]);
+  }, [location.pathname, location.key, location.state, navigationType]);
 
   return (
     <div className="app">
