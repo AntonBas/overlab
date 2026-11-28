@@ -87,6 +87,33 @@ class AbilityImportWriterIntegrationTest {
     }
 
     @Test
+    void aSupplementalAbilityGetsItsControlWithoutBeingMarkedAsNew() {
+        writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
+
+        writer.write("ability-test", List.of(supplemental("new-gun", "New Gun", 0), parsed("dash", "Dash", 1)),
+                url -> Optional.empty());
+
+        HeroAbility stored = abilityRepository.findByHeroIdAndSlug(hero.getId(), "new-gun").orElseThrow();
+        assertThat(stored.getControl()).isEqualTo(AbilityControl.PRIMARY_FIRE);
+        assertThat(stored.getIntroducedAt()).isNull();
+    }
+
+    @Test
+    void aRepeatedImportKeepsTheControlChosenInTheAdminPanel() {
+        List<ParsedAbility> abilities = List.of(supplemental("new-gun", "New Gun", 0));
+        writer.write("ability-test", abilities, url -> Optional.empty());
+        HeroAbility stored = abilityRepository.findByHeroIdAndSlug(hero.getId(), "new-gun").orElseThrow();
+        stored.setControl(AbilityControl.SECONDARY_FIRE);
+        abilityRepository.save(stored);
+
+        ImportCounts counts = writer.write("ability-test", abilities, url -> Optional.empty());
+
+        assertThat(counts).isEqualTo(new ImportCounts(0, 0, 0));
+        assertThat(abilityRepository.findByHeroIdAndSlug(hero.getId(), "new-gun").orElseThrow().getControl())
+                .isEqualTo(AbilityControl.SECONDARY_FIRE);
+    }
+
+    @Test
     void removesNothingWhenThePageYieldedNoAbilities() {
         writer.write("ability-test", List.of(parsed("dash", "Dash", 0)), url -> Optional.empty());
 
@@ -98,6 +125,10 @@ class AbilityImportWriterIntegrationTest {
 
     private ParsedAbility parsed(String slug, String name, int sortOrder) {
         return new ParsedAbility(slug, name, "Text of " + name, null, sortOrder);
+    }
+
+    private ParsedAbility supplemental(String slug, String name, int sortOrder) {
+        return new ParsedAbility(slug, name, "Text of " + name, null, sortOrder, AbilityControl.PRIMARY_FIRE, true);
     }
 
     @Test

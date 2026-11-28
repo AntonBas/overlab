@@ -3,6 +3,7 @@ package gg.overlab.backend.collector.imports;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -13,6 +14,7 @@ import gg.overlab.backend.collector.CollectorProperties;
 import gg.overlab.backend.collector.client.BlizzardHeroPageClient;
 import gg.overlab.backend.collector.media.ImageDownloader;
 import gg.overlab.backend.collector.parser.HeroAbilityParser;
+import gg.overlab.backend.collector.parser.HeroAbilityParserTest;
 import gg.overlab.backend.collector.parser.HeroPerkParser;
 import gg.overlab.backend.collector.parser.HeroPerkParserTest;
 import gg.overlab.backend.config.cache.CacheEviction;
@@ -43,7 +45,7 @@ class HeroContentImportServiceTest {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, enabled, null, null, 3, null, List.of());
         return new HeroContentImportService(properties, heroRepository, pageClient, parser, new HeroAbilityParser(),
-                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), Runnable::run);
+                new SupplementalAbilities(), mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), Runnable::run);
     }
 
     private Hero hero(String slug, boolean active) {
@@ -74,6 +76,18 @@ class HeroContentImportServiceTest {
     }
 
     @Test
+    void addsSupplementalAbilitiesToTheOnesOnTheHeroPage() {
+        when(heroRepository.findAll()).thenReturn(List.of(hero("freja", true)));
+        when(pageClient.fetch("freja")).thenReturn(Optional.of(HeroAbilityParserTest.PAGE));
+        when(writer.write(any(), any(), any())).thenReturn(new ImportCounts(0, 0));
+
+        service(true).startAsync();
+
+        verify(abilityWriter).write(eq("freja"), argThat(abilities -> abilities.stream()
+                .anyMatch(ability -> ability.slug().equals("revdraw-crossbow"))), any());
+    }
+
+    @Test
     void aFailingHeroDoesNotStopTheOthers() {
         when(pageClient.fetch("ana")).thenThrow(new IllegalStateException("boom"));
         when(pageClient.fetch("dva")).thenReturn(Optional.of(HeroPerkParserTest.PAGE));
@@ -97,7 +111,7 @@ class HeroContentImportServiceTest {
         CollectorProperties properties = new CollectorProperties("https://overwatch.example", "agent",
                 Duration.ZERO, null, null, false, true, null, null, 3, null, List.of());
         return new HeroContentImportService(properties, heroRepository, pageClient, parser, new HeroAbilityParser(),
-                mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), executor);
+                new SupplementalAbilities(), mock(ImageDownloader.class), writer, abilityWriter, mock(CacheEviction.class), executor);
     }
 
     @Test
