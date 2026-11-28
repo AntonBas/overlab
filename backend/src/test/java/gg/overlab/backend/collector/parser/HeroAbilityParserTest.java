@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class HeroAbilityParserTest {
+public class HeroAbilityParserTest {
 
-    static final String PAGE = """
+    public static final String PAGE = """
             <html><body>
             <blz-carousel-section>
               <blz-header slot="header"><h2 slot="heading">Abilities</h2></blz-header>

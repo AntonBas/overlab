@@ -1,0 +1,82 @@
+[
+  {
+    "hero": "domina",
+    "slug": "reconstruction",
+    "name": "Reconstruction",
+    "description": "Damage dealt by abilities restores Domina's shields. It does not repair Barrier Array.",
+    "control": "PASSIVE",
+    "after": "panopticon"
+  },
+  {
+    "hero": "doomfist",
+    "slug": "the-best-defense",
+    "name": "The Best Defense",
+    "description": "Damaging enemies with abilities grants temporary overhealth that fades after a short time.",
+    "control": "PASSIVE",
+    "after": "meteor-strike"
+  },
+  {
+    "hero": "emre",
+    "slug": "siphon-blaster",
+    "name": "Siphon Blaster",
+    "description": "Temporarily switch to a semi-automatic pistol with explosive, life-stealing rounds, moving faster and jumping higher. Firing builds heat, and overheating ends it early.",
+    "control": "ABILITY_1",
+    "after": "synthetic-burst-rifle"
+  },
+  {
+    "hero": "freja",
+    "slug": "revdraw-crossbow",
+    "name": "Revdraw Crossbow",
+    "description": "Automatic crossbow that fires a rapid stream of bolts.",
+    "control": "PRIMARY_FIRE",
+    "after": null
+  },
+  {
+    "hero": "junker-queen",
+    "slug": "jagged-blade",
+    "name": "Jagged Blade",
+    "description": "Throw a blade that wounds the enemy it hits. Activate again to recall it, pulling an impaled enemy toward you. Quick melee also wounds.",
+    "control": "SECONDARY_FIRE",
+    "after": "scattergun"
+  },
+  {
+    "hero": "mauga",
+    "slug": "incendiary-chaingun",
+    "name": "Incendiary Chaingun",
+    "description": "Fire Gunny, an automatic chaingun that sets enemies on fire after enough hits.",
+    "control": "PRIMARY_FIRE",
+    "after": null
+  },
+  {
+    "hero": "mauga",
+    "slug": "volatile-chaingun",
+    "name": "Volatile Chaingun",
+    "description": "Fire Cha-Cha, an automatic chaingun that deals critical damage to burning enemies. Firing both chainguns together slows your movement.",
+    "control": "SECONDARY_FIRE",
+    "after": "incendiary-chaingun"
+  },
+  {
+    "hero": "ramattra",
+    "slug": "block-nemesis-form",
+    "name": "Block (Nemesis Form)",
+    "description": "Hold to brace and reduce incoming damage from the front.",
+    "control": "SECONDARY_FIRE",
+    "after": "pummel-nemesis-form"
+  },
+  {
+    "hero": "ramattra",
+    "slug": "nemesis-form",
+    "name": "Nemesis Form",
+    "description": "Transform for a short time, gaining bonus armor and movement speed. Void Accelerator and Void Barrier are replaced by Pummel and Block.",
+    "control": "ABILITY_1",
+    "after": "block-nemesis-form"
+  },
+  {
+    "hero": "reaper",
+    "slug": "dire-triggers",
+    "name": "Dire Triggers",
+    "description": "Fire both shotguns in a quick two-blast volley with a tighter spread and a longer effective range.",
+    "control": "SECONDARY_FIRE",
+    "after": "hellfire-shotguns"
+  }
+]

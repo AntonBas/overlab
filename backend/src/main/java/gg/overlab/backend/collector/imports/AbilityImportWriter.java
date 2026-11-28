@@ -55,7 +55,8 @@ public class AbilityImportWriter {
                 ability = new HeroAbility();
                 ability.setHero(hero);
                 ability.setSlug(parsed.slug());
-                if (heroHadAbilities) {
+                ability.setControl(parsed.defaultControl());
+                if (heroHadAbilities && !parsed.supplemental()) {
                     ability.setIntroducedAt(Instant.now());
                 }
             }

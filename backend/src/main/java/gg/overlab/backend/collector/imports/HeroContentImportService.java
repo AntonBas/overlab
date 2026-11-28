@@ -36,6 +36,7 @@ public class HeroContentImportService {
     private final BlizzardHeroPageClient pageClient;
     private final HeroPerkParser parser;
     private final HeroAbilityParser abilityParser;
+    private final SupplementalAbilities supplementalAbilities;
     private final ImageDownloader imageDownloader;
     private final PerkImportWriter writer;
     private final AbilityImportWriter abilityWriter;
@@ -45,14 +46,16 @@ public class HeroContentImportService {
 
     public HeroContentImportService(CollectorProperties properties, HeroRepository heroRepository,
                              BlizzardHeroPageClient pageClient, HeroPerkParser parser,
-                             HeroAbilityParser abilityParser, ImageDownloader imageDownloader,
-                             PerkImportWriter writer, AbilityImportWriter abilityWriter, CacheEviction cacheEviction,
+                             HeroAbilityParser abilityParser, SupplementalAbilities supplementalAbilities,
+                             ImageDownloader imageDownloader, PerkImportWriter writer,
+                             AbilityImportWriter abilityWriter, CacheEviction cacheEviction,
                              @Qualifier(AsyncConfig.COLLECTOR_EXECUTOR) TaskExecutor executor) {
         this.properties = properties;
         this.heroRepository = heroRepository;
         this.pageClient = pageClient;
         this.parser = parser;
         this.abilityParser = abilityParser;
+        this.supplementalAbilities = supplementalAbilities;
         this.imageDownloader = imageDownloader;
         this.writer = writer;
         this.abilityWriter = abilityWriter;
@@ -113,7 +116,7 @@ public class HeroContentImportService {
             return new ImportCounts(0, 0);
         }
         List<ParsedPerk> perks = parser.parse(page.get());
-        List<ParsedAbility> abilities = abilityParser.parse(page.get());
+        List<ParsedAbility> abilities = supplementalAbilities.complete(slug, abilityParser.parse(page.get()));
         Map<String, Optional<byte[]>> icons = downloadMissingIcons(slug, perks, abilities);
         Function<String, Optional<byte[]>> iconLoader = url -> icons.getOrDefault(url, Optional.empty());
         ImportCounts perkCounts = writer.write(slug, perks, iconLoader);
